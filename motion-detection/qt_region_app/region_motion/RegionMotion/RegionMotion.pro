@@ -17,11 +17,15 @@ SOURCES += main.cpp\
     tinyxml/tinystr.cpp \
     tinyxml/tinyxml.cpp \
     tinyxml/tinyxmlerror.cpp \
-    tinyxml/tinyxmlparser.cpp
+    tinyxml/tinyxmlparser.cpp \
+    spinner/QtWaitingSpinner.cpp \
+    socket/PracticalSocket.cpp
 
 HEADERS  += mainwindow.h \
     tinyxml/tinystr.h \
-    tinyxml/tinyxml.h
+    tinyxml/tinyxml.h \
+    spinner/QtWaitingSpinner.h \
+    socket/PracticalSocket.h
 
 FORMS    += mainwindow.ui
 
