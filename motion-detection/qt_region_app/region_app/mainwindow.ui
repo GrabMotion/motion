@@ -344,7 +344,7 @@ color: rgb(255, 252, 253);</string>
      <rect>
       <x>680</x>
       <y>440</y>
-      <width>115</width>
+      <width>91</width>
       <height>32</height>
      </rect>
     </property>
@@ -355,27 +355,40 @@ color: rgb(255, 252, 253);</string>
    <widget class="QLabel" name="remote_time">
     <property name="geometry">
      <rect>
-      <x>800</x>
-      <y>450</y>
-      <width>59</width>
+      <x>770</x>
+      <y>447</y>
+      <width>0</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string/>
     </property>
    </widget>
    <widget class="QPushButton" name="set_time">
     <property name="geometry">
      <rect>
-      <x>860</x>
-      <y>440</y>
-      <width>115</width>
+      <x>680</x>
+      <y>470</y>
+      <width>91</width>
       <height>32</height>
      </rect>
     </property>
     <property name="text">
      <string>Set Time</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="remote_terminal_time">
+    <property name="geometry">
+     <rect>
+      <x>772</x>
+      <y>447</y>
+      <width>191</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
     </property>
    </widget>
   </widget>

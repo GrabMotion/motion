@@ -25,7 +25,7 @@ SOURCES += main.cpp\
     tinyxml/tinyxmlerror.cpp \
     tinyxml/tinyxmlparser.cpp \
     threads/tcpechothread.cpp \
-    threads/tcpmessagethread.cpp
+    socket/socketlistener.cpp
 
 HEADERS  += mainwindow.h \
     drawing/mouse_coordinates.h \
@@ -40,7 +40,7 @@ HEADERS  += mainwindow.h \
     tinyxml/tinystr.h \
     tinyxml/tinyxml.h \
     threads/tcpechothread.h \
-    threads/tcpmessagethread.h
+    socket/socketlistener.h
 
 FORMS    += mainwindow.ui
 
@@ -53,6 +53,9 @@ LIBS += -L/usr/local/lib \
      -lopencv_imgproc \
      -lopencv_features2d \
      -lopencv_highgui
+
+QMAKE_CXXFLAGS += -std=c++0x -pthread
+LIBS += -pthread
 
 DISTFILES += \
     img/pause.png \

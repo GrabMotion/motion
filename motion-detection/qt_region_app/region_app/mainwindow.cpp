@@ -24,11 +24,11 @@
 
 #include <ctime>
 
-
 #include <ifaddrs.h>
 #include "./spinner/QtWaitingSpinner.h"
 
 using namespace std;
+
 
 Mat src;
 string filename, xml;
@@ -104,6 +104,27 @@ MainWindow::MainWindow(QWidget *parent) :
     spinner_folders->setInnerRadius(4);
     ui->f_spinner->insertLayout(1, spinnerLayoutFolder);
 
+    //Local Network
+    MainWindow::getLocalNetwork();
+}
+
+void MainWindow::init()
+{
+    //Socket Listener Class -- Cannot connect received
+    socket_listener = new SocketListener(this);
+    qRegisterMetaType<std::string>("std::string");
+    bool emited     = connect(socket_listener, SIGNAL(SocketReceivedSignal(std::string)), this, SLOT(receivedMessage(QString)), Qt::QueuedConnection);
+    bool emited_1   = connect(socket_listener, SIGNAL(SocketReceivedSignal(std::string)), this, SLOT(caca()), Qt::QueuedConnection);
+    socket_listener->startListening();
+}
+
+void MainWindow::setTerminalTime(const QString & str)
+{
+    ui->remote_terminal_time->setText(str);
+}
+
+void MainWindow::getLocalNetwork()
+{
     std::string sech = getIpAddress();
     local_ip = sech;
 
@@ -121,10 +142,8 @@ MainWindow::MainWindow(QWidget *parent) :
              NETWORK_IP +=  ip_vector[i];
         }
    }
-
    QString ip = QString::fromUtf8(NETWORK_IP.c_str());
    ui->network_ip->setText(ip);
-
 }
 
 MainWindow::~MainWindow()
@@ -158,28 +177,22 @@ void MainWindow::ResultEcho(string response)
 
     }
     else if (response.compare(getGlobalIntToString(GET_TIME)) == 0)
-     {
+    {
 
-
-
-     }
-
-    /*else {
-
-
-        tcpecho_thread->terminate();
-    }*/
-
+    }
     tcpecho_thread->terminate();
 }
 
-void MainWindow::ResultMessage(string response)
+/*void MainWindow::SocketReceivedMessage()
 {
+    std::cout << "LLEGA" << endl;
+   //ui->remote_time->setText(q_response);
+}*/
 
-    QString time_response = QString::fromUtf8(response.c_str());
-    ui->remote_time->setText(time_response);
-
-
+void MainWindow::receivedMessage(QString q_response)
+{
+    std::cout << "LLEGA" << endl;
+   //ui->remote_time->setText(q_response);
 }
 
 void MainWindow::on_search_button_clicked ()
@@ -198,12 +211,8 @@ void MainWindow::BroadcastReceived(QString ip)
 void MainWindow::StreamingUpdateLabelImage(std::string path, Mat mat)
 {
     src = mat;
-    //QPixmap pixar = QPixmap::fromImage(frame);
-    //src = imread(path, CV_LOAD_IMAGE_COLOR);
-
     QPixmap pixmap((QString::fromStdString(path)));
     ui->output->setPixmap(pixmap);
-    //last_stored_frame = frame;
 }
 
 void MainWindow::broadcastTimeoutSocketException()
@@ -321,10 +330,7 @@ void MainWindow::SharedMounted(QString folder)
     }
 
     spinner_folders->stop();
-
 }
-
-
 
 QString MainWindow::getShare()
 {
@@ -394,13 +400,7 @@ void MainWindow::on_scrrenshot_clicked()
     streaming_thread->StartStreaming(c_str_ip, qt_ip, sh);
 }
 
-
-void MainWindow::on_capture_video_clicked()
-{
-
-
-}
-
+//void MainWindow::on_capture_video_clicked(){}
 
 void MainWindow::on_start_recognition_toggled(bool checked)
 {
@@ -438,14 +438,6 @@ void MainWindow::on_get_time_clicked()
     tcpecho_thread = new TCPEchoThread(this);
     connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
     tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
-
-    tcpmessage_thread = new TcpMessageThread(this);
-    connect(tcpmessage_thread, SIGNAL(ResultMessage(string)), this, SLOT(ResultMessage(string)));
-
-    QString qt_ip = ui->ips_combo->currentText();
-    QByteArray ba_ip = qt_ip.toLatin1();
-    char *c_str_ip = ba_ip.data();
-    tcpmessage_thread->ReceiveMessage(c_str_ip, qt_ip);
 
 }
 
@@ -518,15 +510,8 @@ void MainWindow::Mouse_pressed(vector<Point2f>&coor)
     cout << "PRESSED at (x,t): " <<  ui->output->x() << " " << ui->output->y() << endl;
 }
 
-void MainWindow::Mouse_current_pos()
-{
-
-}
-
-void MainWindow::Mouse_left()
-{
-
-}
+void MainWindow::Mouse_current_pos(){}
+void MainWindow::Mouse_left(){}
 
 void MainWindow::closeEvent (QCloseEvent *event)
 {
@@ -541,12 +526,7 @@ void MainWindow::closeEvent (QCloseEvent *event)
     }
 }
 
-void MainWindow::on_list_files_clicked(const QModelIndex &index)
-{
-
-}
-
-
+void MainWindow::on_list_files_clicked(const QModelIndex &index){}
 
 std::string MainWindow::getIpAddress () {
 
@@ -608,11 +588,4 @@ void MainWindow::split(const string& s, char c,
    }
 }
 
-
-
-void MainWindow::on_start_recognition_clicked()
-{
-
-}
-
-
+void MainWindow::on_start_recognition_clicked(){}

@@ -84,7 +84,8 @@ private:
 
 public:
     void init();
-    Q_SLOT void setEditText(const QString & str) {
+    Q_SLOT void setEditText(const QString & str) 
+    {
         MainWindow::setTerminalTime(str);
         //ui->remote_terminal_time->setText(str);
     }
