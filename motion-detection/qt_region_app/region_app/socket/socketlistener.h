@@ -1,6 +1,7 @@
 #ifndef SOCKETLISTENER_H
 #define SOCKETLISTENER_H
 
+#include <QMainWindow>
 #include <QObject>
 #include <QWidget>
 #include <QtCore>
@@ -27,13 +28,11 @@ class SocketListener : public QObject
 public:
     explicit SocketListener(QObject *parent = 0);
     std::string from_ip;
-    void startListening();
-    void * HandleTCPClient (TCPSocket *sock);
-    static  void * threadMain   (void *clntSock);
+    void startListening(QObject *parent);
+    void * HandleTCPClient (TCPSocket *sock, QObject *parent);
+    static  void * threadMain   (void *arg); //(void *clntSock);
     static void * socketThread (void * args);
     static void * watch_echo   (void * args);
-
-    //int runt, runb, runs, runr, runl, runm;
 
 private:
     pthread_t thread_wait_echo;

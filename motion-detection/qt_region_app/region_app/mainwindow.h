@@ -57,7 +57,6 @@ public:
 
 private:
     Ui::MainWindow *ui;
-
     QtWaitingSpinner *m_spinner;
     QtWaitingSpinner *spinner_folders;
     QImage last_stored_frame;
@@ -83,10 +82,9 @@ private:
     void setTerminalTime(const QString & str);
 
 public:
-    void init();
-    Q_SLOT void setEditText(const QString & str) {
+    Q_SLOT void setRemoteTimeLabel(const QString & str)
+    {
         MainWindow::setTerminalTime(str);
-        //ui->remote_terminal_time->setText(str);
     }
 
 private slots:

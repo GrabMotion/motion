@@ -83,15 +83,7 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
 
       QMetaObject::invokeMethod(parent, "setEditText", Q_ARG(QString, q_response));
 
-      //QMetaObject::invokeMethod(parent,
-      //        "setTimeText",
-      //        Qt::QueuedConnection,
-      //        Q_ARG(QString, q_response));
-
-
-      //SocketListener sl;
-      //sl.emitSignal(q_response);
-
+    
     // end of transmission
     // Echo message back to client
     sock->send(echoBuffer, recvMsgSize);

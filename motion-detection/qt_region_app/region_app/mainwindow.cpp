@@ -52,6 +52,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(broadcast_thread, SIGNAL(BroadcastReceived(QString)), this, SLOT(BroadcastReceived(QString)));
     connect(broadcast_thread, SIGNAL(BroadcastTimeoutSocketException()), this, SLOT(broadcastTimeoutSocketException()));
 
+    //Socket Listener Class -- Cannot connect received
+    socket_listener = new SocketListener(this);
+    bool emited     = connect(socket_listener, SIGNAL(SocketReceivedSignal(std::string)), this, SLOT(receivedMessage(QString)), Qt::QueuedConnection);
+    socket_listener->startListening(this);
+
     //Mount Shares
     mount_thread = new MountThread(this);
     connect(mount_thread, SIGNAL(SharedMounted(QString)), this, SLOT(SharedMounted(QString)));
@@ -106,16 +111,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Local Network
     MainWindow::getLocalNetwork();
-}
-
-void MainWindow::init()
-{
-    //Socket Listener Class -- Cannot connect received
-    socket_listener = new SocketListener(this);
-    qRegisterMetaType<std::string>("std::string");
-    bool emited     = connect(socket_listener, SIGNAL(SocketReceivedSignal(std::string)), this, SLOT(receivedMessage(QString)), Qt::QueuedConnection);
-    bool emited_1   = connect(socket_listener, SIGNAL(SocketReceivedSignal(std::string)), this, SLOT(caca()), Qt::QueuedConnection);
-    socket_listener->startListening();
 }
 
 void MainWindow::setTerminalTime(const QString & str)
