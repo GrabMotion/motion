@@ -23,9 +23,10 @@ const unsigned int DISSCONNECT              = 1006;
 
 const unsigned int GET_TIME                 = 1007;
 
-const unsigned int TCP_PORT                 = 5010;
-const unsigned int STREAMING_VIDEO_PORT     = 5030;
-
+const unsigned int TCP_ECHO_PORT                = 5010;
+const unsigned int UDP_PORT                     = 5020;
+const unsigned int STREAMING_VIDEO_PORT         = 5030;
+const unsigned int TCP_MSG_PORT                 = 5040;
 
 class QtWaitingSpinner;
 
@@ -109,7 +110,7 @@ private slots:
 
     void on_scrrenshot_clicked();
     void on_save_region_clicked();
-    void on_get_remote_time_clicked();
+    void on_get_time_clicked();
 };
 
 #endif // MAINWINDOW_H

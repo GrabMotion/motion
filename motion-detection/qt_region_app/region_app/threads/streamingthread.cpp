@@ -14,7 +14,7 @@ void StreamingThread::StartStreaming(char *c_str_ip, QString ip, QString path)
     //--------------------------------------------------------
 
     char*       serverIP = c_str_ip;
-    int         serverPort = 5030;
+    int         serverPort = STREAMING_VIDEO_PORT;
 
     struct  sockaddr_in serverAddr;
     socklen_t           addrLen = sizeof(struct sockaddr_in);

@@ -18,7 +18,7 @@ void TCPEchoThread::SendEcho (string svradress, string command)
   char *echoString = message;   // Second arg: string to echo
   int echoStringLen = strlen(echoString);   // Determine input length
 
-  unsigned short echoServPort = 5010;
+  unsigned short echoServPort = TCP_ECHO_PORT;
 
   char echoBuffer[RCVBUFSIZE + 1];
 

@@ -6,9 +6,9 @@
 #include <QThread>
 #include <QStringList>
 
-/*#include "opencv2/opencv.hpp"
+#include "opencv2/opencv.hpp"
 #include "opencv2/core/core.hpp"
-#include "opencv2/highgui/highgui.hpp"*/
+#include "opencv2/highgui/highgui.hpp"
 
 #include <QCoreApplication>
 #include <opencv2/core/core.hpp>
@@ -51,6 +51,8 @@ public:
     int width = 640; //1280;
     int height = 480; //720;
     int jpegQuality = 95;
+
+    const unsigned int STREAMING_VIDEO_PORT         = 5030;
 
  signals:
     void StreamingUpdateLabelImage(std::string, Mat img);

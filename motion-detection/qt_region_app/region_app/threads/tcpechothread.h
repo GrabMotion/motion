@@ -24,6 +24,7 @@ public:
 
 private:
     const int RCVBUFSIZE = 32;
+    const unsigned int TCP_ECHO_PORT                = 5010;
 
 signals:
    void ResultEcho(string);

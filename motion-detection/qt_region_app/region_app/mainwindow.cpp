@@ -160,8 +160,7 @@ void MainWindow::ResultEcho(string response)
     else if (response.compare(getGlobalIntToString(GET_TIME)) == 0)
      {
 
-        tcpmessage_thread = new TcpMessageThread(this);
-        connect(tcpmessage_thread, SIGNAL(ResultMessage(string)), this, SLOT(ResultMessage(string)));
+
 
      }
 
@@ -433,14 +432,20 @@ void MainWindow::on_disconnect_clicked()
 
 }
 
-
-void MainWindow::on_get_remote_time_clicked()
+void MainWindow::on_get_time_clicked()
 {
-
     std::string command = getGlobalIntToString(GET_TIME);
     tcpecho_thread = new TCPEchoThread(this);
     connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
     tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
+
+    tcpmessage_thread = new TcpMessageThread(this);
+    connect(tcpmessage_thread, SIGNAL(ResultMessage(string)), this, SLOT(ResultMessage(string)));
+
+    QString qt_ip = ui->ips_combo->currentText();
+    QByteArray ba_ip = qt_ip.toLatin1();
+    char *c_str_ip = ba_ip.data();
+    tcpmessage_thread->ReceiveMessage(c_str_ip, qt_ip);
 
 }
 
@@ -609,3 +614,5 @@ void MainWindow::on_start_recognition_clicked()
 {
 
 }
+
+
