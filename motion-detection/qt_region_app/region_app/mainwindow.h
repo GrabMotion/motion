@@ -7,6 +7,7 @@
 #include "threads/streamingthread.h"
 #include "threads/mountthread.h"
 #include "threads/tcpechothread.h"
+#include "threads/tcpmessagethread.h"
 
 #include <QFileSystemModel>
 
@@ -20,6 +21,7 @@ const unsigned int STOP_RECOGNITION         = 1005;
 
 const unsigned int DISSCONNECT              = 1006;
 
+const unsigned int GET_TIME                 = 1007;
 
 const unsigned int TCP_PORT                 = 5010;
 const unsigned int STREAMING_VIDEO_PORT     = 5030;
@@ -44,6 +46,7 @@ public:
     BroadcastThread *broadcast_thread;
     StreamingThread *streaming_thread;
     TCPEchoThread *tcpecho_thread;
+    TcpMessageThread *tcpmessage_thread;
     MountThread *mount_thread;
     std::string NETWORK_IP;
     QString share;
@@ -92,6 +95,7 @@ private slots:
     void broadcastTimeoutSocketException();
     void StreamingUpdateLabelImage(std::string, Mat);
     void ResultEcho(string);
+    void ResultMessage(string);
 
     //shares
     void SharedMounted(QString folder);
@@ -105,6 +109,7 @@ private slots:
 
     void on_scrrenshot_clicked();
     void on_save_region_clicked();
+    void on_get_remote_time_clicked();
 };
 
 #endif // MAINWINDOW_H

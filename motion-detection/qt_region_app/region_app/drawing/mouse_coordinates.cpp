@@ -1,4 +1,5 @@
 #include "drawing/mouse_coordinates.h"
+
 #include <QString>
 #include <QMouseEvent>
 #include <QPainter>

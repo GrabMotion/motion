@@ -10,8 +10,6 @@
 #include <QVector>
 #include <opencv2/opencv.hpp>
 
-#include "drawing/mouse_coordinates.h"
-
 #include <iostream>
 #include <vector>
 

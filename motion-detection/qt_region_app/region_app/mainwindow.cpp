@@ -43,7 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 {
     ui->setupUi(this);
-    ui->scrrenshot->setCheckable(true);
+
+    //set toogle to recgnition button.
+    ui->start_recognition->setCheckable(true);
 
     //BroadCast Sockets:
     broadcast_thread = new BroadcastThread(this);
@@ -74,26 +76,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->save_region->setEnabled(false);
     ui->rec_with_images->setEnabled(false);
 
-    //ui->web_results->setEnabled(false);
-    //ui->webView->setEnabled(false);
-    //ui->webView->setVisible(false);
-
     ui->output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
-
-    //QPixmap pix_playst(":/img/playstatic.png");
-    //QIcon icon_playst(pix_playst);
-    //ui->capture_video->setIcon(icon_playst);
-    //ui->capture_video->setIconSize(pix_playst.size());
-    //ui->capture_video->setCheckable(true);
-    //ui->capture_video->setStyleSheet( "background-color: rgba( 255, 255, 255, 0% );" );
-
-    //QPixmap pix_stopst(":/images/img/stopstatic.png");
-    //QIcon icon_stopst(pix_stopst);
-
-    //ui->capture_stop->setIcon(icon_stopst);
-    //ui->capture_stop->setIconSize(pix_stopst.size());
-    //ui->capture_stop->setStyleSheet( "background-color: rgba( 255, 255, 255, 0% );" );
-    //ui->capture_stop->setEnabled(false);*/
 
     ui->scrrenshot->setEnabled(false);
     ui->save_region->setEnabled(false);
@@ -108,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_spinner->setLineLength(11);
     m_spinner->setLineWidth(2);
     m_spinner->setInnerRadius(4);
-    ui->spinnerframe->insertLayout(1, spinnerLayout);
+    ui->top_spinner->insertLayout(1, spinnerLayout);
 
     spinner_folders = new QtWaitingSpinner(this);
     QVBoxLayout *spinnerLayoutFolder = new QVBoxLayout;
@@ -120,7 +103,6 @@ MainWindow::MainWindow(QWidget *parent) :
     spinner_folders->setLineWidth(2);
     spinner_folders->setInnerRadius(4);
     ui->f_spinner->insertLayout(1, spinnerLayoutFolder);
-
 
     std::string sech = getIpAddress();
     local_ip = sech;
@@ -165,50 +147,39 @@ int getGlobalStringToInt(std::string id){
 void MainWindow::ResultEcho(string response)
 {
 
-    if (response.compare(getGlobalIntToString(PAUSE_STREAMING)) == 0)
+    if (response.compare(getGlobalIntToString(CONNECT)) == 0)
     {
-        QPixmap pixar = QPixmap::fromImage(last_stored_frame);
-        ui->output->setPixmap(pixar);
-
-        streaming_thread->StopStreaming();
-        streaming_thread->terminate();
-
-    }
-    else if (response.compare(getGlobalIntToString(CONNECT)) == 0)
-    {
-        //ui->capture_video->setIcon(QIcon(":/img/play.png"));
-        //ui->capture_video->setEnabled(true);
-
         ui->start_recognition->setEnabled(true);
         ui->status_label->setText("connected");
         ui->status_label->setStyleSheet("background-color: lightgreen;");
-
+        ui->scrrenshot->setEnabled(true);
         ui->refresh_results->setEnabled(true);
-
         mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
-    }
-    else if (response.compare(getGlobalIntToString(STOP_STREAMING)) == 0)
-    {
-
-        //ui->qt_drawing_output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
-        //QPixmap pix_play(":/img/play.png");
-        //QIcon icon_play(pix_play);
-
-        //ui->capture_video->setIcon(icon_play);
-        //ui->capture_video->setIconSize(pix_play.size());
-        //ui->capture_video->setEnabled(true);
-        //ui->capture_video->setText("Stream Video");
-
-        //QPixmap pix_stopst(":/img/stopstatic.png");
-        //QIcon icon_stopst(pix_stopst);
-        //ui->capture_stop->setIcon(icon_stopst);
-        //ui->capture_stop->setIconSize(pix_stopst.size());
-        //ui->capture_stop->setEnabled(false);
-        //ui->output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
 
     }
+    else if (response.compare(getGlobalIntToString(GET_TIME)) == 0)
+     {
+
+        tcpmessage_thread = new TcpMessageThread(this);
+        connect(tcpmessage_thread, SIGNAL(ResultMessage(string)), this, SLOT(ResultMessage(string)));
+
+     }
+
+    /*else {
+
+
+        tcpecho_thread->terminate();
+    }*/
 
     tcpecho_thread->terminate();
+}
+
+void MainWindow::ResultMessage(string response)
+{
+
+    QString time_response = QString::fromUtf8(response.c_str());
+    ui->remote_time->setText(time_response);
+
 
 }
 
@@ -229,7 +200,6 @@ void MainWindow::StreamingUpdateLabelImage(std::string path, Mat mat)
 {
     src = mat;
     //QPixmap pixar = QPixmap::fromImage(frame);
-
     //src = imread(path, CV_LOAD_IMAGE_COLOR);
 
     QPixmap pixmap((QString::fromStdString(path)));
@@ -259,38 +229,6 @@ std::string MainWindow::getActiveTerminalIPString()
 void MainWindow::on_connect_button_clicked()
 {
 
-    time_t currentTime;
-    struct tm *localTime;
-
-    time( &currentTime );                   // Get the current time
-    localTime = localtime( &currentTime );  // Convert the current time to the local time
-
-    int Day     ,
-        Month   ,
-        Year    ,
-        Hour    ,
-        Min     ,
-        Sec     ;
-
-    Day    = localTime->tm_mday;
-    Month  = localTime->tm_mon + 1;
-    Year   = localTime->tm_year + 1900;
-    Hour   = localTime->tm_hour;
-    Min    = localTime->tm_min;
-    Sec    = localTime->tm_sec;
-
-    std::cout << "Message sent at: " << Hour << ":" << Min << ":" << Sec << std::endl;
-    std::cout << "And the current date is: " << Day << "/" << Month << "/" << Year << std::endl;
-    std::cout << "+++++++++++++++++++++++" << endl;
-
-    string timest =
-            std::to_string(Day)  + "|" +
-            std::to_string(Month)  + "|" +
-            std::to_string(Year)  + "|" +
-            std::to_string(Hour)  + "|" +
-            std::to_string(Min)  + "|" +
-            std::to_string(Sec);
-
     spinner_folders->start();
 
     tcpecho_thread = new TCPEchoThread(this);
@@ -299,8 +237,6 @@ void MainWindow::on_connect_button_clicked()
     QString qt_ip = ui->ips_combo->currentText();
     QByteArray ba_ip = qt_ip.toLatin1();
     char *c_str_ip = ba_ip.data();
-
-   string allpuch = CONNECT + "|" + timest;
 
     tcpecho_thread->SendEcho(c_str_ip, getGlobalIntToString(CONNECT));
 }
@@ -322,8 +258,6 @@ QString MainWindow::getSharedFolder()
     return roo;
 
 }
-
-
 
 void MainWindow::SharedMounted(QString folder)
 {
@@ -387,23 +321,6 @@ void MainWindow::SharedMounted(QString folder)
       QMessageBox::warning(NULL, "Test", "Unable to open: " + region_file , "OK");
     }
 
-
-    /*if( remove( region_file ) != 0 )
-    {
-        fstream f;
-        f.open( region_file, ios::out );
-        f << flush;
-        f.close();
-    }*/
-
-    /*QFile file(region_file);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        cout << "file not created.\n";
-    }*/
-
-
-
     spinner_folders->stop();
 
 }
@@ -417,7 +334,6 @@ QString MainWindow::getShare()
 
 void MainWindow::RefreshTreViewModel(QString roo, QString rip)
 {
-
     dirModel = new QFileSystemModel(this);
     dirModel->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs);
     dirModel->setRootPath(roo);
@@ -432,7 +348,6 @@ void MainWindow::RefreshTreViewModel(QString roo, QString rip)
     fileModel = new QFileSystemModel(this);
     fileModel->setFilter(QDir::NoDotAndDotDot | QDir::Files);
     ui->list_files->setModel(fileModel);
-
 }
 
 
@@ -472,54 +387,12 @@ void MainWindow::on_scrrenshot_clicked()
 
     }
 
-    //if(ui->capture_video->isChecked())
-    //{
-        //QPixmap pix_pause(":/img/pause.png");
-        //QIcon icon_pause(pix_pause);
-        //ui->capture_video->setIcon(icon_pause);
-        //ui->capture_video->setIconSize(pix_pause.size());
-        //ui->capture_video->setEnabled(true);
-        //ui->capture_video->setText("Pause Stream");
+    QString qt_ip = ui->ips_combo->currentText();
+    QByteArray ba_ip = qt_ip.toLatin1();
+    char *c_str_ip = ba_ip.data();
+    QString sh = getSharedFolder();
 
-        //QPixmap pix_stopst(":/img/stop.png");
-        //QIcon icon_stopst(pix_stopst);
-
-        /*ui->capture_stop->setIcon(icon_stopst);
-        ui->capture_stop->setIconSize(pix_stopst.size());
-        ui->capture_stop->setEnabled(true);*/
-
-        QString qt_ip = ui->ips_combo->currentText();
-        QByteArray ba_ip = qt_ip.toLatin1();
-        char *c_str_ip = ba_ip.data();
-        QString sh = getSharedFolder();
-        //streaming_thread->StartStreaming(c_str_ip, STREAMING_VIDEO_PORT, sh);
-
-        streaming_thread->StartStreaming(c_str_ip, qt_ip, sh);
-
-        //ui->output->setStyleSheet("background-color: rgba( 255, 255, 255, 0% );");
-
-    //}
-    //else
-    //{
-        // Pause Streaming
-        //QPixmap pix_play(":/img/play.png");
-        //QIcon icon_play(pix_play);
-        //ui->capture_video->setIcon(icon_play);
-        //ui->capture_video->setIconSize(pix_play.size());
-        //ui->capture_video->setEnabled(true);
-        //ui->capture_video->setText("Stream Video");
-
-        //std::cout << "PAUSE" << std::endl;
-
-        //streaming_thread->StopStreaming();
-        //streaming_thread->terminate();
-
-        /*std::string command = getGlobalIntToString(PAUSE_STREAMING);
-        tcpecho_thread = new TCPEchoThread(this);
-        connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-        tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);*/
-
-    //}
+    streaming_thread->StartStreaming(c_str_ip, qt_ip, sh);
 }
 
 
@@ -529,17 +402,6 @@ void MainWindow::on_capture_video_clicked()
 
 }
 
-/*void MainWindow::on_capture_stop_clicked()
-{
-    std::string command = getGlobalIntToString(STOP_STREAMING);
-    tcpecho_thread = new TCPEchoThread(this);
-    tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
-}*/
-
-/*void MainWindow::on_view_webview_clicked()
-{
-   // ui->webView->load(QUrl(lineEdit->text("http://google.com")));
-}*/
 
 void MainWindow::on_start_recognition_toggled(bool checked)
 {
@@ -550,26 +412,6 @@ void MainWindow::on_start_recognition_toggled(bool checked)
         tcpecho_thread = new TCPEchoThread(this);
         connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
         tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
-
-        /*QStateMachine *machine = new QStateMachine;
-
-        QState *state1 = new QState(machine);
-        state1->assignProperty(button, "geometry", QRect(0, 0, 100, 30));
-        machine->setInitialState(state1);
-
-        QState *state2 = new QState(machine);
-        state2->assignProperty(button, "geometry", QRect(250, 250, 100, 30));
-
-        QSignalTransition *transition1 = state1->addTransition(button,
-            SIGNAL(clicked()), state2);
-        transition1->addAnimation(new QPropertyAnimation(button, "geometry"));
-
-        QSignalTransition *transition2 = state2->addTransition(button,
-            SIGNAL(clicked()), state1);
-        transition2->addAnimation(new QPropertyAnimation(button, "geometry"));
-
-        machine->start();*/
-
 
     }
     else
@@ -591,6 +433,16 @@ void MainWindow::on_disconnect_clicked()
 
 }
 
+
+void MainWindow::on_get_remote_time_clicked()
+{
+
+    std::string command = getGlobalIntToString(GET_TIME);
+    tcpecho_thread = new TCPEchoThread(this);
+    connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
+    tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
+
+}
 
 /////////////SAVE_XML////////////////
 
@@ -667,12 +519,6 @@ void MainWindow::Mouse_current_pos()
 }
 
 void MainWindow::Mouse_left()
-{
-
-}
-
-
-void MainWindow::on_start_recognition_clicked()
 {
 
 }
@@ -757,3 +603,9 @@ void MainWindow::split(const string& s, char c,
    }
 }
 
+
+
+void MainWindow::on_start_recognition_clicked()
+{
+
+}

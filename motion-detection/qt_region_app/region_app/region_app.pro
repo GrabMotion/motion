@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     tinyxml/tinyxml.cpp \
     tinyxml/tinyxmlerror.cpp \
     tinyxml/tinyxmlparser.cpp \
-    threads/tcpechothread.cpp
+    threads/tcpechothread.cpp \
+    threads/tcpmessagethread.cpp
 
 HEADERS  += mainwindow.h \
     drawing/mouse_coordinates.h \
@@ -38,7 +39,8 @@ HEADERS  += mainwindow.h \
     tinyxml/tinyxml.h \
     tinyxml/tinystr.h \
     tinyxml/tinyxml.h \
-    threads/tcpechothread.h
+    threads/tcpechothread.h \
+    threads/tcpmessagethread.h
 
 FORMS    += mainwindow.ui
 
