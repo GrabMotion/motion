@@ -13,9 +13,15 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    tinyxml/tinystr.cpp \
+    tinyxml/tinyxml.cpp \
+    tinyxml/tinyxmlerror.cpp \
+    tinyxml/tinyxmlparser.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    tinyxml/tinystr.h \
+    tinyxml/tinyxml.h
 
 FORMS    += mainwindow.ui
 
