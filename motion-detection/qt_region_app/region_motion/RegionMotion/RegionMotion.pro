@@ -19,13 +19,15 @@ SOURCES += main.cpp\
     tinyxml/tinyxmlerror.cpp \
     tinyxml/tinyxmlparser.cpp \
     spinner/QtWaitingSpinner.cpp \
-    socket/PracticalSocket.cpp
+    socket/PracticalSocket.cpp \
+    image/mat2qimage.cpp
 
 HEADERS  += mainwindow.h \
     tinyxml/tinystr.h \
     tinyxml/tinyxml.h \
     spinner/QtWaitingSpinner.h \
-    socket/PracticalSocket.h
+    socket/PracticalSocket.h \
+    image/mat2qimage.h
 
 FORMS    += mainwindow.ui
 
