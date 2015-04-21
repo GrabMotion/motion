@@ -1,0 +1,9 @@
+include_directories(./)
+
+file(
+	GLOB_RECURSE
+	source_files
+	*.h
+	*.cpp
+)
+
