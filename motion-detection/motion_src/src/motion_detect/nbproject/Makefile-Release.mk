@@ -35,7 +35,11 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/main.o
+	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/tinyxml/tinystr.o \
+	${OBJECTDIR}/tinyxml/tinyxml.o \
+	${OBJECTDIR}/tinyxml/tinyxmlerror.o \
+	${OBJECTDIR}/tinyxml/tinyxmlparser.o
 
 
 # C Compiler Flags
@@ -66,6 +70,26 @@ ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/tinyxml/tinystr.o: tinyxml/tinystr.cpp 
+	${MKDIR} -p ${OBJECTDIR}/tinyxml
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tinyxml/tinystr.o tinyxml/tinystr.cpp
+
+${OBJECTDIR}/tinyxml/tinyxml.o: tinyxml/tinyxml.cpp 
+	${MKDIR} -p ${OBJECTDIR}/tinyxml
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tinyxml/tinyxml.o tinyxml/tinyxml.cpp
+
+${OBJECTDIR}/tinyxml/tinyxmlerror.o: tinyxml/tinyxmlerror.cpp 
+	${MKDIR} -p ${OBJECTDIR}/tinyxml
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tinyxml/tinyxmlerror.o tinyxml/tinyxmlerror.cpp
+
+${OBJECTDIR}/tinyxml/tinyxmlparser.o: tinyxml/tinyxmlparser.cpp 
+	${MKDIR} -p ${OBJECTDIR}/tinyxml
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tinyxml/tinyxmlparser.o tinyxml/tinyxmlparser.cpp
 
 # Subprojects
 .build-subprojects:

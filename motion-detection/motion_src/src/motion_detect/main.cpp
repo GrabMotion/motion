@@ -12,18 +12,91 @@
 
 #include <iostream>
 #include <fstream>
-
-#include "opencv2/opencv.hpp"
-#include "opencv2/highgui/highgui.hpp"
 #include <time.h>
 #include <dirent.h>
+#include <string>
 #include <sstream>
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "opencv2/opencv.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "tinyxml/tinyxml.h"
+#include "tinyxml/tinystr.h"
 
 using namespace std;
 using namespace cv;
+
+// Create initial XML file
+void build_xml(const char * xmlPath)
+{
+    
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       secs[80];
+    tstruct = *localtime(&now);   
+    strftime(secs, sizeof(secs), "%Y-%m-%d.%X", &tstruct);
+    
+    // Make xml: <?xml ..><Hello>World</Hello>
+    TiXmlDocument doc;
+    TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "", "" );
+    TiXmlElement * element = new TiXmlElement( "created" );
+    TiXmlText * text = new TiXmlText( secs );
+    element->LinkEndChild( text );
+    doc.LinkEndChild( decl );
+    doc.LinkEndChild( element );
+    doc.SaveFile( xmlPath );       
+}
+
+// Write XML file
+// Check if the xml file exists, if not create it
+// Write  the log for the motion detected.
+inline void writeXMLFile (const string DIRECTORY, const string EXTENSION, const char * DIR_FORMAT, const char * FILE_FORMAT, const char * XML_FILE, double frame)
+{       
+   
+    time_t seconds;
+    struct tm * timeinfo;
+    char TIME[80];
+    time (&seconds);   
+    timeinfo = localtime (&seconds);
+    
+    // Create name for the date directory
+    strftime (TIME,80,DIR_FORMAT,timeinfo);
+    
+    time_t t = time(0);   // get time now
+    struct tm * now = localtime( & t );
+    cout << (now->tm_year + 1900)   << '-' 
+         << (now->tm_mon + 1)       << '-'
+         <<  now->tm_mday           << '_'
+         <<  now->tm_hour           << ':'
+         <<  now->tm_min            << ':'
+         <<  now->tm_sec            << ':'
+         << endl;
+    
+    string XMLFILE = DIRECTORY + TIME + "/cropped/xml/" + XML_FILE + "" + EXTENSION;
+      
+    std::ifstream infile( XMLFILE.c_str() );
+    if(!infile.good()){
+        build_xml(XMLFILE.c_str());       
+    }
+    
+    TiXmlDocument doc( XMLFILE.c_str() );    
+    if ( doc.LoadFile() ){
+        stringstream sf;
+        sf << frame;
+        string tf = sf.str();   
+        TiXmlElement * start = new TiXmlElement( "start" );      
+        TiXmlText * text_start = new TiXmlText( tf.c_str() );
+        start->LinkEndChild( text_start );  
+        stringstream st;
+        st << now;
+        string ts = st.str();
+        start->SetAttribute("time", ts.c_str() ); 
+        doc.LinkEndChild( start );   
+        doc.SaveFile( XMLFILE.c_str() );   
+    } 
+}
+
 
 // Check if the directory exists, if not create it
 // This function will create a new directory if the image is the first
@@ -60,8 +133,10 @@ inline bool saveImg(Mat image, const string DIRECTORY, const string EXTENSION, c
     ss << DIRECTORY << TIME;
     directoryExistsOrCreate(ss.str().c_str());
     ss << "/cropped";
-    directoryExistsOrCreate(ss.str().c_str());
-
+    directoryExistsOrCreate(ss.str().c_str());    
+    ss << "/xml";
+    directoryExistsOrCreate(ss.str().c_str());      
+    
     // Create name for the image
     strftime (TIME,80,FILE_FORMAT,timeinfo);
     ss.str("");
@@ -124,16 +199,19 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
 
 int main (int argc, char * const argv[])
 {
-    const string DIR = "../../pics/"; ///home/pi/motion_src/pics/"; // directory where the images will be stored
-    const string EXT = ".jpg"; // extension of the images
-    const int DELAY = 500; // in mseconds, take a picture every 1/2 second
-    const string LOGFILE = "../../log"; //"/home/pi/motion_src/log";
+    const string DIR        = "../../pics/";    //home/pi/motion_src/pics/"; // directory where the images will be stored
+    const string EXT        = ".jpg";           // extension of the images
+    const string EXT_DATA   = ".xml";           // extension of the images
+    const int DELAY         = 500;              // in mseconds, take a picture every 1/2 second
+    const string LOGFILE    = "../../log";      //"/home/pi/motion_src/log";
+    
 
     // Format of directory
-    string DIR_FORMAT = "%d%h%Y"; // 1Jan1970
-    string FILE_FORMAT = DIR_FORMAT + "/" + "%d%h%Y_%H%M%S"; // 1Jan1970/1Jan1970_12153
-    string CROPPED_FILE_FORMAT = DIR_FORMAT + "/cropped/" + "%d%h%Y_%H%M%S"; // 1Jan1970/cropped/1Jan1970_121539
-
+    string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
+    string FILE_FORMAT          = DIR_FORMAT + "/" + "%d%h%Y_%H%M%S"; // 1Jan1970/1Jan1970_12153
+    string CROPPED_FILE_FORMAT  = DIR_FORMAT + "/cropped/" + "%d%h%Y_%H%M%S"; // 1Jan1970/cropped/1Jan1970_121539
+    string XML_FILE             =  "motion";
+    
     // Set up camera
     CvCapture * camera = cvCaptureFromCAM(CV_CAP_ANY);
     cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 1280); // width of viewport of camera
@@ -173,6 +251,9 @@ int main (int argc, char * const argv[])
     // All settings have been set, now go in endless loop and
     // take as many pictures you want..
     while (true){
+        
+        double timeCount = (double)cv::getTickCount();
+        
         // Take a new image
         prev_frame = current_frame;
         current_frame = next_frame;
@@ -194,8 +275,35 @@ int main (int argc, char * const argv[])
         if(number_of_changes>=there_is_motion)
         {
             if(number_of_sequence>0){ 
-                saveImg(result,DIR,EXT,DIR_FORMAT.c_str(),FILE_FORMAT.c_str());
-                saveImg(result_cropped,DIR,EXT,DIR_FORMAT.c_str(),CROPPED_FILE_FORMAT.c_str());
+                
+                saveImg (
+                        result, 
+                        DIR, 
+                        EXT, 
+                        DIR_FORMAT.c_str(), 
+                        FILE_FORMAT.c_str()
+                );
+                
+                saveImg (
+                        result_cropped,
+                        DIR,
+                        EXT,
+                        DIR_FORMAT.c_str(),
+                        CROPPED_FILE_FORMAT.c_str()
+                );
+                
+                timeCount= ((double)cv::getTickCount() - timeCount) / cv::getTickFrequency(); // elapsed time in ms
+                                
+                writeXMLFile(
+                        DIR,
+                        EXT_DATA,
+                        DIR_FORMAT.c_str(),
+                        CROPPED_FILE_FORMAT.c_str(),
+                        XML_FILE.c_str(), 
+                        timeCount
+                       );       
+                
+                
             }
             number_of_sequence++;
         }

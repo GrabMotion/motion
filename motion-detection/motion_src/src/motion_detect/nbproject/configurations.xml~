@@ -4,21 +4,17 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>tinyxml/tinystr.h</itemPath>
-      <itemPath>tinyxml/tinyxml.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
                    projectFiles="true">
-      <itemPath>tinyxml/tinystr.cpp</itemPath>
-      <itemPath>tinyxml/tinyxml.cpp</itemPath>
-      <itemPath>tinyxml/tinyxmlerror.cpp</itemPath>
-      <itemPath>tinyxml/tinyxmlparser.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>main.cpp</itemPath>
+      <itemPath>/tinyxml/tinyxml.h</itemPath>
+	<itemPath>/tinyxml/tinystr.h</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -57,18 +53,6 @@
       </compileType>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="tinyxml/tinystr.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tinyxml/tinystr.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="tinyxml/tinyxml.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tinyxml/tinyxml.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="tinyxml/tinyxmlerror.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tinyxml/tinyxmlparser.cpp" ex="false" tool="1" flavor2="0">
-      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -91,18 +75,6 @@
         </asmTool>
       </compileType>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tinyxml/tinystr.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tinyxml/tinystr.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="tinyxml/tinyxml.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tinyxml/tinyxml.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="tinyxml/tinyxmlerror.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tinyxml/tinyxmlparser.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>
