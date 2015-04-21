@@ -201,8 +201,14 @@ echo "<br/><br/><br/>";
     	$sec = substr($stack[$f],14,2);
     	
     	echo "<td style='text-align:center'><a class='vergroot' title='".$dag." ".$maand." ". $jaar ." - ".$uur. ":" . $min. ":". $sec."' rel='24feb' href='pics/".substr($stack[$f],0,9)."/$stack[$f]'><img src='pics/".substr($stack[$f],0,9)."/$stack[$f]' width='300' style='float:left;'><br/>".$dag." ".$maand." ". $jaar . " - ".$uur. ":" . $min. ":". $sec. "</td></a>";
-    }
-    echo "</tr></table>";
+    }      
+    
+    echo "</tr>";
+    
+    $file = file_get_contents("pics/$current/cropped/xml/motion.xml");    
+    echo '<tr><pre>', htmlentities($file), '</pre></tr>';
+    
+    echo "</table>";
     
     closedir($handle);
 }
