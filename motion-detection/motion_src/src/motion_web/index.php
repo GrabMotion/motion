@@ -92,8 +92,7 @@ if ($handle = opendir('pics') ) {
 echo "</ul>";
 
     	
-    $filecount = count(glob("pics/$current/" .  "*.jpg"));
-	
+        $filecount = count(glob("pics/$current/" .  "*.jpg"));	
 	echo "<h2>There are $filecount images available</h2><br/>";
     	
 
@@ -203,14 +202,11 @@ echo "<br/><br/><br/>";
     	echo "<td style='text-align:center'><a class='vergroot' title='".$dag." ".$maand." ". $jaar ." - ".$uur. ":" . $min. ":". $sec."' rel='24feb' href='pics/".substr($stack[$f],0,9)."/$stack[$f]'><img src='pics/".substr($stack[$f],0,9)."/$stack[$f]' width='300' style='float:left;'><br/>".$dag." ".$maand." ". $jaar . " - ".$uur. ":" . $min. ":". $sec. "</td></a>";
     }      
     
-    echo "</tr>";
+    echo "</tr>";   
+    echo "</table>";  
     
-    $file = file_get_contents("pics/$current/cropped/xml/motion.xml");    
-    echo '<tr><pre>', htmlentities($file), '</pre></tr>';
+    closedir($handle);   
     
-    echo "</table>";
-    
-    closedir($handle);
 }
 
 }
@@ -220,6 +216,14 @@ echo "<br/><br/><br/>";
 }
 else
 	print "day whut?..";
+
+echo "<br><br>";
+
+    echo "<font size='5'><a href='"."pics/$current/cropped/xml/motion.xml"."'>BROWSE XML<a></font>";
+    $file = file_get_contents("pics/$current/cropped/xml/motion.xml");        
+    echo '<pre><code>', htmlentities($file), '</code></pre>';
+
 ?>
+    
 </body>
 </html>
