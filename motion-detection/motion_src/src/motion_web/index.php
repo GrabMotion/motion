@@ -219,8 +219,8 @@ else
 
 echo "<br><br>";
 
-    echo "<font size='5'><a href='"."pics/$current/cropped/xml/motion.xml"."'>BROWSE XML<a></font>";
-    $file = file_get_contents("pics/$current/cropped/xml/motion.xml");        
+    echo "<font size='5'><a href='"."pics/$current/cropped/xml/<import>session.xml"."'>BROWSE XML<a></font>";
+    $file = file_get_contents("pics/$current/cropped/xml/<import>session.xml");        
     echo '<pre><code>', htmlentities($file), '</code></pre>';
 
 ?>
