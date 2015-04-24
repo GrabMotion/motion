@@ -82,8 +82,8 @@ if ($handle = opendir('pics') ) {
     
     for($f = 0; $f < count($months); $f++){
     	$dag = substr($months[$f],0,2);
-			$maand = substr($months[$f],2,3);
-			$jaar =  substr($months[$f],5,4);
+		$maand = substr($months[$f],2,3);
+		$jaar =  substr($months[$f],5,4);
         
         	echo "<li  class='button' style='float:left'><a style='text-decoration:none;color: #fff;' href='index.php?page=1&dag=".$dag.$maand.$jaar."'>".$dag.$maand.$jaar."</a></li>";
         	
