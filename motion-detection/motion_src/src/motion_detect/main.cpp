@@ -28,13 +28,11 @@
 #include <functional>
 #include <ctime>
 
-
-
 using namespace std;
 using namespace cv;
 
 // split string return position vector
-string split(const string& s, char c, int position) {  
+/*string split(const string& s, char c, int position) {  
     
    string::size_type i = 0;
    string::size_type j = s.find(c);
@@ -49,10 +47,10 @@ string split(const string& s, char c, int position) {
          v.push_back(s.substr(i, s.length()));
    }   
    return v[position];
-}
+}*/
 
 // get current time
-string getCurrentTime(){
+/*string getCurrentTime(){
 
     time_t currentTime;
     struct tm *localTime;
@@ -92,7 +90,7 @@ string getCurrentTime(){
     
     return current;
   
-}
+}*/
 
 // Create initial XML file
 void build_xml(const char * xmlPath)
@@ -126,7 +124,7 @@ void build_xml(const char * xmlPath)
 inline void writeXMLInstance (
         string XMLFILE, 
         string time_start, 
-        string elapsed_secs, 
+        string time_end,
         string instance
 )
 {      
@@ -149,14 +147,9 @@ inline void writeXMLInstance (
         start->LinkEndChild(text_start);
 
         TiXmlElement * end = new TiXmlElement( "end" );  
-        string current = getCurrentTime();
-        TiXmlText * text_end = new TiXmlText( current.c_str() );
+        TiXmlText * text_end = new TiXmlText( time_end.c_str() );
         end->LinkEndChild(text_end);
-        
-        TiXmlElement * total_elapsed = new TiXmlElement( "elapsed_time" );          
-        TiXmlText * text_total_elampsed = new TiXmlText( elapsed_secs.c_str() );
-        total_elapsed->LinkEndChild(text_total_elampsed);
-
+       
         TiXmlElement * code = new TiXmlElement( "code" );                    
         TiXmlText * text_code = new TiXmlText( "Prueba" );
         code->LinkEndChild(text_code);
@@ -165,7 +158,6 @@ inline void writeXMLInstance (
         instance->LinkEndChild(ID);
         instance->LinkEndChild(start);
         instance->LinkEndChild(end);
-        instance->LinkEndChild(total_elapsed);
         instance->LinkEndChild(code);        
 
         all_instances->LinkEndChild(instance);                           
@@ -384,17 +376,19 @@ int main (int argc, char * const argv[])
     Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2)); 
     
     // time opencv
-    double t = (double)getTickCount(); 
+    //double t = (double)getTickCount(); 
     
     //count instance time     
     string start_instance_time, total_elapsed_time; 
     bool motion_detected = false, init_motion = false, has_instance_directory = false;
-    double begin_time, end_time;    
+    double init_time, begin_time, end_time;    
     //Directory Tree
     stringstream directoryTree;
     // Instance counter
     int instance_counter; 
     string instance = "1";
+    
+    init_time = clock();
     
     // All settings have been set, now go in endless loop and
     // take as many pictures you want..
@@ -438,7 +432,6 @@ int main (int argc, char * const argv[])
                     
                     count_sequence_cero = 0;
                     motion_detected     = true;
-                    start_instance_time = getCurrentTime();
                     begin_time = clock();                             
                     
                     if (!has_instance_directory){
@@ -505,12 +498,12 @@ int main (int argc, char * const argv[])
                 
                 
                 //elapsed time
-                t = ((double)getTickCount() - t)/getTickFrequency();                 
-                ostringstream strs;
-                strs << t;      
-                total_elapsed_time = strs.str();
+                //t = ((double)getTickCount() - t)/getTickFrequency();                 
+                //ostringstream strs;
+                //strs << t;      
+                //total_elapsed_time = strs.str();
                 
-                std::cout << " total_elapsed_time: " << total_elapsed_time << " count_sequence_cero: " << count_sequence_cero << std::endl;
+                std::cout << " count_sequence_cero: " << count_sequence_cero << std::endl;
                             
                 //https://sublimated.wordpress.com/2011/02/17/benchmarking-frames-per-second-when-using-opencvs-cvcapturefromcam/
                 
@@ -546,13 +539,15 @@ int main (int argc, char * const argv[])
                 if(!std::ifstream(XMLFILE.c_str()))    
                 {   
                     build_xml(XMLFILE.c_str());       
-                }               
-                
-                double elapsed_secs = (end_time - begin_time) / CLOCKS_PER_SEC;                                                 
+                }                                                              
                        
-                std::ostringstream es;
-                es << elapsed_secs;
-                writeXMLInstance(XMLFILE.c_str(), start_instance_time, es.str(), instance);     
+                std::ostringstream begin;
+                begin << (begin_time - init_time) / CLOCKS_PER_SEC;
+                
+                std::ostringstream end;
+                end << (end_time - init_time) / CLOCKS_PER_SEC;
+           
+                writeXMLInstance(XMLFILE.c_str(), begin.str(), end.str(), instance);     
                    
             }       
             
