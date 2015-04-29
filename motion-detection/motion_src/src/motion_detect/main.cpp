@@ -92,6 +92,25 @@ using namespace cv;
   
 }*/
 
+void parseRegionXML(string file_region, vector<Point2f> &region){
+    TiXmlDocument doc(file_region.c_str());
+    if(doc.LoadFile()) // ok file loaded correctly
+    {
+        TiXmlElement * point = doc.FirstChildElement("point");
+        int x, y;
+        while (point)
+        {
+            point->Attribute("x",&x);
+            point->Attribute("y",&y);
+            Point2f p(x,y);
+            region.push_back(p);
+            point = point->NextSiblingElement("point");
+        }
+    }
+    else
+        exit(1);
+}
+
 // Create initial XML file
 void build_xml(const char * xmlPath)
 {    
@@ -253,9 +272,9 @@ inline bool createDirectoryTree(
 // Check if there is motion in the result matrix
 // count the number of changes and return.
 inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
-                 int x_start, int x_stop, int y_start, int y_stop,
-                 int max_deviation,
-                 Scalar & color)
+                        vector<Point2f> & region,
+                        int max_deviation,
+                        Scalar & color)
 {
     // calculate the standard deviation
     Scalar mean, stddev;
@@ -267,19 +286,18 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
         int min_x = motion.cols, max_x = 0;
         int min_y = motion.rows, max_y = 0;
         // loop over image and detect changes
-        for(int j = y_start; j < y_stop; j+=2){ // height
-            for(int i = x_start; i < x_stop; i+=2){ // width
-                // check if at pixel (j,i) intensity is equal to 255
-                // this means that the pixel is different in the sequence
-                // of images (prev_frame, current_frame, next_frame)
-                if(static_cast<int>(motion.at<uchar>(j,i)) == 255)
-                {
-                    number_of_changes++;
-                    if(min_x>i) min_x = i;
-                    if(max_x<i) max_x = i;
-                    if(min_y>j) min_y = j;
-                    if(max_y<j) max_y = j;
-                }
+        int x, y, size = region.size();
+        
+        for(int i = 0; i < size; i++){ // loop over region
+            x = region[i].x;
+            y = region[i].y;
+            if(static_cast<int>(motion.at<uchar>(y,x)) == 255)
+            {
+                number_of_changes++;
+                if(min_x>x) min_x = x;
+                if(max_x<x) max_x = x;
+                if(min_y>y) min_y = y;
+                if(max_y<y) max_y = y;
             }
         }
         if(number_of_changes){
@@ -303,12 +321,14 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
 
 int main (int argc, char * const argv[])
 {        
-    const string DIR        = "../../src/motion_web/pics/";    // directory where the images will be stored
-    const string EXT        = ".jpg";           // extension of the images
-    const string EXT_DATA   = ".xml";           // extension of the data
-    const int DELAY         = 500;              // in mseconds, take a picture every 1/2 second
-    const string LOG    = "../../src/motion_web/log";      //"/home/pi/motion_src/log";
+    const string DIR        = "../../src/motion_web/pics/";     // directory where the images will be stored
+    const string REGION     = "../../src/motion_web/region/";   // directory where the regios are stored
+    const string EXT        = ".jpg";                           // extension of the images
+    const string EXT_DATA   = ".xml";                           // extension of the data
+    const int DELAY         = 500;                              // in mseconds, take a picture every 1/2 second
+    const string LOG    = "../../src/motion_web/log";           // log for the export
     const string LOGCLEAR = LOG + "/log_remove";    
+    vector<Point2f> region;                                     // region vector storing xml region
        
     // fps calculated using number of frames / seconds
     double fps; 
@@ -321,6 +341,14 @@ int main (int argc, char * const argv[])
     
     // Create pics directory if not exist. 
     directoryExistsOrCreate(DIR.c_str());
+    
+    // Create region directory if not exist. 
+    directoryExistsOrCreate(REGION.c_str());
+    {
+        // Detect motion in a region in steadof window
+       string file_region = REGION + "region" + EXT_DATA;
+       parseRegionXML(file_region, region);
+    }
     
     // Create log directory if not exist. 
     directoryExistsOrCreate(LOG.c_str());   
@@ -385,8 +413,8 @@ int main (int argc, char * const argv[])
     //Directory Tree
     stringstream directoryTree;
     // Instance counter
-    int instance_counter; 
-    string instance = "1";
+    int instance_counter = 0; 
+    string instance;
     
     init_time = clock();
     
@@ -394,22 +422,13 @@ int main (int argc, char * const argv[])
     // take as many pictures you want..
     while (true){   
         
-        // Take a new image
+       // Take a new image
         prev_frame = current_frame;
         current_frame = next_frame;
         next_frame = cvQueryFrame(camera);
         result = next_frame;
-        cvtColor(next_frame, next_frame, CV_RGB2GRAY);                   
+        cvtColor(next_frame, next_frame, CV_RGB2GRAY);
         
-        // count frames per second
-        // grab a frame 
-        IplImage *frame = cvRetrieveFrame(camera);
-        // see how much time has elapsed
-        time(&end);
-        // calculate current FPS
-         ++counter;        
-         sec = difftime (end, start);          
-
         // Calc differences between the images and do AND-operation
         // threshold image, low differences are ignored (ex. contrast change due to sunlight)
         absdiff(prev_frame, next_frame, d1);
@@ -418,7 +437,8 @@ int main (int argc, char * const argv[])
         threshold(motion, motion, 35, 255, CV_THRESH_BINARY);
         erode(motion, motion, kernel_ero);
         
-        number_of_changes = detectMotion(motion, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
+        //number_of_changes = detectMotion(motion, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
+        number_of_changes = detectMotion(motion, result, result_cropped, region, max_deviation, color);
         
         // If a lot of changes happened, we assume something changed.
         if(number_of_changes>=there_is_motion)
