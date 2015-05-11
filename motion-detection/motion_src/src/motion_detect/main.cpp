@@ -5,585 +5,456 @@
  * Created on April 19, 2015, 11:23 PM
  */
 
-//
-//  Created by Cedric Verstraeten on 18/02/14.
-//  Copyright (c) 2014 Cedric Verstraeten. All rights reserved.
-//
-
+#include <cstring>
 #include <iostream>
-#include <fstream>
-#include <time.h>
-#include <dirent.h>
+//#include "socket/ServerSocket.h"
+//#include "socket/SocketException.h"
 #include <string>
 #include <sstream>
-#include <dirent.h>
+#include <stdio.h>      
 #include <sys/types.h>
-#include <sys/stat.h>
+#include <ifaddrs.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <pthread.h>
+#include "practical/PracticalSocket.h" // For UDPSocket and SocketException
+#include <cstdlib>           // For atoi()
+#include <unistd.h>           // For sleep()
+#include "global.h"
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
-#include "tinyxml/tinyxml.h"
-#include "tinyxml/tinystr.h"
-#include <string>
-#include <vector>
-#include <functional>
-#include <ctime>
+#include <errno.h>
+#include "recognition/detection.h"
+
 
 using namespace std;
 using namespace cv;
 
-// split string return position vector
-/*string split(const string& s, char c, int position) {  
-    
-   string::size_type i = 0;
-   string::size_type j = s.find(c);
-   vector<string> v;
+const unsigned int RCVBUFSIZE = 32;    // Size of receive buffer
+const int MAXRCVSTRING = 4096; // Longest string to receive
+
+// Threading
+pthread_mutex_t tcpMutex;
+pthread_t thread_broadcast, thread_echo, thread_streaming, thread_recognition;
+int runt, runb, runs, runr;
+
+//TCP
+string control_computer_ip;
+
+/// TCP Streaming
+VideoCapture    capture;
+Mat             img0, img1, img2;
+int             is_data_ready = 1;
+int             clientSock;
+char*     	server_ip;
+int       	server_port;
+int       	server_camera;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+struct stream_thread_args 
+{
+    unsigned int port;
+    int cam;
+};
+struct stream_thread_args StreamingStructThread;
+
+struct recognition_thread_args 
+{
+    bool writeImages;
+    bool writeCrops;
+};
+struct recognition_thread_args RecognitionahaStructThread;
+
+void *ThreadMain(void *arg);    
+void HandleTCPClient(TCPSocket *sock);
+
+void quitStrSocket(int retval);
+void connectStreaming(string from_ip);
+
+void* streamVideo(void * arg)
+{
    
-   while (j != string::npos) {
-      v.push_back(s.substr(i, j-i));
-      i = ++j;
-      j = s.find(c, j);
-
-      if (j == string::npos)
-         v.push_back(s.substr(i, s.length()));
-   }   
-   return v[position];
-}*/
-
-// get current time
-/*string getCurrentTime(){
-
-    time_t currentTime;
-    struct tm *localTime;
-
-    time( &currentTime );                   // Get the current time
-    localTime = localtime( &currentTime );  // Convert the current time to the local time
-
-    int Day    = localTime->tm_mday;
-    int Month  = localTime->tm_mon + 1;
-    int Year   = localTime->tm_year + 1900;
-    int Hour   = localTime->tm_hour;
-    int Min    = localTime->tm_min;
-    int Sec    = localTime->tm_sec;
+     struct stream_thread_args *args = (struct stream_thread_args *) arg;
+     
+     std::string cip = control_computer_ip;
+     char *control_remote_ip = new char[cip.length() + 1];
+     std::strcpy(control_remote_ip, cip.c_str());
+     
+     server_ip = control_remote_ip;
+     server_port = args->port;
+     server_camera = args->cam;
+     
+     //--------------------------------------------------------
+    //networking stuff: socket, bind, listen
+    //--------------------------------------------------------
+    int                 localSocket,
+                        remoteSocket,
+                        port = server_port;                               
+ 
+    struct  sockaddr_in localAddr,
+                        remoteAddr;
     
-    ostringstream _y;
-    _y << Year;    
-    ostringstream _m;
-    _m << Month;    
-    ostringstream _d;
-    _d << Day;    
-    ostringstream _h;
-    _h << Hour;
-    ostringstream _mi;
-    _mi << Min;
-    ostringstream _s;
-    _s << Sec;  
-    
-    string current = 
-    _y.str()    + "_" + 
-    _m.str()    + "_" + 
-    _d.str()    + " " + 
-    _h.str()    + ":" + 
-    _mi.str()   + ":" + 
-    _s.str();
-    
-    std::cout << current << "  ";
-    
-    return current;
-  
-}*/
-
-void parseRegionXML(string file_region, vector<Point2f> &region){
-    TiXmlDocument doc(file_region.c_str());
-    if(doc.LoadFile()) // ok file loaded correctly
-    {
-        TiXmlElement * point = doc.FirstChildElement("point");
-        int x, y;
-        while (point)
-        {
-            point->Attribute("x",&x);
-            point->Attribute("y",&y);
-            Point2f p(x,y);
-            region.push_back(p);
-            point = point->NextSiblingElement("point");
-        }
-    }
-    else
-        exit(1);
-}
-
-// Create initial XML file
-void build_xml(const char * xmlPath)
-{    
-    time_t     now = time(0);
-    struct tm  tstruct;
-    char       secs[80];
-    tstruct = *localtime(&now);   
-    strftime(secs, sizeof(secs), "%Y-%m-%d.%X", &tstruct);  
-   
-    TiXmlDocument doc;
-    TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "utf-8", "");
-    TiXmlElement * file = new TiXmlElement( "file" );    
-    TiXmlElement * session_info = new TiXmlElement( "SESSION_INFO" );    
-    TiXmlElement * start_time = new TiXmlElement( "start_time" );    
-    TiXmlText * text_start_time = new TiXmlText( secs );        
-    TiXmlElement * all_instances = new TiXmlElement( "ALL_INSTANCES" );       
-    start_time->LinkEndChild( text_start_time );    
-    session_info->LinkEndChild(start_time);        
-    file->LinkEndChild(session_info); 
-    file->LinkEndChild(all_instances);     
-    doc.LinkEndChild( decl );   
-    doc.LinkEndChild( file );   
-    doc.SaveFile( xmlPath );       
-}
-
-
-// Write XML file
-// Check if the xml file exists, if not create it
-// Write  the log for the motion detected.
-inline void writeXMLInstance (
-        string XMLFILE, 
-        string time_start, 
-        string time_end,
-        string instance
-)
-{      
-    
-    TiXmlDocument doc( XMLFILE.c_str() );    
-    if ( doc.LoadFile() ){
-        
-        TiXmlElement* file = doc.FirstChildElement();	
-        
-        TiXmlElement* session_info = file->FirstChildElement();
-        
-        TiXmlElement* all_instances = session_info->NextSiblingElement();;
-	                       
-        TiXmlElement * ID = new TiXmlElement( "ID" );        
-        TiXmlText * text_ID = new TiXmlText( instance.c_str() );
-        ID->LinkEndChild(text_ID);
-
-        TiXmlElement * start = new TiXmlElement( "start" );        
-        TiXmlText * text_start = new TiXmlText( time_start.c_str()  );
-        start->LinkEndChild(text_start);
-
-        TiXmlElement * end = new TiXmlElement( "end" );  
-        TiXmlText * text_end = new TiXmlText( time_end.c_str() );
-        end->LinkEndChild(text_end);
        
-        TiXmlElement * code = new TiXmlElement( "code" );                    
-        TiXmlText * text_code = new TiXmlText( "Prueba" );
-        code->LinkEndChild(text_code);
-
-        TiXmlElement * instance = new TiXmlElement( "instance" );   
-        instance->LinkEndChild(ID);
-        instance->LinkEndChild(start);
-        instance->LinkEndChild(end);
-        instance->LinkEndChild(code);        
-
-        all_instances->LinkEndChild(instance);                           
-        
-        doc.SaveFile( XMLFILE.c_str() );             
-        
-    } 
-}
-
-
-// Check if the directory exists, if not create it
-// This function will create a new directory if the image is the first
-// image taken for a specific day
-inline void directoryExistsOrCreate(const char* pzPath)
-{
-    DIR *pDir;
-    // directory doesn't exists -> create it
-    if ( pzPath == NULL || (pDir = opendir (pzPath)) == NULL)
-        mkdir(pzPath, 0777);
-    // if directory exists we opened it and we
-    // have to close the directory again.
-    else if(pDir != NULL)
-        (void) closedir (pDir);
-}
-
-// When motion is detected we write the image to disk
-//    - Check if the directory exists where the image will be stored.
-//    - Build the directory and image names.
-int incr = 0;
-inline string saveImg(
-        Mat image, 
-        const string DIRECTORY,         
-        const string EXTENSION, 
-        const char * DIR_FORMAT, 
-        const char * FILE_FORMAT
-)
-{   
-    stringstream ss;
-    time_t seconds;
-    struct tm * timeinfo;
-    char TIME[80];
-    time (&seconds);
-    // Get the current time
-    timeinfo = localtime (&seconds);
+    int addrLen = sizeof(struct sockaddr_in);
     
-    // Create name for the image
-    strftime (TIME,80,FILE_FORMAT,timeinfo);    
-    if(incr < 100) incr++; // quick fix for when delay < 1s && > 10ms, (when delay <= 10ms, images are overwritten)
-    else incr = 0;
-    ss << DIRECTORY << TIME << static_cast<int>(incr) << EXTENSION;        
-    string image_file = ss.str().c_str();
-    imwrite(image_file, image);
-    
-    return image_file;
-}
-
-// When motion is detected we write the image to disk
-//    - Check if the directory exists where the image will be stored.
-//    - Build the directory and image names.
-inline bool createDirectoryTree(
-        const string DIRECTORY, 
-        const string EXTENSION, 
-        const char * DIR_FORMAT, 
-        const char * FILE_FORMAT,
-        string instance
-)
-{
-    stringstream ss, zz;
-    time_t seconds;
-    struct tm * timeinfo;
-    char TIME[80];
-    time (&seconds);
-    // Get the current time
-    timeinfo = localtime (&seconds);
-    
-    // Create name for the date directory
-    strftime (TIME,80,DIR_FORMAT,timeinfo);
-    ss.str("");
-    ss << DIRECTORY << TIME;        
-    directoryExistsOrCreate(ss.str().c_str());    
-    ss << "/xml";
-     directoryExistsOrCreate(ss.str().c_str());   
-    zz.str("");
-    zz << DIRECTORY << TIME << "/" + instance;         
-    directoryExistsOrCreate(zz.str().c_str());
-    zz << "/cropped";
-    directoryExistsOrCreate(zz.str().c_str());    
-    
-    return true;
-}
-
-
-// Check if there is motion in the result matrix
-// count the number of changes and return.
-inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
-                        vector<Point2f> & region,
-                        int max_deviation,
-                        Scalar & color)
-{
-    // calculate the standard deviation
-    Scalar mean, stddev;
-    meanStdDev(motion, mean, stddev);
-    // if not to much changes then the motion is real (neglect agressive snow, temporary sunlight)
-    if(stddev[0] < max_deviation)
+    localSocket = socket(AF_INET , SOCK_STREAM , 0);
+    if (localSocket == -1)
+         perror("socket() call failed!!");
+       
+    localAddr.sin_family = AF_INET;
+    localAddr.sin_addr.s_addr = INADDR_ANY;
+    localAddr.sin_port = htons( port );
+ 
+    int optval = 1;
+    if (setsockopt(localSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int)) < 0)
     {
-        int number_of_changes = 0;
-        int min_x = motion.cols, max_x = 0;
-        int min_y = motion.rows, max_y = 0;
-        // loop over image and detect changes
-        int x, y, size = region.size();
-        
-        for(int i = 0; i < size; i++){ // loop over region
-            x = region[i].x;
-            y = region[i].y;
-            if(static_cast<int>(motion.at<uchar>(y,x)) == 255)
-            {
-                number_of_changes++;
-                if(min_x>x) min_x = x;
-                if(max_x<x) max_x = x;
-                if(min_y>y) min_y = y;
-                if(max_y<y) max_y = y;
-            }
-        }
-        if(number_of_changes){
-            //check if not out of bounds
-            if(min_x-10 > 0) min_x -= 10;
-            if(min_y-10 > 0) min_y -= 10;
-            if(max_x+10 < result.cols-1) max_x += 10;
-            if(max_y+10 < result.rows-1) max_y += 10;
-            // draw rectangle round the changed pixel
-            Point x(min_x,min_y);
-            Point y(max_x,max_y);
-            Rect rect(x,y);
-            Mat cropped = result(rect);
-            cropped.copyTo(result_cropped);
-            rectangle(result,rect,color,1);
-        }
-        return number_of_changes;
+        perror("Cannot set SO_REUSEADDR option");
+        std::cerr << "on listen socket (%s)\n" << strerror(errno) << endl;
     }
+
+    if( bind(localSocket,(struct sockaddr *)&localAddr , sizeof(localAddr)) < 0) 
+    {
+         perror("Can't bind() socket");
+         exit(1);
+    }
+    
+    //Listening
+    listen(localSocket , 1);
+    
+    std::cout <<  "Waiting for connections...\n"
+              <<  "Server Port:" << port << std::endl;
+ 
+    //accept connection from an incoming client
+    remoteSocket = accept(localSocket, (struct sockaddr *)&remoteAddr, (socklen_t*)&addrLen);
+    if (remoteSocket < 0) {
+        perror("accept failed!");
+        exit(1);
+    }
+    std::cout << "Connection accepted" << std::endl;
+ 
+ 
+    //----------------------------------------------------------
+    //OpenCV Code
+    //----------------------------------------------------------
+    int capDev = server_camera;
+ 
+    VideoCapture cap(capDev); // open the default camera
+    Mat img, imgGray;
+    img = Mat::zeros(480 , 640, CV_8UC1);    
+ 
+    if (!cap.isOpened()) {
+        quitStrSocket(1);
+    }
+    
+    //make it continuous
+    if (!img.isContinuous()) {
+        img = img.clone();
+    }
+ 
+    int imgSize = img.total() * img.elemSize();
+    int bytes = 0;
+    int key;
+ 
+    //make img continuos
+    if ( ! img.isContinuous() ) { 
+          img = img.clone();
+          imgGray = img.clone();
+    }
+        
+    std::cout << "Image Size:" << imgSize << std::endl;
+ 
+    while(1) {
+
+        /* get a frame from camera */
+        cap >> img;
+
+        //do video processing here 
+        flip(img, img, 1);
+        cvtColor(img, imgGray, CV_BGR2GRAY);
+
+        pthread_mutex_lock(&tcpMutex);
+        //send processed image
+            if ((bytes = send(remoteSocket, imgGray.data, imgSize, 0)) < 0){
+                 std::cerr <<   "\n--> bytes = " << bytes << std::endl;
+                 quitStrSocket(1);
+            }
+            cout << "sending streaming data: " << bytes  << endl;
+        pthread_mutex_unlock(&tcpMutex);
+
+        
+    }
+
+    
     return 0;
+       
 }
+
+void quitStrSocket(int retval)
+{
+        if (clientSock){
+                close(clientSock);
+        }
+        if (capture.isOpened()){
+                capture.release();
+        }
+        if (!(img0.empty())){
+                (~img0);
+        }
+        if (!(img1.empty())){
+                (~img1);
+        }
+        if (!(img2.empty())){
+                (~img2);
+        }
+        pthread_mutex_destroy(&mutex);
+        exit(retval);
+}
+
+
+void RunUICommand(std::string param, string from_ip){
+    
+    switch (getGlobalStringToInt(param)){
+        
+        case CONNECT:
+               
+            connectStreaming(from_ip);
+            
+            break;
+            
+        case STOP_STREAMING:
+        case PAUSE_STREAMING:
+         
+            if (pthread_cancel(thread_streaming)) {
+                quitStrSocket(1);
+            }
+            
+            break;  
+            
+           case START_RECOGNITION:
+               
+                RecognitionahaStructThread.writeCrops = true;
+                RecognitionahaStructThread.writeImages = true;
+            
+                runr = pthread_create(&thread_recognition, NULL, startRecognition, &RecognitionahaStructThread);
+                if ( runr  != 0) {
+                    cerr << "Unable to create thread" << endl;
+                    cout << "BroadcastSender pthread_create failed." << endl;
+                }
+                
+                pthread_join(    thread_recognition,               (void**) &runr); 
+               
+                break;
+            
+            case STOP_RECOGNITION:
+                
+                if (runr > 0) 
+            
+                break;
+            
+    }
+    
+}
+
+void connectStreaming(string from_ip)
+{
+        control_computer_ip = from_ip;
+        // TCP Streaming
+        StreamingStructThread.port = STREAMING_VIDEO_PORT; 
+        StreamingStructThread.cam = 0;
+
+         // run the streaming client as a separate thread 
+        runs = pthread_create(&thread_streaming, NULL, streamVideo, &StreamingStructThread); 
+        if ( runs  != 0) {
+            cerr << "Unable to create streamVideo thread" << endl;
+           cout << "BroadcastSender pthread_create failed." << endl;
+        }
+
+        pthread_join(    thread_streaming,          (void**) &runs);
+
+}
+
+
+// TCP client handling function
+void HandleTCPClient(TCPSocket *sock) 
+{
+  cout << "Handling client ";
+  string from;
+  try {
+     from = sock->getForeignAddress(); 
+    cout << from << ":";
+  } catch (SocketException &e) {
+    cerr << "Unable to get foreign address" << endl;
+  }
+  try {
+    cout << sock->getForeignPort();
+  } catch (SocketException &e) {
+    cerr << "Unable to get foreign port" << endl;
+  }
+  cout << " with thread " << pthread_self() << endl;
+
+  int bytesReceived = 0;              // Bytes read on each recv()
+    int totalBytesReceived = 0;         // Total bytes read
+  
+  // Send received string and receive again until the end of transmission
+  char echoBuffer[RCVBUFSIZE];
+  int recvMsgSize;
+  std::string mesagge;
+  while ((recvMsgSize = sock->recv(echoBuffer, RCVBUFSIZE)) > 0) { // Zero means
+     
+      totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
+      echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
+      cout << "Received message: " << echoBuffer;                      // Print the echo buff
+      
+       std::stringstream strm;
+       strm << echoBuffer;
+       mesagge = strm.str();
+     
+    // end of transmission
+    // Echo message back to client
+    sock->send(echoBuffer, recvMsgSize);
+  }
+  // Destructor closes socket
+  
+  // Run command from the UI
+  RunUICommand(mesagge, from);
+  
+}
+
+void *ThreadMain(void *clntSock) {
+  // Guarantees that thread resources are deallocated upon return  
+  pthread_detach(pthread_self()); 
+
+  // Extract socket file descriptor from argument  
+  HandleTCPClient((TCPSocket *) clntSock);
+
+  delete (TCPSocket *) clntSock;
+  return NULL;
+}
+
+std::string getIpAddress () {
+    
+    struct ifaddrs * ifAddrStruct=NULL;
+    struct ifaddrs * ifa=NULL;
+    void * tmpAddrPtr = NULL;
+    std::string address; 
+    std::stringstream strm6;
+    std::stringstream strm;
+
+    getifaddrs(&ifAddrStruct);
+
+    for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next) {
+        if (!ifa->ifa_addr) {
+            continue;
+        }
+        if (ifa->ifa_addr->sa_family == AF_INET) { // check it is IP4
+            // is a valid IP4 Address
+            tmpAddrPtr=&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+            char addressBuffer[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+            printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer); 
+
+            strm << addressBuffer;
+            address = strm.str(); 
+            
+        } else if (ifa->ifa_addr->sa_family == AF_INET6) { // check it is IP6
+            // is a valid IP6 Address
+            tmpAddrPtr=&((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
+            char addressBuffer[INET6_ADDRSTRLEN];
+            inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
+            printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer); 
+           
+            strm6 << addressBuffer;
+            address = strm.str(); 
+        } 
+    }
+    if (ifAddrStruct!=NULL) 
+       freeifaddrs(ifAddrStruct);
+  
+    address.erase (0,9);
+       
+    return address;
+}
+
+void * broadcastsender ( void * args ) {
+    
+   std::string destAddress = NETWORK_IP + ".255";
+   unsigned short destPort = UDP_PORT;
+   std::string sech = getIpAddress();
+   char *sendString = new char[sech.length() + 1];
+   std::strcpy(sendString, sech.c_str());
+   char recvString[MAXRCVSTRING + 1];
+  
+    try 
+    {
+    UDPSocket sock;
+    cout  <<  "Sent Broadcast to: " << destAddress << " port: " << destPort << " sent: " << sendString << endl;
+    int countud;
+    for (;;) {
+      pthread_mutex_lock(&tcpMutex);
+            sock.sendTo(sendString, strlen(sendString), destAddress, destPort);
+            cout << "UPD Send: " << countud << endl;
+            countud++;
+      pthread_mutex_unlock(&tcpMutex);
+      sleep(5);  
+    }
+    delete [] sendString;
+  
+  } catch (SocketException &e) {
+    cerr << e.what() << endl;
+    cout  <<  "Error: " << cerr << endl;
+    exit(1);
+  }
+
+}
+
+
 
 int main (int argc, char * const argv[])
-{        
-    const string DIR        = "../../src/motion_web/pics/";     // directory where the images will be stored
-    const string REGION     = "../../src/motion_web/region/";   // directory where the regios are stored
-    const string EXT        = ".jpg";                           // extension of the images
-    const string EXT_DATA   = ".xml";                           // extension of the data
-    const int DELAY         = 500;                              // in mseconds, take a picture every 1/2 second
-    const string LOG    = "../../src/motion_web/log";           // log for the export
-    const string LOGCLEAR = LOG + "/log_remove";    
-    vector<Point2f> region;                                     // region vector storing xml region
-       
-    // fps calculated using number of frames / seconds
-    double fps; 
-    // start and end times
-    time_t start, end; 
-    // frame counter
-    int counter = 0; 
-    // floating point seconds elapsed since start
-    double sec;
-    
-    // Create pics directory if not exist. 
-    directoryExistsOrCreate(DIR.c_str());
-    
-    // Create region directory if not exist. 
-    directoryExistsOrCreate(REGION.c_str());
-    {
-        // Detect motion in a region in steadof window
-       string file_region = REGION + "region" + EXT_DATA;
-       parseRegionXML(file_region, region);
-    }
-    
-    // Create log directory if not exist. 
-    directoryExistsOrCreate(LOG.c_str());   
-    if(!std::ifstream(LOGCLEAR.c_str()))
-    {    
-        ofstream logfile;
-        logfile.open ( LOGCLEAR.c_str() );
-        logfile << "Removed files log.\n";
-        logfile.close();
-    }
-      
-    // Format of directory
-    string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
-    string FILE_FORMAT;//          = DIR_FORMAT + "/" + "%d%h%Y_%H%M%S"; // 1Jan1970/1Jan1970_12153
-    string CROPPED_FILE_FORMAT;//   = DIR_FORMAT + "/cropped/" + "%d%h%Y_%H%M%S"; // 1Jan1970/cropped/1Jan1970_121539
-    string XML_FILE             =  "<import>session";   
-    
-    
-    // Set up camera
-    CvCapture * camera = cvCaptureFromCAM(CV_CAP_ANY);
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 1280); // width of viewport of camera
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 720); // height of ...
-    
-    // Take images and convert them to gray
-    Mat result, result_cropped;
-    Mat prev_frame = result = cvQueryFrame(camera);
-    Mat current_frame = cvQueryFrame(camera);
-    Mat next_frame = cvQueryFrame(camera);
-    cvtColor(current_frame, current_frame, CV_RGB2GRAY);
-    cvtColor(prev_frame, prev_frame, CV_RGB2GRAY);
-    cvtColor(next_frame, next_frame, CV_RGB2GRAY);
-    
-    // d1 and d2 for calculating the differences
-    // result, the result of and operation, calculated on d1 and d2
-    // number_of_changes, the amount of changes in the result matrix.
-    // color, the color for drawing the rectangle when something has changed.
-    Mat d1, d2, motion;
-    int number_of_changes, number_of_sequence = 0, count_sequence_cero = 0, count_save_image = 0;
-    Scalar mean_, color(0,255,255); // yellow 
-    
-    // Detect motion in window
-    int x_start = 10, x_stop = current_frame.cols-11;
-    int y_start = 350, y_stop = 530;
-
-    // If more than 'there_is_motion' pixels are changed, we say there is motion
-    // and store an image on disk
-    int there_is_motion = 5;
-    
-    // Maximum deviation of the image, the higher the value, the more motion is allowed
-    int max_deviation = 20;
-    
-    // Erode kernel
-    Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2)); 
-    
-    // time opencv
-    //double t = (double)getTickCount(); 
-    
-    //count instance time     
-    string start_instance_time, total_elapsed_time; 
-    bool motion_detected = false, init_motion = false, has_instance_directory = false;
-    double init_time, begin_time, end_time;    
-    //Directory Tree
-    stringstream directoryTree;
-    // Instance counter
-    int instance_counter = 0; 
-    string instance;
-    
-    init_time = clock();
-    
-    // All settings have been set, now go in endless loop and
-    // take as many pictures you want..
-    while (true){   
-        
-       // Take a new image
-        prev_frame = current_frame;
-        current_frame = next_frame;
-        next_frame = cvQueryFrame(camera);
-        result = next_frame;
-        cvtColor(next_frame, next_frame, CV_RGB2GRAY);
-        
-        // Calc differences between the images and do AND-operation
-        // threshold image, low differences are ignored (ex. contrast change due to sunlight)
-        absdiff(prev_frame, next_frame, d1);
-        absdiff(next_frame, current_frame, d2);
-        bitwise_and(d1, d2, motion);
-        threshold(motion, motion, 35, 255, CV_THRESH_BINARY);
-        erode(motion, motion, kernel_ero);
-        
-        //number_of_changes = detectMotion(motion, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
-        number_of_changes = detectMotion(motion, result, result_cropped, region, max_deviation, color);
-        
-        // If a lot of changes happened, we assume something changed.
-        if(number_of_changes>=there_is_motion)
-        {
-            
-            if(number_of_sequence>0){            
-                
-                init_motion = true;
-                
-                if (!motion_detected) {                    
-                    
-                    count_sequence_cero = 0;
-                    motion_detected     = true;
-                    begin_time = clock();                             
-                    
-                    if (!has_instance_directory){
-                        
-                        instance_counter++;
-                        stringstream id;
-                        id << instance_counter;
-                        instance = id.str(); 
-                        
-                        FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "%d%h%Y_%H%M%S";
-                        CROPPED_FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "/cropped/" + "%d%h%Y_%H%M%S";
-                        
-                        createDirectoryTree (
-                            DIR, 
-                            EXT, 
-                            DIR_FORMAT.c_str(), 
-                            FILE_FORMAT.c_str(), 
-                            instance );
-                        
-                        has_instance_directory = true;
-                    }    
-                }    
-                
-                //if ( count_save_image == 10 ) {                     
-                    
-                    string image_file = saveImg (
-                        result, 
-                        DIR, 
-                        EXT, 
-                        DIR_FORMAT.c_str(), 
-                        FILE_FORMAT.c_str()                       
-                    );
-                
-                    string cropped_image_file = saveImg (
-                            result_cropped,
-                            DIR,
-                            EXT,
-                            DIR_FORMAT.c_str(),
-                            CROPPED_FILE_FORMAT.c_str()                            
-                    );
-                    
-                    //count_save_image = 0;
-                //}
-                
-                //count_save_image++;
-                
-                
-                /*writeXMLFile(
-                        DIR,
-                        EXT_DATA,
-                        DIR_FORMAT.c_str(),
-                        CROPPED_FILE_FORMAT.c_str(),
-                        XML_FILE.c_str(), 
-                        strs.str(),
-                        fpst.str(), 
-                        image_file,
-                        cropped_image_file
-                       );*/  
-                             
-                //frames per second
-                /*fps = counter / sec;               
-                ostringstream fpst;
-                fpst << fps;*/
-                
-                
-                //elapsed time
-                //t = ((double)getTickCount() - t)/getTickFrequency();                 
-                //ostringstream strs;
-                //strs << t;      
-                //total_elapsed_time = strs.str();
-                
-                std::cout << " count_sequence_cero: " << count_sequence_cero << std::endl;
-                            
-                //https://sublimated.wordpress.com/2011/02/17/benchmarking-frames-per-second-when-using-opencvs-cvcapturefromcam/
-                
-                                
-            }
-            number_of_sequence++;
+{     
+  
+  
+   pthread_mutex_init(&tcpMutex, 0);  
+   
+   // UDP
+   runb = pthread_create(&thread_broadcast, NULL, broadcastsender, NULL);
+   if ( runb  != 0) {
+       cerr << "Unable to create thread" << endl;
+       cout << "BroadcastSender pthread_create failed." << endl;
+   }
+   // TCP
+   unsigned short tcp_port = TCP_PORT;
+   try {
+        TCPServerSocket servSock(tcp_port);   // Socket descriptor for server  
+        for (;;) {      // Run forever  
+            // Create separate memory for client argument 
+            TCPSocket *clntSock = servSock.accept();
+            runt = pthread_create(&thread_echo, NULL, ThreadMain, (void *) clntSock);
+            if ( runb  != 0) 
+            {
+                cerr << "Unable to create ThreadMain thread" << endl;
+                cout << "ThreadMain pthread_create failed." << endl;
+                exit(1);
+            }  
         }
-        else
-        {            
-            
-            number_of_sequence = 0;              
-            
-            if ( count_sequence_cero == 20 & init_motion ) {                                  
-                
-                has_instance_directory = false;                  
-                
-                std::cout << "\033[1 ::::::::::::::::::::::::::::::: m" << std::endl;
-                std::cout << "\033[1 :::::::::::: DUMP ::::::::::::: m" << std::endl;
-                std::cout << "\033[1 ::::::::::::::::::::::::::::::: m" << std::endl;
-                
-                end = clock();               
-                
-                //create xml file if not exists
-                time_t seconds;
-                struct tm * timeinfo;
-                char TIME[80];
-                time (&seconds);   
-                timeinfo = localtime (&seconds);     
-                // Create name for the date directory
-                const char * dir = DIR_FORMAT.c_str();
-                strftime (TIME,80,dir,timeinfo);    
-                string XMLFILE = DIR + TIME + "/xml/" + XML_FILE + "" + EXT_DATA;    
-                if(!std::ifstream(XMLFILE.c_str()))    
-                {   
-                    build_xml(XMLFILE.c_str());       
-                }                                                              
-                       
-                std::ostringstream begin;
-                begin << (begin_time - init_time) / CLOCKS_PER_SEC;
-                
-                std::ostringstream end;
-                end << (end_time - init_time) / CLOCKS_PER_SEC;
-           
-                writeXMLInstance(XMLFILE.c_str(), begin.str(), end.str(), instance);     
-                   
-            }       
-            
-            // XML Instance
-            motion_detected = false;        
-            count_sequence_cero++;    
-                
-            if (count_sequence_cero==1){
-                end_time = clock();
-            }
-                
-            std::cout << " number_of_sequence: 0  "  << "count_sequence_cero: " << count_sequence_cero << " count_save_image: " << std::endl;
-            
-            // Delay, wait a 1/2 second.
-            cvWaitKey (DELAY);
-        }
+    
+    } catch (SocketException &e) {
+        cerr << e.what() << endl;
+        exit(1);
     }
-    return 0;    
+    
+   pthread_join(    thread_broadcast,          (void**) &runb);
+   pthread_join(    thread_echo,               (void**) &runt); 
+   
+   pthread_mutex_destroy(&tcpMutex);
+   
+   cout << "return 0" << endl;
+   
+   return 0;
+  
+    
 }
+
+            
+        
+

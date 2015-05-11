@@ -36,6 +36,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/practical/PracticalSocket.o \
+	${OBJECTDIR}/recognition/detection.o \
 	${OBJECTDIR}/tinyxml/tinystr.o \
 	${OBJECTDIR}/tinyxml/tinyxml.o \
 	${OBJECTDIR}/tinyxml/tinyxmlerror.o \
@@ -70,6 +72,16 @@ ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/practical/PracticalSocket.o: practical/PracticalSocket.cpp 
+	${MKDIR} -p ${OBJECTDIR}/practical
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/practical/PracticalSocket.o practical/PracticalSocket.cpp
+
+${OBJECTDIR}/recognition/detection.o: recognition/detection.cpp 
+	${MKDIR} -p ${OBJECTDIR}/recognition
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/recognition/detection.o recognition/detection.cpp
 
 ${OBJECTDIR}/tinyxml/tinystr.o: tinyxml/tinystr.cpp 
 	${MKDIR} -p ${OBJECTDIR}/tinyxml

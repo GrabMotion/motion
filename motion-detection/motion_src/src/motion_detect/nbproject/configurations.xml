@@ -4,6 +4,9 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>practical/PracticalSocket.h</itemPath>
+      <itemPath>recognition/detection.h</itemPath>
+      <itemPath>global.h</itemPath>
       <itemPath>tinyxml/tinystr.h</itemPath>
       <itemPath>tinyxml/tinyxml.h</itemPath>
     </logicalFolder>
@@ -18,6 +21,8 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>practical/PracticalSocket.cpp</itemPath>
+      <itemPath>recognition/detection.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -55,7 +60,17 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="global.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="practical/PracticalSocket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="practical/PracticalSocket.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="recognition/detection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="recognition/detection.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tinyxml/tinystr.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -90,7 +105,17 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="global.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="practical/PracticalSocket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="practical/PracticalSocket.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="recognition/detection.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="recognition/detection.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tinyxml/tinystr.cpp" ex="false" tool="1" flavor2="0">
       </item>
