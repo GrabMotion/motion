@@ -287,7 +287,7 @@ void connectStreaming(string from_ip)
         runs = pthread_create(&thread_streaming, NULL, streamVideo, &StreamingStructThread); 
         if ( runs  != 0) {
             cerr << "Unable to create streamVideo thread" << endl;
-           cout << "BroadcastSender pthread_create failed." << endl;
+           cout << "BroadcastSender pthread_create failed." << endl; 
         }
 
         pthread_join(    thread_streaming,          (void**) &runs);

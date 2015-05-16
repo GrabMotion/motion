@@ -3,10 +3,10 @@
  * Author: jose
  *
  * Created on May 4, 2015, 4:07 AM
- */
+ */ 
 
-#ifndef GLOBAL_H
-#define	GLOBAL_H
+#ifndef GLOBAL_H 
+#define	GLOBAL_H 
 
 std::string NETWORK_IP; 
 
