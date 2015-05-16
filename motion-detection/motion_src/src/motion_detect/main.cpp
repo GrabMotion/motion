@@ -7,8 +7,6 @@
 
 #include <cstring>
 #include <iostream>
-//#include "socket/ServerSocket.h"
-//#include "socket/SocketException.h"
 #include <string>
 #include <sstream>
 #include <stdio.h>      
@@ -18,14 +16,16 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-#include "practical/PracticalSocket.h" // For UDPSocket and SocketException
-#include <cstdlib>           // For atoi()
-#include <unistd.h>           // For sleep()
+#include "practical/PracticalSocket.h" 
+#include <cstdlib>           
+#include <unistd.h>           
 #include "global.h"
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <errno.h>
 #include "recognition/detection.h"
+#include <vector>
+#include <functional>
 
 
 using namespace std;
@@ -41,6 +41,7 @@ int runt, runb, runs, runr;
 
 //TCP
 string control_computer_ip;
+string local_ip;
 
 /// TCP Streaming
 VideoCapture    capture;
@@ -51,6 +52,7 @@ char*     	server_ip;
 int       	server_port;
 int       	server_camera;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+bool dissconnect_streaming = false; 
 
 struct stream_thread_args 
 {
@@ -144,7 +146,7 @@ void* streamVideo(void * arg)
     img = Mat::zeros(480 , 640, CV_8UC1);    
  
     if (!cap.isOpened()) {
-        quitStrSocket(1);
+        //quitStrSocket(1);
     }
     
     //make it continuous
@@ -174,17 +176,30 @@ void* streamVideo(void * arg)
         cvtColor(img, imgGray, CV_BGR2GRAY);
 
         pthread_mutex_lock(&tcpMutex);
-        //send processed image
-            if ((bytes = send(remoteSocket, imgGray.data, imgSize, 0)) < 0){
-                 std::cerr <<   "\n--> bytes = " << bytes << std::endl;
-                 quitStrSocket(1);
+            //send processed image
+            if ((bytes = send(remoteSocket, imgGray.data, imgSize, 0)) < 0)
+            {
+                 //std::cerr <<   "\n--> bytes = " << bytes << std::endl;
+                 break;
             }
             cout << "sending streaming data: " << bytes  << endl;
         pthread_mutex_unlock(&tcpMutex);
-
+        
+        /*if (dissconnect_streaming){
+            if (localSocket){
+                close(localSocket);
+            }
+            if (cap.isOpened()){
+                cap.release();
+            }
+            break;
+        }*/
         
     }
-
+    
+    cap.release();
+    close(localSocket);
+    
     
     return 0;
        
@@ -225,9 +240,11 @@ void RunUICommand(std::string param, string from_ip){
         case STOP_STREAMING:
         case PAUSE_STREAMING:
          
-            if (pthread_cancel(thread_streaming)) {
-                quitStrSocket(1);
-            }
+            dissconnect_streaming = true;
+            
+            //if (pthread_cancel(thread_streaming)) {
+                //quitStrSocket(1);
+            //}
             
             break;  
             
@@ -239,7 +256,7 @@ void RunUICommand(std::string param, string from_ip){
                 runr = pthread_create(&thread_recognition, NULL, startRecognition, &RecognitionahaStructThread);
                 if ( runr  != 0) {
                     cerr << "Unable to create thread" << endl;
-                    cout << "BroadcastSender pthread_create failed." << endl;
+                    cout << "startRecognition pthread_create failed." << endl;
                 }
                 
                 pthread_join(    thread_recognition,               (void**) &runr); 
@@ -248,7 +265,10 @@ void RunUICommand(std::string param, string from_ip){
             
             case STOP_RECOGNITION:
                 
-                if (runr > 0) 
+                
+                pthread_cancel(thread_recognition);
+                
+                //if (runr > 0) 
             
                 break;
             
@@ -271,6 +291,9 @@ void connectStreaming(string from_ip)
         }
 
         pthread_join(    thread_streaming,          (void**) &runs);
+        
+        pthread_cancel(thread_streaming);
+       
 
 }
 
@@ -376,11 +399,44 @@ std::string getIpAddress () {
     return address;
 }
 
+void split(const string& s, char c,
+           vector<string>& v) {
+   string::size_type i = 0;
+   string::size_type j = s.find(c);
+
+   while (j != string::npos) {
+      v.push_back(s.substr(i, j-i));
+      i = ++j;
+      j = s.find(c, j);
+
+      if (j == string::npos)
+         v.push_back(s.substr(i, s.length()));
+   }
+}
+
 void * broadcastsender ( void * args ) {
     
+  
+   std::string sech = getIpAddress();
+   local_ip = sech;
+
+   vector<string> ip_vector;
+   split(local_ip, '.', ip_vector);
+   
+   for (int i=0; i<ip_vector.size(); i++)
+   {
+        if ( i==0 | i==1) 
+        {
+             NETWORK_IP +=  ip_vector[i] + ".";
+        }
+        else if ( i==2 )
+        {
+             NETWORK_IP +=  ip_vector[i];
+        } 
+   }
+   
    std::string destAddress = NETWORK_IP + ".255";
    unsigned short destPort = UDP_PORT;
-   std::string sech = getIpAddress();
    char *sendString = new char[sech.length() + 1];
    std::strcpy(sendString, sech.c_str());
    char recvString[MAXRCVSTRING + 1];
@@ -411,7 +467,7 @@ void * broadcastsender ( void * args ) {
 
 
 int main (int argc, char * const argv[])
-{     
+{    
   
   
    pthread_mutex_init(&tcpMutex, 0);  

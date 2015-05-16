@@ -8,7 +8,7 @@
 #ifndef GLOBAL_H
 #define	GLOBAL_H
 
-const std::string NETWORK_IP = "192.168.1"; 
+std::string NETWORK_IP; 
 
 const unsigned int TCP_PORT                 = 5010;
 const unsigned int UDP_PORT                 = 5020;
