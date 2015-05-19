@@ -8,29 +8,27 @@
 #ifndef GLOBAL_H 
 #define	GLOBAL_H 
 
-std::string NETWORK_IP; 
+#include <string>
+#include <sstream>
+#include <cstdlib>
 
-const unsigned int TCP_PORT                 = 5010;
-const unsigned int UDP_PORT                 = 5020;
-const unsigned int STREAMING_VIDEO_PORT     = 5030;
+using namespace std;
 
-const unsigned int CONNECT              = 1000;
-const unsigned int STOP_STREAMING       = 1002;
-const unsigned int PAUSE_STREAMING      = 1003;
+    // Threading
+extern pthread_mutex_t tcpMutex, streamingMutex;
+extern pthread_t thread_broadcast, thread_echo, thread_streaming, thread_recognition;
+//extern pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-const unsigned int START_RECOGNITION        = 1004;
-const unsigned int STOP_RECOGNITION         = 1005;
+//Threads
+extern int runt, runb, runs, runr;
 
+/// TCP Streaming
+extern int             clientSock;
+extern char*     	server_ip;
+extern int       	server_port;
+extern int       	server_camera;
+extern std::string control_computer_ip;
 
-std::string getGlobalIntToString(int id){
-    std::stringstream strm;
-    strm << id;
-    return strm.str();
-}
-
-int getGlobalStringToInt(std::string id){
-   return atoi( id.c_str() );
-}
 
 #endif	/* GLOBAL_H */
 

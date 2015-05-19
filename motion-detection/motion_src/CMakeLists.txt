@@ -5,7 +5,10 @@ PROJECT(MOTION_DETECTION)
 # paths 
 INCLUDE_DIRECTORIES(src)
 INCLUDE_DIRECTORIES(/usr/local/include)
-INCLUDE_DIRECTORIES(${TINYXML_DIRECTORY} /src/motion_detect/tinyxml)
+INCLUDE_DIRECTORIES(
+	${TINYXML_DIRECTORY} /src/motion_detect/tinyxml
+	${RECOGNITION_DIRECTORY} /src/motion_detect/recognition
+)
 LINK_DIRECTORIES(/usr/local/lib)
 LINK_DIRECTORIES(/usr/lib)
 
@@ -18,6 +21,12 @@ SET(OpenCV_LIBRARIES opencv_core opencv_highgui opencv_imgproc opencv_video)
 
 ADD_EXECUTABLE(motion_detect_raspberry 
 	src/motion_detect/main.cpp
+	src/motion_detect/streamvideo.cpp
+	src/motion_detect/streamvideo.h
+	src/motion_detect/practical/PracticalSocket.h
+	src/motion_detect/practical/PracticalSocket.cpp
+	src/motion_detect/recognition/detection.h
+        src/motion_detect/recognition/detection.cpp 
 	src/motion_detect/tinyxml/tinystr.cpp
 	src/motion_detect/tinyxml/tinyxml.cpp
 	src/motion_detect/tinyxml/tinyxmlerror.cpp
@@ -25,7 +34,7 @@ ADD_EXECUTABLE(motion_detect_raspberry
         src/motion_detect/practical/PracticalSocket.cpp
         src/motion_detect/recognition/detection.cpp
 )
-TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES})
+TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm)
 
 SET(CMAKE_BUILD_TYPE Release)
 

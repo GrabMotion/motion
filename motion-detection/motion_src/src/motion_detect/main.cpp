@@ -5,6 +5,8 @@
  * Created on April 19, 2015, 11:23 PM
  */
 
+#include "global.h"
+
 #include <cstring>
 #include <iostream>
 #include <string>
@@ -19,47 +21,69 @@
 #include "practical/PracticalSocket.h" 
 #include <cstdlib>           
 #include <unistd.h>           
-#include "global.h"
+
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <errno.h>
 #include "recognition/detection.h"
 #include <vector>
 #include <functional>
-
+#include "streamvideo.h"
 
 using namespace std;
 using namespace cv;
 
-const unsigned int RCVBUFSIZE = 32;    // Size of receive buffer
-const int MAXRCVSTRING = 4096; // Longest string to receive
+const unsigned int TCP_PORT                 = 5010;
+const unsigned int UDP_PORT                 = 5020;
+
+const unsigned int CONNECT                  = 1000;
+const unsigned int STOP_STREAMING           = 1002;
+const unsigned int PAUSE_STREAMING          = 1003;
+
+const unsigned int START_RECOGNITION        = 1004;
+const unsigned int STOP_RECOGNITION         = 1005;
 
 // Threading
-pthread_mutex_t tcpMutex;
-pthread_t thread_broadcast, thread_echo, thread_streaming, thread_recognition;
-int runt, runb, runs, runr;
+pthread_mutex_t tcpMutex, streamingMutex;
+pthread_t thread_broadcast, thread_echo, /*thread_streaming,*/ thread_recognition;
+//pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-//TCP
-string control_computer_ip;
-string local_ip;
+//Threads
+int runt, runb, /*runs,*/ runr;
 
 /// TCP Streaming
-VideoCapture    capture;
-Mat             img0, img1, img2;
-int             is_data_ready = 1;
 int             clientSock;
 char*     	server_ip;
 int       	server_port;
 int       	server_camera;
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-bool dissconnect_streaming = false; 
 
-struct stream_thread_args 
+
+//TCP
+std::string local_ip;
+string NETWORK_IP;
+
+const unsigned int RCVBUFSIZE = 32;    // Size of receive buffer
+const int MAXRCVSTRING = 4096; // Longest string to receive
+
+std::string getGlobalIntToString(int id);
+
+int getGlobalStringToInt(std::string id);
+
+
+int getGlobalStringToInt(std::string id)
 {
-    unsigned int port;
-    int cam;
-};
-struct stream_thread_args StreamingStructThread;
+    return atoi( id.c_str() );
+}
+
+std::string getGlobalIntToString(int id)
+{
+    std::stringstream strm;
+    strm << id;
+    return strm.str();
+}
+
+//Detection
+//int scene_changes_amount = 0;
 
 struct recognition_thread_args 
 {
@@ -71,179 +95,23 @@ struct recognition_thread_args RecognitionahaStructThread;
 void *ThreadMain(void *arg);    
 void HandleTCPClient(TCPSocket *sock);
 
-void quitStrSocket(int retval);
-void connectStreaming(string from_ip);
-
-void* streamVideo(void * arg)
-{
-   
-     struct stream_thread_args *args = (struct stream_thread_args *) arg;
-     
-     std::string cip = control_computer_ip;
-     char *control_remote_ip = new char[cip.length() + 1];
-     std::strcpy(control_remote_ip, cip.c_str());
-     
-     server_ip = control_remote_ip;
-     server_port = args->port;
-     server_camera = args->cam;
-     
-     //--------------------------------------------------------
-    //networking stuff: socket, bind, listen
-    //--------------------------------------------------------
-    int                 localSocket,
-                        remoteSocket,
-                        port = server_port;                               
- 
-    struct  sockaddr_in localAddr,
-                        remoteAddr;
-    
-       
-    int addrLen = sizeof(struct sockaddr_in);
-    
-    localSocket = socket(AF_INET , SOCK_STREAM , 0);
-    if (localSocket == -1)
-         perror("socket() call failed!!");
-       
-    localAddr.sin_family = AF_INET;
-    localAddr.sin_addr.s_addr = INADDR_ANY;
-    localAddr.sin_port = htons( port );
- 
-    int optval = 1;
-    if (setsockopt(localSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int)) < 0)
-    {
-        perror("Cannot set SO_REUSEADDR option");
-        std::cerr << "on listen socket (%s)\n" << strerror(errno) << endl;
-    }
-
-    if( bind(localSocket,(struct sockaddr *)&localAddr , sizeof(localAddr)) < 0) 
-    {
-         perror("Can't bind() socket");
-         exit(1);
-    }
-    
-    //Listening
-    listen(localSocket , 1);
-    
-    std::cout <<  "Waiting for connections...\n"
-              <<  "Server Port:" << port << std::endl;
- 
-    //accept connection from an incoming client
-    remoteSocket = accept(localSocket, (struct sockaddr *)&remoteAddr, (socklen_t*)&addrLen);
-    if (remoteSocket < 0) {
-        perror("accept failed!");
-        exit(1);
-    }
-    std::cout << "Connection accepted" << std::endl;
- 
- 
-    //----------------------------------------------------------
-    //OpenCV Code
-    //----------------------------------------------------------
-    int capDev = server_camera;
- 
-    VideoCapture cap(capDev); // open the default camera
-    Mat img, imgGray;
-    img = Mat::zeros(480 , 640, CV_8UC1);    
- 
-    if (!cap.isOpened()) {
-        //quitStrSocket(1);
-    }
-    
-    //make it continuous
-    if (!img.isContinuous()) {
-        img = img.clone();
-    }
- 
-    int imgSize = img.total() * img.elemSize();
-    int bytes = 0;
-    int key;
- 
-    //make img continuos
-    if ( ! img.isContinuous() ) { 
-          img = img.clone();
-          imgGray = img.clone();
-    }
-        
-    std::cout << "Image Size:" << imgSize << std::endl;
- 
-    while(1) {
-
-        /* get a frame from camera */
-        cap >> img;
-
-        //do video processing here 
-        flip(img, img, 1);
-        cvtColor(img, imgGray, CV_BGR2GRAY);
-
-        pthread_mutex_lock(&tcpMutex);
-            //send processed image
-            if ((bytes = send(remoteSocket, imgGray.data, imgSize, 0)) < 0)
-            {
-                 //std::cerr <<   "\n--> bytes = " << bytes << std::endl;
-                 break;
-            }
-            cout << "sending streaming data: " << bytes  << endl;
-        pthread_mutex_unlock(&tcpMutex);
-        
-        /*if (dissconnect_streaming){
-            if (localSocket){
-                close(localSocket);
-            }
-            if (cap.isOpened()){
-                cap.release();
-            }
-            break;
-        }*/
-        
-    }
-    
-    cap.release();
-    close(localSocket);
-    
-    
-    return 0;
-       
-}
-
-void quitStrSocket(int retval)
-{
-        if (clientSock){
-                close(clientSock);
-        }
-        if (capture.isOpened()){
-                capture.release();
-        }
-        if (!(img0.empty())){
-                (~img0);
-        }
-        if (!(img1.empty())){
-                (~img1);
-        }
-        if (!(img2.empty())){
-                (~img2);
-        }
-        pthread_mutex_destroy(&mutex);
-        exit(retval);
-}
-
+std::string getIpAddress();
 
 void RunUICommand(std::string param, string from_ip){
+    
     
     switch (getGlobalStringToInt(param)){
         
         case CONNECT:
-               
+        
             connectStreaming(from_ip);
             
             break;
             
         case STOP_STREAMING:
         case PAUSE_STREAMING:
-         
-            dissconnect_streaming = true;
-            
+        
             //if (pthread_cancel(thread_streaming)) {
-                //quitStrSocket(1);
             //}
             
             break;  
@@ -274,27 +142,6 @@ void RunUICommand(std::string param, string from_ip){
             
     }
     
-}
-
-void connectStreaming(string from_ip)
-{
-        control_computer_ip = from_ip;
-        // TCP Streaming
-        StreamingStructThread.port = STREAMING_VIDEO_PORT; 
-        StreamingStructThread.cam = 0;
-
-         // run the streaming client as a separate thread 
-        runs = pthread_create(&thread_streaming, NULL, streamVideo, &StreamingStructThread); 
-        if ( runs  != 0) {
-            cerr << "Unable to create streamVideo thread" << endl;
-           cout << "BroadcastSender pthread_create failed." << endl; 
-        }
-
-        pthread_join(    thread_streaming,          (void**) &runs);
-        
-        pthread_cancel(thread_streaming);
-       
-
 }
 
 
@@ -329,9 +176,9 @@ void HandleTCPClient(TCPSocket *sock)
       echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
       cout << "Received message: " << echoBuffer;                      // Print the echo buff
       
-       std::stringstream strm;
-       strm << echoBuffer;
-       mesagge = strm.str();
+       std::stringstream strmm;
+       strmm << echoBuffer;
+       mesagge = strmm.str();
      
     // end of transmission
     // Echo message back to client
@@ -394,7 +241,7 @@ std::string getIpAddress () {
     if (ifAddrStruct!=NULL) 
        freeifaddrs(ifAddrStruct);
   
-    address.erase (0,9);
+    //address.erase (0,9);
        
     return address;
 }
@@ -418,6 +265,7 @@ void * broadcastsender ( void * args ) {
     
   
    std::string sech = getIpAddress();
+   cout  <<  "IP: " << sech << endl;
    local_ip = sech;
 
    vector<string> ip_vector;
@@ -452,7 +300,7 @@ void * broadcastsender ( void * args ) {
             cout << "UPD Send: " << countud << endl;
             countud++;
       pthread_mutex_unlock(&tcpMutex);
-      sleep(5);  
+      sleep(3);
     }
     delete [] sendString;
   

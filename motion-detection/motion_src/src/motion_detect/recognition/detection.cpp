@@ -50,7 +50,10 @@ void parseRegionXML(string file_region, vector<Point2f> &region){
         }
     }
     else
+    {
         exit(1);
+    }
+    std::cout << "XML Reguion loaded." << std::endl;
 }
 
 // Create initial XML file
@@ -218,9 +221,11 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
                         int max_deviation,
                         Scalar & color)
 {
+    
     // calculate the standard deviation
     Scalar mean, stddev;
     meanStdDev(motion, mean, stddev);
+    
     // if not to much changes then the motion is real (neglect agressive snow, temporary sunlight)
     if(stddev[0] < max_deviation)
     {
@@ -253,11 +258,15 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
             Point x(min_x,min_y);
             Point y(max_x,max_y);
             Rect rect(x,y);
-            Mat cropped = result(rect);
-            cropped.copyTo(result_cropped);
+            
+            //Mat cropped = result(rect);
+            //cropped.copyTo(result_cropped);   //JOSE Cropp removed.
             rectangle(result,rect,color,1);
+
             
         }
+        std::cout << "number_of_changes = " << number_of_changes << std::endl;
+        
         return number_of_changes;
     }
     return 0;
@@ -265,13 +274,16 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
 
 void * startRecognition(void * arg)
 {
+    
+    bool writeImages = true, writeCroop = false;
+    
     pthread_mutex_t detectMutex;
     pthread_mutex_init(&detectMutex, 0); 
     
     struct recognition_thread_args *args = (struct recognition_thread_args *) arg;
     
     const string DIR        = "../../src/motion_web/pics/";     // directory where the images will be stored
-    const string REGION     = "../../src/motion_web/region/";   // directory where the regios are stored
+    const string REGION     = "../../src/motion_web/pics/region/";   // directory where the regios are stored
     const string EXT        = ".jpg";                           // extension of the images
     const string EXT_DATA   = ".xml";                           // extension of the data
     const int DELAY         = 500;                              // in mseconds, take a picture every 1/2 second
@@ -289,15 +301,15 @@ void * startRecognition(void * arg)
     double sec;
     
     // Create pics directory if not exist. 
-    directoryExistsOrCreate(DIR.c_str());
+    //directoryExistsOrCreate(DIR.c_str());
     
     // Create region directory if not exist. 
-    directoryExistsOrCreate(REGION.c_str());
-    {
+    //directoryExistsOrCreate(REGION.c_str());
+    //{
         // Detect motion in a region in steadof window
        string file_region = REGION + "region" + EXT_DATA;
        parseRegionXML(file_region, region);
-    }
+    //}
     
     // Create log directory if not exist. 
     directoryExistsOrCreate(LOG.c_str());   
@@ -309,32 +321,28 @@ void * startRecognition(void * arg)
         logfile.close();
     }
     
+    std::cout << "llega" << std::endl;
+    
     // Format of directory
     string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
     string FILE_FORMAT;//          = DIR_FORMAT + "/" + "%d%h%Y_%H%M%S"; // 1Jan1970/1Jan1970_12153
     string CROPPED_FILE_FORMAT;//   = DIR_FORMAT + "/cropped/" + "%d%h%Y_%H%M%S"; // 1Jan1970/cropped/1Jan1970_121539
-    string XML_FILE             =  "<import>session";   
-    
+    string XML_FILE             =  "<import>session";
     
     // Set up camera
     CvCapture * camera = cvCaptureFromCAM(CV_CAP_ANY);
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 1280); // width of viewport of camera
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 720); // height of ...
+    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 640); //1280); // width of viewport of camera
+    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 480); //720); // height of ...
     
     // Take images and convert them to gray
     Mat result, result_cropped;
     Mat prev_frame = result = cvQueryFrame(camera);
     Mat current_frame = cvQueryFrame(camera);
     Mat next_frame = cvQueryFrame(camera);
+    
     cvtColor(current_frame, current_frame, CV_RGB2GRAY);
     cvtColor(prev_frame, prev_frame, CV_RGB2GRAY);
     cvtColor(next_frame, next_frame, CV_RGB2GRAY);
-    
-    //Thread de socket client
-    //Thread socketThread;
-    //socketThread.startThread();    
-     //unsigned int microseconds = 1000000000;
-     //usleep(microseconds);
     
     // d1 and d2 for calculating the differences
     // result, the result of and operation, calculated on d1 and d2
@@ -370,12 +378,15 @@ void * startRecognition(void * arg)
     // Instance counter
     int instance_counter = 0; 
     string instance;
+    int countWhile;
     
     init_time = clock();
     
     // All settings have been set, now go in endless loop and
     // take as many pictures you want..
     while (true){   
+        
+        countWhile++;
         
        // Take a new image
         prev_frame = current_frame;
@@ -394,8 +405,11 @@ void * startRecognition(void * arg)
         
         pthread_mutex_lock(&detectMutex);
         
+        
         //number_of_changes = detectMotion(motion, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
         number_of_changes = detectMotion(motion, result, result_cropped, region, max_deviation, color);
+        
+        //scene_changes_amount = detectMotion;
         
         pthread_mutex_unlock(&detectMutex);
         
@@ -438,7 +452,10 @@ void * startRecognition(void * arg)
                     }    
                 }    
                 
-                    pthread_mutex_lock(&detectMutex);              
+                if (writeImages) {
+                    
+                
+                    pthread_mutex_lock(&detectMutex);
                     
                     string image_file = saveImg (
                         result, 
@@ -447,6 +464,13 @@ void * startRecognition(void * arg)
                         DIR_FORMAT.c_str(), 
                         FILE_FORMAT.c_str()                       
                     );
+                
+                    pthread_mutex_unlock(&detectMutex);
+                
+                }
+                if (writeCroop)
+                {
+                    pthread_mutex_lock(&detectMutex);
                 
                     string cropped_image_file = saveImg (
                             result_cropped,
@@ -457,8 +481,9 @@ void * startRecognition(void * arg)
                     );
                     
                     pthread_mutex_unlock(&detectMutex);
-            
-                    std::cout << " count_sequence_cero: " << count_sequence_cero << std::endl;
+                }
+                
+                //std::cout << " count_sequence_cero: " << count_sequence_cero << std::endl;
                             
                 //https://sublimated.wordpress.com/2011/02/17/benchmarking-frames-per-second-when-using-opencvs-cvcapturefromcam/
                 
@@ -475,9 +500,9 @@ void * startRecognition(void * arg)
                 
                 has_instance_directory = false;                  
                 
-                std::cout << "\033[1 ::::::::::::::::::::::::::::::: m" << std::endl;
-                std::cout << "\033[1 :::::::::::: DUMP ::::::::::::: m" << std::endl;
-                std::cout << "\033[1 ::::::::::::::::::::::::::::::: m" << std::endl;
+                std::cout << "\033[1 :::::::::::::::::::::::::::::::::::::::: m" << std::endl;
+                std::cout << "\033[1 :::::::::::: DUMP INSTANCE ::::::::::::: m" << std::endl;
+                std::cout << "\033[1 :::::::::::::::::::::::::::::::::::::::: m" << std::endl;
                 
                 end = clock();               
                 
@@ -517,7 +542,7 @@ void * startRecognition(void * arg)
                 end_time = clock();
             }
                 
-            std::cout << " number_of_sequence: 0  "  << "count_sequence_cero: " << count_sequence_cero << " count_save_image: " << std::endl;
+            //std::cout << " number_of_sequence: 0  "  << "count_sequence_cero: " << count_sequence_cero << " count_save_image: " << std::endl;
             
             // Delay, wait a 1/2 second.
             cvWaitKey (DELAY);
@@ -527,136 +552,4 @@ void * startRecognition(void * arg)
     //return 0;   
     
 }
-
-// split string return position vector
-/*string split(const string& s, char c, int position) {  
-    
-   string::size_type i = 0;
-   string::size_type j = s.find(c);
-   vector<string> v;
-   
-   while (j != string::npos) {
-      v.push_back(s.substr(i, j-i));
-      i = ++j;
-      j = s.find(c, j);
-
-      if (j == string::npos)
-         v.push_back(s.substr(i, s.length()));
-   }   
-   return v[position];
-}*/
-
-// get current time
-/*string getCurrentTime(){
-
-    time_t currentTime;
-    struct tm *localTime;
-
-    time( &currentTime );                   // Get the current time
-    localTime = localtime( &currentTime );  // Convert the current time to the local time
-
-    int Day    = localTime->tm_mday;
-    int Month  = localTime->tm_mon + 1;
-    int Year   = localTime->tm_year + 1900;
-    int Hour   = localTime->tm_hour;
-    int Min    = localTime->tm_min;
-    int Sec    = localTime->tm_sec;
-    
-    ostringstream _y;
-    _y << Year;    
-    ostringstream _m;
-    _m << Month;    
-    ostringstream _d;
-    _d << Day;    
-    ostringstream _h;
-    _h << Hour;
-    ostringstream _mi;
-    _mi << Min;
-    ostringstream _s;
-    _s << Sec;  
-    
-    string current = 
-    _y.str()    + "_" + 
-    _m.str()    + "_" + 
-    _d.str()    + " " + 
-    _h.str()    + ":" + 
-    _mi.str()   + ":" + 
-    _s.str();
-    
-    std::cout << current << "  ";
-    
-    return current;
-}*/
-
-
-
-/*class Thread {
-    public:
-        static void*  callSocketFunction (void *arg) { return ((Thread*)arg)->socketFunction(); }
-        void*          socketFunction(void);
-        void          startThread(void);
-};
-void* Thread::socketFunction() {
-   
-  unsigned int microseconds = 100000;
-  
-  ostringstream strs;
-  bool doConnect = false;
-  
-   while (!doConnect) {
-       
-        char * res  = initclient();
-        strs << res; 
-        
-        if (strs.str().find("192.168") != std::string::npos) 
-        {
-            std::cout << "Connected" << '\n';
-            doConnect = true;
-        }
-        
-        usleep(microseconds);
-                
-        std::cout << " response: " << strs.str() << " " << std::endl;
-   }
-  
-    Mat frame;
-    frame = cvQueryFrame(camera);
-    cvtColor(frame, frame, CV_RGB2GRAY);
-    frame = (frame.reshape(0,1)); // to make it continuous
-    int  imgSize = frame.total()*frame.elemSize();
-    
-    // Send data here
-    sendMessage(frame.data, imgSize, 0);
-    //bytes = send(sd, frame.data, imgSize, 0));
-    return 0;
-}
-
-void  Thread::startThread() {
-    pthread_t tid;
-    int       result;
-    result = pthread_create(&tid, 0, Thread::callSocketFunction, this);
-    if (result == 0)
-        pthread_detach(tid);
-}*/
-
-/*
-  std::string stip = "192.168.1.43";
-    char *sip = new char[stip.length() + 1];
-    std::strcpy(sip, stip.c_str());
-    
-    char *mip = new char[myip.length() + 1];
-    strcpy(mip, myip.c_str());
-    
-    std::stringstream strp;
-    int po = 4890;
-    strp << po;
-    char* port = new char[strp.str().length()];
-    strcpy(port, strp.str().c_str());
-    
-    char * argv[] = {sip, mip, port, NULL};
-    int argc = sizeof(argv) / sizeof(char*) - 1;
-    
-    delete [] sip;
-    delete [] mip;
-    delete [] port;*/
 
