@@ -8,11 +8,16 @@
 #include <QString>
 #include <QMessageBox>
 #include <vector>
-#include <QtWebKitWidgets/QWebView>
 #include <QFileSystemModel>
 #include <QObject>
 #include <QModelIndex>
 #include <string>
+#include <qfile.h>
+
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <cstdio>
 
 #include "tinyxml/tinystr.h"
 #include "tinyxml/tinyxml.h"
@@ -52,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(streaming_thread, SIGNAL(StreamingUpdateLabelImage(QImage, Mat)), this, SLOT(StreamingUpdateLabelImage(QImage, Mat)));
 
     //Mouse Events
-    connect(ui->qt_drawing_output, SIGNAL(sendMousePosition(QPoint&)), this, SLOT(showMousePosition(QPoint&)));
+    connect(ui->qt_drawing_output, SIGNAL(sendMousePosition(QPoint)), this, SLOT(showMousePosition(QPoint&)));
 
     connect(ui->qt_drawing_output, SIGNAL(Mouse_Pos()), this, SLOT(Mouse_current_pos()));
     connect(ui->qt_drawing_output, SIGNAL(Mouse_Pressed()), this, SLOT(Mouse_pressed()));
@@ -64,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->list_files->setEnabled(false);
     ui->refresh_results->setEnabled(false);
     ui->start_recognition->setEnabled(false);
-    ui->save_region->setEnabled(false);
+    //ui->save_region->setEnabled(false);
     ui->rec_with_images->setEnabled(false);
     ui->rec_with_cropped->setEnabled(false);
 
@@ -291,6 +296,56 @@ void MainWindow::SharedMounted(QString folder)
     ui->list_files->setModel(fileModel);
     ui->list_files->setEnabled(true);
 
+    QString region = rip + "/region/";
+    QByteArray baregion = rip.toLatin1();
+    const char *regionfile = baregion.data();
+
+    //removeDir(region);
+    if (!QDir(regionfile).exists())
+    {
+        QDir().mkdir(regionfile);
+    }
+
+    QString region_file = region + "region.xml";
+
+    QByteArray xml_region = region_file.toLatin1();
+    const char *xmlfile = xml_region.data();
+
+    xml = xmlfile;
+
+    QFile * xmlFile = new QFile(region_file);
+    if (QFile(region_file).exists())
+    {
+        QString path = region;
+        QDir dir(path);
+        dir.setNameFilters(QStringList() << "*.*");
+        dir.setFilter(QDir::Files);
+        foreach(QString dirFile, dir.entryList())
+        {
+            dir.remove(dirFile);
+        }
+
+    }
+    if( ! xmlFile->open(QIODevice::WriteOnly) )
+    {
+      QMessageBox::warning(NULL, "Test", "Unable to open: " + region_file , "OK");
+    }
+
+
+    /*if( remove( region_file ) != 0 )
+    {
+        fstream f;
+        f.open( region_file, ios::out );
+        f << flush;
+        f.close();
+    }*/
+
+    /*QFile file(region_file);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        cout << "file not created.\n";
+    }*/
+
     spinner_folders->stop();
 
 }
@@ -310,17 +365,17 @@ void MainWindow::ShareUmounted()
 void MainWindow::on_capture_video_clicked()
 {
 
-    if(ui->capture_video->isChecked())
-    {
-        QPixmap pix_pause(":/img/pause.png");
-        QIcon icon_pause(pix_pause);
-        ui->capture_video->setIcon(icon_pause);
-        ui->capture_video->setIconSize(pix_pause.size());
-        ui->capture_video->setEnabled(true);
-        ui->capture_video->setText("Pause Stream");
+    //if(ui->capture_video->isChecked())
+    //{
+        //QPixmap pix_pause(":/img/pause.png");
+        //QIcon icon_pause(pix_pause);
+        //ui->capture_video->setIcon(icon_pause);
+        //ui->capture_video->setIconSize(pix_pause.size());
+        //ui->capture_video->setEnabled(true);
+        //ui->capture_video->setText("Pause Stream");
 
-        QPixmap pix_stopst(":/img/stop.png");
-        QIcon icon_stopst(pix_stopst);
+        //QPixmap pix_stopst(":/img/stop.png");
+        //QIcon icon_stopst(pix_stopst);
 
         /*ui->capture_stop->setIcon(icon_stopst);
         ui->capture_stop->setIconSize(pix_stopst.size());
@@ -331,21 +386,22 @@ void MainWindow::on_capture_video_clicked()
         char *c_str_ip = ba_ip.data();
         streaming_thread->StartStreaming(c_str_ip, STREAMING_VIDEO_PORT);
 
-        ui->output->setStyleSheet("background-color: rgba( 255, 255, 255, 0% );");
-    }
-    else
-    {
+        //ui->output->setStyleSheet("background-color: rgba( 255, 255, 255, 0% );");
+
+    //}
+    //else
+    //{
         // Pause Streaming
-        QPixmap pix_play(":/img/play.png");
-        QIcon icon_play(pix_play);
-        ui->capture_video->setIcon(icon_play);
-        ui->capture_video->setIconSize(pix_play.size());
-        ui->capture_video->setEnabled(true);
-        ui->capture_video->setText("Stream Video");
+        //QPixmap pix_play(":/img/play.png");
+        //QIcon icon_play(pix_play);
+        //ui->capture_video->setIcon(icon_play);
+        //ui->capture_video->setIconSize(pix_play.size());
+        //ui->capture_video->setEnabled(true);
+        //ui->capture_video->setText("Stream Video");
 
-        std::cout << "PAUSE" << std::endl;
+        //std::cout << "PAUSE" << std::endl;
 
-        streaming_thread->StopStreaming();
+        //streaming_thread->StopStreaming();
         //streaming_thread->terminate();
 
         /*std::string command = getGlobalIntToString(PAUSE_STREAMING);
@@ -353,7 +409,7 @@ void MainWindow::on_capture_video_clicked()
         connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
         tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);*/
 
-    }
+    //}
 }
 
 /*void MainWindow::on_capture_stop_clicked()

@@ -74,7 +74,7 @@ private slots:
     void Mouse_current_pos();
     void Mouse_pressed();
     void Mouse_left();
-    void showMousePosition(QPoint& pos);
+    void showMousePosition(QPoint&);
     void Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&);
 
     //sockets

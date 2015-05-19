@@ -1,4 +1,5 @@
 #include "threads/streamingthread.h"
+#include "socket/PracticalSocket.h"
 
 StreamingThread::StreamingThread(QObject *parent): QThread(parent)
 {
@@ -49,35 +50,75 @@ void StreamingThread::StartStreaming(char * serverIp,  int port)
 
     std::cout << "Image Size:" << imgSize << std::endl;
 
-    namedWindow("CV Video Client",1);
+    //namedWindow("CV Video Client",1);
 
-    while (key != 'q') {
+    int count = 0;
 
-        streamingMutex.lock();
+    while (1) { //key != 'q') {
 
-        if ((bytes = recv(soket_streaming, iptr, imgSize , MSG_WAITALL)) == -1) {
-            std::cerr << "recv failed, received bytes = " << bytes << std::endl;
+        //streamingMutex.lock();
+        pthread_mutex_lock(&streamingMutex);
+
+        try {
+
+            if ((bytes = recv(soket_streaming, iptr, imgSize , MSG_PEEK)) == -1) {
+                std::cerr << "recv failed, received bytes = " << bytes << std::endl;
+            }
+
+            std::cout << "Streaming : " << imgSize << std::endl;
+            std::cout << "bytes: " << bytes << std::endl;
+
+            //image received then break
+            if (count==100)
+            {
+                if (soket_streaming){
+                    close(soket_streaming);
+                }
+                if (!(img.empty())){
+                    (~img);
+                }
+
+                //pthread_mutex_destroy(&streamingMutex);
+                break;
+            }
+
+            if (img.empty())
+            {
+                std::cout << "img.empty() : " << std::endl;
+            } else
+            {
+                //cv::imwrite("test.jpg", img);
+                // Declare what you need
+                //cv::FileStorage file("test_1.png", cv::FileStorage::WRITE);
+                // Write to file!
+                //file << img;
+            }
+
+            //cv::imshow("CV Video Client", img);
+
+            //frame = Mat2QImage(); //MatToQImage(img);
+            frame = Mat2QImage(img);
+
+            pthread_mutex_unlock(&streamingMutex);
+            //streamingMutex.unlock();
+
+            emit StreamingUpdateLabelImage(frame, img);
+
+            waitKey(10);
+
+            //if (key = cv::waitKey(10) >= 0)
+                //break;
+
+        } catch (SocketException &e) {
+            std::cerr << "Socket error!" << std::endl;
         }
 
-        std::cout << "Streaming : " << imgSize << std::endl;
+        count++;
 
-        cv::imshow("CV Video Client", img);
+        std::cout << "count: " << count << std::endl;
 
-        //frame = Mat2QImage(); //MatToQImage(img);
-        frame = Mat2QImage(img);
-
-        streamingMutex.unlock();
-
-        emit StreamingUpdateLabelImage(frame, img);
-
-        if (!run)
-            break;
-
-        if (key = cv::waitKey(10) >= 0)
-            break;
     }
 
-    close(soket_streaming);
 }
 
 void StreamingThread::StopStreaming()

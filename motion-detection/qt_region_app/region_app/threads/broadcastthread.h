@@ -11,6 +11,9 @@
 #include <iostream>            // For cout and cerr
 #include <cstdlib>             // For atoi()
 #include <sstream>
+#include <stdio.h>
+#include <string>
+
 
 using namespace std;
 

@@ -60,7 +60,7 @@ protected:
     void paintEvent(QPaintEvent *);
 
 signals:
-    void sendMousePosition(QPoint&);
+    void ShowMousePosition(QPoint&);
     void Mouse_Pressed();
     void Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&);
     void Mouse_Pos();

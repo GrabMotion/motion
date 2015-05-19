@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QThread>
 #include <QIODevice>
+#include <QMessageBox>
 
 using namespace std;
 

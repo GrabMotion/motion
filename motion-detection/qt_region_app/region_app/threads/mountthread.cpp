@@ -35,13 +35,13 @@ void MountThread::MountNetWorkDrive(QString ip)
 
     command =   "mount -t smbfs ";
 
-    QString usrshr = "//guest:@" + ip + "/motion -o  credentials=FILE,nls=utf8";
+    QString usrshr = "//guest:@" + ip + "/motion ";
     QByteArray bausr = usrshr.toLatin1();
     const char *credshare = bausr.data();
 
     command += credshare;
 
-    QString mount =  roo + "/" + ip + "/";
+    QString mount =  roo + "/" + ip;
     QByteArray bamount = mount.toLatin1();
     const char *mountpoint = bamount.data();
 

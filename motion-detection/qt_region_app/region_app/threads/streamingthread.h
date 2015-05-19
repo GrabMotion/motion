@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <iostream>
+#include <errno.h>
 
 #include "image/mat2qimage.h"
 
@@ -29,8 +30,9 @@ public:
 
  private:
     int soket_streaming;
-    QMutex streamingMutex;
+    //QMutex streamingMutex;
     QImage frame;
+    pthread_mutex_t streamingMutex;
     bool run = true;
 
  signals:

@@ -291,35 +291,22 @@ color: rgb(255, 252, 253);</string>
     </property>
    </widget>
    <widget class="QPushButton" name="capture_video">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>17</x>
+      <x>211</x>
       <y>526</y>
       <width>171</width>
       <height>60</height>
      </rect>
     </property>
     <property name="text">
-     <string>Capture Video</string>
+     <string>Take Picture</string>
     </property>
     <property name="checkable">
      <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="save_region">
-    <property name="geometry">
-     <rect>
-      <x>207</x>
-      <y>526</y>
-      <width>161</width>
-      <height>60</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true"/>
-    </property>
-    <property name="text">
-     <string>Save Region</string>
     </property>
    </widget>
    <widget class="QPushButton" name="start_recognition">
