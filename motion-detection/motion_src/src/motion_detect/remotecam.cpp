@@ -5,26 +5,13 @@
 #include  <ctime>
 #include <cstring>
 #include <iostream>
+
+#include "remotecam.hpp"
 #include "send_data.hpp"
+
 
 using namespace cv;
 using namespace std;
-
-int w = 320;
-int h = 240;
-int jpegQuality = 95;
-
-pthread_t thread_streaming;
-int runs;
-string control_computer_ip;
-
-struct stream_thread_args
-{
-    unsigned int port;
-    int cam;
-};
-struct stream_thread_args StreamingStructThread;
-
 
 /*void paramInfo(int argc, char* argv[]) {
     printf("params: %d\n", argc);

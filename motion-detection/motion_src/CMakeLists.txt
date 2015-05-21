@@ -6,9 +6,11 @@ PROJECT(MOTION_DETECTION)
 INCLUDE_DIRECTORIES(src)
 INCLUDE_DIRECTORIES(/usr/local/include)
 INCLUDE_DIRECTORIES(
-	${TINYXML_DIRECTORY} /src/motion_detect/tinyxml
+	${TINYXML_DIRECTORY} /src/motion_detect/tinyxml 
 	${RECOGNITION_DIRECTORY} /src/motion_detect/recognition
+	${NTP_DIRECTORY} /src/motion_detect/ntp
 )
+
 LINK_DIRECTORIES(/usr/local/lib)
 LINK_DIRECTORIES(/usr/lib)
 
@@ -21,9 +23,11 @@ SET(OpenCV_LIBRARIES opencv_core opencv_highgui opencv_imgproc opencv_video)
 
 ADD_EXECUTABLE(motion_detect_raspberry 
 	src/motion_detect/main.cpp
-	src/motion_detect/streamvideo.cpp
-	src/motion_detect/streamvideo.h
-	src/motion_detect/practical/PracticalSocket.h
+        src/motion_detect/remotecam.hpp
+        src/motion_detect/remotecam.cpp
+        src/motion_detect/send_data.hpp
+        src/motion_detect/send_data.cpp
+        src/motion_detect/practical/PracticalSocket.h
 	src/motion_detect/practical/PracticalSocket.cpp
 	src/motion_detect/recognition/detection.h
         src/motion_detect/recognition/detection.cpp 
@@ -31,8 +35,8 @@ ADD_EXECUTABLE(motion_detect_raspberry
 	src/motion_detect/tinyxml/tinyxml.cpp
 	src/motion_detect/tinyxml/tinyxmlerror.cpp
 	src/motion_detect/tinyxml/tinyxmlparser.cpp
-        src/motion_detect/practical/PracticalSocket.cpp
-        src/motion_detect/recognition/detection.cpp
+	src/motion_detect/ntp/tinyxmlparser.cpp
+	/src/motion_detect/ntp/ndp_client.cpp
 )
 TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm)
 
