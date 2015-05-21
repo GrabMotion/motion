@@ -28,7 +28,8 @@
 #include "recognition/detection.h"
 #include <vector>
 #include <functional>
-#include "streamvideo.h"
+//#include "streamvideo.h"
+#include "remotecam.hpp"
 
 using namespace std;
 using namespace cv;

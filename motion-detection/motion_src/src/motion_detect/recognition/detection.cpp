@@ -282,7 +282,7 @@ void * startRecognition(void * arg)
     
     struct recognition_thread_args *args = (struct recognition_thread_args *) arg;
     
-    const string DIR        = "../../src/motion_web/pics/";     // directory where the images will be stored
+    const string DIR        = "../../src/motion_web/pics/";          // directory where the images will be stored
     const string REGION     = "../../src/motion_web/pics/region/";   // directory where the regios are stored
     const string EXT        = ".jpg";                           // extension of the images
     const string EXT_DATA   = ".xml";                           // extension of the data

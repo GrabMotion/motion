@@ -100,6 +100,8 @@ void* streamVideo(void * arg)
     std::cout << "rows: " << img.rows << " cols: " << img.cols << endl;
     //img = cv::Mat::zeros(img.rows, img.cols, CV_8UC1);
     
+    img = (img.reshape(0,1)); // to make it continuous
+    
     if (!cap.isOpened()) {
         cap.release();
     }
@@ -123,7 +125,7 @@ void* streamVideo(void * arg)
     
     int count = 0;
     
-    cv::namedWindow("CV Video Client",1);
+    //cv::namedWindow("CV Video Client",1);
 
     
     while (1) {
@@ -188,7 +190,7 @@ void* streamVideo(void * arg)
         }
         
         
-        cv::imshow("CV Video Client", img);
+        //cv::imshow("CV Video Client", img);
         
         pthread_mutex_unlock(&streamingMutex);
         
@@ -199,7 +201,7 @@ void* streamVideo(void * arg)
         //count>30
         
         
-        cvWaitKey(10);
+        //cvWaitKey(10);
         
         //if (key = cv::waitKey(10) >= 0)
         //break;
