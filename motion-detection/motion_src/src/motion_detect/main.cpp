@@ -20,7 +20,11 @@
 #include <pthread.h>
 #include "practical/PracticalSocket.h" 
 #include <cstdlib>           
-#include <unistd.h>           
+#include <unistd.h>    
+#include <string.h> /* for strncpy */
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <ctime>
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -104,8 +108,47 @@ void RunUICommand(std::string param, string from_ip){
     switch (getGlobalStringToInt(param)){
         
         case CONNECT:
+            
+            time_t currentTime;
+            struct tm *localTime;
+            
+            time( &currentTime );                   // Get the current time
+            localTime = localtime( &currentTime );  // Convert the current time to the local time
+            
+            int Day     ,
+                Month   ,
+                Year    ,
+                Hour    ,
+                Min     ,
+                Sec     ;
+            
+            Day    = localTime->tm_mday;
+            Month  = localTime->tm_mon + 1;
+            Year   = localTime->tm_year + 1900;
+            Hour   = localTime->tm_hour;
+            Min    = localTime->tm_min;
+            Sec    = localTime->tm_sec;
+            
+            //std::cout << "This program was exectued at: " << Hour << ":" << Min << ":" << Sec << std::endl;
+            //std::cout << "And the current date is: " << Day << "/" << Month << "/" << Year << std::endl;
         
+            std::cout << "Message received at: " << Hour << ":" << Min << ":" << Sec << std::endl;
+            std::cout << "And the current date is: " << Day << "/" << Month << "/" << Year << std::endl;
+            std::cout << "+++++++++++++++++++++++" << endl;
+            
+            
+            //sprintf(newdate,"date --set %s %s %s %s", month, date.substr(8,2), date.substr(0,4), newtime);
+            //system(newdate);
+            
+            //time_t  timev;
+            //me(&timev);
+            //std::stringstream strmt;
+            //strmt << timev;
+            //std::string stime_now = strmt.str();
+            //cout << "TIME NOW!!!." << timev << endl;
+            
             connectStreaming(from_ip);
+            
             
             break;
             
@@ -205,46 +248,23 @@ void *ThreadMain(void *clntSock) {
 
 std::string getIpAddress () {
     
-    struct ifaddrs * ifAddrStruct=NULL;
-    struct ifaddrs * ifa=NULL;
-    void * tmpAddrPtr = NULL;
-    std::string address; 
-    std::stringstream strm6;
-    std::stringstream strm;
-
-    getifaddrs(&ifAddrStruct);
-
-    for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next) {
-        if (!ifa->ifa_addr) {
-            continue;
-        }
-        if (ifa->ifa_addr->sa_family == AF_INET) { // check it is IP4
-            // is a valid IP4 Address
-            tmpAddrPtr=&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
-            char addressBuffer[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-            printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer); 
-
-            strm << addressBuffer;
-            address = strm.str(); 
-            
-        } else if (ifa->ifa_addr->sa_family == AF_INET6) { // check it is IP6
-            // is a valid IP6 Address
-            tmpAddrPtr=&((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
-            char addressBuffer[INET6_ADDRSTRLEN];
-            inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
-            printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer); 
-           
-            strm6 << addressBuffer;
-            address = strm.str(); 
-        } 
-    }
-    if (ifAddrStruct!=NULL) 
-       freeifaddrs(ifAddrStruct);
-  
-    //address.erase (0,9);
+    int fd;
+    struct ifreq ifr;
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    /* I want to get an IPv4 IP address */
+    ifr.ifr_addr.sa_family = AF_INET;
+    /* I want IP address attached to "eth0" */
+    strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);
+    ioctl(fd, SIOCGIFADDR, &ifr);
+    close(fd);
+    
+    char * ipaddrs = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
+    
+    std::string ip_txt(ipaddrs);
+    
+    std::cout << " IP TERMINAL :: " << ip_txt << '\n';
        
-    return address;
+    return ip_txt;
 }
 
 void split(const string& s, char c,
@@ -267,8 +287,15 @@ void * broadcastsender ( void * args ) {
   
    std::string sech = getIpAddress();
    cout  <<  "IP: " << sech << endl;
-   size_t f = sech.find("127.0.0.1");
-   sech.replace(f, std::string("127.0.0.1").length(), "");
+   
+    //size_t f = sech.find("127.0.0.1");
+    //sech.replace(f, std::string("127.0.0.1").length(), "");
+    
+    //if (sech.find("-") != std::string::npos) {
+    //    std::string delimiter = "-";
+    //    std::string token = sech.substr(1, sech.find(delimiter)); // token is "scott"
+    //}
+    
    local_ip = sech;
 
    vector<string> ip_vector;

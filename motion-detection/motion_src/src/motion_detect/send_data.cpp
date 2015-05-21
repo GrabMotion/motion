@@ -24,13 +24,6 @@ int initRemote() {
     
     struct sockaddr_in server, client;
 
-    //    printf("function remote\n  ");
-    //    for (int ii = 0; ii < 10; ii++) {
-    //        printf("%d ", buff.at(ii)); //255 216 ...
-    //    }
-    //    printf("buffer size: %d", buff.size());
-    //    printf("\n");
-
 #ifndef linux 
     printf("\ninitialising Winsock...");
     WSADATA wsa;
@@ -95,7 +88,7 @@ void closeSock() {
 #endif
 }
 
-int remote(vector<uchar>& buff) {
+int remote(std::vector<uchar>& buff) {
     printf("sending...");
 
     int sizeInfo = buff.size();
@@ -112,7 +105,17 @@ int remote(vector<uchar>& buff) {
     char recvbuf[10] = "";
     printf("receiving...");
     int x = recv(socket02, recvbuf, 10, 0);
-    printf("received %s (%d bytes).\n", recvbuf, x);
+    printf("received data from client :::  %s (%d bytes).\n", recvbuf, x);
+    //if (strstr(recvbuf, "ok") != NULL)
+    //{
+        printf("closeSock FROM MESSAGE::: ");
+        return -1;
+    
+        //closeSock();
+        //cvReleaseCapture(&capture);
+
+    //s}
+    
 
     return x;
 }

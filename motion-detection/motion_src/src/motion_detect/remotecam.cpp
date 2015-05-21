@@ -62,12 +62,15 @@ void initCam(CvCapture* capture) {
 
 void* streamVideo(void * arg) {
     
+    
     struct stream_thread_args *args = (struct stream_thread_args *) arg;
     
     std::string cip = control_computer_ip;
     char *control_remote_ip = new char[cip.length() + 1];
     std::strcpy(control_remote_ip, cip.c_str());
 
+    
+    std::cout << " ENTRA STREAMING :: " << control_remote_ip << '\n';
     
     //paramInfo(argc, argv);
     
@@ -80,7 +83,7 @@ void* streamVideo(void * arg) {
     initCam(capture);
 
 #ifndef linux
-    //cvNamedWindow("Cam");
+    cvNamedWindow("Cam");
 #endif
     IplImage* image = cvQueryFrame(capture);
     printf("%d x %d (%d bit)\n", image->width, image->height, image->depth);
@@ -120,15 +123,26 @@ void* streamVideo(void * arg) {
 
         int receivedBytes = remote(buff);
         if (receivedBytes <= 0) {
+            
             closeSock();
-            initRemote();
+            //initRemote();
+            
+            clock_t t1 = clock();
+            printf("t1: %d\n", t1);
+            printf("time %.1f fps\n", 1000.0 * counter / (t1 - t0));
+            
+            cvReleaseCapture(&capture);
+            
+            cerr << "WEBCAM CLOSED!!" << endl;
+            
+            break;
         }
 
         image = cvQueryFrame(capture);
-        //int c = cvWaitKey(1);
-        //if (c == 27) {
-            //break;
-        //}
+        int c = cvWaitKey(1);
+        if (c == 27) {
+            break;
+        }
     }
 
     clock_t t1 = clock();

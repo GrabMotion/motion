@@ -30,6 +30,7 @@
 #include <ctime>
 #include <unistd.h>
 #include "detection.h"
+#include <cstring>
 
 using namespace std;
 using namespace cv;
@@ -56,6 +57,19 @@ void parseRegionXML(string file_region, vector<Point2f> &region){
     std::cout << "XML Reguion loaded." << std::endl;
 }
 
+
+char * CharArrayPlusChar( const char *array, char c )
+{
+    size_t sz = std::strlen( array );
+    char *s = new char[sz + 2];
+    
+    std::strcpy( s, array );
+    s[sz] = c;
+    s[sz + 1] = '\0';
+    
+    return ( s );
+}
+
 // Create initial XML file
 void build_xml(const char * xmlPath)
 {    
@@ -63,15 +77,24 @@ void build_xml(const char * xmlPath)
     struct tm  tstruct;
     char       secs[80];
     tstruct = *localtime(&now);   
-    strftime(secs, sizeof(secs), "%Y-%m-%d.%X", &tstruct);  
-   
+    strftime(secs, sizeof(secs), "%Y:%m:%d %X", &tstruct);
+
+    const char *append = " 000";
+    
+    char result[100];   // array to hold the result.
+    
+    strcpy(result, secs); // copy string one into the result.
+    strcat(result, append); // append string two to the result.
+    
     TiXmlDocument doc;
     TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "utf-8", "");
     TiXmlElement * file = new TiXmlElement( "file" );    
     TiXmlElement * session_info = new TiXmlElement( "SESSION_INFO" );    
     TiXmlElement * start_time = new TiXmlElement( "start_time" );    
-    TiXmlText * text_start_time = new TiXmlText( secs );        
-    TiXmlElement * all_instances = new TiXmlElement( "ALL_INSTANCES" );       
+    TiXmlText * text_start_time = new TiXmlText( result );
+    TiXmlElement * all_instances = new TiXmlElement( "ALL_INSTANCES" );
+
+    
     start_time->LinkEndChild( text_start_time );    
     session_info->LinkEndChild(start_time);        
     file->LinkEndChild(session_info); 
