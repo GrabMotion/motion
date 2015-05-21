@@ -36,8 +36,11 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/ntp/ndp_client.o \
 	${OBJECTDIR}/practical/PracticalSocket.o \
 	${OBJECTDIR}/recognition/detection.o \
+	${OBJECTDIR}/remotecam.o \
+	${OBJECTDIR}/send_data.o \
 	${OBJECTDIR}/tinyxml/tinystr.o \
 	${OBJECTDIR}/tinyxml/tinyxml.o \
 	${OBJECTDIR}/tinyxml/tinyxmlerror.o \
@@ -73,6 +76,11 @@ ${OBJECTDIR}/main.o: main.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I/usr/local/include/opencv2 `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
+${OBJECTDIR}/ntp/ndp_client.o: ntp/ndp_client.cpp 
+	${MKDIR} -p ${OBJECTDIR}/ntp
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I/usr/local/include/opencv2 `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ntp/ndp_client.o ntp/ndp_client.cpp
+
 ${OBJECTDIR}/practical/PracticalSocket.o: practical/PracticalSocket.cpp 
 	${MKDIR} -p ${OBJECTDIR}/practical
 	${RM} "$@.d"
@@ -82,6 +90,16 @@ ${OBJECTDIR}/recognition/detection.o: recognition/detection.cpp
 	${MKDIR} -p ${OBJECTDIR}/recognition
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I/usr/local/include/opencv2 `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/recognition/detection.o recognition/detection.cpp
+
+${OBJECTDIR}/remotecam.o: remotecam.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I/usr/local/include/opencv2 `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/remotecam.o remotecam.cpp
+
+${OBJECTDIR}/send_data.o: send_data.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I/usr/local/include/opencv2 `pkg-config --cflags opencv`   -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/send_data.o send_data.cpp
 
 ${OBJECTDIR}/tinyxml/tinystr.o: tinyxml/tinystr.cpp 
 	${MKDIR} -p ${OBJECTDIR}/tinyxml
