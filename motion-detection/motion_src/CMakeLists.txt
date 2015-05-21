@@ -35,8 +35,7 @@ ADD_EXECUTABLE(motion_detect_raspberry
 	src/motion_detect/tinyxml/tinyxml.cpp
 	src/motion_detect/tinyxml/tinyxmlerror.cpp
 	src/motion_detect/tinyxml/tinyxmlparser.cpp
-	src/motion_detect/ntp/tinyxmlparser.cpp
-	/src/motion_detect/ntp/ndp_client.cpp
+	src/motion_detect/ntp/ndp_client.cpp
 )
 TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm)
 
