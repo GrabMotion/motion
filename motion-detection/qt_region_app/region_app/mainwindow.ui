@@ -347,7 +347,7 @@ color: rgb(255, 252, 253);</string>
    <widget class="QCheckBox" name="rec_with_images">
     <property name="geometry">
      <rect>
-      <x>573</x>
+      <x>574</x>
       <y>533</y>
       <width>101</width>
       <height>20</height>
