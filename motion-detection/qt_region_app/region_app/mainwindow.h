@@ -18,6 +18,9 @@ const unsigned int PAUSE_STREAMING          = 1003;
 const unsigned int START_RECOGNITION        = 1004;
 const unsigned int STOP_RECOGNITION         = 1005;
 
+const unsigned int DISSCONNECT              = 1006;
+
+
 const unsigned int TCP_PORT                 = 5010;
 const unsigned int STREAMING_VIDEO_PORT     = 5030;
 
@@ -61,6 +64,10 @@ private:
     void split(const string& s, char c, vector<string>& v);
     std::string local_ip;
 
+    void RefreshTreViewModel(QString roo, QString rip);
+    QString treeViewPath;
+    QString ipPath;
+
 private slots:
 
     //buttons
@@ -90,6 +97,8 @@ private slots:
     void on_list_files_clicked(const QModelIndex &index);
     void on_list_folders_clicked(const QModelIndex &index);
 
+    void on_disconnect_clicked();
+    void on_refresh_results_clicked();
 };
 
 #endif // MAINWINDOW_H

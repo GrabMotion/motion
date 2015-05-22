@@ -39,7 +39,7 @@
       <height>41</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,3,0,0,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,3,0,0,0,0,0,0">
      <item>
       <widget class="QLineEdit" name="network_ip">
        <property name="maximumSize">
@@ -87,6 +87,13 @@
       <widget class="QPushButton" name="connect_button">
        <property name="text">
         <string>Connect </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="disconnect">
+       <property name="text">
+        <string>Dissconnect</string>
        </property>
       </widget>
      </item>

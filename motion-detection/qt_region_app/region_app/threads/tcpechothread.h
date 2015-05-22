@@ -11,6 +11,7 @@
 #include <cstdlib>            // For atoi()
 #include <sstream>
 #include <string>
+#include <stdio.h>
 
 using namespace std;
 

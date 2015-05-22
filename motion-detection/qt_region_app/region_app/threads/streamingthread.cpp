@@ -19,7 +19,7 @@ void StreamingThread::StartStreaming(char * serverIp,  int port)
     struct  sockaddr_in serverAddr;
     socklen_t           addrLen = sizeof(struct sockaddr_in);
 
-    if ((soket_streaming = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((soket_streaming = ::socket(PF_INET, SOCK_STREAM, 0)) < 0) {
         std::cerr << "socket() failed" << std::endl;
     }
 
@@ -36,10 +36,10 @@ void StreamingThread::StartStreaming(char * serverIp,  int port)
     //----------------------------------------------------------
 
     Mat img;
-    img = Mat::zeros(480 , 640, CV_8UC1);
+    img = Mat::zeros(320 , 240, CV_8UC1);
     int imgSize = img.total() * img.elemSize();
     uchar *iptr = img.data;
-    int bytes = 0;
+    int bytes = 0, sentBytes = 0;
     int key = 0;
 
     //make img continuos
@@ -50,7 +50,7 @@ void StreamingThread::StartStreaming(char * serverIp,  int port)
 
     std::cout << "Image Size:" << imgSize << std::endl;
 
-    //namedWindow("CV Video Client",1);
+    namedWindow("CV Video Client",1);
 
     int count = 0;
 
@@ -61,32 +61,49 @@ void StreamingThread::StartStreaming(char * serverIp,  int port)
 
         try {
 
-            if ((bytes = recv(soket_streaming, iptr, imgSize , MSG_PEEK)) == -1) {
+            if ((bytes = ::recv(soket_streaming, iptr, imgSize , MSG_PEEK)) == -1) {
                 std::cerr << "recv failed, received bytes = " << bytes << std::endl;
             }
 
             std::cout << "Streaming : " << imgSize << std::endl;
             std::cout << "bytes: " << bytes << std::endl;
 
-            //image received then break
-            if (count==100)
+            cv::imshow("CV Video Client", img);
+
+            //frame = Mat2QImage(); //MatToQImage(img);
+            frame = Mat2QImage(img);
+
+            emit StreamingUpdateLabelImage(frame, img);
+
+            if (!img.empty())
             {
-                if (soket_streaming){
-                    close(soket_streaming);
-                }
+
                 if (!(img.empty())){
                     (~img);
                 }
 
-                //pthread_mutex_destroy(&streamingMutex);
-                break;
-            }
+                std::string  reply = "ok";
+                int reply_length = reply.length();
 
-            if (img.empty())
-            {
-                std::cout << "img.empty() : " << std::endl;
+
+               char *sendString = new char[reply.length() + 1];
+               std::strcpy(sendString, reply.c_str());
+
+
+               std::cout << "Enviando mensaje : " << reply << std::endl;
+
+                //send processed image
+                if ((sentBytes = ::send(soket_streaming, sendString, reply_length, 0)) < 0){
+                    std::cerr << "bytes = " << reply_length << std::endl;
+                }
+
+                break;
+
             } else
             {
+
+                std::cout << "img.empty(), NO IMAGE COMING:" << std::endl;
+
                 //cv::imwrite("test.jpg", img);
                 // Declare what you need
                 //cv::FileStorage file("test_1.png", cv::FileStorage::WRITE);
@@ -94,20 +111,10 @@ void StreamingThread::StartStreaming(char * serverIp,  int port)
                 //file << img;
             }
 
-            //cv::imshow("CV Video Client", img);
-
-            //frame = Mat2QImage(); //MatToQImage(img);
-            frame = Mat2QImage(img);
 
             pthread_mutex_unlock(&streamingMutex);
-            //streamingMutex.unlock();
-
-            emit StreamingUpdateLabelImage(frame, img);
 
             waitKey(10);
-
-            //if (key = cv::waitKey(10) >= 0)
-                //break;
 
         } catch (SocketException &e) {
             std::cerr << "Socket error!" << std::endl;

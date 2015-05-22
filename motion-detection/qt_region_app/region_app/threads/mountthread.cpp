@@ -24,6 +24,15 @@ void MountThread::MountNetWorkDrive(QString ip)
         QDir().mkdir(shrs);
     }
 
+    QString shots = roStr + "/" + "screenshots";
+
+    QByteArray bts = shots.toLatin1();
+    const char *shrsots = bts.data();
+    if (!QDir(shrsots).exists())
+    {
+        QDir().mkdir(shrsots);
+    }
+
     QString rip = roo + "/" + ip;
     QByteArray baip = rip.toLatin1();
     const char *ipfile = baip.data();
@@ -35,7 +44,7 @@ void MountThread::MountNetWorkDrive(QString ip)
 
     command =   "mount -t smbfs ";
 
-    QString usrshr = "//guest:@" + ip + "/motion ";
+    QString usrshr = "//jose:joselon@" + ip + "/motion ";
     QByteArray bausr = usrshr.toLatin1();
     const char *credshare = bausr.data();
 
@@ -46,6 +55,8 @@ void MountThread::MountNetWorkDrive(QString ip)
     const char *mountpoint = bamount.data();
 
     command += mountpoint;
+
+    std::cout << "mount command ::  " << command.toStdString() <<  std::endl;
 
     process_mount.start(command, QIODevice::ReadOnly);
     process_mount.waitForFinished();

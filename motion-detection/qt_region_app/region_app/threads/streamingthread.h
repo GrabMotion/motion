@@ -7,6 +7,7 @@
 #include <QStringList>
 
 #include "opencv2/opencv.hpp"
+#include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
 #include <sys/socket.h>
@@ -15,6 +16,12 @@
 #include <fstream>
 #include <iostream>
 #include <errno.h>
+#include <sstream>
+
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
 
 #include "image/mat2qimage.h"
 
@@ -34,6 +41,10 @@ public:
     QImage frame;
     pthread_mutex_t streamingMutex;
     bool run = true;
+
+    int width = 640; //1280;
+    int height = 480; //720;
+    int jpegQuality = 95;
 
  signals:
     void StreamingUpdateLabelImage(QImage, Mat);

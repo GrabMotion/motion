@@ -9,6 +9,7 @@
 #include <QThread>
 #include <QIODevice>
 #include <QMessageBox>
+#include <iostream>
 
 using namespace std;
 

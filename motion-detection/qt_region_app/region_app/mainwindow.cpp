@@ -22,6 +22,8 @@
 #include "tinyxml/tinystr.h"
 #include "tinyxml/tinyxml.h"
 
+#include <ctime>
+
 
 #include <ifaddrs.h>
 #include "./spinner/QtWaitingSpinner.h"
@@ -181,6 +183,7 @@ void MainWindow::ResultEcho(string response)
         ui->start_recognition->setEnabled(true);
         ui->status_label->setText("connected");
         ui->status_label->setStyleSheet("background-color: lightgreen;");
+        ui->refresh_results->setEnabled(true);
 
         mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
 
@@ -253,6 +256,31 @@ std::string MainWindow::getActiveTerminalIPString()
 
 void MainWindow::on_connect_button_clicked()
 {
+
+    time_t currentTime;
+    struct tm *localTime;
+
+    time( &currentTime );                   // Get the current time
+    localTime = localtime( &currentTime );  // Convert the current time to the local time
+
+    int Day     ,
+        Month   ,
+        Year    ,
+        Hour    ,
+        Min     ,
+        Sec     ;
+
+    Day    = localTime->tm_mday;
+    Month  = localTime->tm_mon + 1;
+    Year   = localTime->tm_year + 1900;
+    Hour   = localTime->tm_hour;
+    Min    = localTime->tm_min;
+    Sec    = localTime->tm_sec;
+
+    std::cout << "Message sent at: " << Hour << ":" << Min << ":" << Sec << std::endl;
+    std::cout << "And the current date is: " << Day << "/" << Month << "/" << Year << std::endl;
+    std::cout << "+++++++++++++++++++++++" << endl;
+
     spinner_folders->start();
 
     tcpecho_thread = new TCPEchoThread(this);
@@ -263,6 +291,11 @@ void MainWindow::on_connect_button_clicked()
     char *c_str_ip = ba_ip.data();
 
     tcpecho_thread->SendEcho(c_str_ip, getGlobalIntToString(CONNECT));
+}
+
+void MainWindow::on_refresh_results_clicked()
+{
+    MainWindow::RefreshTreViewModel(treeViewPath, ipPath);
 }
 
 void MainWindow::SharedMounted(QString folder)
@@ -280,20 +313,11 @@ void MainWindow::SharedMounted(QString folder)
     QByteArray baip = rip.toLatin1();
     const char *ipfile = baip.data();
 
-    dirModel = new QFileSystemModel(this);
-    dirModel->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs);
-    dirModel->setRootPath(roo);
+    treeViewPath = roo;
+    ipPath = rip;
 
-    ui->list_folders->setModel(dirModel);
-    ui->list_folders->setRootIndex(dirModel->setRootPath(rip));
-    ui->list_folders->hideColumn(1);
-    ui->list_folders->hideColumn(2);
-    ui->list_folders->header()->resizeSection(1, 100);
-    ui->list_folders->setEnabled(true);
+    RefreshTreViewModel(roo, rip);
 
-    fileModel = new QFileSystemModel(this);
-    fileModel->setFilter(QDir::NoDotAndDotDot | QDir::Files);
-    ui->list_files->setModel(fileModel);
     ui->list_files->setEnabled(true);
 
     QString region = rip + "/region/";
@@ -347,6 +371,26 @@ void MainWindow::SharedMounted(QString folder)
     }*/
 
     spinner_folders->stop();
+
+}
+
+void MainWindow::RefreshTreViewModel(QString roo, QString rip)
+{
+
+    dirModel = new QFileSystemModel(this);
+    dirModel->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs);
+    dirModel->setRootPath(roo);
+
+    ui->list_folders->setModel(dirModel);
+    ui->list_folders->setRootIndex(dirModel->setRootPath(rip));
+    ui->list_folders->hideColumn(1);
+    ui->list_folders->hideColumn(2);
+    ui->list_folders->header()->resizeSection(1, 100);
+    ui->list_folders->setEnabled(true);
+
+    fileModel = new QFileSystemModel(this);
+    fileModel->setFilter(QDir::NoDotAndDotDot | QDir::Files);
+    ui->list_files->setModel(fileModel);
 
 }
 
@@ -464,6 +508,16 @@ void MainWindow::on_start_recognition_toggled(bool checked)
     }
 
 }
+
+void MainWindow::on_disconnect_clicked()
+{
+    std::string command = getGlobalIntToString(DISSCONNECT);
+    tcpecho_thread = new TCPEchoThread(this);
+    connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
+    tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
+
+}
+
 
 /////////////SAVE_XML////////////////
 
@@ -608,3 +662,7 @@ void MainWindow::split(const string& s, char c,
          v.push_back(s.substr(i, s.length()));
    }
 }
+
+
+
+
