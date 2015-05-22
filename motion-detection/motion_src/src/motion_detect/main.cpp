@@ -34,6 +34,7 @@
 #include <functional>
 //#include "streamvideo.h"
 #include "remotecam.hpp"
+//#include "rtp/hwclock.c"
 
 using namespace std;
 using namespace cv;
@@ -133,10 +134,10 @@ void RunUICommand(std::string param, string from_ip){
             //std::cout << "And the current date is: " << Day << "/" << Month << "/" << Year << std::endl;
         
             std::cout << "Message received at: " << Hour << ":" << Min << ":" << Sec << std::endl;
-            std::cout << "And the current date is: " << Day << "/" << Month << "/" << Year << std::endl;
+            std::cout << "And the current date is:x " << Day << "/" << Month << "/" << Year << std::endl;
             std::cout << "+++++++++++++++++++++++" << endl;
             
-            
+        
             //sprintf(newdate,"date --set %s %s %s %s", month, date.substr(8,2), date.substr(0,4), newtime);
             //system(newdate);
             

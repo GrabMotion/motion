@@ -10,12 +10,23 @@
 #include "send_data.hpp"
 
 
+#include <iostream>
+#include <vector>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
 using namespace cv;
 using namespace std;
 
 
-int w = 320;
-int h = 240;
+int w = 640; //1280; //320;
+int h = 480; //720; //240;
+
 int jpegQuality = 95;
 
 pthread_t thread_streaming;
@@ -29,24 +40,6 @@ struct stream_thread_args
 };
 struct stream_thread_args StreamingStructThread;
 
-/*void paramInfo(int argc, char* argv[]) {
-    printf("params: %d\n", argc);
-
-    int i = 0;
-    for (int i = 0; i < argc; i++) {
-        printf("param %d = %s\n", i, argv[i]);
-    }
-
-    if (argc >= 2) {
-        w = atoi(argv[1]);
-    }
-    if (argc >= 3) {
-        h = atoi(argv[2]);
-    }
-    if (argc >= 4) {
-        jpegQuality = atoi(argv[3]);
-    }
-}*/
 
 void initCam(CvCapture* capture) {
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
@@ -70,7 +63,7 @@ void* streamVideo(void * arg) {
     std::strcpy(control_remote_ip, cip.c_str());
 
     
-    std::cout << " ENTRA STREAMING :: " << control_remote_ip << '\n';
+    std::cout << " Ready to stream image :: " << control_remote_ip << '\n';
     
     //paramInfo(argc, argv);
     
@@ -85,8 +78,9 @@ void* streamVideo(void * arg) {
 #ifndef linux
     cvNamedWindow("Cam");
 #endif
+    
     IplImage* image = cvQueryFrame(capture);
-    printf("%d x %d (%d bit)\n", image->width, image->height, image->depth);
+    printf("image take size: %d x %d (%d bit)\n", image->width, image->height, image->depth);
 
     Mat mat(h, w, CV_8UC3);
     clock_t t0 = clock();
@@ -97,32 +91,37 @@ void* streamVideo(void * arg) {
     vector<int> param = vector<int>(2);
     param[0] = CV_IMWRITE_JPEG_QUALITY;
     param[1] = jpegQuality;
-
+    
     initRemote();
 
     while (true) {
+        
         counter++;
+        
 #ifndef linux
         cvShowImage("Cam", image);
 #endif
 
         mat = image;
-        //        printf("writing jpg %d..", clock());
-        //        imwrite("cam.jpg", mat);
-        //        printf("%d\n", clock());
+        
+        printf("writing jpg %d..", clock());
+        imwrite("../motion_web/cam.jpg", mat);
+        printf("%d\n", clock());
 
         printf("encode to jpg %d.. ", clock());
         cv::imencode(".jpg", mat, buff, param);
         printf("%d\n", clock());
         printf("jpg data: %d bytes\n", buff.size());
 
-        //        for (int ii = 0; ii < 10; ii++) {
-        //            printf("%d ", buff.at(ii)); //255 216 ...
-        //        }
-        //        printf("\n");
+        for (int ii = 0; ii < 10; ii++) {
+            printf("%d ", buff.at(ii)); //255 216 ...
+        }
+        printf("\n");
 
         int receivedBytes = remote(buff);
-        if (receivedBytes <= 0) {
+        
+        if (receivedBytes <= 0)
+        {
             
             closeSock();
             //initRemote();
@@ -153,6 +152,48 @@ void* streamVideo(void * arg) {
 
     return 0;
 }
+
+/*void* streamVideo(void * arg) {
+
+    std::cout << "ENTRA: " << std::endl;
+    
+    int sock, numrcv;
+    struct sockaddr_in addr;
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(5030);
+    addr.sin_addr.s_addr = INADDR_ANY;
+    bind(sock, (struct sockaddr *)&addr, sizeof(addr));
+    
+    std::cout << "ABRE VENTANA: " << std::endl;
+    
+    cvNamedWindow("Receive", CV_WINDOW_AUTOSIZE);
+    
+    cv::Mat image = cv::Mat(480,640,CV_8UC3);
+    static const int receiveSize = 65500;
+    static char buff[receiveSize];
+    
+    vector<uchar> ibuff;
+    
+    while(cvWaitKey(1) == -1){
+        
+        while(cvWaitKey( 10 ) == -1){
+            
+            numrcv = recv(sock, buff, receiveSize, 0);
+            for(int i=0; i<sizeof(buff) ; i++){
+                ibuff.push_back((uchar)buff[i]);
+            }
+            if(numrcv == -1) break;
+            image = imdecode(Mat(ibuff), CV_LOAD_IMAGE_COLOR);
+            cv::imshow("Receive", image);
+            ibuff.clear();
+        
+        }
+    }
+    close(sock);
+    
+    return 0;
+}*/
 
 int connectStreaming(std::string from_ip)
 {

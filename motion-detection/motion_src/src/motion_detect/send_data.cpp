@@ -101,20 +101,14 @@ int remote(std::vector<uchar>& buff) {
     write(socket02, (char*) (&buff[0]), buff.size());
 #endif
     printf("done.\n");
-
+    
     char recvbuf[10] = "";
     printf("receiving...");
+    
     int x = recv(socket02, recvbuf, 10, 0);
     printf("received data from client :::  %s (%d bytes).\n", recvbuf, x);
-    //if (strstr(recvbuf, "ok") != NULL)
-    //{
         printf("closeSock FROM MESSAGE::: ");
         return -1;
-    
-        //closeSock();
-        //cvReleaseCapture(&capture);
-
-    //s}
     
 
     return x;
