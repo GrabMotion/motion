@@ -24,15 +24,6 @@ void MountThread::MountNetWorkDrive(QString ip)
         QDir().mkdir(shrs);
     }
 
-    QString shots = roStr + "/" + "screenshots";
-
-    QByteArray bts = shots.toLatin1();
-    const char *shrsots = bts.data();
-    if (!QDir(shrsots).exists())
-    {
-        QDir().mkdir(shrsots);
-    }
-
     QString rip = roo + "/" + ip;
     QByteArray baip = rip.toLatin1();
     const char *ipfile = baip.data();

@@ -6,15 +6,15 @@ StreamingThread::StreamingThread(QObject *parent): QThread(parent)
 
 }
 
-void StreamingThread::StartStreaming(char * serverIp,  int port)
+void StreamingThread::StartStreaming(char *c_str_ip, QString ip, QString path)
 {
 
     //--------------------------------------------------------
     //networking stuff: socket , connect
     //--------------------------------------------------------
 
-    char*       serverIP = serverIp;
-    int         serverPort = port;
+    char*       serverIP = c_str_ip;
+    int         serverPort = 5030;
 
     struct  sockaddr_in serverAddr;
     socklen_t           addrLen = sizeof(struct sockaddr_in);
@@ -36,7 +36,7 @@ void StreamingThread::StartStreaming(char * serverIp,  int port)
     //----------------------------------------------------------
 
     Mat img;
-    img = Mat::zeros(320 , 240, CV_8UC1);
+    img = Mat::zeros(480 , 340, CV_8UC1);
     int imgSize = img.total() * img.elemSize();
     uchar *iptr = img.data;
     int bytes = 0, sentBytes = 0;
@@ -54,7 +54,7 @@ void StreamingThread::StartStreaming(char * serverIp,  int port)
 
     int count = 0;
 
-    while (1) { //key != 'q') {
+    //while (1) { //key != 'q') {
 
         //streamingMutex.lock();
         pthread_mutex_lock(&streamingMutex);
@@ -65,15 +65,21 @@ void StreamingThread::StartStreaming(char * serverIp,  int port)
                 std::cerr << "recv failed, received bytes = " << bytes << std::endl;
             }
 
+            //Mat ;
+            std::string pathToShare = path.toStdString() + "/"  + ip.toStdString() +  "/screenshots/screen.jpg";
+            //emitimage = cv::imread( pathToShare ); //, CV_LOAD_IMAGE_COLOR);
+
             std::cout << "Streaming : " << imgSize << std::endl;
             std::cout << "bytes: " << bytes << std::endl;
 
-            cv::imshow("CV Video Client", img);
+            // cv::imshow("CV Video Client", image);
 
             //frame = Mat2QImage(); //MatToQImage(img);
             frame = Mat2QImage(img);
 
-            emit StreamingUpdateLabelImage(frame, img);
+            //emit StreamingUpdateLabelImage(frame, image, path);
+
+            emit StreamingUpdateLabelImage(pathToShare, img);
 
             if (!img.empty())
             {
@@ -97,7 +103,7 @@ void StreamingThread::StartStreaming(char * serverIp,  int port)
                     std::cerr << "bytes = " << reply_length << std::endl;
                 }
 
-                break;
+                //break;
 
             } else
             {
@@ -124,7 +130,7 @@ void StreamingThread::StartStreaming(char * serverIp,  int port)
 
         std::cout << "count: " << count << std::endl;
 
-    }
+   // }
 
 }
 

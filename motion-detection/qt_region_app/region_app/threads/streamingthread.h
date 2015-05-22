@@ -6,9 +6,15 @@
 #include <QThread>
 #include <QStringList>
 
-#include "opencv2/opencv.hpp"
+/*#include "opencv2/opencv.hpp"
 #include "opencv2/core/core.hpp"
-#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/highgui/highgui.hpp"*/
+
+#include <QCoreApplication>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv/cv.h>
+#include <iostream>
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -22,7 +28,6 @@
 #include <string.h>
 #include <unistd.h>
 
-
 #include "image/mat2qimage.h"
 
 using namespace cv;
@@ -32,7 +37,8 @@ class StreamingThread : public QThread
     Q_OBJECT
 public:
     explicit StreamingThread(QObject *parent =0);
-    void StartStreaming(char * serverIp,  int port);
+    //void StartStreaming(char * serverIp,  int port, QString share);
+    void StartStreaming(char *c_str_ip, QString ip, QString share);
     void StopStreaming();
 
  private:
@@ -47,7 +53,7 @@ public:
     int jpegQuality = 95;
 
  signals:
-    void StreamingUpdateLabelImage(QImage, Mat);
+    void StreamingUpdateLabelImage(std::string, Mat img);
 
 };
 

@@ -47,6 +47,8 @@ public:
     TCPEchoThread *tcpecho_thread;
     MountThread *mount_thread;
     std::string NETWORK_IP;
+    QString share;
+    QString getShare();
 
 private:
     Ui::MainWindow *ui;
@@ -68,6 +70,8 @@ private:
     QString treeViewPath;
     QString ipPath;
 
+    QString getSharedFolder();
+
 private slots:
 
     //buttons
@@ -87,7 +91,7 @@ private slots:
     //sockets
     void BroadcastReceived(QString);
     void broadcastTimeoutSocketException();
-    void StreamingUpdateLabelImage(QImage, Mat);
+    void StreamingUpdateLabelImage(std::string, Mat);
     void ResultEcho(string);
 
     //shares
@@ -99,6 +103,8 @@ private slots:
 
     void on_disconnect_clicked();
     void on_refresh_results_clicked();
+
+    void on_scrrenshot_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -303,8 +303,8 @@ color: rgb(255, 252, 253);</string>
     </property>
     <property name="geometry">
      <rect>
-      <x>211</x>
-      <y>526</y>
+      <x>30</x>
+      <y>510</y>
       <width>171</width>
       <height>60</height>
      </rect>
@@ -368,6 +368,19 @@ color: rgb(255, 252, 253);</string>
     </property>
     <property name="text">
      <string>  Cropped</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="scrrenshot">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>540</y>
+      <width>115</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ScreenShot</string>
     </property>
    </widget>
   </widget>

@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Streaming Resutl
     streaming_thread = new StreamingThread(this);
-    connect(streaming_thread, SIGNAL(StreamingUpdateLabelImage(QImage, Mat)), this, SLOT(StreamingUpdateLabelImage(QImage, Mat)));
+    connect(streaming_thread, SIGNAL(StreamingUpdateLabelImage(std::string, Mat)), this, SLOT(StreamingUpdateLabelImage(std::string, Mat)));
 
     //Mouse Events
     connect(ui->qt_drawing_output, SIGNAL(sendMousePosition(QPoint)), this, SLOT(showMousePosition(QPoint&)));
@@ -227,12 +227,16 @@ void MainWindow::BroadcastReceived(QString ip)
     ui->connect_button->setEnabled(true);
 }
 
-void MainWindow::StreamingUpdateLabelImage(QImage frame, Mat mat)
+void MainWindow::StreamingUpdateLabelImage(std::string path, Mat mat)
 {
     src = mat;
-    QPixmap pixar = QPixmap::fromImage(frame);
-    ui->output->setPixmap(pixar);
-    last_stored_frame = frame;
+    //QPixmap pixar = QPixmap::fromImage(frame);
+
+    //src = imread(path, CV_LOAD_IMAGE_COLOR);
+
+    QPixmap pixmap((QString::fromStdString(path)));
+    ui->output->setPixmap(pixmap);
+    //last_stored_frame = frame;
 }
 
 void MainWindow::broadcastTimeoutSocketException()
@@ -298,7 +302,7 @@ void MainWindow::on_refresh_results_clicked()
     MainWindow::RefreshTreViewModel(treeViewPath, ipPath);
 }
 
-void MainWindow::SharedMounted(QString folder)
+QString MainWindow::getSharedFolder()
 {
     QDir rootDir;
     rootDir = QDir::currentPath();
@@ -307,22 +311,42 @@ void MainWindow::SharedMounted(QString folder)
     rootDir.cdUp();
     QString roStr = rootDir.absolutePath();
     QString roo = roStr + "/" + "shares";
+    return roo;
+
+}
+
+
+
+void MainWindow::SharedMounted(QString folder)
+{
+
+    QString sh = getSharedFolder();
+    share = sh;
 
     QString ip = ui->ips_combo->currentText();
-    QString rip = roo + "/" + ip;
+    QString rip = share + "/" + ip;
     QByteArray baip = rip.toLatin1();
     const char *ipfile = baip.data();
 
-    treeViewPath = roo;
+    treeViewPath = share;
     ipPath = rip;
 
-    RefreshTreViewModel(roo, rip);
+    RefreshTreViewModel(share, rip);
 
     ui->list_files->setEnabled(true);
 
     QString region = rip + "/region/";
     QByteArray baregion = rip.toLatin1();
     const char *regionfile = baregion.data();
+
+    QString shots = rip + "/" + "screenshots";
+
+    QByteArray bts = shots.toLatin1();
+    const char *shrsots = bts.data();
+    if (!QDir(shrsots).exists())
+    {
+        QDir().mkdir(shrsots);
+    }
 
     //removeDir(region);
     if (!QDir(regionfile).exists())
@@ -338,7 +362,7 @@ void MainWindow::SharedMounted(QString folder)
     xml = xmlfile;
 
     QFile * xmlFile = new QFile(region_file);
-    if (QFile(region_file).exists())
+    /*if (QFile(region_file).exists())
     {
         QString path = region;
         QDir dir(path);
@@ -349,7 +373,7 @@ void MainWindow::SharedMounted(QString folder)
             dir.remove(dirFile);
         }
 
-    }
+    }*/
     if( ! xmlFile->open(QIODevice::WriteOnly) )
     {
       QMessageBox::warning(NULL, "Test", "Unable to open: " + region_file , "OK");
@@ -370,8 +394,17 @@ void MainWindow::SharedMounted(QString folder)
         cout << "file not created.\n";
     }*/
 
+
+
     spinner_folders->stop();
 
+}
+
+
+
+QString MainWindow::getShare()
+{
+    return share;
 }
 
 void MainWindow::RefreshTreViewModel(QString roo, QString rip)
@@ -406,8 +439,30 @@ void MainWindow::ShareUmounted()
 
 }
 
-void MainWindow::on_capture_video_clicked()
+void MainWindow::on_scrrenshot_clicked()
 {
+
+    QString qtip = ui->ips_combo->currentText();
+    QString share = getSharedFolder();
+
+    string scree_shot = share.toStdString() + "/"  + qtip.toStdString() +  "/screenshots/screen.jpg"; //region + "region.xml";
+    string screenshots = share.toStdString() + "/"  + qtip.toStdString() +  "/screenshots"; //region + "region.xml";
+
+    QString scree_shot_file = QString::fromStdString(scree_shot);
+    QString screenshots_file = QString::fromStdString(scree_shot);
+
+    if (QFile(scree_shot_file).exists())
+    {
+        QString path = screenshots_file;
+        QDir dir(path);
+        dir.setNameFilters(QStringList() << "*.*");
+        dir.setFilter(QDir::Files);
+        foreach(QString dirFile, dir.entryList())
+        {
+            dir.remove(dirFile);
+        }
+
+    }
 
     //if(ui->capture_video->isChecked())
     //{
@@ -428,7 +483,10 @@ void MainWindow::on_capture_video_clicked()
         QString qt_ip = ui->ips_combo->currentText();
         QByteArray ba_ip = qt_ip.toLatin1();
         char *c_str_ip = ba_ip.data();
-        streaming_thread->StartStreaming(c_str_ip, STREAMING_VIDEO_PORT);
+        QString sh = getSharedFolder();
+        //streaming_thread->StartStreaming(c_str_ip, STREAMING_VIDEO_PORT, sh);
+
+        streaming_thread->StartStreaming(c_str_ip, qt_ip, sh);
 
         //ui->output->setStyleSheet("background-color: rgba( 255, 255, 255, 0% );");
 
@@ -454,6 +512,13 @@ void MainWindow::on_capture_video_clicked()
         tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);*/
 
     //}
+}
+
+
+void MainWindow::on_capture_video_clicked()
+{
+
+
 }
 
 /*void MainWindow::on_capture_stop_clicked()
@@ -662,6 +727,7 @@ void MainWindow::split(const string& s, char c,
          v.push_back(s.substr(i, s.length()));
    }
 }
+
 
 
 
