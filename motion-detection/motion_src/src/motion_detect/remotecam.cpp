@@ -26,8 +26,11 @@ using namespace std;
 
 int w = 640; //1280; //320;
 int h = 480; //720; //240;
+int jpegQuality = 200;
 
-int jpegQuality = 95;
+//int w = 320;
+//int h = 240;
+//int jpegQuality = 95;
 
 pthread_t thread_streaming;
 int runs;
@@ -72,52 +75,54 @@ void* streamVideo(void * arg) {
         printf("No cam found.\n");
         return 0;
     }
-
+    
     initCam(capture);
-
+    
 #ifndef linux
     cvNamedWindow("Cam");
 #endif
-    
     IplImage* image = cvQueryFrame(capture);
-    printf("image take size: %d x %d (%d bit)\n", image->width, image->height, image->depth);
-
+    printf("%d x %d (%d bit)\n", image->width, image->height, image->depth);
+    
     Mat mat(h, w, CV_8UC3);
     clock_t t0 = clock();
     printf("t0: %d\n", t0);
     int counter = 0;
-
+    
     vector<uchar> buff;
     vector<int> param = vector<int>(2);
     param[0] = CV_IMWRITE_JPEG_QUALITY;
     param[1] = jpegQuality;
     
     initRemote();
-
+    
     while (true) {
-        
         counter++;
-        
 #ifndef linux
         cvShowImage("Cam", image);
 #endif
-
-        mat = image;
         
-        printf("writing jpg %d..", clock());
-        imwrite("../motion_web/cam.jpg", mat);
-        printf("%d\n", clock());
-
+        mat = image;
+                printf("writing jpg %d..", clock());
+                imwrite("../motion_web/pics/screenshots/screen.jpg", mat);
+                printf("%d\n", clock());
+        
         printf("encode to jpg %d.. ", clock());
         cv::imencode(".jpg", mat, buff, param);
         printf("%d\n", clock());
         printf("jpg data: %d bytes\n", buff.size());
-
-        for (int ii = 0; ii < 10; ii++) {
-            printf("%d ", buff.at(ii)); //255 216 ...
-        }
-        printf("\n");
-
+        
+        //        for (int ii = 0; ii < 10; ii++) {
+        //            printf("%d ", buff.at(ii)); //255 216 ...
+        //        }
+        //        printf("\n");
+        
+        //int receivedBytes = remote(buff);
+        //if (receivedBytes <= 0) {
+        //    closeSock();
+        //    initRemote();
+        // }
+        
         int receivedBytes = remote(buff);
         
         if (receivedBytes <= 0)
@@ -136,18 +141,18 @@ void* streamVideo(void * arg) {
             
             break;
         }
-
+        
         image = cvQueryFrame(capture);
         int c = cvWaitKey(1);
         if (c == 27) {
             break;
         }
     }
-
+    
     clock_t t1 = clock();
     printf("t1: %d\n", t1);
     printf("time %.1f fps\n", 1000.0 * counter / (t1 - t0));
-
+    
     cvReleaseCapture(&capture);
 
     return 0;

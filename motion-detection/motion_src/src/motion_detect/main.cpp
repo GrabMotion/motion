@@ -136,6 +136,24 @@ void RunUICommand(std::string param, string from_ip){
             std::cout << "Message received at: " << Hour << ":" << Min << ":" << Sec << std::endl;
             std::cout << "And the current date is:x " << Day << "/" << Month << "/" << Year << std::endl;
             std::cout << "+++++++++++++++++++++++" << endl;
+
+            struct       rtc_time {
+                int 	  	tm_sec;
+                int 	  	tm_min;
+                int 	  	tm_hour;
+                int 	  	tm_mday;
+                int 	  	tm_mon;
+                int 	  	tm_year;
+                int 	  	tm_wday; /* unused */
+                int 	  	tm_yday; /* unused */
+                int 	  	tm_isdst;/* unused */
+            };
+            
+            struct rtc_time rt;
+            /* set your values here */
+            fd = open("/dev/rtc", O_RDONLY);
+            ioctl(fd, RTC_SET_TIME, &rt);
+            close(fd);
             
         
             //sprintf(newdate,"date --set %s %s %s %s", month, date.substr(8,2), date.substr(0,4), newtime);
