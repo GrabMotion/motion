@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 {
     ui->setupUi(this);
-    ui->capture_video->setCheckable(true);
+    ui->scrrenshot->setCheckable(true);
 
     //BroadCast Sockets:
     broadcast_thread = new BroadcastThread(this);
@@ -59,10 +59,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(streaming_thread, SIGNAL(StreamingUpdateLabelImage(std::string, Mat)), this, SLOT(StreamingUpdateLabelImage(std::string, Mat)));
 
     //Mouse Events
-    connect(ui->qt_drawing_output, SIGNAL(sendMousePosition(QPoint)), this, SLOT(showMousePosition(QPoint&)));
+    connect(ui->qt_drawing_output, SIGNAL(sendMousePosition(QPoint&)), this, SLOT(showMousePosition(QPoint&)));
 
     connect(ui->qt_drawing_output, SIGNAL(Mouse_Pos()), this, SLOT(Mouse_current_pos()));
-    connect(ui->qt_drawing_output, SIGNAL(Mouse_Pressed()), this, SLOT(Mouse_pressed()));
+    connect(ui->qt_drawing_output, SIGNAL(Mouse_Pressed(std::vector<cv::Point2f>&)), this, SLOT(Mouse_pressed(std::vector<cv::Point2f>&)));
     connect(ui->qt_drawing_output, SIGNAL(Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&)), this, SLOT(Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&)));
     connect(ui->qt_drawing_output, SIGNAL(Mouse_Left()), this, SLOT(Mouse_left()));
 
@@ -73,7 +73,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->start_recognition->setEnabled(false);
     //ui->save_region->setEnabled(false);
     ui->rec_with_images->setEnabled(false);
-    ui->rec_with_cropped->setEnabled(false);
 
     //ui->web_results->setEnabled(false);
     //ui->webView->setEnabled(false);
@@ -81,25 +80,24 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
 
-    QPixmap pix_playst(":/img/playstatic.png");
-    QIcon icon_playst(pix_playst);
-    ui->capture_video->setIcon(icon_playst);
-    ui->capture_video->setIconSize(pix_playst.size());
-    ui->capture_video->setCheckable(true);
+    //QPixmap pix_playst(":/img/playstatic.png");
+    //QIcon icon_playst(pix_playst);
+    //ui->capture_video->setIcon(icon_playst);
+    //ui->capture_video->setIconSize(pix_playst.size());
+    //ui->capture_video->setCheckable(true);
     //ui->capture_video->setStyleSheet( "background-color: rgba( 255, 255, 255, 0% );" );
-    ui->capture_video->setEnabled(false);
 
+    //QPixmap pix_stopst(":/images/img/stopstatic.png");
+    //QIcon icon_stopst(pix_stopst);
 
-    QPixmap pix_stopst(":/images/img/stopstatic.png");
-    QIcon icon_stopst(pix_stopst);
+    //ui->capture_stop->setIcon(icon_stopst);
+    //ui->capture_stop->setIconSize(pix_stopst.size());
+    //ui->capture_stop->setStyleSheet( "background-color: rgba( 255, 255, 255, 0% );" );
+    //ui->capture_stop->setEnabled(false);*/
 
-    /*ui->capture_stop->setIcon(icon_stopst);
-    ui->capture_stop->setIconSize(pix_stopst.size());
-    ui->capture_stop->setStyleSheet( "background-color: rgba( 255, 255, 255, 0% );" );
-    ui->capture_stop->setEnabled(false);*/
-
-    /* This spinner will be embedded in a layout. For the modal, centred spinner,
-     * see "launchBlockingSpinner" below*/
+    ui->scrrenshot->setEnabled(false);
+    ui->save_region->setEnabled(false);
+    ui->start_recognition->setEnabled(false);
 
     m_spinner = new QtWaitingSpinner(this);
     QVBoxLayout *spinnerLayout = new QVBoxLayout;
@@ -178,35 +176,35 @@ void MainWindow::ResultEcho(string response)
     }
     else if (response.compare(getGlobalIntToString(CONNECT)) == 0)
     {
-        ui->capture_video->setIcon(QIcon(":/img/play.png"));
-        ui->capture_video->setEnabled(true);
+        //ui->capture_video->setIcon(QIcon(":/img/play.png"));
+        //ui->capture_video->setEnabled(true);
+
         ui->start_recognition->setEnabled(true);
         ui->status_label->setText("connected");
         ui->status_label->setStyleSheet("background-color: lightgreen;");
+
         ui->refresh_results->setEnabled(true);
 
         mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
-
-
     }
     else if (response.compare(getGlobalIntToString(STOP_STREAMING)) == 0)
     {
-        ui->qt_drawing_output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
 
-        QPixmap pix_play(":/img/play.png");
-        QIcon icon_play(pix_play);
-        ui->capture_video->setIcon(icon_play);
-        ui->capture_video->setIconSize(pix_play.size());
-        ui->capture_video->setEnabled(true);
-        ui->capture_video->setText("Stream Video");
+        //ui->qt_drawing_output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
+        //QPixmap pix_play(":/img/play.png");
+        //QIcon icon_play(pix_play);
 
-        QPixmap pix_stopst(":/img/stopstatic.png");
-        QIcon icon_stopst(pix_stopst);
+        //ui->capture_video->setIcon(icon_play);
+        //ui->capture_video->setIconSize(pix_play.size());
+        //ui->capture_video->setEnabled(true);
+        //ui->capture_video->setText("Stream Video");
+
+        //QPixmap pix_stopst(":/img/stopstatic.png");
+        //QIcon icon_stopst(pix_stopst);
         //ui->capture_stop->setIcon(icon_stopst);
         //ui->capture_stop->setIconSize(pix_stopst.size());
         //ui->capture_stop->setEnabled(false);
-
-        ui->output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
+        //ui->output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
 
     }
 
@@ -285,6 +283,14 @@ void MainWindow::on_connect_button_clicked()
     std::cout << "And the current date is: " << Day << "/" << Month << "/" << Year << std::endl;
     std::cout << "+++++++++++++++++++++++" << endl;
 
+    string timest =
+            std::to_string(Day)  + "|" +
+            std::to_string(Month)  + "|" +
+            std::to_string(Year)  + "|" +
+            std::to_string(Hour)  + "|" +
+            std::to_string(Min)  + "|" +
+            std::to_string(Sec);
+
     spinner_folders->start();
 
     tcpecho_thread = new TCPEchoThread(this);
@@ -293,6 +299,8 @@ void MainWindow::on_connect_button_clicked()
     QString qt_ip = ui->ips_combo->currentText();
     QByteArray ba_ip = qt_ip.toLatin1();
     char *c_str_ip = ba_ip.data();
+
+   string allpuch = CONNECT + "|" + timest;
 
     tcpecho_thread->SendEcho(c_str_ip, getGlobalIntToString(CONNECT));
 }
@@ -622,14 +630,35 @@ void MainWindow::Mouse_Pressed_Right_Click(vector<Point2f>&coor)
     savePointsAsXML(insideContour);
 }
 
-void MainWindow::showMousePosition( QPoint & pos )
+void MainWindow::on_save_region_clicked()
 {
-    ui->xy_pos->setText("x: " + QString::number(pos.x()) + " y : "  + QString::number(pos.y()) );
+    //TODO
+    vector<Point2f> & contour = coor;
+    vector<Point2f> insideContour;
+
+    for(int j = 0; j < src.rows; j++)
+    {
+        for(int i = 0; i < src.cols; i++)
+        {
+            Point2f p(i,j);
+            if(pointPolygonTest(contour,p,false) >= 0) // yes inside
+                insideContour.push_back(p);
+        }
+    }
+    cout << "# points inside contour: " << insideContour.size() << endl;
+    savePointsAsXML(insideContour);
 }
 
-void MainWindow::Mouse_pressed()
+
+void MainWindow::showMousePosition( QPoint & pos )
 {
-    cout << "PRESSED at (x,t): " <<  ui->capture_video->x() << " " << ui->capture_video->y() << endl;
+    ui->label_xy->setText("x: " + QString::number(pos.x()) + " y : "  + QString::number(pos.y()) );
+}
+
+void MainWindow::Mouse_pressed(vector<Point2f>&coor)
+{
+    vector<Point2f> & contour = coor;
+    cout << "PRESSED at (x,t): " <<  ui->output->x() << " " << ui->output->y() << endl;
 }
 
 void MainWindow::Mouse_current_pos()
@@ -727,8 +756,4 @@ void MainWindow::split(const string& s, char c,
          v.push_back(s.substr(i, s.length()));
    }
 }
-
-
-
-
 

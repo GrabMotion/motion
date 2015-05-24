@@ -13,21 +13,25 @@ mouse_coordinates::mouse_coordinates(QWidget *parent) : QLabel(parent)
 
 mouse_coordinates::~mouse_coordinates() {}
 
-int isEventInBound(QMouseEvent * mouse_event, QLabel * label)
+bool isEventInBound(QMouseEvent * mouse_event, QLabel * label)
 {
     QPoint mouse_pos = mouse_event->pos();
     if ( mouse_pos.x() <= label->size().width() && mouse_pos.y() <= label->size().height()){
         if(mouse_pos.x() > 0 && mouse_pos.y()  >0)
         {
-            //emit Mouse_Pressed(); //(mouse_pos);
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 
 void mouse_coordinates::mouseMoveEvent(QMouseEvent* evt)
 {
-
+    if (isEventInBound(evt, this))
+    {
+       QPoint mouse_pos = evt->pos();
+       emit sendMousePosition(mouse_pos);
+    }
 }
 
 void mouse_coordinates::mousePressEvent(QMouseEvent* evt)
@@ -37,7 +41,10 @@ void mouse_coordinates::mousePressEvent(QMouseEvent* evt)
         emit Mouse_Pressed_Right_Click(coor);
     }
     else
-        emit Mouse_Pressed();
+        if (isEventInBound(evt, this))
+        {
+            emit Mouse_Pressed(coor);
+        }
 }
 
 void mouse_coordinates::paintEvent(QPaintEvent *event)

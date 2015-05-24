@@ -25,7 +25,6 @@ const unsigned int TCP_PORT                 = 5010;
 const unsigned int STREAMING_VIDEO_PORT     = 5030;
 
 
-
 class QtWaitingSpinner;
 
 namespace Ui
@@ -83,7 +82,7 @@ private slots:
 
     //mouse
     void Mouse_current_pos();
-    void Mouse_pressed();
+    void Mouse_pressed(std::vector<cv::Point2f>&);
     void Mouse_left();
     void showMousePosition(QPoint&);
     void Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&);
@@ -105,6 +104,7 @@ private slots:
     void on_refresh_results_clicked();
 
     void on_scrrenshot_clicked();
+    void on_save_region_clicked();
 };
 
 #endif // MAINWINDOW_H

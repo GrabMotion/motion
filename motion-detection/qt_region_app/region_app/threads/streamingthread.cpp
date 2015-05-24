@@ -27,8 +27,10 @@ void StreamingThread::StartStreaming(char *c_str_ip, QString ip, QString path)
     serverAddr.sin_addr.s_addr = inet_addr(serverIP);
     serverAddr.sin_port = htons(serverPort);
 
-    if (::connect(soket_streaming, (sockaddr*)&serverAddr, addrLen) < 0) {
+    if (::connect(soket_streaming, (sockaddr*)&serverAddr, addrLen) < 0)
+    {
         std::cerr << "connect() failed!" << std::endl;
+        return;
     }
 
     //----------------------------------------------------------
