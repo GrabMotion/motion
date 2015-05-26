@@ -49,13 +49,24 @@ const unsigned int PAUSE_STREAMING          = 1003;
 const unsigned int START_RECOGNITION        = 1004;
 const unsigned int STOP_RECOGNITION         = 1005;
 
+const unsigned int DISSCONNECT              = 1006;
+
+const unsigned int GET_TIME                 = 1007;
+
+
+void * ThreadMain(void *clntSock);
+int HandleTCPClient(TCPSocket *sock);
+void RunUICommand(int result, string from_ip);
+void * sendMessage (void * arg);
+
 // Threading
 pthread_mutex_t tcpMutex, streamingMutex;
-pthread_t thread_broadcast, thread_echo, /*thread_streaming,*/ thread_recognition;
-//pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_t thread_broadcast, thread_echo, thread_socket,
+thread_message, thread_recognition, thread_wait_echo;
+
 
 //Threads
-int runt, runb, /*runs,*/ runr;
+int runt, runb, runs, runr, runl, runm;
 
 /// TCP Streaming
 int             clientSock;
@@ -63,6 +74,12 @@ char*     	server_ip;
 int       	server_port;
 int       	server_camera;
 
+//Threads
+pthread_cond_t echo_response;
+pthread_mutex_t echo_mutex;
+bool echo_received;
+int resutl_echo;
+std::string from_ip;
 
 //TCP
 std::string local_ip;
@@ -75,6 +92,14 @@ std::string getGlobalIntToString(int id);
 
 int getGlobalStringToInt(std::string id);
 
+struct message_thread_args
+{
+    unsigned int port;
+    string machine_ip;
+    char * message;
+    
+};
+struct message_thread_args MessageStructThread;
 
 int getGlobalStringToInt(std::string id)
 {
@@ -98,110 +123,129 @@ struct recognition_thread_args
 };
 struct recognition_thread_args RecognitionahaStructThread;
 
-void *ThreadMain(void *arg);    
-void HandleTCPClient(TCPSocket *sock);
-
 std::string getIpAddress();
 
-void RunUICommand(std::string param, string from_ip){
+void * sendMessage (void * arg)
+{
+ 
+    struct message_thread_args *args = (struct message_thread_args *) arg;
+    
+    string servAddress = args->machine_ip;
+    char *echoString = args->message;   // Second arg: string to echo
+    
+    int echoStringLen = strlen(echoString);   // Determine input length
+    
+    unsigned short echoServPort = args->port;
+    
+    char echoBuffer[RCVBUFSIZE + 1];
+    
+    try {
+        
+        // Establish connection with the echo server
+        TCPSocket sock(servAddress, echoServPort);
+        
+        // Send the string to the echo server
+        sock.send(echoString, echoStringLen);
+        
+        // Buffer for echo string + \0
+        int bytesReceived = 0;              // Bytes read on each recv()
+        int totalBytesReceived = 0;         // Total bytes read
+        
+        // Receive the same string back from the server
+        cout << "Received: " << endl;               // Setup to print the echoed string
+        
+        while (totalBytesReceived < echoStringLen) {
+            // Receive up to the buffer size bytes from the sender
+            if ((bytesReceived = (sock.recv(echoBuffer, RCVBUFSIZE))) <= 0) {
+                cerr << "Unable to read";
+                exit(1);
+            }
+            totalBytesReceived += bytesReceived;     // Keep tally of total bytes
+            echoBuffer[bytesReceived] = '\0';        // Terminate the string!
+            cout << "Received message: " << echoBuffer;                      // Print the echo buffer
+        }
+        cout << endl;
+        
+        // Destructor closes the socket
+        
+    } catch(SocketException &e) {
+        cerr << e.what() << endl;
+        exit(1);
+    }
+    
+    std::stringstream strm;
+    strm << echoBuffer;
     
     
-    switch (getGlobalStringToInt(param)){
+}
+
+void RunUICommand(int result, string from_ip)
+{
+    
+    
+    //switch (getGlobalStringToInt(param)){
+    
+    char * message_send;
+    std::string command = "HOLA";
+
+    
+    switch (result)
+    {
+            
+        case GET_TIME:
+            
+            message_send = new char[command.size() + 1];
+            std::copy(command.begin(), command.end(), message_send);
+            message_send[command.size()] = '\0'; // don't forget the terminating 0
+            
+            control_computer_ip = from_ip;
+
+            MessageStructThread.port            = TCP_PORT;
+            MessageStructThread.machine_ip      = control_computer_ip;
+            MessageStructThread.message         = message_send;
+            
+             cout << "TCP_PORT." << TCP_PORT <<  " control_computer_ip: " << control_computer_ip << " message_send " << message_send << endl;
+            
+            // run the streaming client as a separate thread
+            runm = pthread_create(&thread_message, NULL, sendMessage, &MessageStructThread);
+            if ( runm  != 0) {
+                cerr << "Unable to create streamVideo thread" << endl;
+                cout << "BroadcastSender pthread_create failed." << endl;
+            }
+            
+            pthread_join(    thread_message,          (void**) &runm);
+            
+            pthread_cancel(thread_message);
+        
+            break;
+        
         
         case CONNECT:
             
-            time_t currentTime;
-            struct tm *localTime;
-            
-            time( &currentTime );                   // Get the current time
-            localTime = localtime( &currentTime );  // Convert the current time to the local time
-            
-            int Day     ,
-                Month   ,
-                Year    ,
-                Hour    ,
-                Min     ,
-                Sec     ;
-            
-            Day    = localTime->tm_mday;
-            Month  = localTime->tm_mon + 1;
-            Year   = localTime->tm_year + 1900;
-            Hour   = localTime->tm_hour;
-            Min    = localTime->tm_min;
-            Sec    = localTime->tm_sec;
-            
-            //std::cout << "This program was exectued at: " << Hour << ":" << Min << ":" << Sec << std::endl;
-            //std::cout << "And the current date is: " << Day << "/" << Month << "/" << Year << std::endl;
-        
-            std::cout << "Message received at: " << Hour << ":" << Min << ":" << Sec << std::endl;
-            std::cout << "And the current date is:x " << Day << "/" << Month << "/" << Year << std::endl;
-            std::cout << "+++++++++++++++++++++++" << endl;
-
-            struct       rtc_time {
-                int 	  	tm_sec;
-                int 	  	tm_min;
-                int 	  	tm_hour;
-                int 	  	tm_mday;
-                int 	  	tm_mon;
-                int 	  	tm_year;
-                int 	  	tm_wday; /* unused */
-                int 	  	tm_yday; /* unused */
-                int 	  	tm_isdst;/* unused */
-            };
-            
-            struct rtc_time rt;
-            /* set your values here */
-            fd = open("/dev/rtc", O_RDONLY);
-            ioctl(fd, RTC_SET_TIME, &rt);
-            close(fd);
-            
-        
-            //sprintf(newdate,"date --set %s %s %s %s", month, date.substr(8,2), date.substr(0,4), newtime);
-            //system(newdate);
-            
-            //time_t  timev;
-            //me(&timev);
-            //std::stringstream strmt;
-            //strmt << timev;
-            //std::string stime_now = strmt.str();
-            //cout << "TIME NOW!!!." << timev << endl;
-            
             connectStreaming(from_ip);
-            
             
             break;
             
-        case STOP_STREAMING:
-        case PAUSE_STREAMING:
-        
-            //if (pthread_cancel(thread_streaming)) {
-            //}
-            
-            break;  
-            
-           case START_RECOGNITION:
+        case START_RECOGNITION:
                
-                RecognitionahaStructThread.writeCrops = true;
-                RecognitionahaStructThread.writeImages = true;
+            RecognitionahaStructThread.writeCrops = true;
+            RecognitionahaStructThread.writeImages = true;
             
-                runr = pthread_create(&thread_recognition, NULL, startRecognition, &RecognitionahaStructThread);
-                if ( runr  != 0) {
-                    cerr << "Unable to create thread" << endl;
-                    cout << "startRecognition pthread_create failed." << endl;
-                }
+            runr = pthread_create(&thread_recognition, NULL, startRecognition, &RecognitionahaStructThread);
+            if ( runr  != 0) {
+                cerr << "Unable to create thread" << endl;
+                cout << "startRecognition pthread_create failed." << endl;
+            }
                 
-                pthread_join(    thread_recognition,               (void**) &runr); 
+            pthread_join(    thread_recognition,               (void**) &runr);
                
-                break;
+            break;
             
-            case STOP_RECOGNITION:
+        case STOP_RECOGNITION:
                 
-                
-                pthread_cancel(thread_recognition);
-                
-                //if (runr > 0) 
+            pthread_cancel(thread_recognition);
             
-                break;
+            break;
             
     }
     
@@ -209,8 +253,10 @@ void RunUICommand(std::string param, string from_ip){
 
 
 // TCP client handling function
-void HandleTCPClient(TCPSocket *sock) 
+int HandleTCPClient(TCPSocket *sock)
 {
+    
+  int value;
   cout << "Handling client ";
   string from;
   try {
@@ -219,6 +265,9 @@ void HandleTCPClient(TCPSocket *sock)
   } catch (SocketException &e) {
     cerr << "Unable to get foreign address" << endl;
   }
+  
+  from_ip = from;
+    
   try {
     cout << sock->getForeignPort();
   } catch (SocketException &e) {
@@ -237,11 +286,12 @@ void HandleTCPClient(TCPSocket *sock)
      
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
       echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
-      cout << "Received message: " << echoBuffer;                      // Print the echo buff
+      cout << "Received message: " << echoBuffer << endl;                      // Print the echo buff
       
        std::stringstream strmm;
        strmm << echoBuffer;
        mesagge = strmm.str();
+       value = atoi(mesagge.c_str());
      
     // end of transmission
     // Echo message back to client
@@ -250,19 +300,90 @@ void HandleTCPClient(TCPSocket *sock)
   // Destructor closes socket
   
   // Run command from the UI
-  RunUICommand(mesagge, from);
+  //RunUICommand(mesagge, from);
   
+  return value;
+    
 }
 
-void *ThreadMain(void *clntSock) {
-  // Guarantees that thread resources are deallocated upon return  
-  pthread_detach(pthread_self()); 
+void * ThreadMain(void *clntSock)
+{
 
-  // Extract socket file descriptor from argument  
-  HandleTCPClient((TCPSocket *) clntSock);
+  // Guarantees that thread resources are deallocated upon return
+  pthread_detach(pthread_self());
+    
+    pthread_mutex_lock(&echo_mutex);
+    
+        resutl_echo = HandleTCPClient((TCPSocket *) clntSock);
+        pthread_cond_signal(&echo_response);
+        cout << "RESULT IN THREAD:: " << resutl_echo << " from_ip: " << from_ip << endl;
+    
+    pthread_mutex_unlock(&echo_mutex);
 
-  delete (TCPSocket *) clntSock;
-  return NULL;
+    delete (TCPSocket *) clntSock;
+    //pthread_exit((void *) resutl);
+    pthread_exit(NULL);
+    return (void *) resutl_echo;
+}
+
+void * watch_echo (void * t)
+{
+    pthread_mutex_lock(&echo_mutex);
+    while (!echo_received)
+    {
+        pthread_cond_wait(&echo_response, &echo_mutex);
+        std::cout << "RECIBIDO!!!. resutl_echo " << resutl_echo << endl;
+        
+        RunUICommand(resutl_echo, from_ip);
+        
+    }
+    pthread_mutex_lock(&echo_mutex);
+    pthread_exit(NULL);
+}
+
+void * socketThread (void * args)
+{
+    
+    // TCP
+    unsigned short tcp_port = TCP_PORT;
+    void *status;
+    
+    pthread_mutex_init(&echo_mutex, NULL);
+    pthread_cond_init(&echo_response, NULL);
+    
+    runl = pthread_create (&thread_wait_echo, NULL, watch_echo, NULL);
+    if ( runl  != 0)
+    {
+        cerr << "Unable to create ThreadMain thread" << endl;
+        cout << "ThreadM:::.in pthread_create failed." << endl;
+        exit(1);
+    }
+    
+    try {
+        TCPServerSocket servSock(tcp_port);   // Socket descriptor for server
+        for (;;) {      // Run forever
+            cout << "new TCPServerSocket() runt::" << runt << endl;
+            // Create separate memory for client argument
+            TCPSocket *clntSock = servSock.accept();
+            //runt
+            runt =  pthread_create(&thread_echo, NULL, ThreadMain, (void *) clntSock);
+            if ( runb  != 0)
+            {
+                cerr << "Unable to create ThreadMain thread" << endl;
+                cout << "ThreadM:::.in pthread_create failed." << endl;
+                exit(1);
+            }
+            cout << "ThreadMain pthread_create created!!!!!." << endl;
+            pthread_join(    thread_echo,               (void**) &runt);
+            //cout << "STATUS!!! = " << runt << endl;
+            //return (void *) runt;
+        }
+        
+    } catch (SocketException &e) {
+        cerr << e.what() << endl;
+        exit(1);
+    }
+
 }
 
 std::string getIpAddress () {
@@ -361,8 +482,6 @@ void * broadcastsender ( void * args ) {
 
 }
 
-
-
 int main (int argc, char * const argv[])
 {    
   
@@ -375,29 +494,21 @@ int main (int argc, char * const argv[])
        cerr << "Unable to create thread" << endl;
        cout << "BroadcastSender pthread_create failed." << endl;
    }
-   // TCP
-   unsigned short tcp_port = TCP_PORT;
-   try {
-        TCPServerSocket servSock(tcp_port);   // Socket descriptor for server  
-        for (;;) {      // Run forever  
-            // Create separate memory for client argument 
-            TCPSocket *clntSock = servSock.accept();
-            runt = pthread_create(&thread_echo, NULL, ThreadMain, (void *) clntSock);
-            if ( runb  != 0) 
-            {
-                cerr << "Unable to create ThreadMain thread" << endl;
-                cout << "ThreadMain pthread_create failed." << endl;
-                exit(1);
-            }  
-        }
-    
-    } catch (SocketException &e) {
-        cerr << e.what() << endl;
-        exit(1);
+   
+    //Socket
+    runs = pthread_create(&thread_socket, NULL, socketThread, NULL);
+    if ( runs  != 0) {
+        cerr << "Unable to create thread" << endl;
+        cout << "BroadcastSender pthread_create failed." << endl;
     }
     
-   pthread_join(    thread_broadcast,          (void**) &runb);
-   pthread_join(    thread_echo,               (void**) &runt); 
+   cout << "join thread_broadcast" << endl;
+   //pthread_join(    thread_broadcast,          (void**) &runb);
+   cout << "join thread_echo" << endl;
+   pthread_join(    thread_socket,               (void**) &runs);
+    
+    cout << "LAST!!! = " << runs << endl;
+    
    
    pthread_mutex_destroy(&tcpMutex);
    

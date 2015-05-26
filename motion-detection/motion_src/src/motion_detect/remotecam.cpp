@@ -33,7 +33,7 @@ int jpegQuality = 200;
 //int jpegQuality = 95;
 
 pthread_t thread_streaming;
-int runs;
+int runst;
 string control_computer_ip;
 
 struct stream_thread_args
@@ -208,13 +208,13 @@ int connectStreaming(std::string from_ip)
     StreamingStructThread.cam = 0;
     
     // run the streaming client as a separate thread
-    runs = pthread_create(&thread_streaming, NULL, streamVideo, &StreamingStructThread);
-    if ( runs  != 0) {
+    runst = pthread_create(&thread_streaming, NULL, streamVideo, &StreamingStructThread);
+    if ( runst  != 0) {
         cerr << "Unable to create streamVideo thread" << endl;
         cout << "BroadcastSender pthread_create failed." << endl;
     }
     
-    pthread_join(    thread_streaming,          (void**) &runs);
+    pthread_join(    thread_streaming,          (void**) &runst);
     
     pthread_cancel(thread_streaming);
     
