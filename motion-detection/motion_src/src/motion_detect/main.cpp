@@ -39,8 +39,10 @@
 using namespace std;
 using namespace cv;
 
-const unsigned int TCP_PORT                 = 5010;
-const unsigned int UDP_PORT                 = 5020;
+const unsigned int TCP_ECHO_PORT                = 5010;
+const unsigned int UDP_PORT                     = 5020;
+const unsigned int STREAMING_VIDEO_PORT         = 5030;
+const unsigned int TCP_MSG_PORT                 = 5040;
 
 const unsigned int CONNECT                  = 1000;
 const unsigned int STOP_STREAMING           = 1002;
@@ -110,6 +112,7 @@ std::string getGlobalIntToString(int id)
 {
     std::stringstream strm;
     strm << id;
+
     return strm.str();
 }
 
@@ -139,7 +142,10 @@ void * sendMessage (void * arg)
     
     char echoBuffer[RCVBUFSIZE + 1];
     
-    try {
+    try
+    {
+        
+        std::cout << "Establish connection with the echo server" << servAddress << " " << echoServPort << std::endl;
         
         // Establish connection with the echo server
         TCPSocket sock(servAddress, echoServPort);
@@ -200,11 +206,11 @@ void RunUICommand(int result, string from_ip)
             
             control_computer_ip = from_ip;
 
-            MessageStructThread.port            = TCP_PORT;
+            MessageStructThread.port            = TCP_MSG_PORT;
             MessageStructThread.machine_ip      = control_computer_ip;
             MessageStructThread.message         = message_send;
             
-             cout << "TCP_PORT." << TCP_PORT <<  " control_computer_ip: " << control_computer_ip << " message_send " << message_send << endl;
+             cout << "TCP_PORT." << TCP_MSG_PORT <<  " control_computer_ip: " << control_computer_ip << " message_send " << message_send << endl;
             
             // run the streaming client as a separate thread
             runm = pthread_create(&thread_message, NULL, sendMessage, &MessageStructThread);
@@ -345,7 +351,7 @@ void * socketThread (void * args)
 {
     
     // TCP
-    unsigned short tcp_port = TCP_PORT;
+    unsigned short tcp_port = TCP_ECHO_PORT;
     void *status;
     
     pthread_mutex_init(&echo_mutex, NULL);

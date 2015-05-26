@@ -17,6 +17,8 @@
 
 using namespace std;
 
+const unsigned int STREAMING_VIDEO_PORT         = 5030;
+
 int socket01;
 int socket02;
 
@@ -42,7 +44,7 @@ int initRemote() {
 
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(5030);
+    server.sin_port = htons(STREAMING_VIDEO_PORT);
 
     printf(" server bind: ", server); 
 

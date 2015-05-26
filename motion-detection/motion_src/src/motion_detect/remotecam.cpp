@@ -23,6 +23,7 @@
 using namespace cv;
 using namespace std;
 
+const unsigned int STREAMING_VIDEO_PORT         = 5030;
 
 int w = 640; //1280; //320;
 int h = 480; //720; //240;
@@ -52,9 +53,6 @@ void initCam(CvCapture* capture) {
     double height = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
     printf("cam w x h: %.0f x %.0f\n", width, height);
 }
-
-//int main(int argc, char* argv[]) {
-//    paramInfo(argc, argv);
 
 void* streamVideo(void * arg) {
     
@@ -158,53 +156,11 @@ void* streamVideo(void * arg) {
     return 0;
 }
 
-/*void* streamVideo(void * arg) {
-
-    std::cout << "ENTRA: " << std::endl;
-    
-    int sock, numrcv;
-    struct sockaddr_in addr;
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(5030);
-    addr.sin_addr.s_addr = INADDR_ANY;
-    bind(sock, (struct sockaddr *)&addr, sizeof(addr));
-    
-    std::cout << "ABRE VENTANA: " << std::endl;
-    
-    cvNamedWindow("Receive", CV_WINDOW_AUTOSIZE);
-    
-    cv::Mat image = cv::Mat(480,640,CV_8UC3);
-    static const int receiveSize = 65500;
-    static char buff[receiveSize];
-    
-    vector<uchar> ibuff;
-    
-    while(cvWaitKey(1) == -1){
-        
-        while(cvWaitKey( 10 ) == -1){
-            
-            numrcv = recv(sock, buff, receiveSize, 0);
-            for(int i=0; i<sizeof(buff) ; i++){
-                ibuff.push_back((uchar)buff[i]);
-            }
-            if(numrcv == -1) break;
-            image = imdecode(Mat(ibuff), CV_LOAD_IMAGE_COLOR);
-            cv::imshow("Receive", image);
-            ibuff.clear();
-        
-        }
-    }
-    close(sock);
-    
-    return 0;
-}*/
-
 int connectStreaming(std::string from_ip)
 {
     control_computer_ip = from_ip;
     // TCP Streaming
-    StreamingStructThread.port = 5030;
+    StreamingStructThread.port = STREAMING_VIDEO_PORT;
     StreamingStructThread.cam = 0;
     
     // run the streaming client as a separate thread
