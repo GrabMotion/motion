@@ -25,9 +25,11 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <ctime>
+#include <sys/time.h> // {get,set}timeofday
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
+
 #include <errno.h>
 #include "recognition/detection.h"
 #include <vector>
@@ -60,6 +62,7 @@ void * ThreadMain(void *clntSock);
 int HandleTCPClient(TCPSocket *sock);
 void RunUICommand(int result, string from_ip);
 void * sendMessage (void * arg);
+void setMessage(char * message_send);
 
 // Threading
 pthread_mutex_t tcpMutex, streamingMutex;
@@ -185,11 +188,31 @@ void * sendMessage (void * arg)
     
 }
 
+void setMessage(char * message_send)
+{
+    control_computer_ip = from_ip;
+    
+    MessageStructThread.port            = TCP_ECHO_PORT;
+    MessageStructThread.machine_ip      = control_computer_ip;
+    MessageStructThread.message         = message_send;
+    
+    cout << "TCP_PORT." << TCP_MSG_PORT <<  " control_computer_ip: " << control_computer_ip << " message_send " << message_send << endl;
+    
+    // run the streaming client as a separate thread
+    runm = pthread_create(&thread_message, NULL, sendMessage, &MessageStructThread);
+    if ( runm  != 0) {
+        cerr << "Unable to create streamVideo thread" << endl;
+        cout << "BroadcastSender pthread_create failed." << endl;
+    }
+    
+    pthread_join(    thread_message,          (void**) &runm);
+    
+    pthread_cancel(thread_message);
+    
+}
+
 void RunUICommand(int result, string from_ip)
 {
-    
-    
-    //switch (getGlobalStringToInt(param)){
     
     char * message_send;
     std::string command = "HOLA";
@@ -200,29 +223,25 @@ void RunUICommand(int result, string from_ip)
             
         case GET_TIME:
             
-            message_send = new char[command.size() + 1];
-            std::copy(command.begin(), command.end(), message_send);
-            message_send[command.size()] = '\0'; // don't forget the terminating 0
+            //message_send = new char[command.size() + 1];
+            //std::copy(command.begin(), command.end(), message_send);
+            //message_send[command.size()] = '\0';
             
-            control_computer_ip = from_ip;
-
-            MessageStructThread.port            = TCP_MSG_PORT;
-            MessageStructThread.machine_ip      = control_computer_ip;
-            MessageStructThread.message         = message_send;
+            struct timeval tv;
+            time_t nowtime;
+            struct tm *nowtm;
+            char tmbuf[64], buf[64];
             
-             cout << "TCP_PORT." << TCP_MSG_PORT <<  " control_computer_ip: " << control_computer_ip << " message_send " << message_send << endl;
+            gettimeofday(&tv, NULL);
+            nowtime = tv.tv_sec;
+            nowtm = localtime(&nowtime);
+            strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
+            snprintf(buf, sizeof buf, "%s.%06d", tmbuf, tv.tv_usec);
             
-            // run the streaming client as a separate thread
-            runm = pthread_create(&thread_message, NULL, sendMessage, &MessageStructThread);
-            if ( runm  != 0) {
-                cerr << "Unable to create streamVideo thread" << endl;
-                cout << "BroadcastSender pthread_create failed." << endl;
-            }
+            cout << "buf TIME " << buf << "tmbuf TIME " << buf << endl;
             
-            pthread_join(    thread_message,          (void**) &runm);
+            setMessage(buf);
             
-            pthread_cancel(thread_message);
-        
             break;
         
         
@@ -373,7 +392,7 @@ void * socketThread (void * args)
             TCPSocket *clntSock = servSock.accept();
             //runt
             runt =  pthread_create(&thread_echo, NULL, ThreadMain, (void *) clntSock);
-            if ( runb  != 0)
+            if ( runt  != 0)
             {
                 cerr << "Unable to create ThreadMain thread" << endl;
                 cout << "ThreadM:::.in pthread_create failed." << endl;
