@@ -77,14 +77,12 @@ void build_xml(const char * xmlPath)
     struct tm  tstruct;
     char       secs[80];
     tstruct = *localtime(&now);   
-    strftime(secs, sizeof(secs), "%Y:%m:%d %X", &tstruct);
-
-    const char *append = " 000";
+    //strftime(secs, sizeof(secs), "%Y:%m:%d %X", &tstruct);
+    strftime(secs, sizeof(secs), "%Y-%m-%d %H:%M:%S %z", &tstruct);
     
     char result[100];   // array to hold the result.
     
     strcpy(result, secs); // copy string one into the result.
-    strcat(result, append); // append string two to the result.
     
     TiXmlDocument doc;
     TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "utf-8", "");

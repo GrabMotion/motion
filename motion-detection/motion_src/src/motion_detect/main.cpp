@@ -254,7 +254,7 @@ void RunUICommand(int result, string from_ip)
             
             gettimeofday (&tv, NULL);
             ptm = localtime (&tv.tv_sec);
-            strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S", ptm);
+            strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S %z", ptm);
             
             cout << "time_string TIME " << time_string << endl;
             
