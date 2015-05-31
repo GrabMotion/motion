@@ -388,6 +388,19 @@ color: rgb(255, 252, 253);</string>
      </rect>
     </property>
     <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="remote_time_response">
+    <property name="geometry">
+     <rect>
+      <x>774</x>
+      <y>477</y>
+      <width>191</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
      <string>TextLabel</string>
     </property>
    </widget>

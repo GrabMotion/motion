@@ -20,7 +20,9 @@ class TCPEchoThread : public QThread
     Q_OBJECT
 public:
    explicit TCPEchoThread(QObject *parent =0);
-   void SendEcho(string svradress, string command);
+    void SendEcho (string svradress, char * message);
+    void SendEcho (string svradress, string command);
+    void send(string svradress, char * message);
 
 private:
     const int RCVBUFSIZE                = 32;

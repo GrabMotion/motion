@@ -54,7 +54,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Socket Listener Class -- Cannot connect received
     socket_listener = new SocketListener(this);
-    bool emited     = connect(socket_listener, SIGNAL(SocketReceivedSignal(std::string)), this, SLOT(receivedMessage(QString)), Qt::QueuedConnection);
     socket_listener->startListening(this);
 
     //Mount Shares
@@ -111,11 +110,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Local Network
     MainWindow::getLocalNetwork();
-}
-
-void MainWindow::setTerminalTime(const QString & str)
-{
-    ui->remote_terminal_time->setText(str);
 }
 
 void MainWindow::getLocalNetwork()
@@ -178,16 +172,38 @@ void MainWindow::ResultEcho(string response)
     tcpecho_thread->terminate();
 }
 
-/*void MainWindow::SocketReceivedMessage()
+void MainWindow::setRemoteMessage(const QString & str)
 {
-    std::cout << "LLEGA" << endl;
-   //ui->remote_time->setText(q_response);
-}*/
+    std::string message = str.toStdString();
+    int value;
 
-void MainWindow::receivedMessage(QString q_response)
-{
-    std::cout << "LLEGA" << endl;
-   //ui->remote_time->setText(q_response);
+    if (str.size()>4)
+    {
+      std::string id_action = message.substr (0,4);
+      value = atoi(id_action.c_str());
+      result_message = message.substr (4,message.size());
+    }
+    else
+    {
+      value = atoi(message.c_str());
+    }
+
+    q_response = QString::fromStdString(result_message);
+
+    switch(value)
+    {
+
+        case TIME_SET:
+            ui->remote_time_response->setText(q_response);
+            break;
+
+        case GET_TIME:
+            ui->remote_terminal_time->setText(q_response);
+            break;
+
+    }
+
+
 }
 
 void MainWindow::on_search_button_clicked ()
@@ -220,7 +236,6 @@ void MainWindow::broadcastTimeoutSocketException()
     msgBox->show();
     ui->connect_button->setEnabled(false);
 }
-
 
 std::string MainWindow::getActiveTerminalIPString()
 {
@@ -259,7 +274,6 @@ QString MainWindow::getSharedFolder()
     QString roStr = rootDir.absolutePath();
     QString roo = roStr + "/" + "shares";
     return roo;
-
 }
 
 void MainWindow::SharedMounted(QString folder)
@@ -395,7 +409,6 @@ void MainWindow::on_scrrenshot_clicked()
     streaming_thread->StartStreaming(c_str_ip, qt_ip, sh);
 }
 
-//void MainWindow::on_capture_video_clicked(){}
 
 void MainWindow::on_start_recognition_toggled(bool checked)
 {
@@ -568,12 +581,13 @@ std::string MainWindow::getIpAddress () {
 }
 
 
-void MainWindow::split(const string& s, char c,
-           vector<string>& v) {
+void MainWindow::split(const string& s, char c, vector<string>& v)
+{
    string::size_type i = 0;
    string::size_type j = s.find(c);
 
-   while (j != string::npos) {
+   while (j != string::npos)
+   {
       v.push_back(s.substr(i, j-i));
       i = ++j;
       j = s.find(c, j);
@@ -584,3 +598,33 @@ void MainWindow::split(const string& s, char c,
 }
 
 void MainWindow::on_start_recognition_clicked(){}
+
+void MainWindow::on_set_time_clicked()
+{
+
+    struct timeval tv;
+    struct tm* ptm;
+    char time_string[40];
+
+    gettimeofday (&tv, NULL);
+    ptm = localtime (&tv.tv_sec);
+    strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S", ptm);
+
+    cout << "time_string TIME :: " << time_string << endl;
+
+    std::string command = getGlobalIntToString(SET_TIME);
+
+    char * message = new char[command.size() + 1];
+    std::copy(command.begin(), command.end(), message);
+    message[command.size()] = '\0'; // don't forget the terminating 0
+
+    char buffer[256];
+    strncpy(buffer, message, sizeof(buffer));
+    strncat(buffer, time_string, sizeof(buffer));
+
+    cout << "buffer:: " << buffer << endl;
+
+    tcpecho_thread = new TCPEchoThread(this);
+    connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
+    tcpecho_thread->SendEcho(getActiveTerminalIPString(), buffer);
+}

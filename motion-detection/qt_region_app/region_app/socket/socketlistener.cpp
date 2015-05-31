@@ -2,38 +2,7 @@
 
 using namespace std;
 
-SocketListener::SocketListener(QObject *parent): QObject(parent)
-{
-
-}
-
-void SocketListener::emitSignal(std::string message)
-{
-
-    emit SocketReceivedSignal(message);
-}
-
-/*void * SocketListener::watch_echo (void * args)
-{
-
-    pthread_mutex_lock(&echo_mutex);
-    while (!echo_received)
-    {
-        pthread_cond_wait(&echo_response, &echo_mutex);
-        std::cout << "RECIBIDO!!!. resutl_echo " << resutl_echo << endl;
-
-        //RunUICommand(resutl_echo, from_ip);
-
-        //SocketListener sl;
-        //sl.emitSignal(socket_response);
-
-        emit SocketReceivedSignal(socket_response);
-
-    }
-    pthread_mutex_lock(&echo_mutex);
-    pthread_exit(NULL);
-}*/
-
+SocketListener::SocketListener(QObject *parent): QObject(parent){}
 
 // TCP client handling function
 void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
@@ -78,19 +47,9 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
       message = strmm.str();
 
       QString q_response = QString::fromUtf8(message.c_str());
-
       socket_response = message;
 
-      QMetaObject::invokeMethod(parent, "setEditText", Q_ARG(QString, q_response));
-
-      //QMetaObject::invokeMethod(parent,
-      //        "setTimeText",
-      //        Qt::QueuedConnection,
-      //        Q_ARG(QString, q_response));
-
-
-      //SocketListener sl;
-      //sl.emitSignal(q_response);
+      QMetaObject::invokeMethod(parent, "remoteMessage", Q_ARG(QString, q_response));
 
     // end of transmission
     // Echo message back to client
@@ -110,7 +69,6 @@ struct message_thread_args MessageStructThread;
 
 void * SocketListener::threadMain (void *arg) //void *clntSock)
 {
-
     // Guarantees that thread resources are deallocated upon return
     pthread_detach(pthread_self());
 
@@ -133,18 +91,6 @@ void * SocketListener::socketThread (void * args)
     pthread_t thread_echo;
     int runt, runb;
     void *status;
-
-    /*pthread_mutex_init  (&echo_mutex, NULL);
-    pthread_cond_init   (&echo_response, NULL);
-
-    runl = pthread_create (&thread_wait_echo, NULL, &SocketListener::watch_echo, NULL);
-    if ( runl  != 0)
-    {
-        cerr << "Unable to create ThreadMain thread" << endl;
-        cout << "ThreadM:::.in pthread_create failed." << endl;
-        exit(1);
-    }*/
-
 
     try
     {

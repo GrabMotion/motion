@@ -29,8 +29,9 @@ public:
     explicit SocketListener(QObject *parent = 0);
     std::string from_ip;
     void startListening(QObject *parent);
+
     void * HandleTCPClient (TCPSocket *sock, QObject *parent);
-    static  void * threadMain   (void *arg); //(void *clntSock);
+    static  void * threadMain   (void *arg);
     static void * socketThread (void * args);
     static void * watch_echo   (void * args);
 

@@ -10,6 +10,7 @@
 #include "socket/socketlistener.h"
 
 #include <QFileSystemModel>
+#include <sys/time.h> // {get,set}timeofday
 
 const unsigned int CONNECT                  = 1000;
 
@@ -22,6 +23,8 @@ const unsigned int STOP_RECOGNITION         = 1005;
 const unsigned int DISSCONNECT              = 1006;
 
 const unsigned int GET_TIME                 = 1007;
+const unsigned int SET_TIME                 = 1008;
+const unsigned int TIME_SET                 = 1009;
 
 const unsigned int TCP_ECHO_PORT            = 5010;
 const unsigned int UDP_PORT                 = 5020;
@@ -74,24 +77,23 @@ private:
     void RefreshTreViewModel(QString roo, QString rip);
     QString treeViewPath;
     QString ipPath;
-
     QString getSharedFolder();
-
     void getLocalNetwork();
+    void setRemoteMessage(const QString & str);
 
-    void setTerminalTime(const QString & str);
+    std::string result_message;
+    QString q_response;
 
 public:
-    Q_SLOT void setRemoteTimeLabel(const QString & str)
+    Q_SLOT void remoteMessage(const QString & str)
     {
-        MainWindow::setTerminalTime(str);
+        setRemoteMessage(str);
     }
 
 private slots:
 
     //buttons
     void on_search_button_clicked();
-    //void on_capture_video_clicked();
     void on_connect_button_clicked();
     void on_start_recognition_clicked();
     void on_start_recognition_toggled(bool checked);
@@ -108,7 +110,6 @@ private slots:
     void broadcastTimeoutSocketException();
     void StreamingUpdateLabelImage(std::string, Mat);
     void ResultEcho(string);
-    void receivedMessage(QString);
 
     //shares
     void SharedMounted(QString folder);
@@ -124,6 +125,8 @@ private slots:
     void on_save_region_clicked();
     void on_get_time_clicked();
 
+
+    void on_set_time_clicked();
 
 signals:
     void SocketReceivedSignal(std::string);

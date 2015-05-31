@@ -1,19 +1,24 @@
 #include "threads/tcpechothread.h"
 
-TCPEchoThread::TCPEchoThread(QObject *parent): QThread(parent)
-{
-
-}
+TCPEchoThread::TCPEchoThread(QObject *parent): QThread(parent){}
 
 using namespace std;
 
 void TCPEchoThread::SendEcho (string svradress, string command)
 {
+    char * message = new char[command.size() + 1];
+    std::copy(command.begin(), command.end(), message);
+    message[command.size()] = '\0'; // don't forget the terminating 0
+    send(svradress, message);
+}
 
-  char * message = new char[command.size() + 1];
-  std::copy(command.begin(), command.end(), message);
-  message[command.size()] = '\0'; // don't forget the terminating 0
+void TCPEchoThread::SendEcho (string svradress, char * message)
+{
+    send(svradress, message);
+}
 
+void TCPEchoThread::send (string svradress, char * message)
+{
   string servAddress = svradress;
   char *echoString = message;   // Second arg: string to echo
   int echoStringLen = strlen(echoString);   // Determine input length
@@ -22,7 +27,8 @@ void TCPEchoThread::SendEcho (string svradress, string command)
 
   char echoBuffer[RCVBUFSIZE + 1];
 
-  try {
+  try
+  {
 
     // Establish connection with the echo server
     TCPSocket sock(servAddress, echoServPort);
