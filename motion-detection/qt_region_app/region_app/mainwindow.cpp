@@ -108,6 +108,10 @@ MainWindow::MainWindow(QWidget *parent) :
     spinner_folders->setInnerRadius(4);
     ui->f_spinner->insertLayout(1, spinnerLayoutFolder);
 
+    QFont f( "Arial", 11, QFont::Bold);
+    ui->remote_time_response->setFont(f);
+    ui->remote_terminal_time->setFont(f);
+
     //Local Network
     MainWindow::getLocalNetwork();
 }

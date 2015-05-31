@@ -333,7 +333,7 @@ color: rgb(255, 252, 253);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(148, 148, 148);</string>
+     <string notr="true">color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string/>
@@ -400,8 +400,11 @@ color: rgb(255, 252, 253);</string>
       <height>16</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(42, 150, 46);</string>
+    </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string/>
     </property>
    </widget>
   </widget>
