@@ -57,6 +57,9 @@ const unsigned int DISSCONNECT              = 1006;
 
 const unsigned int GET_TIME                 = 1007;
 
+const unsigned int SET_TIME                 = 1008;
+const unsigned int TIME_SET                 = 1009;
+
 
 void * ThreadMain(void *clntSock);
 int HandleTCPClient(TCPSocket *sock);
@@ -69,12 +72,11 @@ pthread_mutex_t tcpMutex, streamingMutex;
 pthread_t thread_broadcast, thread_echo, thread_socket,
 thread_message, thread_recognition, thread_wait_echo;
 
-
 //Threads
 int runt, runb, runs, runr, runl, runm;
 
 /// TCP Streaming
-int             clientSock;
+int         clientSock;
 char*     	server_ip;
 int       	server_port;
 int       	server_camera;
@@ -84,6 +86,7 @@ pthread_cond_t echo_response;
 pthread_mutex_t echo_mutex;
 bool echo_received;
 int resutl_echo;
+std::string result_message;
 std::string from_ip;
 
 //TCP
@@ -96,6 +99,7 @@ const int MAXRCVSTRING = 4096; // Longest string to receive
 std::string getGlobalIntToString(int id);
 
 int getGlobalStringToInt(std::string id);
+char * setMessageValueBody(int value, std::string body);
 
 struct message_thread_args
 {
@@ -118,9 +122,6 @@ std::string getGlobalIntToString(int id)
 
     return strm.str();
 }
-
-//Detection
-//int scene_changes_amount = 0;
 
 struct recognition_thread_args 
 {
@@ -211,36 +212,105 @@ void setMessage(char * message_send)
     
 }
 
+char * setMessageValueBody(int value, std::string body)
+{
+    
+    std::string command = getGlobalIntToString(value);
+    
+    char * message = new char[command.size() + 1];
+    std::copy(command.begin(), command.end(), message);
+    message[command.size()] = '\0';
+    
+    char * action = new char[body.size() + 1];
+    std::copy(body.begin(), body.end(), action);
+    action[body.size()] = '\0'; // don't forget the terminating 0
+    
+    char buffer[256];
+    strncpy(buffer, message, sizeof(buffer));
+    strncat(buffer, action, sizeof(buffer));
+    
+    cout << " joined response:: " << buffer << std::endl;
+    
+    return buffer;
+    
+}
+
 void RunUICommand(int result, string from_ip)
 {
     
     char * message_send;
     std::string command = "HOLA";
-
     
+    char *response;
+
     switch (result)
     {
             
         case GET_TIME:
             
-            //message_send = new char[command.size() + 1];
-            //std::copy(command.begin(), command.end(), message_send);
-            //message_send[command.size()] = '\0';
-            
             struct timeval tv;
-            time_t nowtime;
-            struct tm *nowtm;
-            char tmbuf[64], buf[64];
+            struct tm* ptm;
+            char time_string[40];
             
-            gettimeofday(&tv, NULL);
-            nowtime = tv.tv_sec;
-            nowtm = localtime(&nowtime);
-            strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
-            snprintf(buf, sizeof buf, "%s.%06d", tmbuf, tv.tv_usec);
+            gettimeofday (&tv, NULL);
+            ptm = localtime (&tv.tv_sec);
+            strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S", ptm);
             
-            cout << "buf TIME " << buf << "tmbuf TIME " << buf << endl;
+            cout << "time_string TIME " << time_string << endl;
             
-            setMessage(buf);
+            response = setMessageValueBody(GET_TIME, time_string);
+            
+            setMessage(response);
+            
+            break;
+            
+        case SET_TIME:
+            
+            struct tm tmremote;
+            char *bufr;
+            
+            bufr = new char[result_message.length() + 1];
+            strcpy(bufr, result_message.c_str());
+            
+            cout << "::bufr:: " << bufr << endl;
+
+            memset(&tmremote, 0, sizeof(struct tm));
+            strptime(bufr, "%Y-%m-%d %H:%M:%S", &tmremote);
+    
+            std::cout << std::endl;
+            std::cout << " Seconds  :"  << tmremote.tm_sec  << std::endl;
+            std::cout << " Minutes  :"  << tmremote.tm_min  << std::endl;
+            std::cout << " Hours    :"  << tmremote.tm_hour << std::endl;
+            std::cout << " Day      :"  << tmremote.tm_mday << std::endl;
+            std::cout << " Month    :"  << tmremote.tm_mon  << std::endl;
+            std::cout << " Year     :"  << tmremote.tm_year << std::endl;
+            std::cout << std::endl;
+            
+            struct tm mytime;
+            struct timeval systime;
+            char * text_time;
+            
+            mytime.tm_sec 	= tmremote.tm_sec  ;
+            mytime.tm_min 	= tmremote.tm_min  ;
+            mytime.tm_hour 	= tmremote.tm_hour ;
+            mytime.tm_mday 	= tmremote.tm_mday ;
+            mytime.tm_mon 	= tmremote.tm_mon  ;
+            mytime.tm_year 	= tmremote.tm_year ;
+            
+            systime.tv_sec = mktime(&mytime);
+            systime.tv_usec = 0;
+            
+            settimeofday(&systime, NULL);
+            
+            gettimeofday(&systime, NULL);
+            
+            text_time = ctime(&systime.tv_sec);
+            
+            printf("The system time is set to %s\n", text_time);
+            
+            response = setMessageValueBody(TIME_SET, "Time set correctly!");
+            
+            setMessage(response);
             
             break;
         
@@ -271,7 +341,6 @@ void RunUICommand(int result, string from_ip)
             pthread_cancel(thread_recognition);
             
             break;
-            
     }
     
 }
@@ -306,7 +375,7 @@ int HandleTCPClient(TCPSocket *sock)
   // Send received string and receive again until the end of transmission
   char echoBuffer[RCVBUFSIZE];
   int recvMsgSize;
-  std::string mesagge;
+  std::string message;
   while ((recvMsgSize = sock->recv(echoBuffer, RCVBUFSIZE)) > 0) { // Zero means
      
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
@@ -315,17 +384,24 @@ int HandleTCPClient(TCPSocket *sock)
       
        std::stringstream strmm;
        strmm << echoBuffer;
-       mesagge = strmm.str();
-       value = atoi(mesagge.c_str());
-     
+       message = strmm.str();
+      
+       if (message.size()>4)
+       {
+          std::string id_action = message.substr (0,4);
+          value = atoi(id_action.c_str());
+          result_message = message.substr (4,message.size());
+       }
+       else
+       {
+          value = atoi(message.c_str());
+       }
+    
+      
     // end of transmission
     // Echo message back to client
     sock->send(echoBuffer, recvMsgSize);
   }
-  // Destructor closes socket
-  
-  // Run command from the UI
-  //RunUICommand(mesagge, from);
   
   return value;
     
@@ -449,18 +525,9 @@ void split(const string& s, char c,
 
 void * broadcastsender ( void * args ) {
     
-  
    std::string sech = getIpAddress();
    cout  <<  "IP: " << sech << endl;
    
-    //size_t f = sech.find("127.0.0.1");
-    //sech.replace(f, std::string("127.0.0.1").length(), "");
-    
-    //if (sech.find("-") != std::string::npos) {
-    //    std::string delimiter = "-";
-    //    std::string token = sech.substr(1, sech.find(delimiter)); // token is "scott"
-    //}
-    
    local_ip = sech;
 
    vector<string> ip_vector;
@@ -508,12 +575,11 @@ void * broadcastsender ( void * args ) {
 }
 
 int main (int argc, char * const argv[])
-{    
-  
-  
-   pthread_mutex_init(&tcpMutex, 0);  
-   
-   // UDP
+{
+    
+   pthread_mutex_init(&tcpMutex, 0);
+
+    // UDP
    runb = pthread_create(&thread_broadcast, NULL, broadcastsender, NULL);
    if ( runb  != 0) {
        cerr << "Unable to create thread" << endl;
@@ -532,9 +598,8 @@ int main (int argc, char * const argv[])
    cout << "join thread_echo" << endl;
    pthread_join(    thread_socket,               (void**) &runs);
     
-    cout << "LAST!!! = " << runs << endl;
+   cout << "LAST!!! = " << runs << endl;
     
-   
    pthread_mutex_destroy(&tcpMutex);
    
    cout << "return 0" << endl;
