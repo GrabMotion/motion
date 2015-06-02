@@ -14,11 +14,6 @@
 
 using namespace std;
 
-    // Threading
-extern pthread_mutex_t tcpMutex, streamingMutex;
-extern pthread_t thread_broadcast, thread_echo, thread_streaming, thread_socket, thread_recognition;
-//extern pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
 //Threads
 //extern int runt, runb, runs, runr;
 

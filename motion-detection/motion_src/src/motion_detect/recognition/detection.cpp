@@ -11,6 +11,8 @@
 //  Copyright (c) 2014 Cedric Verstraeten. All rights reserved.
 //
 
+#include "../global.h"
+
 #include <iostream>
 #include <fstream>
 #include <time.h>
@@ -29,8 +31,9 @@
 #include <functional>
 #include <ctime>
 #include <unistd.h>
-#include "detection.h"
 #include <cstring>
+
+#include "../recognition/detection.h"
 
 using namespace std;
 using namespace cv;
@@ -91,7 +94,6 @@ void build_xml(const char * xmlPath)
     TiXmlElement * start_time = new TiXmlElement( "start_time" );    
     TiXmlText * text_start_time = new TiXmlText( result );
     TiXmlElement * all_instances = new TiXmlElement( "ALL_INSTANCES" );
-
     
     start_time->LinkEndChild( text_start_time );    
     session_info->LinkEndChild(start_time);        
@@ -177,7 +179,8 @@ inline string saveImg(
         const string DIRECTORY,         
         const string EXTENSION, 
         const char * DIR_FORMAT, 
-        const char * FILE_FORMAT
+        const char * FILE_FORMAT,
+        int n_o_changes
 )
 {   
     stringstream ss;
@@ -188,11 +191,17 @@ inline string saveImg(
     // Get the current time
     timeinfo = localtime (&seconds);
     
+    std::string n_str_file = "_" + n_o_changes;
+    
+    char * n_file = new char[n_str_file.size() + 1];
+    std::copy(n_str_file.begin(), n_str_file.end(), n_file);
+    n_file[n_str_file.size()] = '\0';
+    
     // Create name for the image
     strftime (TIME,80,FILE_FORMAT,timeinfo);    
     if(incr < 100) incr++; // quick fix for when delay < 1s && > 10ms, (when delay <= 10ms, images are overwritten)
     else incr = 0;
-    ss << DIRECTORY << TIME << static_cast<int>(incr) << EXTENSION;        
+    ss << DIRECTORY << TIME << static_cast<int>(incr) << n_file << EXTENSION;
     string image_file = ss.str().c_str();
     imwrite(image_file, image);
     
@@ -296,12 +305,13 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
 void * startRecognition(void * arg)
 {
     
-    bool writeImages = true, writeCroop = false;
-    
     pthread_mutex_t detectMutex;
-    pthread_mutex_init(&detectMutex, 0); 
+    pthread_mutex_init(&detectMutex, 0);
     
     struct recognition_thread_args *args = (struct recognition_thread_args *) arg;
+    
+    bool writeImages = true, writeCroop = false;
+    bool send_number_detected = true;
     
     const string DIR        = "../../src/motion_web/pics/";          // directory where the images will be stored
     const string REGION     = "../../src/motion_web/pics/region/";   // directory where the regios are stored
@@ -405,7 +415,8 @@ void * startRecognition(void * arg)
     
     // All settings have been set, now go in endless loop and
     // take as many pictures you want..
-    while (true){   
+    while (true)
+    {
         
         countWhile++;
         
@@ -424,15 +435,10 @@ void * startRecognition(void * arg)
         threshold(motion, motion, 35, 255, CV_THRESH_BINARY);
         erode(motion, motion, kernel_ero);
         
-        pthread_mutex_lock(&detectMutex);
-        
-        
         //number_of_changes = detectMotion(motion, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
+        
         number_of_changes = detectMotion(motion, result, result_cropped, region, max_deviation, color);
-        
-        //scene_changes_amount = detectMotion;
-        
-        pthread_mutex_unlock(&detectMutex);
+        resutl_watch_detected = number_of_changes;
         
         // If a lot of changes happened, we assume something changed.
         if(number_of_changes>=there_is_motion)
@@ -478,12 +484,13 @@ void * startRecognition(void * arg)
                 
                     pthread_mutex_lock(&detectMutex);
                     
-                    string image_file = saveImg (
+                    image_file_recognized = saveImg (
                         result, 
                         DIR, 
                         EXT, 
                         DIR_FORMAT.c_str(), 
-                        FILE_FORMAT.c_str()                       
+                        FILE_FORMAT.c_str(),
+                        number_of_sequence
                     );
                 
                     pthread_mutex_unlock(&detectMutex);
@@ -498,7 +505,8 @@ void * startRecognition(void * arg)
                             DIR,
                             EXT,
                             DIR_FORMAT.c_str(),
-                            CROPPED_FILE_FORMAT.c_str()                            
+                            CROPPED_FILE_FORMAT.c_str(),
+                            number_of_sequence
                     );
                     
                     pthread_mutex_unlock(&detectMutex);
@@ -521,9 +529,9 @@ void * startRecognition(void * arg)
                 
                 has_instance_directory = false;                  
                 
-                std::cout << "\033[1 :::::::::::::::::::::::::::::::::::::::: m" << std::endl;
-                std::cout << "\033[1 :::::::::::: DUMP INSTANCE ::::::::::::: m" << std::endl;
-                std::cout << "\033[1 :::::::::::::::::::::::::::::::::::::::: m" << std::endl;
+                std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
+                std::cout << ":::::::::::: DUMP INSTANCE :::::::::::::" << std::endl;
+                std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
                 
                 end = clock();               
                 
@@ -568,6 +576,16 @@ void * startRecognition(void * arg)
             // Delay, wait a 1/2 second.
             cvWaitKey (DELAY);
         }
+        
+        // Send data to server.
+        if (send_number_detected  && number_of_changes>0)
+        {
+            pthread_mutex_lock(&watch_amount_mutex);
+                pthread_cond_signal(&watch_amount_detected);
+                cout << "RESULT NUMBER:: " << number_of_changes << endl;
+            pthread_mutex_unlock(&watch_amount_mutex);
+        }
+        
     }
     
     //return 0;   

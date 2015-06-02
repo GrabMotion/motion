@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <stdio.h>      
+#include <stdio.h>
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <sys/socket.h>
@@ -34,17 +34,16 @@
 #include "recognition/detection.h"
 #include <vector>
 #include <functional>
-//#include "streamvideo.h"
 #include "remotecam.hpp"
-//#include "rtp/hwclock.c"
+
 
 using namespace std;
 using namespace cv;
 
-const unsigned int TCP_ECHO_PORT                = 5010;
-const unsigned int UDP_PORT                     = 5020;
-const unsigned int STREAMING_VIDEO_PORT         = 5030;
-const unsigned int TCP_MSG_PORT                 = 5040;
+const unsigned int TCP_ECHO_PORT            = 5010;
+const unsigned int UDP_PORT                 = 5020;
+const unsigned int STREAMING_VIDEO_PORT     = 5030;
+const unsigned int TCP_MSG_PORT             = 5040;
 
 const unsigned int CONNECT                  = 1000;
 const unsigned int STOP_STREAMING           = 1002;
@@ -60,12 +59,16 @@ const unsigned int GET_TIME                 = 1007;
 const unsigned int SET_TIME                 = 1008;
 const unsigned int TIME_SET                 = 1009;
 
+const unsigned int AMOUNT_DETECTED          = 1010;
+const unsigned int FILE_RECOGNIZED          = 1011;
+
 
 void * ThreadMain(void *clntSock);
 int HandleTCPClient(TCPSocket *sock);
 void RunUICommand(int result, string from_ip);
 void * sendMessage (void * arg);
 void setMessage(char * message_send);
+void * watch_amount (void * t);
 
 // Threading
 pthread_mutex_t tcpMutex, streamingMutex;
@@ -73,7 +76,7 @@ pthread_t thread_broadcast, thread_echo, thread_socket,
 thread_message, thread_recognition, thread_wait_echo;
 
 //Threads
-int runt, runb, runs, runr, runl, runm;
+int runt, runb, runs, runr, runl, runm, runw;
 
 /// TCP Streaming
 int         clientSock;
@@ -106,9 +109,28 @@ struct message_thread_args
     unsigned int port;
     string machine_ip;
     char * message;
+    bool loop;
     
 };
 struct message_thread_args MessageStructThread;
+
+//Watch Recogition
+pthread_condattr_t cattr;
+pthread_t thread_watch_amount;
+pthread_mutex_t watch_amount_mutex;
+pthread_cond_t watch_amount_detected;
+bool watch_received;
+int resutl_watch;
+int resutl_watch_detected;
+std::string image_file_recognized;
+
+
+struct recognition_thread_args
+{
+    bool writeImages;
+    bool writeCrops;
+};
+struct recognition_thread_args RecognitionahaStructThread;
 
 int getGlobalStringToInt(std::string id)
 {
@@ -123,13 +145,6 @@ std::string getGlobalIntToString(int id)
     return strm.str();
 }
 
-struct recognition_thread_args 
-{
-    bool writeImages;
-    bool writeCrops;
-};
-struct recognition_thread_args RecognitionahaStructThread;
-
 std::string getIpAddress();
 
 void * sendMessage (void * arg)
@@ -139,6 +154,7 @@ void * sendMessage (void * arg)
     
     string servAddress = args->machine_ip;
     char *echoString = args->message;   // Second arg: string to echo
+    bool loop = args->loop;
     
     int echoStringLen = strlen(echoString);   // Determine input length
     
@@ -154,8 +170,19 @@ void * sendMessage (void * arg)
         // Establish connection with the echo server
         TCPSocket sock(servAddress, echoServPort);
         
-        // Send the string to the echo server
-        sock.send(echoString, echoStringLen);
+        //if (loop)
+        //{
+            //for (;;) {
+                //sock.send(echoString, echoStringLen);
+                //sleep(5);
+            //}
+            
+        //}
+        //else
+        //{
+            // Send the string to the echo server
+            sock.send(echoString, echoStringLen);
+        //}
         
         // Buffer for echo string + \0
         int bytesReceived = 0;              // Bytes read on each recv()
@@ -178,7 +205,8 @@ void * sendMessage (void * arg)
         
         // Destructor closes the socket
         
-    } catch(SocketException &e) {
+    } catch(SocketException &e)
+    {
         cerr << e.what() << endl;
         exit(1);
     }
@@ -234,6 +262,41 @@ char * setMessageValueBody(int value, std::string body)
     return buffer;
     
 }
+
+void * watch_amount (void * t)
+{
+    
+    std::string set_amount_socket = getGlobalIntToString(AMOUNT_DETECTED);
+    char * init_amout = new char[set_amount_socket.size() + 1];
+    std::copy(set_amount_socket.begin(), set_amount_socket.end(), init_amout);
+    init_amout[set_amount_socket.size()] = '\0';
+    setMessage(init_amout);
+    
+    pthread_mutex_lock(& watch_amount_mutex);
+    while (!watch_received)
+    {
+        pthread_cond_wait(&watch_amount_detected, & watch_amount_mutex);
+        std::cout << "RECIBIDO!!!. resutl_echo " << resutl_watch_detected << endl;
+        
+        std::ostringstream oss;
+        oss << resutl_watch_detected;
+        std::string watch_detected_str = oss.str();
+        
+        char * response = setMessageValueBody(AMOUNT_DETECTED, watch_detected_str);
+        
+        std::cout << "RECIBIDO!!!. resutl_echo " << resutl_watch_detected << endl;
+        
+        MessageStructThread.port            = TCP_ECHO_PORT;
+        MessageStructThread.machine_ip      = control_computer_ip;
+        MessageStructThread.message         = response;
+    
+        sendMessage(&MessageStructThread);
+        
+    }
+    pthread_mutex_lock(&watch_amount_mutex);
+    pthread_exit(NULL);
+}
+
 
 void RunUICommand(int result, string from_ip)
 {
@@ -322,6 +385,20 @@ void RunUICommand(int result, string from_ip)
             break;
             
         case START_RECOGNITION:
+            
+            pthread_mutex_init(&watch_amount_mutex, NULL);
+            
+            resutl_watch = pthread_condattr_setpshared(&cattr, PTHREAD_PROCESS_SHARED);
+            
+            pthread_cond_init(&watch_amount_detected, &cattr);
+            
+            runw = pthread_create (&thread_watch_amount, NULL, watch_amount, NULL);
+            if ( runw  != 0)
+            {
+                cerr << "Unable to create ThreadMain thread" << endl;
+                cout << "ThreadM:::.in pthread_create failed." << endl;
+                exit(1);
+            }
                
             RecognitionahaStructThread.writeCrops = true;
             RecognitionahaStructThread.writeImages = true;
@@ -376,6 +453,7 @@ int HandleTCPClient(TCPSocket *sock)
   char echoBuffer[RCVBUFSIZE];
   int recvMsgSize;
   std::string message;
+    
   while ((recvMsgSize = sock->recv(echoBuffer, RCVBUFSIZE)) > 0) { // Zero means
      
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes

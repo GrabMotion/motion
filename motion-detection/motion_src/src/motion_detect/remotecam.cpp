@@ -83,6 +83,7 @@ void* streamVideo(void * arg) {
     printf("%d x %d (%d bit)\n", image->width, image->height, image->depth);
     
     Mat mat(h, w, CV_8UC3);
+    mat = cvQueryFrame(capture);
     clock_t t0 = clock();
     printf("t0: %d\n", t0);
     int counter = 0;
@@ -100,7 +101,7 @@ void* streamVideo(void * arg) {
         cvShowImage("Cam", image);
 #endif
         
-        mat = image;
+        //mat = image;
                 printf("writing jpg %d..", clock());
                 imwrite("../motion_web/pics/screenshots/screen.jpg", mat);
                 printf("%d\n", clock());
