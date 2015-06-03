@@ -191,11 +191,15 @@ inline string saveImg(
     // Get the current time
     timeinfo = localtime (&seconds);
     
-    std::string n_str_file = "_" + n_o_changes;
+    std::string amount_str = getGlobalIntToString(n_o_changes);
+    
+    std::string n_str_file = "_" + amount_str;
     
     char * n_file = new char[n_str_file.size() + 1];
     std::copy(n_str_file.begin(), n_str_file.end(), n_file);
     n_file[n_str_file.size()] = '\0';
+    
+    std::cout << "n_file: " << n_file << std::endl;
     
     // Create name for the image
     strftime (TIME,80,FILE_FORMAT,timeinfo);    
@@ -204,6 +208,8 @@ inline string saveImg(
     ss << DIRECTORY << TIME << static_cast<int>(incr) << n_file << EXTENSION;
     string image_file = ss.str().c_str();
     imwrite(image_file, image);
+    
+    std::cout << "image_file: " << image_file << std::endl;
     
     return image_file;
 }
@@ -295,7 +301,7 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
 
             
         }
-        std::cout << "number_of_changes = " << number_of_changes << std::endl;
+        //std::cout << "number_of_changes = " << number_of_changes << std::endl;
         
         return number_of_changes;
     }
@@ -413,6 +419,27 @@ void * startRecognition(void * arg)
     
     init_time = clock();
     
+    //Socket.
+    string servAddress = args->machine_ip;
+    char *echoString = args->message;   // Second arg: string to echo
+    bool loop = args->loop;
+    int echoStringLen = strlen(echoString);   // Determine input length
+    unsigned short echoServPort = args->port;
+    char echoBuffer[RCVBUFSIZE + 1];
+
+    try
+    {
+        
+        // Establish connection with the echo server
+        TCPSocket sock(servAddress, echoServPort);
+
+    } catch(SocketException &e)
+    {
+        cerr << e.what() << endl;
+        exit(1);
+    }
+
+    
     // All settings have been set, now go in endless loop and
     // take as many pictures you want..
     while (true)
@@ -437,8 +464,17 @@ void * startRecognition(void * arg)
         
         //number_of_changes = detectMotion(motion, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
         
-        number_of_changes = detectMotion(motion, result, result_cropped, region, max_deviation, color);
-        resutl_watch_detected = number_of_changes;
+        
+            pthread_mutex_lock(&detectMutex);
+        
+                number_of_changes = detectMotion(motion, result, result_cropped, region, max_deviation, color);
+                resutl_watch_detected = number_of_changes;
+        
+                std::cout << "number_of_changes = " << number_of_changes << std::endl;
+        
+            pthread_mutex_unlock(&detectMutex);
+            
+            
         
         // If a lot of changes happened, we assume something changed.
         if(number_of_changes>=there_is_motion)
@@ -490,7 +526,7 @@ void * startRecognition(void * arg)
                         EXT, 
                         DIR_FORMAT.c_str(), 
                         FILE_FORMAT.c_str(),
-                        number_of_sequence
+                        number_of_changes
                     );
                 
                     pthread_mutex_unlock(&detectMutex);
@@ -506,16 +542,11 @@ void * startRecognition(void * arg)
                             EXT,
                             DIR_FORMAT.c_str(),
                             CROPPED_FILE_FORMAT.c_str(),
-                            number_of_sequence
+                            number_of_changes
                     );
                     
                     pthread_mutex_unlock(&detectMutex);
                 }
-                
-                //std::cout << " count_sequence_cero: " << count_sequence_cero << std::endl;
-                            
-                //https://sublimated.wordpress.com/2011/02/17/benchmarking-frames-per-second-when-using-opencvs-cvcapturefromcam/
-                
                                 
             }
             number_of_sequence++;
@@ -575,15 +606,6 @@ void * startRecognition(void * arg)
             
             // Delay, wait a 1/2 second.
             cvWaitKey (DELAY);
-        }
-        
-        // Send data to server.
-        if (send_number_detected  && number_of_changes>0)
-        {
-            pthread_mutex_lock(&watch_amount_mutex);
-                pthread_cond_signal(&watch_amount_detected);
-                cout << "RESULT NUMBER:: " << number_of_changes << endl;
-            pthread_mutex_unlock(&watch_amount_mutex);
         }
         
     }

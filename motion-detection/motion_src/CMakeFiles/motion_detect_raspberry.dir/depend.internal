@@ -40,10 +40,11 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSock
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.cpp
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../global.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../recognition/detection.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../tinyxml/tinystr.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../tinyxml/tinyxml.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp
- /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.h
  /usr/local/include/opencv2/calib3d/calib3d.hpp
  /usr/local/include/opencv2/contrib/contrib.hpp
  /usr/local/include/opencv2/contrib/openfabmap.hpp

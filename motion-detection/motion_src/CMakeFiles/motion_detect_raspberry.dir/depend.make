@@ -39,10 +39,11 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/incl
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.o: src/motion_detect/practical/PracticalSocket.cpp
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.o: src/motion_detect/practical/PracticalSocket.h
 
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o: src/motion_detect/recognition/../global.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o: src/motion_detect/recognition/../recognition/detection.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o: src/motion_detect/recognition/../tinyxml/tinystr.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o: src/motion_detect/recognition/../tinyxml/tinyxml.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o: src/motion_detect/recognition/detection.cpp
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o: src/motion_detect/recognition/detection.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o: /usr/local/include/opencv2/calib3d/calib3d.hpp
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o: /usr/local/include/opencv2/contrib/contrib.hpp
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o: /usr/local/include/opencv2/contrib/openfabmap.hpp

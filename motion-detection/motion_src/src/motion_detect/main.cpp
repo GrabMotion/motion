@@ -115,12 +115,12 @@ struct message_thread_args
 struct message_thread_args MessageStructThread;
 
 //Watch Recogition
-pthread_condattr_t cattr;
-pthread_t thread_watch_amount;
-pthread_mutex_t watch_amount_mutex;
-pthread_cond_t watch_amount_detected;
-bool watch_received;
-int resutl_watch;
+//pthread_condattr_t cattr;
+//pthread_t thread_watch_amount;
+//pthread_mutex_t watch_amount_mutex;
+//pthread_cond_t watch_amount_detected;
+//bool watch_received;
+//int resutl_watch;
 int resutl_watch_detected;
 std::string image_file_recognized;
 
@@ -170,19 +170,9 @@ void * sendMessage (void * arg)
         // Establish connection with the echo server
         TCPSocket sock(servAddress, echoServPort);
         
-        //if (loop)
-        //{
-            //for (;;) {
-                //sock.send(echoString, echoStringLen);
-                //sleep(5);
-            //}
-            
-        //}
-        //else
-        //{
-            // Send the string to the echo server
-            sock.send(echoString, echoStringLen);
-        //}
+        // Send the string to the echo server
+        sock.send(echoString, echoStringLen);
+        
         
         // Buffer for echo string + \0
         int bytesReceived = 0;              // Bytes read on each recv()
@@ -217,13 +207,14 @@ void * sendMessage (void * arg)
     
 }
 
-void setMessage(char * message_send)
+void setMessage(char * message_send, bool loop)
 {
     control_computer_ip = from_ip;
     
     MessageStructThread.port            = TCP_ECHO_PORT;
     MessageStructThread.machine_ip      = control_computer_ip;
     MessageStructThread.message         = message_send;
+    MessageStructThread.loop            = loop;
     
     cout << "TCP_PORT." << TCP_MSG_PORT <<  " control_computer_ip: " << control_computer_ip << " message_send " << message_send << endl;
     
@@ -234,9 +225,9 @@ void setMessage(char * message_send)
         cout << "BroadcastSender pthread_create failed." << endl;
     }
     
-    pthread_join(    thread_message,          (void**) &runm);
+    //pthread_join(    thread_message,          (void**) &runm);
     
-    pthread_cancel(thread_message);
+    //pthread_cancel(thread_message);
     
 }
 
@@ -257,13 +248,11 @@ char * setMessageValueBody(int value, std::string body)
     strncpy(buffer, message, sizeof(buffer));
     strncat(buffer, action, sizeof(buffer));
     
-    cout << " joined response:: " << buffer << std::endl;
-    
     return buffer;
     
 }
 
-void * watch_amount (void * t)
+/*void * watch_amount (void * t)
 {
     
     std::string set_amount_socket = getGlobalIntToString(AMOUNT_DETECTED);
@@ -295,7 +284,7 @@ void * watch_amount (void * t)
     }
     pthread_mutex_lock(&watch_amount_mutex);
     pthread_exit(NULL);
-}
+}*/
 
 
 void RunUICommand(int result, string from_ip)
@@ -305,6 +294,7 @@ void RunUICommand(int result, string from_ip)
     std::string command = "HOLA";
     
     char *response;
+    char* init;
 
     switch (result)
     {
@@ -323,7 +313,7 @@ void RunUICommand(int result, string from_ip)
             
             response = setMessageValueBody(GET_TIME, time_string);
             
-            setMessage(response);
+            setMessage(response, false);
             
             break;
             
@@ -373,7 +363,7 @@ void RunUICommand(int result, string from_ip)
             
             response = setMessageValueBody(TIME_SET, "Time set correctly!");
             
-            setMessage(response);
+            setMessage(response, false);
             
             break;
         
@@ -386,20 +376,23 @@ void RunUICommand(int result, string from_ip)
             
         case START_RECOGNITION:
             
-            pthread_mutex_init(&watch_amount_mutex, NULL);
-            
+            /*pthread_mutex_init(&watch_amount_mutex, NULL);
             resutl_watch = pthread_condattr_setpshared(&cattr, PTHREAD_PROCESS_SHARED);
-            
             pthread_cond_init(&watch_amount_detected, &cattr);
-            
             runw = pthread_create (&thread_watch_amount, NULL, watch_amount, NULL);
             if ( runw  != 0)
             {
                 cerr << "Unable to create ThreadMain thread" << endl;
                 cout << "ThreadM:::.in pthread_create failed." << endl;
                 exit(1);
-            }
-               
+            }*/
+            
+            
+            init = "init_recognition";
+            setMessage(init, true);
+            //delete [] init;
+            std::cout << "PASA!!" << std::endl;
+            
             RecognitionahaStructThread.writeCrops = true;
             RecognitionahaStructThread.writeImages = true;
             
@@ -410,7 +403,9 @@ void RunUICommand(int result, string from_ip)
             }
                 
             pthread_join(    thread_recognition,               (void**) &runr);
-               
+            
+            
+            
             break;
             
         case STOP_RECOGNITION:
