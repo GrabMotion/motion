@@ -1,0 +1,60 @@
+package detection;
+
+message Motion 
+{
+  	required int32 idMotion 	= 1;
+	optional string time 	= 2;
+  	optional string code 	= 3;
+
+	enum ActionType 
+	{
+  		CONNECT                  = 1000;
+ 		STOP_STREAMING           = 1002;
+ 		PAUSE_STREAMING          = 1003;
+ 		START_RECOGNITION        = 1004;
+ 		STOP_RECOGNITION         = 1005;
+ 		DISSCONNECT              = 1006;
+ 		GET_TIME                 = 1007;
+ 		SET_TIME                 = 1008;
+ 		TIME_SET                 = 1009;
+ 		AMOUNT_DETECTED          = 1010;
+ 		FILE_RECOGNIZED          = 1011;
+ 		TCP_ECHO_PORT            = 5010;
+ 		UDP_PORT                 = 5020;
+ 		STREAMING_VIDEO_PORT     = 5030;
+ 		TCP_MSG_PORT             = 5040;
+	}
+	
+	message Action 
+	{
+    		required int32 idAction 		= 1;
+		optional ActionType type 	= 2 [default = CONNECT];
+	}
+
+	message Recognition
+	{
+		required int32 instance 		= 1;
+		optional bool storeImage 		= 2;
+		optional bool sendAmount 	= 3;
+		optional bool sendFilePath 	= 4;
+		optional string amount 		= 5;
+		optional string filePath	 	= 6;
+	}
+
+	message Instance
+	{
+		required int32  idInstance	 	= 1;
+		required string start		= 2;
+		required string end			= 3;
+	}
+
+	repeated Action action 		= 4;
+	repeated Instance instance 	= 5;
+}
+
+
+message Message 
+{
+  repeated Motion motion = 1;
+}
+

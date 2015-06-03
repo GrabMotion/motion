@@ -22,6 +22,8 @@
 #include <sstream>
 #include <iostream>
 
+#include <google/protobuf/message.h>
+
 class SocketListener : public QObject
 {
     Q_OBJECT

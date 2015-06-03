@@ -51,9 +51,10 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
 
       QMetaObject::invokeMethod(parent, "remoteMessage", Q_ARG(QString, q_response));
 
-    // end of transmission
-    // Echo message back to client
-    sock->send(echoBuffer, recvMsgSize);
+      // end of transmission
+      // Echo message back to client
+
+      //sock->send(echoBuffer, recvMsgSize);
   }
   // Destructor closes socket
 

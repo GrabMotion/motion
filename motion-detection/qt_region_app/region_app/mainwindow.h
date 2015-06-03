@@ -26,6 +26,9 @@ const unsigned int GET_TIME                 = 1007;
 const unsigned int SET_TIME                 = 1008;
 const unsigned int TIME_SET                 = 1009;
 
+const unsigned int AMOUNT_DETECTED          = 1010;
+const unsigned int FILE_RECOGNIZED          = 1011;
+
 const unsigned int TCP_ECHO_PORT            = 5010;
 const unsigned int UDP_PORT                 = 5020;
 const unsigned int STREAMING_VIDEO_PORT     = 5030;
@@ -75,6 +78,7 @@ private:
     std::string local_ip;
 
     void RefreshTreViewModel(QString roo, QString rip);
+    void refresh_results();
     QString treeViewPath;
     QString ipPath;
     QString getSharedFolder();
@@ -119,7 +123,6 @@ private slots:
     void on_list_folders_clicked(const QModelIndex &index);
 
     void on_disconnect_clicked();
-    void on_refresh_results_clicked();
 
     void on_scrrenshot_clicked();
     void on_save_region_clicked();

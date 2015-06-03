@@ -29,12 +29,13 @@
 
 using namespace std;
 
-
 Mat src;
 string filename, xml;
 Scalar color(0,0,255); // red color
 vector<Point2f> coor;
+vector<Point2f> contour;
 int coor_num = 0;
+int count_clicks;
 
 MainWindow::MainWindow(QWidget *parent) :
 
@@ -75,7 +76,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->connect_button->setEnabled(false);
     ui->list_folders->setEnabled(false);
     ui->list_files->setEnabled(false);
-    ui->refresh_results->setEnabled(false);
     ui->start_recognition->setEnabled(false);
     //ui->save_region->setEnabled(false);
     ui->rec_with_images->setEnabled(false);
@@ -165,7 +165,6 @@ void MainWindow::ResultEcho(string response)
         ui->status_label->setText("connected");
         ui->status_label->setStyleSheet("background-color: lightgreen;");
         ui->scrrenshot->setEnabled(true);
-        ui->refresh_results->setEnabled(true);
         mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
 
     }
@@ -205,6 +204,10 @@ void MainWindow::setRemoteMessage(const QString & str)
             ui->remote_terminal_time->setText(q_response);
             break;
 
+        case AMOUNT_DETECTED:
+            //refresh_results();
+            ui->amount_detected->setText(q_response);
+            break;
     }
 
 
@@ -263,7 +266,7 @@ void MainWindow::on_connect_button_clicked()
     tcpecho_thread->SendEcho(c_str_ip, getGlobalIntToString(CONNECT));
 }
 
-void MainWindow::on_refresh_results_clicked()
+void MainWindow::refresh_results()
 {
     MainWindow::RefreshTreViewModel(treeViewPath, ipPath);
 }
@@ -373,6 +376,13 @@ void MainWindow::on_list_folders_clicked(const QModelIndex &index)
 {
     QString sPath = fileModel->fileInfo(index).absoluteFilePath();
     ui->list_files->setRootIndex(fileModel->setRootPath(sPath));
+}
+
+void MainWindow::on_list_files_clicked(const QModelIndex &index)
+{
+    QString sPath = fileModel->fileInfo(index).absoluteFilePath();
+    QPixmap pixmap(sPath);
+    ui->remote_capture->setPixmap(pixmap);
 }
 
 void MainWindow::ShareUmounted()
@@ -494,7 +504,8 @@ void MainWindow::Mouse_Pressed_Right_Click(vector<Point2f>&coor)
 void MainWindow::on_save_region_clicked()
 {
     //TODO
-    vector<Point2f> & contour = coor;
+    //vector<Point2f> & contour = coor;
+    coor = contour;
     vector<Point2f> insideContour;
 
     for(int j = 0; j < src.rows; j++)
@@ -508,6 +519,7 @@ void MainWindow::on_save_region_clicked()
     }
     cout << "# points inside contour: " << insideContour.size() << endl;
     savePointsAsXML(insideContour);
+    count_clicks=0;
 }
 
 
@@ -518,7 +530,12 @@ void MainWindow::showMousePosition( QPoint & pos )
 
 void MainWindow::Mouse_pressed(vector<Point2f>&coor)
 {
-    vector<Point2f> & contour = coor;
+    contour = coor;
+    count_clicks++;
+    if (count_clicks>2)
+    {
+        ui->save_region->setEnabled(true);
+    }
     cout << "PRESSED at (x,t): " <<  ui->output->x() << " " << ui->output->y() << endl;
 }
 
@@ -538,7 +555,6 @@ void MainWindow::closeEvent (QCloseEvent *event)
     }
 }
 
-void MainWindow::on_list_files_clicked(const QModelIndex &index){}
 
 std::string MainWindow::getIpAddress () {
 
