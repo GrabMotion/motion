@@ -34,11 +34,14 @@
 #include "recognition/detection.h"
 #include <vector>
 #include <functional>
-#include "remotecam.hpp"
+#include "remotecam.hpp" 
+#include "protobuffer/motion_protocol.pb.h"
+#include <fstream>
 
 
 using namespace std;
 using namespace cv;
+using namespace google::protobuf::io;
 
 const unsigned int TCP_ECHO_PORT            = 5010;
 const unsigned int UDP_PORT                 = 5020;
@@ -455,7 +458,24 @@ int HandleTCPClient(TCPSocket *sock)
       echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
       cout << "Received message: " << echoBuffer << endl;                      // Print the echo buff
       
-       std::stringstream strmm;
+      detection::Message main_message;
+      
+      fstream input(echoBuffer, ios::in | ios::binary);
+      main_message.ParseFromIstream(&input);
+      
+      detection::Motion main_motion = main_message.motion(0);
+      
+      detection::Motion::Action main_action;
+      
+      main_action = main_motion.action(0);
+      
+      google::protobuf::uint32 action;
+      
+      action = main_action.idaction();
+      
+      value = action;
+      
+       /*std::stringstream strmm;
        strmm << echoBuffer;
        message = strmm.str();
       
@@ -468,7 +488,7 @@ int HandleTCPClient(TCPSocket *sock)
        else
        {
           value = atoi(message.c_str());
-       }
+       }*/
     
       
     // end of transmission

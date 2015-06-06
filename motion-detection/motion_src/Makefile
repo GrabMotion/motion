@@ -160,6 +160,21 @@ src/motion_detect/practical/PracticalSocket.s:
 .PHONY : src/motion_detect/practical/PracticalSocket.s
 
 # target to build an object file
+src/motion_detect/protobuffer/motion_protocol.pb.o:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o
+.PHONY : src/motion_detect/protobuffer/motion_protocol.pb.o
+
+# target to preprocess a source file
+src/motion_detect/protobuffer/motion_protocol.pb.i:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.i
+.PHONY : src/motion_detect/protobuffer/motion_protocol.pb.i
+
+# target to generate assembly for a file
+src/motion_detect/protobuffer/motion_protocol.pb.s:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.s
+.PHONY : src/motion_detect/protobuffer/motion_protocol.pb.s
+
+# target to build an object file
 src/motion_detect/recognition/detection.o:
 	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o
 .PHONY : src/motion_detect/recognition/detection.o
@@ -282,6 +297,9 @@ help:
 	@echo "... src/motion_detect/practical/PracticalSocket.o"
 	@echo "... src/motion_detect/practical/PracticalSocket.i"
 	@echo "... src/motion_detect/practical/PracticalSocket.s"
+	@echo "... src/motion_detect/protobuffer/motion_protocol.pb.o"
+	@echo "... src/motion_detect/protobuffer/motion_protocol.pb.i"
+	@echo "... src/motion_detect/protobuffer/motion_protocol.pb.s"
 	@echo "... src/motion_detect/recognition/detection.o"
 	@echo "... src/motion_detect/recognition/detection.i"
 	@echo "... src/motion_detect/recognition/detection.s"

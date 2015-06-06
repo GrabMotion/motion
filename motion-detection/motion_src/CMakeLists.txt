@@ -7,10 +7,13 @@ INCLUDE_DIRECTORIES(src)
 INCLUDE_DIRECTORIES(/usr/local/include)
 
 INCLUDE_DIRECTORIES(
-	${TINYXML_DIRECTORY} /src/motion_detect/tinyxml 
-	${RECOGNITION_DIRECTORY} /src/motion_detect/recognition
-	${NTP_DIRECTORY} /src/motion_detect/ntp
+	${TINYXML_DIRECTORY} 	/src/motion_detect/tinyxml 
+	${RECOGNITION_DIRECTORY}/src/motion_detect/recognition
+	${PROTOBUFF_DIRECTORY}  /src/motion_detect/protobuffer
+	${NTP_DIRECTORY}        /src/motion_detect/ntp
 )
+
+FIND_PACKAGE(Protobuf REQUIRED)
 
 LINK_DIRECTORIES(/usr/local/lib)
 LINK_DIRECTORIES(/usr/lib)
@@ -37,6 +40,8 @@ ADD_EXECUTABLE(motion_detect_raspberry
 	src/motion_detect/tinyxml/tinyxmlerror.cpp
 	src/motion_detect/tinyxml/tinyxmlparser.cpp
         src/motion_detect/ntp/hwclock.c
+	src/motion_detect/protobuffer/motion_protocol.pb.h
+	src/motion_detect/protobuffer/motion_protocol.pb.cc
 )
 
 TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm)

@@ -420,7 +420,7 @@ void * startRecognition(void * arg)
     init_time = clock();
     
     //Socket.
-    string servAddress = args->machine_ip;
+    /*string servAddress = args->machine_ip;
     char *echoString = args->message;   // Second arg: string to echo
     bool loop = args->loop;
     int echoStringLen = strlen(echoString);   // Determine input length
@@ -437,7 +437,7 @@ void * startRecognition(void * arg)
     {
         cerr << e.what() << endl;
         exit(1);
-    }
+    }*/
 
     
     // All settings have been set, now go in endless loop and

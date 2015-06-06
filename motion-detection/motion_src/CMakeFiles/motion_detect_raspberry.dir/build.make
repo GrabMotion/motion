@@ -282,6 +282,29 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o.provides:
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o.provides.build: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o
 
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o: CMakeFiles/motion_detect_raspberry.dir/flags.make
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o: src/motion_detect/protobuffer/motion_protocol.pb.cc
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_11)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion_protocol.pb.cc
+
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion_protocol.pb.cc > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.i
+
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion_protocol.pb.cc -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.s
+
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o.requires:
+.PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o.requires
+
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o.provides: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o.requires
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o.provides.build
+.PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o.provides
+
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o.provides.build: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o
+
 # Object files for target motion_detect_raspberry
 motion_detect_raspberry_OBJECTS = \
 "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o" \
@@ -293,7 +316,8 @@ motion_detect_raspberry_OBJECTS = \
 "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.o" \
 "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.o" \
 "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o" \
-"CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o"
+"CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o" \
+"CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o"
 
 # External object files for target motion_detect_raspberry
 motion_detect_raspberry_EXTERNAL_OBJECTS =
@@ -308,6 +332,7 @@ src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.di
 src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.o
 src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o
 src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o
+src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o
 src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/build.make
 src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --red --bold "Linking CXX executable src/motion_detect/motion_detect_raspberry"
@@ -327,6 +352,7 @@ CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspbe
 CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.o.requires
 CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o.requires
 CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o.requires
+CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o.requires
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/requires
 
 CMakeFiles/motion_detect_raspberry.dir/clean:
