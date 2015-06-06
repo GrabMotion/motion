@@ -49,7 +49,9 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
       QString q_response = QString::fromUtf8(message.c_str());
       socket_response = message;
 
-      QMetaObject::invokeMethod(parent, "remoteMessage", Q_ARG(QString, q_response));
+      //QMetaObject::invokeMethod(parent, "remoteMessage", Q_ARG(QString, q_response));
+
+      QMetaObject::invokeMethod(parent, "remoteMessage", Q_ARG(const char *, echoBuffer));
 
       // end of transmission
       // Echo message back to client

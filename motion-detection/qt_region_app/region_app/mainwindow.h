@@ -9,6 +9,8 @@
 #include "threads/tcpechothread.h"
 #include "socket/socketlistener.h"
 
+#include "protobuffer/motion_protocol.pb.h"
+
 #include <QFileSystemModel>
 #include <sys/time.h> // {get,set}timeofday
 
@@ -83,13 +85,13 @@ private:
     QString ipPath;
     QString getSharedFolder();
     void getLocalNetwork();
-    void setRemoteMessage(const QString & str);
+    void setRemoteMessage(const char * str);
 
     std::string result_message;
     QString q_response;
 
 public:
-    Q_SLOT void remoteMessage(const QString & str)
+    Q_SLOT void remoteMessage(const char * str)
     {
         setRemoteMessage(str);
     }

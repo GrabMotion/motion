@@ -180,7 +180,7 @@ void MainWindow::setRemoteMessage(const char * str)
 {
 
     google::protobuf::uint32 action;
-
+    
     detection::Message main_message;
     fstream input(str, ios::in | ios::binary);
     main_message.ParseFromIstream(&input);
