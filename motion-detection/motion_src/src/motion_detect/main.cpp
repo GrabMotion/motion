@@ -35,13 +35,14 @@
 #include <vector>
 #include <functional>
 #include "remotecam.hpp" 
-#include "protobuffer/motion_protocol.pb.h"
-#include <fstream>
+//#include "protobuffer/motion_protocol.pb.h"
+#include "protobuffer/motion.pb.h"
+//#include <fstream>
 
 
 using namespace std;
 using namespace cv;
-using namespace google::protobuf::io;
+//using namespace google::protobuf::io;
 
 const unsigned int TCP_ECHO_PORT            = 5010;
 const unsigned int UDP_PORT                 = 5020;
@@ -420,6 +421,7 @@ void RunUICommand(int result, string from_ip)
     
 }
 
+#define MAXDATASIZE 100
 
 // TCP client handling function
 int HandleTCPClient(TCPSocket *sock)
@@ -448,7 +450,7 @@ int HandleTCPClient(TCPSocket *sock)
     int totalBytesReceived = 0;         // Total bytes read
   
   // Send received string and receive again until the end of transmission
-  char echoBuffer[RCVBUFSIZE];
+  char echoBuffer[MAXDATASIZE];
   int recvMsgSize;
   std::string message;
     
@@ -458,22 +460,23 @@ int HandleTCPClient(TCPSocket *sock)
       echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
       cout << "Received message: " << echoBuffer << endl;                      // Print the echo buff
       
-      detection::Message main_message;
+      echoBuffer[recvMsgSize] = '\0';
+      const string & data = echoBuffer;
+      motion::Message m;
+      m.ParseFromString(data);
+      cout << "Message: " << endl;
+      cout << "Name: " << m.type() << endl;
+      cout << "ID: " << m.time() << endl;
       
+      /*detection::Message main_message;
       fstream input(echoBuffer, ios::in | ios::binary);
       main_message.ParseFromIstream(&input);
-      
       detection::Motion main_motion = main_message.motion(0);
-      
       detection::Motion::Action main_action;
-      
       main_action = main_motion.action(0);
-      
       google::protobuf::uint32 action;
-      
       action = main_action.idaction();
-      
-      value = action;
+      value = action;*/
       
        /*std::stringstream strmm;
        strmm << echoBuffer;
