@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     tinyxml/tinyxmlparser.cpp \
     threads/tcpechothread.cpp \
     socket/socketlistener.cpp \
-    protobuffer/motion_protocol.pb.cc
+    protobuffer/motion_protocol.pb.cc \
+    protobuffer/motion.pb.cc
 
 HEADERS  += mainwindow.h \
     drawing/mouse_coordinates.h \
@@ -42,7 +43,8 @@ HEADERS  += mainwindow.h \
     tinyxml/tinyxml.h \
     threads/tcpechothread.h \
     socket/socketlistener.h \
-    protobuffer/motion_protocol.pb.h
+    protobuffer/motion_protocol.pb.h \
+    protobuffer/motion.pb.h
 
 FORMS    += mainwindow.ui
 

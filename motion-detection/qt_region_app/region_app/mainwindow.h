@@ -10,6 +10,7 @@
 #include "socket/socketlistener.h"
 
 #include "protobuffer/motion_protocol.pb.h"
+#include "protobuffer/motion.pb.h"
 
 #include <QFileSystemModel>
 #include <sys/time.h> // {get,set}timeofday

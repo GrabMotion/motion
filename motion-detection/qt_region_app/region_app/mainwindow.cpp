@@ -28,7 +28,7 @@
 #include "./spinner/QtWaitingSpinner.h"
 
 using namespace std;
-using namespace google::protobuf::io;
+
 
 Mat src;
 string filename, xml;
@@ -180,7 +180,7 @@ void MainWindow::setRemoteMessage(const char * str)
 {
 
     google::protobuf::uint32 action;
-
+    
     detection::Message main_message;
     fstream input(str, ios::in | ios::binary);
     main_message.ParseFromIstream(&input);
@@ -279,6 +279,8 @@ std::string MainWindow::getActiveTerminalIPString()
     return qs.toLocal8Bit().constData();
 }
 
+#define MAXDATASIZE 20
+
 void MainWindow::on_connect_button_clicked()
 {
 
@@ -291,22 +293,21 @@ void MainWindow::on_connect_button_clicked()
     QByteArray ba_ip = qt_ip.toLatin1();
     char *c_str_ip = ba_ip.data();
 
+    char buf[MAXDATASIZE];
     string data;
-    detection::Message main_message;
-    detection::Motion main_motion = main_message.motion(0);
-    detection::Motion::Action main_action = main_motion.action(0);
-    main_action.set_type(main_motion.CONNECT);
+    motion::Message m;
+    m.set_type(motion::Message::ActionType::Message_ActionType_CONNECT);
+    m.set_time("Hola");
+    m.SerializeToString(&data);
+    char bts[data.length()];
+    strcpy(bts, data.c_str());
 
-    //demo::People p;
-    //p.set_name("Hideto");
-    //p.set_id(123);
-    //p.set_email("hideto.bj@gmail.com");
+    tcpecho_thread->SendEcho(c_str_ip, bts); //getGlobalIntToString(CONNECT));
 
-    main_message.SerializeToString(&data);
-    char message[data.length()];
-    strcpy(message, data.c_str());
+    //http://protobuf.narkive.com/CWaOz6AP/google-protobuf-messagelite-parsefromarray-valgrind-memory-leak
 
-    tcpecho_thread->SendEcho(c_str_ip, message); //getGlobalIntToString(CONNECT));
+    google::protobuf::ShutdownProtobufLibrary();
+
 }
 
 void MainWindow::refresh_results()
@@ -428,10 +429,7 @@ void MainWindow::on_list_files_clicked(const QModelIndex &index)
     ui->remote_capture->setPixmap(pixmap);
 }
 
-void MainWindow::ShareUmounted()
-{
-
-}
+void MainWindow::ShareUmounted(){}
 
 void MainWindow::on_scrrenshot_clicked()
 {
