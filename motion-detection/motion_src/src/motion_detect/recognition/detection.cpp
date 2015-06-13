@@ -11,8 +11,6 @@
 //  Copyright (c) 2014 Cedric Verstraeten. All rights reserved.
 //
 
-#include "../global.h"
-
 #include <iostream>
 #include <fstream>
 #include <time.h>

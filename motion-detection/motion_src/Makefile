@@ -160,6 +160,21 @@ src/motion_detect/practical/PracticalSocket.s:
 .PHONY : src/motion_detect/practical/PracticalSocket.s
 
 # target to build an object file
+src/motion_detect/practical/sendmessage.o:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o
+.PHONY : src/motion_detect/practical/sendmessage.o
+
+# target to preprocess a source file
+src/motion_detect/practical/sendmessage.i:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.i
+.PHONY : src/motion_detect/practical/sendmessage.i
+
+# target to generate assembly for a file
+src/motion_detect/practical/sendmessage.s:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.s
+.PHONY : src/motion_detect/practical/sendmessage.s
+
+# target to build an object file
 src/motion_detect/protobuffer/motion.pb.o:
 	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o
 .PHONY : src/motion_detect/protobuffer/motion.pb.o
@@ -173,21 +188,6 @@ src/motion_detect/protobuffer/motion.pb.i:
 src/motion_detect/protobuffer/motion.pb.s:
 	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.s
 .PHONY : src/motion_detect/protobuffer/motion.pb.s
-
-# target to build an object file
-src/motion_detect/protobuffer/motion_protocol.pb.o:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.o
-.PHONY : src/motion_detect/protobuffer/motion_protocol.pb.o
-
-# target to preprocess a source file
-src/motion_detect/protobuffer/motion_protocol.pb.i:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.i
-.PHONY : src/motion_detect/protobuffer/motion_protocol.pb.i
-
-# target to generate assembly for a file
-src/motion_detect/protobuffer/motion_protocol.pb.s:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion_protocol.pb.s
-.PHONY : src/motion_detect/protobuffer/motion_protocol.pb.s
 
 # target to build an object file
 src/motion_detect/recognition/detection.o:
@@ -205,34 +205,34 @@ src/motion_detect/recognition/detection.s:
 .PHONY : src/motion_detect/recognition/detection.s
 
 # target to build an object file
-src/motion_detect/remotecam.o:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/remotecam.o
-.PHONY : src/motion_detect/remotecam.o
+src/motion_detect/streaming/remotecam.o:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/streaming/remotecam.o
+.PHONY : src/motion_detect/streaming/remotecam.o
 
 # target to preprocess a source file
-src/motion_detect/remotecam.i:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/remotecam.i
-.PHONY : src/motion_detect/remotecam.i
+src/motion_detect/streaming/remotecam.i:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/streaming/remotecam.i
+.PHONY : src/motion_detect/streaming/remotecam.i
 
 # target to generate assembly for a file
-src/motion_detect/remotecam.s:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/remotecam.s
-.PHONY : src/motion_detect/remotecam.s
+src/motion_detect/streaming/remotecam.s:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/streaming/remotecam.s
+.PHONY : src/motion_detect/streaming/remotecam.s
 
 # target to build an object file
-src/motion_detect/send_data.o:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/send_data.o
-.PHONY : src/motion_detect/send_data.o
+src/motion_detect/streaming/send_data.o:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/streaming/send_data.o
+.PHONY : src/motion_detect/streaming/send_data.o
 
 # target to preprocess a source file
-src/motion_detect/send_data.i:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/send_data.i
-.PHONY : src/motion_detect/send_data.i
+src/motion_detect/streaming/send_data.i:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/streaming/send_data.i
+.PHONY : src/motion_detect/streaming/send_data.i
 
 # target to generate assembly for a file
-src/motion_detect/send_data.s:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/send_data.s
-.PHONY : src/motion_detect/send_data.s
+src/motion_detect/streaming/send_data.s:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/streaming/send_data.s
+.PHONY : src/motion_detect/streaming/send_data.s
 
 # target to build an object file
 src/motion_detect/tinyxml/tinystr.o:
@@ -312,21 +312,21 @@ help:
 	@echo "... src/motion_detect/practical/PracticalSocket.o"
 	@echo "... src/motion_detect/practical/PracticalSocket.i"
 	@echo "... src/motion_detect/practical/PracticalSocket.s"
+	@echo "... src/motion_detect/practical/sendmessage.o"
+	@echo "... src/motion_detect/practical/sendmessage.i"
+	@echo "... src/motion_detect/practical/sendmessage.s"
 	@echo "... src/motion_detect/protobuffer/motion.pb.o"
 	@echo "... src/motion_detect/protobuffer/motion.pb.i"
 	@echo "... src/motion_detect/protobuffer/motion.pb.s"
-	@echo "... src/motion_detect/protobuffer/motion_protocol.pb.o"
-	@echo "... src/motion_detect/protobuffer/motion_protocol.pb.i"
-	@echo "... src/motion_detect/protobuffer/motion_protocol.pb.s"
 	@echo "... src/motion_detect/recognition/detection.o"
 	@echo "... src/motion_detect/recognition/detection.i"
 	@echo "... src/motion_detect/recognition/detection.s"
-	@echo "... src/motion_detect/remotecam.o"
-	@echo "... src/motion_detect/remotecam.i"
-	@echo "... src/motion_detect/remotecam.s"
-	@echo "... src/motion_detect/send_data.o"
-	@echo "... src/motion_detect/send_data.i"
-	@echo "... src/motion_detect/send_data.s"
+	@echo "... src/motion_detect/streaming/remotecam.o"
+	@echo "... src/motion_detect/streaming/remotecam.i"
+	@echo "... src/motion_detect/streaming/remotecam.s"
+	@echo "... src/motion_detect/streaming/send_data.o"
+	@echo "... src/motion_detect/streaming/send_data.i"
+	@echo "... src/motion_detect/streaming/send_data.s"
 	@echo "... src/motion_detect/tinyxml/tinystr.o"
 	@echo "... src/motion_detect/tinyxml/tinystr.i"
 	@echo "... src/motion_detect/tinyxml/tinystr.s"

@@ -3,11 +3,11 @@
 
 # compile C with /usr/bin/gcc
 # compile CXX with /usr/bin/c++
-C_FLAGS = -O3 -DNDEBUG -I/home/pi/motion/motion-detection/motion_src/src -I/usr/local/include -I/src/motion_detect/tinyxml -I/src/motion_detect/recognition -I/src/motion_detect/protobuffer -I/src/motion_detect/ntp   
+C_FLAGS = -O3 -DNDEBUG -I/home/pi/motion/motion-detection/motion_src/src -I/usr/local/include -I/src/motion_detect/tinyxml -I/src/motion_detect/recognition -I/src/motion_detect/protobuffer -I/src/motion_detect/streaming -I/src/motion_detect/practical -I/src/motion_detect/ntp   
 
 C_DEFINES = 
 
-CXX_FLAGS = -o3 -w -O3 -DNDEBUG -I/home/pi/motion/motion-detection/motion_src/src -I/usr/local/include -I/src/motion_detect/tinyxml -I/src/motion_detect/recognition -I/src/motion_detect/protobuffer -I/src/motion_detect/ntp   
+CXX_FLAGS = -o3 -w -O3 -DNDEBUG -I/home/pi/motion/motion-detection/motion_src/src -I/usr/local/include -I/src/motion_detect/tinyxml -I/src/motion_detect/recognition -I/src/motion_detect/protobuffer -I/src/motion_detect/streaming -I/src/motion_detect/practical -I/src/motion_detect/ntp   
 
 CXX_DEFINES = 
 

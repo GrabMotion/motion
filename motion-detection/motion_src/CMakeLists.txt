@@ -10,6 +10,8 @@ INCLUDE_DIRECTORIES(
 	${TINYXML_DIRECTORY} 	/src/motion_detect/tinyxml 
 	${RECOGNITION_DIRECTORY}/src/motion_detect/recognition
 	${PROTOBUFF_DIRECTORY}  /src/motion_detect/protobuffer
+	${STREAMING_DIRECTORY}  /src/motion_detect/streaming	
+	${SOCKET_DIRECTORY}  	/src/motion_detect/practical
 	${NTP_DIRECTORY}        /src/motion_detect/ntp
 )
 
@@ -28,12 +30,14 @@ SET(PROTOBUF_LIBRARIES protobuf)
 
 ADD_EXECUTABLE(motion_detect_raspberry 
 	src/motion_detect/main.cpp
-        src/motion_detect/remotecam.hpp
-        src/motion_detect/remotecam.cpp
-        src/motion_detect/send_data.hpp
-        src/motion_detect/send_data.cpp
+        src/motion_detect/streaming/remotecam.hpp
+        src/motion_detect/streaming/remotecam.cpp
+        src/motion_detect/streaming/send_data.hpp
+        src/motion_detect/streaming/send_data.cpp
         src/motion_detect/practical/PracticalSocket.h
 	src/motion_detect/practical/PracticalSocket.cpp
+	src/motion_detect/practical/sendmessage.h
+	src/motion_detect/practical/sendmessage.cpp
 	src/motion_detect/recognition/detection.h
         src/motion_detect/recognition/detection.cpp 
 	src/motion_detect/tinyxml/tinystr.cpp
@@ -41,8 +45,6 @@ ADD_EXECUTABLE(motion_detect_raspberry
 	src/motion_detect/tinyxml/tinyxmlerror.cpp
 	src/motion_detect/tinyxml/tinyxmlparser.cpp
         src/motion_detect/ntp/hwclock.c
-	src/motion_detect/protobuffer/motion_protocol.pb.h
-	src/motion_detect/protobuffer/motion_protocol.pb.cc
 	src/motion_detect/protobuffer/motion.pb.h
 	src/motion_detect/protobuffer/motion.pb.cc
 )
