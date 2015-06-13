@@ -22,7 +22,10 @@
 #include <sstream>
 #include <iostream>
 
-#include <google/protobuf/message.h>
+//#include <google/protobuf/message.h>
+#include "protobuffer/motion.pb.h"
+#include <opencv2/opencv.hpp>
+#include "image/mat2qimage.h"
 
 class SocketListener : public QObject
 {
@@ -43,13 +46,16 @@ private:
     pthread_cond_t echo_response;
     bool echo_received;
     int resutl_echo;
-    void emitSignal(std::string message);
+    //void emitSignal(std::string message);
 
 public:
     std::string socket_response;
 
-signals:
-    void SocketReceivedSignal(std::string);
+//signals:
+    //void SocketReceivedSignal(std::string);
+
+//signals:
+  // void ResultEchoMessage(string);
 
 };
 

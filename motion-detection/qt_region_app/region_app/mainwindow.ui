@@ -443,6 +443,19 @@ color: rgb(255, 252, 253);</string>
      <string/>
     </property>
    </widget>
+   <widget class="QPushButton" name="test_mat">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>300</y>
+      <width>115</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>test_mat</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

@@ -40,7 +40,7 @@ void TCPEchoThread::send (string svradress, char * message)
     int bytesReceived = 0;              // Bytes read on each recv()
     int totalBytesReceived = 0;         // Total bytes read
     // Receive the same string back from the server
-    cout << "Received: " << endl;                 // Setup to print the echoed string
+    //cout << "Received: " << endl;                 // Setup to print the echoed string
 
     while (totalBytesReceived < echoStringLen) {
       // Receive up to the buffer size bytes from the sender
@@ -50,22 +50,22 @@ void TCPEchoThread::send (string svradress, char * message)
       }
       totalBytesReceived += bytesReceived;     // Keep tally of total bytes
       echoBuffer[bytesReceived] = '\0';        // Terminate the string!
-      cout << "Received message: " << echoBuffer;                      // Print the echo buffer
+      //cout << "Received message: " << echoBuffer;                      // Print the echo buffer
     }
-    cout << endl;
-
-    // Destructor closes the socket
+    //cout << endl;
 
     std::stringstream strm;
     strm << echoBuffer;
 
-    emit ResultEcho(strm.str());
+    const string & data = echoBuffer;
+
+    emit ResultEcho(data);
 
   } catch(SocketException &e) {
     cerr << e.what() << endl;
     exit(1);
   }
 
-
+  // Destructor closes the socket
 
 }

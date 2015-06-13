@@ -125,8 +125,8 @@ void MainWindow::getLocalNetwork()
     vector<string> ip_vector;
     split(local_ip, '.', ip_vector);
 
-   for (int i=0; i<ip_vector.size(); i++)
-   {
+    for (int i=0; i<ip_vector.size(); i++)
+    {
         if ( i==0 | i==1)
         {
              NETWORK_IP +=  ip_vector[i] + ".";
@@ -135,16 +135,15 @@ void MainWindow::getLocalNetwork()
         {
              NETWORK_IP +=  ip_vector[i];
         }
-   }
-   QString ip = QString::fromUtf8(NETWORK_IP.c_str());
-   ui->network_ip->setText(ip);
+    }
+    QString ip = QString::fromUtf8(NETWORK_IP.c_str());
+    ui->network_ip->setText(ip);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-
 
 std::string getGlobalIntToString(int id)
 {
@@ -160,27 +159,129 @@ int getGlobalStringToInt(std::string id){
 void MainWindow::ResultEcho(string response)
 {
 
-    if (response.compare(getGlobalIntToString(CONNECT)) == 0)
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+    int action;
+    motion::Message m;
+    m.ParseFromString(response);
+
+    action = m.type();
+    std::string payload;
+    QString qpayload;
+    std::string mtime;
+
+    if (m.has_payload())
     {
-        ui->start_recognition->setEnabled(true);
-        ui->status_label->setText("connected");
-        ui->status_label->setStyleSheet("background-color: lightgreen;");
-        ui->scrrenshot->setEnabled(true);
-        mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
+        payload = m.payload();
+        qpayload = QString::fromStdString(payload);
+    }
+
+    if (m.has_time())
+    {
+       mtime  = m.time();
+    }
+
+    std::cout << "Action received:: " << action << " time: " << mtime << std::endl;
+
+    switch (action)
+    {
+        case motion::Message::CONNECT:
+            ui->start_recognition->setEnabled(true);
+            ui->status_label->setText(qpayload);
+            ui->status_label->setStyleSheet("background-color: lightgreen;");
+            ui->scrrenshot->setEnabled(true);
+            mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
+            break;
+
+
+    }
+
+    /*if (response.compare(getGlobalIntToString(CONNECT)) == 0)
+    {
+
 
     }
     else if (response.compare(getGlobalIntToString(GET_TIME)) == 0)
     {
 
-    }
+    }*/
+
+    google::protobuf::ShutdownProtobufLibrary();
+
     tcpecho_thread->terminate();
+    mount_thread->terminate();
 }
 
-void MainWindow::setRemoteMessage(const char * str)
+char* convert2char(QString input)
+{
+    return (char*)input.data();
+}
+
+void MainWindow::setRemoteImage(QImage image)
+{
+    ui->output->setPixmap(QPixmap::fromImage(image));
+}
+
+void MainWindow::setRemoteMessage(QString qstr)
 {
 
-    google::protobuf::uint32 action;
-    
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+    std::string response = qstr.toUtf8().constData();
+
+    int action;
+    motion::Message mm;
+    mm.ParseFromString(response);
+
+    action = mm.type();
+
+    //char* str = convert2char(qstr);
+    //int action;
+    //motion::Message mm;
+    //mm.ParseFromArray(&str, sizeof(str));
+
+    if (mm.has_type())
+    {
+        action = mm.type();
+    }
+
+    std::string payload;
+    QString qpayload;
+    std::string mtime;
+
+    if (mm.has_payload())
+    {
+        payload = mm.payload();
+        qpayload = QString::fromStdString(payload);
+    }
+
+    if (mm.has_time())
+    {
+       mtime  = mm.time();
+    }
+
+    std::cout << "Action received:: " << action << " time: " << mtime << std::endl;
+
+    switch (action)
+    {
+        case motion::Message::SET_MAT:
+            motion::Message mbytes;
+            //mbytes.ParseFromArray(response.data(), response.size());
+            cv::Mat data_mat;
+            if(mm.ByteSize() > 0)
+            {
+                std::string mdata = mm.data();
+                typedef unsigned char byte;
+                std::vector<byte> vectordata(mdata.begin(),mdata.end());
+                cv::Mat data_mat(vectordata,true);
+                QImage frame = Mat2QImage(data_mat);
+                //QPixmap pixmap((QString::fromStdString(path)));
+                ui->output->setPixmap(QPixmap::fromImage(frame));
+            }
+            break;
+    }
+
+    /*
     detection::Message main_message;
     fstream input(str, ios::in | ios::binary);
     main_message.ParseFromIstream(&input);
@@ -201,8 +302,11 @@ void MainWindow::setRemoteMessage(const char * str)
 
 
     }
+    */
 
     google::protobuf::ShutdownProtobufLibrary();
+
+
     /*
     std::string message = str.toStdString();
     int value;
@@ -221,7 +325,7 @@ void MainWindow::setRemoteMessage(const char * str)
     q_response = QString::fromStdString(result_message);
     */
 
-    switch(action)
+    /*switch(action)
     {
 
         case TIME_SET:
@@ -236,7 +340,7 @@ void MainWindow::setRemoteMessage(const char * str)
             //refresh_results();
             ui->amount_detected->setText(q_response);
             break;
-    }
+    }*/
 
 
 }
@@ -291,20 +395,21 @@ void MainWindow::on_connect_button_clicked()
 
     QString qt_ip = ui->ips_combo->currentText();
     QByteArray ba_ip = qt_ip.toLatin1();
+    std::string qt_ip_str = qt_ip.toUtf8().constData();
     char *c_str_ip = ba_ip.data();
 
     char buf[MAXDATASIZE];
     string data;
     motion::Message m;
     m.set_type(motion::Message::ActionType::Message_ActionType_CONNECT);
-    m.set_time("Hola");
+    m.set_serverip(qt_ip_str);
     m.SerializeToString(&data);
     char bts[data.length()];
     strcpy(bts, data.c_str());
 
-    tcpecho_thread->SendEcho(c_str_ip, bts); //getGlobalIntToString(CONNECT));
+    tcpecho_thread->SendEcho(c_str_ip, bts);
 
-    //http://protobuf.narkive.com/CWaOz6AP/google-protobuf-messagelite-parsefromarray-valgrind-memory-leak
+    tcpecho_thread->terminate();
 
     google::protobuf::ShutdownProtobufLibrary();
 
@@ -372,6 +477,7 @@ void MainWindow::SharedMounted(QString folder)
     xml = xmlfile;
 
     QFile * xmlFile = new QFile(region_file);
+
     /*if (QFile(region_file).exists())
     {
         QString path = region;
@@ -384,6 +490,7 @@ void MainWindow::SharedMounted(QString folder)
         }
 
     }*/
+
     if( ! xmlFile->open(QIODevice::WriteOnly) )
     {
       QMessageBox::warning(NULL, "Test", "Unable to open: " + region_file , "OK");
@@ -453,7 +560,6 @@ void MainWindow::on_scrrenshot_clicked()
         {
             dir.remove(dirFile);
         }
-
     }
 
     QString qt_ip = ui->ips_combo->currentText();
@@ -474,6 +580,7 @@ void MainWindow::on_start_recognition_toggled(bool checked)
         tcpecho_thread = new TCPEchoThread(this);
         connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
         tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
+        tcpecho_thread->terminate();
 
     }
     else
@@ -482,6 +589,7 @@ void MainWindow::on_start_recognition_toggled(bool checked)
         tcpecho_thread = new TCPEchoThread(this);
         connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
         tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
+        tcpecho_thread->terminate();
     }
 
 }
@@ -492,7 +600,7 @@ void MainWindow::on_disconnect_clicked()
     tcpecho_thread = new TCPEchoThread(this);
     connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
     tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
-
+    tcpecho_thread->terminate();
 }
 
 void MainWindow::on_get_time_clicked()
@@ -688,4 +796,34 @@ void MainWindow::on_set_time_clicked()
     tcpecho_thread = new TCPEchoThread(this);
     connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
     tcpecho_thread->SendEcho(getActiveTerminalIPString(), buffer);
+
+    tcpecho_thread->terminate();
+}
+
+void MainWindow::on_test_mat_clicked()
+{
+
+    tcpecho_thread = new TCPEchoThread(this);
+    //dataconnect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
+
+    QString qt_ip = ui->ips_combo->currentText();
+    std::string qt_ip_str = qt_ip.toUtf8().constData();
+    QByteArray ba_ip = qt_ip.toLatin1();
+    char *c_str_ip = ba_ip.data();
+
+    char buf[MAXDATASIZE];
+    string data;
+    motion::Message m;
+    m.set_type(motion::Message::ActionType::Message_ActionType_GET_MAT);
+    m.set_serverip(getIpAddress());
+    m.SerializeToString(&data);
+    char bts[data.length()];
+    strcpy(bts, data.c_str());
+
+    tcpecho_thread->SendEcho(c_str_ip, bts);
+
+    google::protobuf::ShutdownProtobufLibrary();
+
+    tcpecho_thread->terminate();
+
 }

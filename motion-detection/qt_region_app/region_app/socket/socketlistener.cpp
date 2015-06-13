@@ -8,7 +8,7 @@ SocketListener::SocketListener(QObject *parent): QObject(parent){}
 void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
 {
 
-  const unsigned int RCVBUFSIZE = 32;    // Size of receive buffer
+  const unsigned int RCVBUFSIZE = 100000; //32;    // Size of receive buffer
 
   int value;
   cout << "Handling client ";
@@ -35,30 +35,138 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
   char echoBuffer[RCVBUFSIZE];
   int recvMsgSize;
 
-  while ((recvMsgSize = sock->recv(echoBuffer, RCVBUFSIZE)) > 0) { // Zero means
+  bool parse = false;
+  int action;
+  motion::Message mm;
 
-      totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
-      echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
-      cout << "Received message: " << echoBuffer << endl;                      // Print the echo buff
+  bool array = true;
 
-      std::stringstream strmm;
-      std::string message;
-      strmm << echoBuffer;
-      message = strmm.str();
+  //while ((
 
-      QString q_response = QString::fromUtf8(message.c_str());
-      socket_response = message;
+  recvMsgSize = sock->recv(echoBuffer, RCVBUFSIZE);//)// > 0)
+  //{ // Zero means
 
-      //QMetaObject::invokeMethod(parent, "remoteMessage", Q_ARG(QString, q_response));
+      cout << "recvMsgSize: " << recvMsgSize << endl;
 
-      QMetaObject::invokeMethod(parent, "remoteMessage", Q_ARG(const char *, echoBuffer));
+      //if (!parse)
+      //{
+          totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
+          echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
 
-      // end of transmission
-      // Echo message back to client
+          const string & data = echoBuffer;
 
-      //sock->send(echoBuffer, recvMsgSize);
+          GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+          if (array)
+          {
+
+            mm.ParseFromArray(&echoBuffer, sizeof(echoBuffer));
+          }
+          else
+          {
+             mm.ParseFromString(data);
+          }
+
+          cout << "Type Received: " << mm.type() << endl;
+
+          action = mm.type();
+
+          if (mm.has_time())
+          {
+                cout << "VALUE!! " << value << " TIME!! " << mm.time() << endl;
+          }
+
+          std::string payload;
+          QString qpayload;
+          std::string mtime;
+
+          if (mm.has_payload())
+          {
+              payload = mm.payload();
+              qpayload = QString::fromStdString(payload);
+          }
+
+          if (mm.has_time())
+          {
+             mtime  = mm.time();
+          }
+
+          std::cout << "Action received:: " << action << " time: " << mtime << std::endl;
+
+          //parse = true;
+
+         //break;
+      //}
+  //}
+
+
+  switch (action)
+  {
+  case motion::Message::SET_MAT:
+
+      //motion::Message mbytes;
+      //mbytes.ParseFromArray(response.data(), response.size());
+
+      //cv::Mat data_mat;
+
+      if(mm.ByteSize() > 0)
+      {
+          if (mm.has_data())
+          {
+              std::string mdata = mm.data();
+
+              int w = mm.width();
+              int h = mm.height();
+
+              //cv::Mat image1(w,h,CV_8UC3,cv::Scalar(255,255,255));
+
+              cv::Mat mat(mm.width(), mm.height(), CV_8UC3, &mdata);
+
+              //typedef unsigned char byte;
+              //std::vector<byte> vectordata(mdata.begin(),mdata.end());
+              // cv::Mat data_mat(vectordata,true);
+
+              QImage frame = Mat2QImage(mat);
+
+              //QPixmap pixmap((QString::fromStdString(path)));
+              //QString q_response = QString::fromUtf8(data.c_str());
+
+              QMetaObject::invokeMethod(parent, "remoteImage", Q_ARG(QImage, frame));
+                //ui->output->setPixmap(QPixmap::fromImage(frame));
+           }
+      }
+
+      break;
   }
-  // Destructor closes socket
+
+  google::protobuf::ShutdownProtobufLibrary();
+
+  motion::Message mr;
+  mr.set_type(motion::Message::SET_MAT);
+
+  string datar;
+  mr.SerializeToString(&datar);
+  char bts[datar.length()];
+  strcpy(bts, datar.c_str());
+
+  // Echo message back to client
+  sock->send(bts, strlen(bts));
+
+  google::protobuf::ShutdownProtobufLibrary();
+
+  //sock->send(echoBuffer, recvMsgSize);
+
+  //totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
+  //echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
+
+  //QString q_response = QString::fromUtf8(message.c_str());
+  //socket_response = message;
+  //QMetaObject::invokeMethod(parent, "remoteMessage", Q_ARG(QString, q_response));
+  //QMetaObject::invokeMethod(parent, "remoteMessage", Q_ARG(const char *, echoBuffer));
+
+  // Destructor closes sockets
+
+
 
 }
 
@@ -97,7 +205,7 @@ void * SocketListener::socketThread (void * args)
 
     try
     {
-        TCPServerSocket servSock(TCP_ECHO_PORT);   // Socket descriptor for server
+        TCPServerSocket servSock(motion::Message::TCP_MSG_PORT);   // Socket descriptor for server
         for (;;) {      // Run forever
 
             cout << "new TCPServerSocket() runt::" << runt << endl;

@@ -9,11 +9,12 @@
 #include "threads/tcpechothread.h"
 #include "socket/socketlistener.h"
 
-#include "protobuffer/motion_protocol.pb.h"
 #include "protobuffer/motion.pb.h"
 
 #include <QFileSystemModel>
-#include <sys/time.h> // {get,set}timeofday
+#include <sys/time.h>
+
+#include <opencv2/opencv.hpp>
 
 const unsigned int CONNECT                  = 1000;
 
@@ -86,17 +87,21 @@ private:
     QString ipPath;
     QString getSharedFolder();
     void getLocalNetwork();
-    void setRemoteMessage(const char * str);
+    void setRemoteMessage(QString str);
+    void setRemoteImage(QImage image);
 
     std::string result_message;
     QString q_response;
 
 public:
-    Q_SLOT void remoteMessage(const char * str)
+    Q_SLOT void remoteMessage(QString str)
     {
         setRemoteMessage(str);
     }
-
+    Q_SLOT void remoteImage(QImage image)
+    {
+        setRemoteImage(image);
+    }
 private slots:
 
     //buttons
@@ -133,6 +138,8 @@ private slots:
 
 
     void on_set_time_clicked();
+
+    void on_test_mat_clicked();
 
 signals:
     void SocketReceivedSignal(std::string);
