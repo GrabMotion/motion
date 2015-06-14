@@ -6,6 +6,24 @@
 
 #IncludeRegexTransform: 
 
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/../b64/cencode.h
+
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/cdecode.h
+
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/decode.h
+iostream
+-
+cdecode.h
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/cdecode.h
+
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/encode.h
+iostream
+-
+../b64/cencode.h
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/../b64/cencode.h
+../b64/cencode.h
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/../b64/cencode.h
+
 /home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp
 cstring
 -
@@ -61,6 +79,10 @@ recognition/detection.h
 /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.h
 protobuffer/motion.pb.h
 /home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.h
+b64/encode.h
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/encode.h
+b64/decode.h
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/decode.h
 
 /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/../practical/PracticalSocket.h
 string

@@ -37,6 +37,7 @@ SET(CMAKE_C_TARGET_INCLUDE_PATH
   "/src/motion_detect/streaming"
   "/src/motion_detect/practical"
   "/src/motion_detect/ntp"
+  "/src/motion_detect/b64"
   )
 SET(CMAKE_CXX_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})
 SET(CMAKE_Fortran_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})

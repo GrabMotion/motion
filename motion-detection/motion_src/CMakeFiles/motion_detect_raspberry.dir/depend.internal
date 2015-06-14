@@ -4,6 +4,10 @@
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/ntp/hwclock.c
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/../b64/cencode.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/cdecode.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/decode.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/encode.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/../practical/PracticalSocket.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/../protobuffer/motion.pb.h
