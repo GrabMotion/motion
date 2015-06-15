@@ -11,100 +11,54 @@ SocketListener::SocketListener(QObject *parent): QObject(parent){}
 void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
 {
 
-  //const unsigned int RCVBUFSIZE = 100000; //32;    // Size of receive buffer
+    int value;
+    cout << "Handling client ";
+    string from;
+    try
+    {
+        from = sock->getForeignAddress();
+        cout << from << ":";
+    } catch (SocketException &e) {
+        cerr << "Unable to get foreign address" << endl;
+    }
+    try
+    {
+        cout << sock->getForeignPort();
+    } catch (SocketException &e) {
+        cerr << "Unable to get foreign port" << endl;
+    }
+    cout << " with thread " << pthread_self() << endl;
 
-  int value;
-  cout << "Handling client ";
-  string from;
-  try {
-     from = sock->getForeignAddress();
-    cout << from << ":";
-  } catch (SocketException &e) {
-    cerr << "Unable to get foreign address" << endl;
-  }
-
-  try
-  {
-    cout << sock->getForeignPort();
-  } catch (SocketException &e) {
-    cerr << "Unable to get foreign port" << endl;
-  }
-  cout << " with thread " << pthread_self() << endl;
-
-  int bytesReceived = 0;              // Bytes read on each recv()
+    int bytesReceived = 0;              // Bytes read on each recv()
     int totalBytesReceived = 0;         // Total bytes read
 
-  // Send received string and receive again until the end of transmission
-  char echoBuffer[RCVBUFSIZE];
-  int recvMsgSize;
+    // Send received string and receive again until the end of transmission
+    char echoBuffer[RCVBUFSIZE];
+    int recvMsgSize;
 
-  bool parse = false;
-  int action;
-  motion::Message mm;
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    int action;
+    motion::Message mm;
+    bool array = true;
 
-  bool array = true;
+    recvMsgSize = sock->recv(echoBuffer, RCVBUFSIZE);
+    cout << "recvMsgSize: " << recvMsgSize << endl;
 
-  //while ((
+    const string & data = echoBuffer;
+    if (array)
+    {
+        mm.ParseFromArray(&echoBuffer, sizeof(echoBuffer));
+    }
+    else
+    {
+        //mm.ParseFromString(data);
+    }
+    action = mm.type();
 
-  recvMsgSize = sock->recv(echoBuffer, RCVBUFSIZE);//)// > 0)
-  //{ // Zero means
-
-      cout << "recvMsgSize: " << recvMsgSize << endl;
-
-      //if (!parse)
-      //{
-          //totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
-          //echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
-
-          const string & data = echoBuffer;
-
-          GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-          if (array)
-          {
-
-            mm.ParseFromArray(&echoBuffer, sizeof(echoBuffer));
-          }
-          else
-          {
-             mm.ParseFromString(data);
-          }
-
-          cout << "Type Received: " << mm.type() << endl;
-
-          action = mm.type();
-
-          if (mm.has_time())
-          {
-                cout << "VALUE!! " << value << " TIME!! " << mm.time() << endl;
-          }
-
-          std::string payload;
-          QString qpayload;
-          std::string mtime;
-
-          if (mm.has_payload())
-          {
-              payload = mm.payload();
-              qpayload = QString::fromStdString(payload);
-          }
-
-          if (mm.has_time())
-          {
-             mtime  = mm.time();
-          }
-
-          std::cout << "Action received:: " << action << " time: " << mtime << std::endl;
-
-          //parse = true;
-
-         //break;
-      //}
-  //}
-
-   int size_init = mm.ByteSize();
-
-   cout << "ByteSize:::::::::::::: " << size_init << endl;
+    cout << "+++++++++++RESTORING PROTO++++++++++++++" << endl;
+    std::cout << "Action received   :: " << action << " time: " << mm.time() << std::endl;
+    int size_init = mm.ByteSize();
+    cout << "Proto ByteSize         :: " << size_init << endl;
 
     switch (action)
     {
@@ -117,11 +71,10 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
               {
 
                   std::string mdata = mm.data();
-
                   std::stringstream input_d;
                   input_d << mdata;
 
-                  // Base64 decode the stringstream
+                  // Base64 decode the stringstream.
                   base64::decoder D;
                   stringstream decoded;
                   D.decode(input_d, decoded);
@@ -129,47 +82,42 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
                   int width_d = mm.width();
                   int height_d = mm.height();
                   int type_d = mm.typemat();
-                  size_t size_d = mm.size(); // = input_d.tellp();
+                  size_t size_d = mm.size(); // = input_d.tellp(); //Alternative.
 
-                  cout << "size_d: " << size_d << endl;
-                  //input_d.read((char*)(&width_d), sizeof(int));
-                  //input_d.read((char*)(&height_d), sizeof(int));
-                  //input_d.read((char*)(&type_d), sizeof(int));
-                  //input_d.read((char*)(&size_d), sizeof(size_t));
+                  cout << "width_d      :: "  << mm.width()  <<  endl;
+                  cout << "height_d     :: " << mm.height() <<  endl;
+                  cout << "type_d       :: "   << mm.typemat()  <<  endl;
+                  cout << "size_d       :: "   << mm.size()  <<  endl;
 
+                  //Base64 to char.
                   char* data_d = new char[size_d];
-                  //data_d[size_d] = '\0';
                   decoded.read(data_d, size_d);
-
-                  // Construct the image (clone it so that it won't need our buffer anymore)
-                  //cv::Mat m_r = cv::Mat(height_d, width_d, type_d, data_d).clone();
-
                   cv::Mat m_r = cv::Mat(mm.height(), mm.width(), type_d, data_d).clone();
+                  google::protobuf::ShutdownProtobufLibrary();
+                  delete data_d;
 
+                  //Render image.
                   imwrite("/jose/repos/image_2.jpg", m_r);
                   QImage frame = Mat2QImage(m_r);
                   QMetaObject::invokeMethod(parent, "remoteImage", Q_ARG(QImage, frame));
-                  delete data_d;
-
                }
           }
 
           break;
     }
 
-    google::protobuf::ShutdownProtobufLibrary();
+    //Reply msg.
+    sock->send(echoBuffer, recvMsgSize);
 
-    motion::Message mr;
+    //Sending andser proto
+    /*motion::Message mr;
     mr.set_type(motion::Message::SET_MAT);
-
     string datar;
     mr.SerializeToString(&datar);
     char bts[datar.length()];
-    strcpy(bts, datar.c_str());
-
-    sock->send(bts, strlen(bts));
-
-    google::protobuf::ShutdownProtobufLibrary();
+    strcpy(bts, datar.c_str());*/
+    //sock->send(bts, strlen(bts));
+    //google::protobuf::ShutdownProtobufLibrary();
 
 }
 
