@@ -79,6 +79,7 @@ string NETWORK_IP;
 //Protobuffer
 motion::Message send_proto;
 motion::Message receive_proto;
+void restoreProto(bool isarray, char ** data, std::string file);
 
 #define MAXDATASIZE 1000
 
@@ -213,6 +214,66 @@ void sendEcho(std::string serv, char *echo, short port )
 
 }
 
+void restoreProto(bool isarray, char ** data, std::string file)
+{
+    cout << "+++++++++++RESTORING PROTO++++++++++++++" << endl;
+    
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    
+    motion::Message mm;
+    
+    cout << "::1::" << endl;
+    
+    if (isarray)
+    {
+        mm.ParseFromArray(&data, sizeof(data));
+    }
+    else
+    {
+        //mm.ParseFromString(&data);
+    }
+    
+    cout << "::2::" << endl;
+    
+    int size_final = mm.ByteSize();
+    
+    cout << "width      : " << mm.width()   << endl;
+    cout << "rows       : " << mm.rows()    << endl;
+    cout << "height     : " << mm.height()  << endl;
+    cout << "cols       : " << mm.cols()    << endl;
+    cout << "Mat type   : " << mm.type()    << endl;
+    cout << "Mat size   : " << mm.size()    << endl;
+    cout << "Proto size : " << size_final   << endl;
+    
+    std::string mdata = mm.data();
+    
+    std::stringstream input_o;
+    input_o << mdata;
+    
+    // Base64 decode the stringstream
+    base64::decoder D;
+    std::stringstream decoded;
+    D.decode(input_o, decoded);
+    
+    //Store into proto
+    std::string decoded_str = decoded.str();
+    
+    // Allocate a buffer for the pixels
+    char* data_r = new char[mm.size()];
+    // Read the pixels from the stringstream
+    decoded.read(data_r, mm.size());
+    
+    // Construct the image (clone it so that it won't need our buffer anymore)
+    cv::Mat m_d = Mat(mm.height(), mm.width(), mm.typemat(), data_r).clone();
+    
+    imwrite(file /*"image_2.jpg"*/, m_d);
+    
+    google::protobuf::ShutdownProtobufLibrary();
+    delete data_r;
+    delete data;
+
+}
+
 void* streamCast(void * arg)
 {
     
@@ -240,13 +301,14 @@ void* streamCast(void * arg)
     
     IplImage* img=0;
     img = cvQueryFrame( capture );
-    cvSaveImage("img.jpg",img);
+    cvSaveImage("IplImage.JPG",img);
     
     Mat mat(h, w, CV_8U); //CV_8U); // CV_8UC3);
     mat = cvQueryFrame(capture);
     cvtColor(mat, mat, CV_RGB2GRAY);
-    imwrite("image_1.jpg", mat);
+    imwrite("MAT.jpg", mat);
     
+    cout << "+++++++++++CREATING PROTO++++++++++++++" << endl;
     
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     
@@ -263,13 +325,8 @@ void* streamCast(void * arg)
     me.set_cols(cols);
     
     cv::Size s = mat.size();
-    me.set_height(s.height);
-    me.set_width(s.width);
-    
-    cout << "rows: " << rows << endl;
-    cout << "cols: " << cols << endl;
-    cout << "width: " << me.width() << endl;
-    cout << "height: " << me.height() << endl;
+    me.set_height(h);
+    me.set_width(w);
     
     // We will need to also serialize the width, height, type and size of the matrix
     int width_s     = mat.cols;
@@ -282,49 +339,37 @@ void* streamCast(void * arg)
     
     // Initialize a stringstream and write the data
     std::stringstream ss;
+    int size_init = me.ByteSize();
     
-    //ss.write((char*)(&width_s), sizeof(int));
-    //ss.write((char*)(&height_s), sizeof(int));
-    //ss.write((char*)(&type_s), sizeof(int));
-    //ss.write((char*)(&size_s), sizeof(size_t));
-    
-    cout << "size_s: " << size_s << endl;
+    cout << "width      : " << me.width() << endl;
+    cout << "rows       : " << rows << endl;
+    cout << "height     : " << me.height() << endl;
+    cout << "cols       : " << cols << endl;
+    cout << "Mat type   : " << me.type() << endl;
+    cout << "Mat size   : " << size_s << endl;
+    cout << "Proto size : " << size_init << endl;
     
     // Write the whole image data
-    ss.write((char*)mat.data, size_s);
+    ss.write((char*) mat.data, size_s);
     
     // Base64 encode the stringstream
     base64::encoder E;
     std::stringstream encoded;
     E.encode(ss, encoded);
 
-    me.set_data(encoded.str()); //mat_data);
+    //Store into proto
+    std::string encoded_str = encoded.str();
+    me.set_data(encoded_str); //mat_data);
 
-    bool array = true;
-    int size_init = me.ByteSize();
-    
-    cout << "ByteSize initial::: " << size_init << endl;
-    
-    char data_init[size_init];
-    
+    //Send proto to the server
     setMessage(me, true);
+    
+    bool array = true;
+    char * data_init[size_init];
     
     if (array)
     {
-        
-        cout << "ByteSize:: " << size_init <<  endl;
-        try
-        {
-            me.SerializeToArray(data_init, size_init);
-            
-            //m.SerializeToArray(&data, size);
-            //sendEcho(me.serverip(), data_init, motion::Message::TCP_MSG_PORT);
-            
-        }
-        catch (google::protobuf::FatalException fe)
-        {
-            std::cout << "PbToZmq " << fe.message() << std::endl;
-        }
+        me.SerializeToArray(&data_init, size_init);
         
     } else
     {
@@ -335,92 +380,12 @@ void* streamCast(void * arg)
         //sendEcho(me.serverip(), bts, motion::Message::TCP_MSG_PORT);
     }
     
-    google::protobuf::ShutdownProtobufLibrary();
-    
-    ///////////////////////////
-    
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-    
-    motion::Message mm;
-    
-    if (array)
-    {
-        
-        mm.ParseFromArray(&data_init, sizeof(data_init));
-    }
-    else
-    {
-        //mm.ParseFromString(&data);
-    }
-    
-    cout << "Type Received: " << mm.type() << endl;
-    
-    int action = mm.type();
-    
-    if (mm.has_time())
-    {
-        cout << "VALUE!! " << action << " TIME!! " << mm.time() << endl;
-    }
-    
-    std::string payload;
-    std::string mtime;
-    
-    if (mm.has_payload())
-    {
-        payload = mm.payload();
-    }
-    
-    if (mm.has_time())
-    {
-        mtime  = mm.time();
-    }
-    
-    std::string mdata = mm.data();
-    
-    int size_final = mm.ByteSize();
-    
-    cout << "ByteSize final::: " << size_final << endl;
-    
-    std::stringstream input_d;
-    input_d << mdata;
-    
-    // Base64 decode the stringstream
-    base64::decoder D;
-    stringstream decoded;
-    D.decode(input_d, decoded);
-    
-    // The data we need to deserialize
-    int width_d = 0;
-    int height_d = 0;
-    int type_d = 0;
-    size_t size_d = 0;
-    
-    // Read the width, height, type and size of the buffer
-    //input_d.read((char*)(&width_d), sizeof(int));
-    //input_d.read((char*)(&height_d), sizeof(int));
-    //input_d.read((char*)(&type_d), sizeof(int));
-    //input_d.read((char*)(&size_d), sizeof(size_t));
-    
-    cout << "width_d: "  << width_d  <<  endl;
-    cout << "height_d: " << height_d <<  endl;
-    cout << "type_d: "   << type_d   <<  endl;
-    cout << "size_d: "   << size_d   <<  endl;
-    
-    // Allocate a buffer for the pixels
-    char* data_d = new char[mm.size()];
-    // Read the pixels from the stringstream
-    decoded.read(data_d, mm.size());
-    
-    // Construct the image (clone it so that it won't need our buffer anymore)
-    cv::Mat m_d = Mat(mm.height(), mm.width(), mm.typemat(), data_d).clone();
-    
-    imwrite("image_2.jpg", m_d);
-    
-    google::protobuf::ShutdownProtobufLibrary();
-
     cvReleaseCapture(&capture);
+    google::protobuf::ShutdownProtobufLibrary();
+    delete data_init;
     
-    delete data_d;
+    //Restore Proto
+    restoreProto(true, data_init, "MAT_LOCAL.jpg");
     
     return 0;
 }

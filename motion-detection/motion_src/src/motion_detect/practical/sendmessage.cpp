@@ -34,6 +34,8 @@ void * sendMessage (void * arg)
     
     string servAddress = m.serverip();
     
+    cout << "+++++++++++SENDING PROTO++++++++++++++" << endl;
+    
     cout << "::servAddress:: " << servAddress <<  endl;
     
     int port = motion::Message::TCP_MSG_PORT;
@@ -41,7 +43,7 @@ void * sendMessage (void * arg)
     
     cout << "::echoServPort:: " << echoServPort <<  endl;
     
-    char echoBuffer[RCVBUFSIZE + 1];
+    char * echoBuffer[RCVBUFSIZE + 1];
     
     try
     {
@@ -60,7 +62,7 @@ void * sendMessage (void * arg)
             cout << "ByteSize:: " << size <<  endl;
             try
             {
-                m.SerializeToArray(data, size);
+                m.SerializeToArray(&data, size);
                 //m.SerializeToArray(&data, size);
             }
             catch (google::protobuf::FatalException fe)
@@ -72,7 +74,7 @@ void * sendMessage (void * arg)
         {
            //m.SerializeToString(data);
         }
-       
+        
         sock.send(data, sizeof(data));
         
         // Buffer for echo string + \0
@@ -83,7 +85,6 @@ void * sendMessage (void * arg)
         
         motion::Message mr;
 
-        
         while (totalBytesReceived < sizeof(data)) {
             // Receive up to the buffer size bytes from the sender
             if ((bytesReceived = (sock.recv(echoBuffer, RCVBUFSIZE))) <= 0) {
@@ -94,17 +95,18 @@ void * sendMessage (void * arg)
             echoBuffer[bytesReceived] = '\0';        // Terminate the string!
             cout << "Received message: " << echoBuffer;                      // Print the echo buffer
             
-            const string & data = echoBuffer;
-            
-            mr.ParseFromString(data);
-            
+            //const string & data = echoBuffer;
             receive_proto.Clear();
             receive_proto = mr;
             
-            cout << "Type Received: " << mr.type() << endl;
+            restoreProto(true, echoBuffer, "MAT_REMOTE.jpg");
+            
+            
             
         }
         cout << endl;
+        
+        delete data;
         
         // Destructor closes the socket
         
@@ -126,8 +128,7 @@ void * sendMessage (void * arg)
 
 void setMessage(motion::Message m, bool array)
 {
-    cout << "::setMessage::" << m.type() << endl;
-    
+
     MessageStructThread.message         = m;
     MessageStructThread.array           = array;
     
