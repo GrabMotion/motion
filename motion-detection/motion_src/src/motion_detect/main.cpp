@@ -82,13 +82,10 @@ motion::Message receive_proto;
 
 #define MAXDATASIZE 1000
 
-#define RCVBUFSIZE 16777216
+#define RCVBUFSIZE 500000
 
 //const unsigned int RCVBUFSIZE = 100000; //4096; //32;     // Size of receive buffer
 const int MAXRCVSTRING = 4096;          // Longest string to receive
-
-Mat deserialize(stringstream& input);
-stringstream serialize(Mat input);
 
 std::string getGlobalIntToString(int id);
 
@@ -134,7 +131,6 @@ char * setMessageValueBody(int value, std::string body)
     strncat(buffer, action, sizeof(buffer));
     
     return buffer;
-    
 }
 
 struct screenshot_thread_args
@@ -158,8 +154,8 @@ void sendEcho(std::string serv, char *echo, short port )
 {
     
     std::string servAddress  = serv;            //argv[1]; // First arg: server address
-    char *echoString    = echo;                 //argv[2];   // Second arg: string to echo
-    int echoStringLen   = strlen(echoString);   // Determine input length
+    //char *echoString    = echo;                 //argv[2];   // Second arg: string to echo
+    int echoStringLen   = strlen(echo);   // Determine input length
     unsigned short echoServPort = port; //(argc == 4) ? atoi(argv[3]) : 7;
     
     cout << "servAddress: " << servAddress << endl;
@@ -171,7 +167,7 @@ void sendEcho(std::string serv, char *echo, short port )
         TCPSocket sock(servAddress, echoServPort);
         
         // Send the string to the echo server
-        sock.send(echoString, echoStringLen);
+        sock.send(echo, echoStringLen);
         
         char echoBuffer[RCVBUFSIZE + 1];    // Buffer for echo string + \0
         int bytesReceived = 0;              // Bytes read on each recv()
@@ -189,12 +185,12 @@ void sendEcho(std::string serv, char *echo, short port )
                 cerr << "Unable to read";
                 exit(1);
             }
+            
             totalBytesReceived += bytesReceived;     // Keep tally of total bytes
             echoBuffer[bytesReceived] = '\0';        // Terminate the string!
             cout << echoBuffer;                      // Print the echo buffer
             
             const string & data = echoBuffer;
-            
             
             mr.ParseFromString(data);
             
@@ -202,13 +198,7 @@ void sendEcho(std::string serv, char *echo, short port )
             receive_proto = mr;
             
             cout << "Type Received: " << mr.type() << endl;
-            
-            int value = mr.type();
-            
-            if (mr.has_time())
-            {
-                cout << "VALUE!! " << value << " TIME!! " << mr.time() << endl;
-            }
+
 
         }
         cout << endl;
@@ -216,65 +206,12 @@ void sendEcho(std::string serv, char *echo, short port )
         // Destructor closes the socket
         
     } catch(SocketException &e) {
+        cout << "Error!: " << e.what() << endl;
         cerr << e.what() << endl;
         exit(1);
     }
 
 }
-
-
-// Serialize a cv::Mat to a stringstream
-/*std::stringstream serialize(Mat input)
-{
-    // We will need to also serialize the width, height, type and size of the matrix
-    int width = input.cols;
-    int height = input.rows;
-    int type = input.type();
-    size_t size = input.total() * input.elemSize();
-    
-    // Initialize a stringstream and write the data
-    std::stringstream ss;
-    ss.write((char*)(&width), sizeof(int));
-    ss.write((char*)(&height), sizeof(int));
-    ss.write((char*)(&type), sizeof(int));
-    ss.write((char*)(&size), sizeof(size_t));
-    
-    // Write the whole image data
-    ss.write((char*)input.data, size);
-    
-    return ss;
-}*/
-
-// Deserialize a Mat from a stringstream
-cv::Mat deserialize(std::stringstream& input)
-{
-    // The data we need to deserialize
-    int width = 0;
-    int height = 0;
-    int type = 0;
-    size_t size = 0;
-    
-    // Read the width, height, type and size of the buffer
-    input.read((char*)(&width), sizeof(int));
-    input.read((char*)(&height), sizeof(int));
-    input.read((char*)(&type), sizeof(int));
-    input.read((char*)(&size), sizeof(size_t));
-    
-    // Allocate a buffer for the pixels
-    char* data = new char[size];
-    // Read the pixels from the stringstream
-    input.read(data, size);
-    
-    // Construct the image (clone it so that it won't need our buffer anymore)
-    cv::Mat m = Mat(height, width, type, data).clone();
-    
-    // Delete our buffer
-    delete[]data;
-    
-    // Return the matrix
-    return m;
-}
-
 
 void* streamCast(void * arg)
 {
@@ -283,14 +220,17 @@ void* streamCast(void * arg)
     
     motion::Message message = args->msg;
     
+    cout << "CAPTURING !!!!!!!!!!!!!" << endl;
+    
     CvCapture* capture = cvCreateCameraCapture(0);
-    if (capture == NULL) {
+    if (capture == NULL)
+    {
         std::cout << "No cam found." << std::endl;
         return 0;
     }
     
-    int w = 640; //1280; //320;
-    int h = 480; //720; //240;
+    int w = 1280; //640; //1280; //320;
+    int h = 720; //480; //720; //240;
     
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
@@ -298,11 +238,15 @@ void* streamCast(void * arg)
     //double width = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
     //double height = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
     
+    IplImage* img=0;
+    img = cvQueryFrame( capture );
+    cvSaveImage("img.jpg",img);
+    
     Mat mat(h, w, CV_8U); //CV_8U); // CV_8UC3);
     mat = cvQueryFrame(capture);
     cvtColor(mat, mat, CV_RGB2GRAY);
-    
     imwrite("image_1.jpg", mat);
+    
     
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     
@@ -340,60 +284,26 @@ void* streamCast(void * arg)
     ss.write((char*)(&type_s), sizeof(int));
     ss.write((char*)(&size_s), sizeof(size_t));
     
+    cout << "size_s: " << size_s << endl;
+    
     // Write the whole image data
     ss.write((char*)mat.data, size_s);
-    
-    //std::stringstream serializedStream = ss;
-    
+
     // Base64 encode the stringstream
     //base64::encoder E;
     //std::stringstream encoded;
     //E.encode(ss, encoded);
-
+    
     me.set_data(ss.str()); //mat_data);
-    
-    //std::string matAsString (mat.begin<unsigned char>(), mat.end<unsigned char>());
-    //std::string sData(reinterpret_cast<char*>(mat.data));
-    
-    cv::Size size = mat.size();
-    
-    /*int total = size.width * size.height * mat.channels();
-    std::cout << "Mat size = " << total << std::endl;
-    
-    std::vector<char> data(mat.ptr(), mat.ptr() + total);
-    std::string mat_data(data.begin(), data.end());*/
-    
-    // Serialize the input image to a stringstream
-    //std::stringstream serializedStream = serialize(mat);
-    
-    
-    // Base64 encode the stringstream
-    //base64::encoder E;
-    //std::stringstream encoded;
-    //E.encode(serializedStream, encoded);
-    
-    //me.set_data(serializedStream.str()); //mat_data);
-    
-    cout << "AACTION: " << me.type() << endl;
-    
-    
-    /*int size = me.ByteSize();
-    char data[size];
-    me.SerializeToArray(data, size);
 
-    motion::Message mt;
-    mt.set_type(motion::Message::CONNECT);
-    mt.set_time("success");
-    mt.ParseFromArray(data, size);
-    cout << "A VERRR: " << mt.type() << " size: " << mt.ByteSize() << endl;*/
-    
-    cout << " sleep " << endl;
-    
-    sleep(5);
-    
     bool array = true;
     int size_init = me.ByteSize();
+    
+    cout << "ByteSize initial::: " << size_init << endl;
+    
     char data_init[size_init];
+    
+    setMessage(me, true);
     
     if (array)
     {
@@ -402,9 +312,9 @@ void* streamCast(void * arg)
         try
         {
             me.SerializeToArray(data_init, size_init);
-            //m.SerializeToArray(&data, size);
             
-            //sendEcho(me.serverip(), data, motion::Message::TCP_MSG_PORT);
+            //m.SerializeToArray(&data, size);
+            //sendEcho(me.serverip(), data_init, motion::Message::TCP_MSG_PORT);
             
         }
         catch (google::protobuf::FatalException fe)
@@ -414,11 +324,11 @@ void* streamCast(void * arg)
         
     } else
     {
-        string data;
-        me.SerializeToString(&data);
-        char bts[data.length()];
-        strcpy(bts, data.c_str());
-        sendEcho(me.serverip(), bts, motion::Message::TCP_MSG_PORT);
+        //string data;
+        //me.SerializeToString(&data);
+        //char bts[data.length()];
+        //strcpy(bts, data.c_str());
+        //sendEcho(me.serverip(), bts, motion::Message::TCP_MSG_PORT);
     }
     
     google::protobuf::ShutdownProtobufLibrary();
@@ -463,11 +373,12 @@ void* streamCast(void * arg)
     
     std::string mdata = mm.data();
     
+    int size_final = mm.ByteSize();
+    
+    cout << "ByteSize final::: " << size_final << endl;
+    
     std::stringstream input_d;
     input_d << mdata;
-    
-    //std::vector<uchar> mainStr(mdata.begin(), mdata.end());
-    //cv::Mat image = cv::imdecode(cv::Mat(mainStr), 1);
     
     // The data we need to deserialize
     int width_d = 0;
@@ -481,6 +392,11 @@ void* streamCast(void * arg)
     input_d.read((char*)(&type_d), sizeof(int));
     input_d.read((char*)(&size_d), sizeof(size_t));
     
+    cout << "width_d: "  << width_d  <<  endl;
+    cout << "height_d: " << height_d <<  endl;
+    cout << "type_d: "   << type_d   <<  endl;
+    cout << "size_d: "   << size_d   <<  endl;
+    
     // Allocate a buffer for the pixels
     char* data_d = new char[size_d];
     // Read the pixels from the stringstream
@@ -489,16 +405,13 @@ void* streamCast(void * arg)
     // Construct the image (clone it so that it won't need our buffer anymore)
     cv::Mat m_d = Mat(height_d, width_d, type_d, data_d).clone();
     
-    
     imwrite("image_2.jpg", m_d);
-    
-    
-    //int echoStringLen = sizeof(data); //strlen(bts);
-    //setMessage(me, true);
     
     google::protobuf::ShutdownProtobufLibrary();
 
     cvReleaseCapture(&capture);
+    
+    delete data_d;
     
     return 0;
 }
@@ -929,18 +842,15 @@ void * broadcastsender ( void * args ) {
 int main (int argc, char * const argv[])
 {
     
-    motion::Message mf;
+    /*motion::Message mf;
     mf.set_type(motion::Message::SET_MAT);
     mf.set_serverip("192.168.1.35");
     mf.set_time("timess");
     screenshot(mf);
-    google::protobuf::ShutdownProtobufLibrary();
+    google::protobuf::ShutdownProtobufLibrary();*/
     
-    
-    
-   /*
-    
-    pthread_mutex_init(&tcpMutex, 0);
+
+  pthread_mutex_init(&tcpMutex, 0);
 
     // UDP
    runb = pthread_create(&thread_broadcast, NULL, broadcastsender, NULL);
@@ -967,8 +877,8 @@ int main (int argc, char * const argv[])
    pthread_mutex_destroy(&tcpMutex);
    
    cout << "return 0" << endl;
-    
-    */
+   
+   
    
    return 0;
   

@@ -18,7 +18,7 @@ struct message_thread_args
 };
 struct message_thread_args MessageStructThread;
 
-const unsigned int RCVBUFSIZE = 32;     // Size of receive buffer
+const unsigned int RCVBUFSIZE = 500000;     // Size of receive buffer
 const int MAXRCVSTRING = 4096;          // Longest string to receive
 
 
@@ -32,8 +32,6 @@ void * sendMessage (void * arg)
     motion::Message m = args->message;
     send_proto = m;
     
-    cout << "::m:: " << m.type() <<  endl;
-    
     string servAddress = m.serverip();
     
     cout << "::servAddress:: " << servAddress <<  endl;
@@ -45,8 +43,6 @@ void * sendMessage (void * arg)
     
     char echoBuffer[RCVBUFSIZE + 1];
     
-    cout << "::1:: " <<  endl;
-    
     try
     {
         
@@ -54,10 +50,7 @@ void * sendMessage (void * arg)
         
         // Establish connection with the echo server
         TCPSocket sock(servAddress, echoServPort);
-        
-        cout << "::2:: " <<  endl;
-        
-    
+       
         //string data;
         int size = m.ByteSize();
         char data[size];
@@ -79,34 +72,19 @@ void * sendMessage (void * arg)
         {
            //m.SerializeToString(data);
         }
-        //cout << "::3:: data:: " << data <<  endl;
-        
-        //char bts[data.length()];
-        
-        cout << "::4:: " <<  endl;
-        //strcpy(bts, data.c_str());
-    
-        //m.SerializeToArray(&data, m.ByteSize());
-        //char bts[data.length()];
-        //strcpy(bts, data.c_str());
-        cout << "::5:: " <<  endl;
-        
-        int echoStringLen = sizeof(data); //strlen(bts);
-        
-        // Send the string to the echo server
-        //sock.send(echoString, echoStringLen);
-        
-        cout << "::6:: " <<  endl;
+       
         sock.send(data, sizeof(data));
         
         // Buffer for echo string + \0
         int bytesReceived = 0;              // Bytes read on each recv()
         int totalBytesReceived = 0;         // Total bytes read
         
-        // Receive the same string back from the server
-        cout << "Received: " << endl;               // Setup to print the echoed string
+        GOOGLE_PROTOBUF_VERIFY_VERSION;
         
-        while (totalBytesReceived < echoStringLen) {
+        motion::Message mr;
+
+        
+        while (totalBytesReceived < sizeof(data)) {
             // Receive up to the buffer size bytes from the sender
             if ((bytesReceived = (sock.recv(echoBuffer, RCVBUFSIZE))) <= 0) {
                 cerr << "Unable to read";
@@ -115,6 +93,16 @@ void * sendMessage (void * arg)
             totalBytesReceived += bytesReceived;     // Keep tally of total bytes
             echoBuffer[bytesReceived] = '\0';        // Terminate the string!
             cout << "Received message: " << echoBuffer;                      // Print the echo buffer
+            
+            const string & data = echoBuffer;
+            
+            mr.ParseFromString(data);
+            
+            receive_proto.Clear();
+            receive_proto = mr;
+            
+            cout << "Type Received: " << mr.type() << endl;
+            
         }
         cout << endl;
         
@@ -131,7 +119,7 @@ void * sendMessage (void * arg)
     //std::stringstream strm;
     //strm << echoBuffer;
 
-    //pthread_cancel(thread_message);
+    pthread_cancel(thread_message);
     
     
 }
@@ -150,8 +138,8 @@ void setMessage(motion::Message m, bool array)
         cout << "BroadcastSender pthread_create failed." << endl;
     }
     
-    pthread_join(    thread_message,          (void**) &runm);
+    //pthread_join(    thread_message,          (void**) &runm);
     
-    pthread_cancel(thread_message);
+    //pthread_cancel(thread_message);
     
 }
