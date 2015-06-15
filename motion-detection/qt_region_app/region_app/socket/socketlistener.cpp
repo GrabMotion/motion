@@ -2,13 +2,15 @@
 
 using namespace std;
 
+#define RCVBUFSIZE 500000
+
 SocketListener::SocketListener(QObject *parent): QObject(parent){}
 
 // TCP client handling function
 void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
 {
 
-  const unsigned int RCVBUFSIZE = 100000; //32;    // Size of receive buffer
+  //const unsigned int RCVBUFSIZE = 100000; //32;    // Size of receive buffer
 
   int value;
   cout << "Handling client ";
@@ -50,8 +52,8 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
 
       //if (!parse)
       //{
-          totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
-          echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
+          //totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
+          //echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
 
           const string & data = echoBuffer;
 
@@ -99,74 +101,68 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
       //}
   //}
 
+   int size_init = mm.ByteSize();
 
-  switch (action)
-  {
-  case motion::Message::SET_MAT:
+   cout << "ByteSize:::::::::::::: " << size_init << endl;
 
-      //motion::Message mbytes;
-      //mbytes.ParseFromArray(response.data(), response.size());
+    switch (action)
+    {
 
-      //cv::Mat data_mat;
+      case motion::Message::SET_MAT:
 
-      if(mm.ByteSize() > 0)
-      {
-          if (mm.has_data())
+          if(mm.ByteSize() > 0)
           {
-              std::string mdata = mm.data();
+              if (mm.has_data())
+              {
 
-              int w = mm.width();
-              int h = mm.height();
+                  std::string mdata = mm.data();
+                  std::stringstream input_d;
+                  input_d << mdata;
 
-              //cv::Mat image1(w,h,CV_8UC3,cv::Scalar(255,255,255));
+                  int width_d = 0;
+                  int height_d = 0;
+                  int type_d = 0;
+                  size_t size_d = 0; // = input_d.tellp();
 
-              cv::Mat mat(mm.width(), mm.height(), CV_8UC3, &mdata);
+                  cout << "size_d: " << size_d << endl;
+                  input_d.read((char*)(&width_d), sizeof(int));
+                  input_d.read((char*)(&height_d), sizeof(int));
+                  input_d.read((char*)(&type_d), sizeof(int));
+                  input_d.read((char*)(&size_d), sizeof(size_t));
 
-              //typedef unsigned char byte;
-              //std::vector<byte> vectordata(mdata.begin(),mdata.end());
-              // cv::Mat data_mat(vectordata,true);
+                  char* data_d = new char[size_d];
+                  //data_d[size_d] = '\0';
+                  input_d.read(data_d, size_d);
 
-              QImage frame = Mat2QImage(mat);
+                  // Construct the image (clone it so that it won't need our buffer anymore)
+                  //cv::Mat m_r = cv::Mat(height_d, width_d, type_d, data_d).clone();
 
-              //QPixmap pixmap((QString::fromStdString(path)));
-              //QString q_response = QString::fromUtf8(data.c_str());
+                  cv::Mat m_r = cv::Mat(mm.height(), mm.width(), type_d, data_d).clone();
 
-              QMetaObject::invokeMethod(parent, "remoteImage", Q_ARG(QImage, frame));
-                //ui->output->setPixmap(QPixmap::fromImage(frame));
-           }
-      }
+                  imwrite("/jose/repos/image_2.jpg", m_r);
+                  QImage frame = Mat2QImage(m_r);
+                  QMetaObject::invokeMethod(parent, "remoteImage", Q_ARG(QImage, frame));
+                  delete data_d;
 
-      break;
-  }
+               }
+          }
 
-  google::protobuf::ShutdownProtobufLibrary();
+          break;
+    }
 
-  motion::Message mr;
-  mr.set_type(motion::Message::SET_MAT);
+    google::protobuf::ShutdownProtobufLibrary();
 
-  string datar;
-  mr.SerializeToString(&datar);
-  char bts[datar.length()];
-  strcpy(bts, datar.c_str());
+    motion::Message mr;
+    mr.set_type(motion::Message::SET_MAT);
 
-  // Echo message back to client
-  sock->send(bts, strlen(bts));
+    string datar;
+    mr.SerializeToString(&datar);
+    char bts[datar.length()];
+    strcpy(bts, datar.c_str());
 
-  google::protobuf::ShutdownProtobufLibrary();
+    sock->send(bts, strlen(bts));
 
-  //sock->send(echoBuffer, recvMsgSize);
-
-  //totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
-  //echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
-
-  //QString q_response = QString::fromUtf8(message.c_str());
-  //socket_response = message;
-  //QMetaObject::invokeMethod(parent, "remoteMessage", Q_ARG(QString, q_response));
-  //QMetaObject::invokeMethod(parent, "remoteMessage", Q_ARG(const char *, echoBuffer));
-
-  // Destructor closes sockets
-
-
+    google::protobuf::ShutdownProtobufLibrary();
 
 }
 
@@ -191,14 +187,14 @@ void * SocketListener::threadMain (void *arg) //void *clntSock)
     SocketListener sl;
     sl.HandleTCPClient((TCPSocket *) clntSock, parent);
 
-    delete (TCPSocket *) clntSock;
+    //delete (TCPSocket *) clntSock;
 }
+
 
 void * SocketListener::socketThread (void * args)
 {
 
     QObject *parent = (QObject *)args;
-    const unsigned int TCP_ECHO_PORT                = 5010;
     pthread_t thread_echo;
     int runt, runb;
     void *status;
@@ -233,6 +229,8 @@ void * SocketListener::socketThread (void * args)
     } catch (SocketException &e) {
         cerr << e.what() << endl;
         //exit(1);
+        QString error = e.what();
+        QMetaObject::invokeMethod(parent, "remoteError", Q_ARG(QString&, error));
     }
 
 }

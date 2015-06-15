@@ -6,6 +6,8 @@
 #include <QWidget>
 #include <QtCore>
 #include <QThread>
+#include <QtWidgets/qdialog.h>
+#include <QMessageBox>
 
 #include "socket/PracticalSocket.h"
 #include <arpa/inet.h>
@@ -21,6 +23,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <sys/malloc.h>
 
 //#include <google/protobuf/message.h>
 #include "protobuffer/motion.pb.h"
@@ -46,7 +49,6 @@ private:
     pthread_cond_t echo_response;
     bool echo_received;
     int resutl_echo;
-    //void emitSignal(std::string message);
 
 public:
     std::string socket_response;

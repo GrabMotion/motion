@@ -93,6 +93,8 @@ private:
     std::string result_message;
     QString q_response;
 
+    void SocketErrorMessage(QString &e);
+
 public:
     Q_SLOT void remoteMessage(QString str)
     {
@@ -102,6 +104,11 @@ public:
     {
         setRemoteImage(image);
     }
+    Q_SLOT void remoteError(QString &e)
+    {
+        SocketErrorMessage(e);
+    }
+
 private slots:
 
     //buttons

@@ -13,6 +13,8 @@
 #include <string>
 #include <stdio.h>
 
+#include <QMessageBox>
+
 using namespace std;
 
 class TCPEchoThread : public QThread

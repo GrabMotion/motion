@@ -115,6 +115,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Local Network
     MainWindow::getLocalNetwork();
+
+    //ui->ips_combo->addItem("192.168.1.47"); //208.70.188.15");
+    //ui->connect_button->setEnabled(true);
 }
 
 void MainWindow::getLocalNetwork()
@@ -825,5 +828,24 @@ void MainWindow::on_test_mat_clicked()
     google::protobuf::ShutdownProtobufLibrary();
 
     tcpecho_thread->terminate();
+
+}
+
+
+void MainWindow::SocketErrorMessage(QString &e)
+{
+    QMessageBox* msgBox 	= new QMessageBox();
+    msgBox->setWindowTitle("Trying to connect with terminals");
+    msgBox->setText(e);
+    msgBox->setWindowFlags(Qt::WindowStaysOnTopHint);
+    msgBox->show();
+
+    /*if (msgBox == QMessageBox::Yes)
+  {
+    qDebug() << "Yes was clicked";
+    QApplication::quit();
+  } else {
+    qDebug() << "Yes was *not* clicked";
+  }*/
 
 }

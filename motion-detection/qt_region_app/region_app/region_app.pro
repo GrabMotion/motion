@@ -55,6 +55,7 @@ LIBS += -L/usr/local/lib \
      -lopencv_imgproc \
      -lopencv_features2d \
      -lopencv_highgui \
+     -lopencv_imgcodecs \
      -lprotobuf
 
 QMAKE_CXXFLAGS += -std=c++0x -pthread
