@@ -44,13 +44,15 @@ void protobuf_AssignDesc_motion_2eproto() {
       "motion.proto");
   GOOGLE_CHECK(file != NULL);
   Message_descriptor_ = file->message_type(0);
-  static const int Message_offsets_[10] = {
+  static const int Message_offsets_[12] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, time_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, width_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, height_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, rows_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, cols_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, typemat_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, size_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, data_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, serverip_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, clientip_),
@@ -163,27 +165,27 @@ void protobuf_AddDesc_motion_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014motion.proto\022\006motion\"\227\004\n\007Message\0221\n\004ty"
+    "\n\014motion.proto\022\006motion\"\266\004\n\007Message\0221\n\004ty"
     "pe\030\001 \002(\0162\032.motion.Message.ActionType:\007CO"
     "NNECT\022\014\n\004time\030\002 \001(\t\022\r\n\005width\030\003 \001(\005\022\016\n\006he"
-    "ight\030\004 \001(\005\022\014\n\004rows\030\005 \001(\005\022\014\n\004cols\030\006 \001(\005\022\014"
-    "\n\004data\030\007 \001(\014\022\020\n\010serverip\030\010 \001(\t\022\020\n\010client"
-    "ip\030\t \001(\t\022\017\n\007payload\030\n \001(\t\"\314\002\n\nActionType"
-    "\022\014\n\007CONNECT\020\350\007\022\023\n\016STOP_STREAMING\020\352\007\022\024\n\017P"
-    "AUSE_STREAMING\020\353\007\022\026\n\021START_RECOGNITION\020\354"
-    "\007\022\025\n\020STOP_RECOGNITION\020\355\007\022\020\n\013DISSCONNECT\020"
-    "\356\007\022\r\n\010GET_TIME\020\357\007\022\r\n\010SET_TIME\020\360\007\022\r\n\010TIME"
-    "_SET\020\361\007\022\024\n\017AMOUNT_DETECTED\020\362\007\022\024\n\017FILE_RE"
-    "COGNIZED\020\363\007\022\014\n\007GET_MAT\020\364\007\022\014\n\007SET_MAT\020\365\007\022"
-    "\022\n\rTCP_ECHO_PORT\020\222\'\022\r\n\010UDP_PORT\020\234\'\022\031\n\024ST"
-    "REAMING_VIDEO_PORT\020\246\'\022\021\n\014TCP_MSG_PORT\020\260\'"
-    "\"\210\001\n\013Recognition\022\020\n\010instance\030\001 \002(\005\022\025\n\rse"
-    "tStoreImage\030\002 \001(\010\022\025\n\rsetSendAmount\030\003 \001(\010"
-    "\022\027\n\017setSendFilePath\030\004 \001(\010\022\016\n\006amount\030\005 \001("
-    "\t\022\020\n\010filePath\030\006 \001(\t\":\n\010Instance\022\022\n\nidIns"
-    "tance\030\001 \002(\005\022\r\n\005start\030\002 \002(\t\022\013\n\003end\030\003 \002(\t\""
-    "/\n\006Region\022\020\n\010fileName\030\001 \002(\t\022\023\n\013xml_conte"
-    "nt\030\002 \002(\t", 808);
+    "ight\030\004 \001(\005\022\014\n\004rows\030\005 \001(\005\022\014\n\004cols\030\006 \001(\005\022\017"
+    "\n\007typemat\030\007 \001(\005\022\014\n\004size\030\010 \001(\005\022\014\n\004data\030\t "
+    "\001(\014\022\020\n\010serverip\030\n \001(\t\022\020\n\010clientip\030\013 \001(\t\022"
+    "\017\n\007payload\030\014 \001(\t\"\314\002\n\nActionType\022\014\n\007CONNE"
+    "CT\020\350\007\022\023\n\016STOP_STREAMING\020\352\007\022\024\n\017PAUSE_STRE"
+    "AMING\020\353\007\022\026\n\021START_RECOGNITION\020\354\007\022\025\n\020STOP"
+    "_RECOGNITION\020\355\007\022\020\n\013DISSCONNECT\020\356\007\022\r\n\010GET"
+    "_TIME\020\357\007\022\r\n\010SET_TIME\020\360\007\022\r\n\010TIME_SET\020\361\007\022\024"
+    "\n\017AMOUNT_DETECTED\020\362\007\022\024\n\017FILE_RECOGNIZED\020"
+    "\363\007\022\014\n\007GET_MAT\020\364\007\022\014\n\007SET_MAT\020\365\007\022\022\n\rTCP_EC"
+    "HO_PORT\020\222\'\022\r\n\010UDP_PORT\020\234\'\022\031\n\024STREAMING_V"
+    "IDEO_PORT\020\246\'\022\021\n\014TCP_MSG_PORT\020\260\'\"\210\001\n\013Reco"
+    "gnition\022\020\n\010instance\030\001 \002(\005\022\025\n\rsetStoreIma"
+    "ge\030\002 \001(\010\022\025\n\rsetSendAmount\030\003 \001(\010\022\027\n\017setSe"
+    "ndFilePath\030\004 \001(\010\022\016\n\006amount\030\005 \001(\t\022\020\n\010file"
+    "Path\030\006 \001(\t\":\n\010Instance\022\022\n\nidInstance\030\001 \002"
+    "(\005\022\r\n\005start\030\002 \002(\t\022\013\n\003end\030\003 \002(\t\"/\n\006Region"
+    "\022\020\n\010fileName\030\001 \002(\t\022\023\n\013xml_content\030\002 \002(\t", 839);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "motion.proto", &protobuf_RegisterTypes);
   Message::default_instance_ = new Message();
@@ -264,6 +266,8 @@ const int Message::kWidthFieldNumber;
 const int Message::kHeightFieldNumber;
 const int Message::kRowsFieldNumber;
 const int Message::kColsFieldNumber;
+const int Message::kTypematFieldNumber;
+const int Message::kSizeFieldNumber;
 const int Message::kDataFieldNumber;
 const int Message::kServeripFieldNumber;
 const int Message::kClientipFieldNumber;
@@ -295,6 +299,8 @@ void Message::SharedCtor() {
   height_ = 0;
   rows_ = 0;
   cols_ = 0;
+  typemat_ = 0;
+  size_ = 0;
   data_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   serverip_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   clientip_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -360,14 +366,16 @@ void Message::Clear() {
   } while (0)
 
   if (_has_bits_[0 / 32] & 255) {
-    ZR_(width_, rows_);
+    ZR_(width_, typemat_);
     type_ = 1000;
     if (has_time()) {
       if (time_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         time_->clear();
       }
     }
-    cols_ = 0;
+    size_ = 0;
+  }
+  if (_has_bits_[8 / 32] & 3840) {
     if (has_data()) {
       if (data_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         data_->clear();
@@ -378,8 +386,6 @@ void Message::Clear() {
         serverip_->clear();
       }
     }
-  }
-  if (_has_bits_[8 / 32] & 768) {
     if (has_clientip()) {
       if (clientip_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         clientip_->clear();
@@ -501,26 +507,56 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(58)) goto parse_data;
+        if (input->ExpectTag(56)) goto parse_typemat;
         break;
       }
 
-      // optional bytes data = 7;
+      // optional int32 typemat = 7;
       case 7: {
-        if (tag == 58) {
+        if (tag == 56) {
+         parse_typemat:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &typemat_)));
+          set_has_typemat();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(64)) goto parse_size;
+        break;
+      }
+
+      // optional int32 size = 8;
+      case 8: {
+        if (tag == 64) {
+         parse_size:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &size_)));
+          set_has_size();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(74)) goto parse_data;
+        break;
+      }
+
+      // optional bytes data = 9;
+      case 9: {
+        if (tag == 74) {
          parse_data:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_data()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(66)) goto parse_serverip;
+        if (input->ExpectTag(82)) goto parse_serverip;
         break;
       }
 
-      // optional string serverip = 8;
-      case 8: {
-        if (tag == 66) {
+      // optional string serverip = 10;
+      case 10: {
+        if (tag == 82) {
          parse_serverip:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_serverip()));
@@ -531,13 +567,13 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(74)) goto parse_clientip;
+        if (input->ExpectTag(90)) goto parse_clientip;
         break;
       }
 
-      // optional string clientip = 9;
-      case 9: {
-        if (tag == 74) {
+      // optional string clientip = 11;
+      case 11: {
+        if (tag == 90) {
          parse_clientip:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_clientip()));
@@ -548,13 +584,13 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(82)) goto parse_payload;
+        if (input->ExpectTag(98)) goto parse_payload;
         break;
       }
 
-      // optional string payload = 10;
-      case 10: {
-        if (tag == 82) {
+      // optional string payload = 12;
+      case 12: {
+        if (tag == 98) {
          parse_payload:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_payload()));
@@ -630,40 +666,50 @@ void Message::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->cols(), output);
   }
 
-  // optional bytes data = 7;
-  if (has_data()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
-      7, this->data(), output);
+  // optional int32 typemat = 7;
+  if (has_typemat()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->typemat(), output);
   }
 
-  // optional string serverip = 8;
+  // optional int32 size = 8;
+  if (has_size()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(8, this->size(), output);
+  }
+
+  // optional bytes data = 9;
+  if (has_data()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
+      9, this->data(), output);
+  }
+
+  // optional string serverip = 10;
   if (has_serverip()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->serverip().data(), this->serverip().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
       "serverip");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      8, this->serverip(), output);
+      10, this->serverip(), output);
   }
 
-  // optional string clientip = 9;
+  // optional string clientip = 11;
   if (has_clientip()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->clientip().data(), this->clientip().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
       "clientip");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      9, this->clientip(), output);
+      11, this->clientip(), output);
   }
 
-  // optional string payload = 10;
+  // optional string payload = 12;
   if (has_payload()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->payload().data(), this->payload().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
       "payload");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      10, this->payload(), output);
+      12, this->payload(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -713,14 +759,24 @@ void Message::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->cols(), target);
   }
 
-  // optional bytes data = 7;
+  // optional int32 typemat = 7;
+  if (has_typemat()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->typemat(), target);
+  }
+
+  // optional int32 size = 8;
+  if (has_size()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(8, this->size(), target);
+  }
+
+  // optional bytes data = 9;
   if (has_data()) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        7, this->data(), target);
+        9, this->data(), target);
   }
 
-  // optional string serverip = 8;
+  // optional string serverip = 10;
   if (has_serverip()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->serverip().data(), this->serverip().length(),
@@ -728,10 +784,10 @@ void Message::SerializeWithCachedSizes(
       "serverip");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        8, this->serverip(), target);
+        10, this->serverip(), target);
   }
 
-  // optional string clientip = 9;
+  // optional string clientip = 11;
   if (has_clientip()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->clientip().data(), this->clientip().length(),
@@ -739,10 +795,10 @@ void Message::SerializeWithCachedSizes(
       "clientip");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        9, this->clientip(), target);
+        11, this->clientip(), target);
   }
 
-  // optional string payload = 10;
+  // optional string payload = 12;
   if (has_payload()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->payload().data(), this->payload().length(),
@@ -750,7 +806,7 @@ void Message::SerializeWithCachedSizes(
       "payload");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        10, this->payload(), target);
+        12, this->payload(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -806,30 +862,44 @@ int Message::ByteSize() const {
           this->cols());
     }
 
-    // optional bytes data = 7;
+    // optional int32 typemat = 7;
+    if (has_typemat()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->typemat());
+    }
+
+    // optional int32 size = 8;
+    if (has_size()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->size());
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional bytes data = 9;
     if (has_data()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
           this->data());
     }
 
-    // optional string serverip = 8;
+    // optional string serverip = 10;
     if (has_serverip()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->serverip());
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
-    // optional string clientip = 9;
+    // optional string clientip = 11;
     if (has_clientip()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->clientip());
     }
 
-    // optional string payload = 10;
+    // optional string payload = 12;
     if (has_payload()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -881,14 +951,20 @@ void Message::MergeFrom(const Message& from) {
     if (from.has_cols()) {
       set_cols(from.cols());
     }
+    if (from.has_typemat()) {
+      set_typemat(from.typemat());
+    }
+    if (from.has_size()) {
+      set_size(from.size());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_data()) {
       set_data(from.data());
     }
     if (from.has_serverip()) {
       set_serverip(from.serverip());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_clientip()) {
       set_clientip(from.clientip());
     }
@@ -925,6 +1001,8 @@ void Message::Swap(Message* other) {
     std::swap(height_, other->height_);
     std::swap(rows_, other->rows_);
     std::swap(cols_, other->cols_);
+    std::swap(typemat_, other->typemat_);
+    std::swap(size_, other->size_);
     std::swap(data_, other->data_);
     std::swap(serverip_, other->serverip_);
     std::swap(clientip_, other->clientip_);

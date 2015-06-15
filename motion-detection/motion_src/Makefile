@@ -115,6 +115,36 @@ motion_detect_raspberry/fast:
 .PHONY : motion_detect_raspberry/fast
 
 # target to build an object file
+src/motion_detect/b64/cdecode.o:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cdecode.o
+.PHONY : src/motion_detect/b64/cdecode.o
+
+# target to preprocess a source file
+src/motion_detect/b64/cdecode.i:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cdecode.i
+.PHONY : src/motion_detect/b64/cdecode.i
+
+# target to generate assembly for a file
+src/motion_detect/b64/cdecode.s:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cdecode.s
+.PHONY : src/motion_detect/b64/cdecode.s
+
+# target to build an object file
+src/motion_detect/b64/cencode.o:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o
+.PHONY : src/motion_detect/b64/cencode.o
+
+# target to preprocess a source file
+src/motion_detect/b64/cencode.i:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.i
+.PHONY : src/motion_detect/b64/cencode.i
+
+# target to generate assembly for a file
+src/motion_detect/b64/cencode.s:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.s
+.PHONY : src/motion_detect/b64/cencode.s
+
+# target to build an object file
 src/motion_detect/main.o:
 	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o
 .PHONY : src/motion_detect/main.o
@@ -303,6 +333,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... motion_detect_raspberry"
 	@echo "... rebuild_cache"
+	@echo "... src/motion_detect/b64/cdecode.o"
+	@echo "... src/motion_detect/b64/cdecode.i"
+	@echo "... src/motion_detect/b64/cdecode.s"
+	@echo "... src/motion_detect/b64/cencode.o"
+	@echo "... src/motion_detect/b64/cencode.i"
+	@echo "... src/motion_detect/b64/cencode.s"
 	@echo "... src/motion_detect/main.o"
 	@echo "... src/motion_detect/main.i"
 	@echo "... src/motion_detect/main.s"

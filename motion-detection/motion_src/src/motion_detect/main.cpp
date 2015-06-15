@@ -277,24 +277,28 @@ void* streamCast(void * arg)
     int type_s      = mat.type();
     size_t size_s   = mat.total() * mat.elemSize();
     
+    me.set_size(size_s);
+    me.set_typemat(type_s);
+    
     // Initialize a stringstream and write the data
     std::stringstream ss;
-    ss.write((char*)(&width_s), sizeof(int));
-    ss.write((char*)(&height_s), sizeof(int));
-    ss.write((char*)(&type_s), sizeof(int));
-    ss.write((char*)(&size_s), sizeof(size_t));
+    
+    //ss.write((char*)(&width_s), sizeof(int));
+    //ss.write((char*)(&height_s), sizeof(int));
+    //ss.write((char*)(&type_s), sizeof(int));
+    //ss.write((char*)(&size_s), sizeof(size_t));
     
     cout << "size_s: " << size_s << endl;
     
     // Write the whole image data
     ss.write((char*)mat.data, size_s);
-
-    // Base64 encode the stringstream
-    //base64::encoder E;
-    //std::stringstream encoded;
-    //E.encode(ss, encoded);
     
-    me.set_data(ss.str()); //mat_data);
+    // Base64 encode the stringstream
+    base64::encoder E;
+    std::stringstream encoded;
+    E.encode(ss, encoded);
+
+    me.set_data(encoded.str()); //mat_data);
 
     bool array = true;
     int size_init = me.ByteSize();
@@ -380,6 +384,11 @@ void* streamCast(void * arg)
     std::stringstream input_d;
     input_d << mdata;
     
+    // Base64 decode the stringstream
+    base64::decoder D;
+    stringstream decoded;
+    D.decode(input_d, decoded);
+    
     // The data we need to deserialize
     int width_d = 0;
     int height_d = 0;
@@ -387,10 +396,10 @@ void* streamCast(void * arg)
     size_t size_d = 0;
     
     // Read the width, height, type and size of the buffer
-    input_d.read((char*)(&width_d), sizeof(int));
-    input_d.read((char*)(&height_d), sizeof(int));
-    input_d.read((char*)(&type_d), sizeof(int));
-    input_d.read((char*)(&size_d), sizeof(size_t));
+    //input_d.read((char*)(&width_d), sizeof(int));
+    //input_d.read((char*)(&height_d), sizeof(int));
+    //input_d.read((char*)(&type_d), sizeof(int));
+    //input_d.read((char*)(&size_d), sizeof(size_t));
     
     cout << "width_d: "  << width_d  <<  endl;
     cout << "height_d: " << height_d <<  endl;
@@ -398,12 +407,12 @@ void* streamCast(void * arg)
     cout << "size_d: "   << size_d   <<  endl;
     
     // Allocate a buffer for the pixels
-    char* data_d = new char[size_d];
+    char* data_d = new char[mm.size()];
     // Read the pixels from the stringstream
-    input_d.read(data_d, size_d);
+    decoded.read(data_d, mm.size());
     
     // Construct the image (clone it so that it won't need our buffer anymore)
-    cv::Mat m_d = Mat(height_d, width_d, type_d, data_d).clone();
+    cv::Mat m_d = Mat(mm.height(), mm.width(), mm.typemat(), data_d).clone();
     
     imwrite("image_2.jpg", m_d);
     

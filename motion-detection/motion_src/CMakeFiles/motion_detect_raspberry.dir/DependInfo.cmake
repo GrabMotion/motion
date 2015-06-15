@@ -5,6 +5,8 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_C
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/cdecode.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cdecode.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/cencode.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/ntp/hwclock.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o"
   )
 SET(CMAKE_C_COMPILER_ID "GNU")

@@ -9,7 +9,6 @@ For details, see http://sourceforge.net/projects/libb64
 #define BASE64_ENCODE_H
 
 #include <iostream>
-#include "../b64/cencode.h"
 
 #define BUFFERSIZE 16777216
 
@@ -17,7 +16,7 @@ namespace base64
 {
 	extern "C" 
 	{
-		#include "../b64/cencode.h"
+		#include "cencode.h"
 	}
 
 	struct encoder

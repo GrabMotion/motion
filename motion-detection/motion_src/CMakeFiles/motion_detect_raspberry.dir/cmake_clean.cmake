@@ -11,6 +11,8 @@ FILE(REMOVE_RECURSE
   "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o"
   "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o"
   "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o"
+  "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cdecode.o"
+  "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o"
   "src/motion_detect/motion_detect_raspberry.pdb"
   "src/motion_detect/motion_detect_raspberry"
 )
