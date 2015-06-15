@@ -30,6 +30,9 @@
 #include <opencv2/opencv.hpp>
 #include "image/mat2qimage.h"
 
+#include "b64/encode.h"
+#include "b64/decode.h"
+
 class SocketListener : public QObject
 {
     Q_OBJECT

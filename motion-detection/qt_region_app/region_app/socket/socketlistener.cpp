@@ -1,6 +1,7 @@
 #include "socket/socketlistener.h"
 
 using namespace std;
+using namespace base64;
 
 #define RCVBUFSIZE 500000
 
@@ -116,23 +117,29 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
               {
 
                   std::string mdata = mm.data();
+
                   std::stringstream input_d;
                   input_d << mdata;
 
-                  int width_d = 0;
-                  int height_d = 0;
-                  int type_d = 0;
-                  size_t size_d = 0; // = input_d.tellp();
+                  // Base64 decode the stringstream
+                  base64::decoder D;
+                  stringstream decoded;
+                  D.decode(input_d, decoded);
+
+                  int width_d = mm.width();
+                  int height_d = mm.height();
+                  int type_d = mm.typemat();
+                  size_t size_d = mm.size(); // = input_d.tellp();
 
                   cout << "size_d: " << size_d << endl;
-                  input_d.read((char*)(&width_d), sizeof(int));
-                  input_d.read((char*)(&height_d), sizeof(int));
-                  input_d.read((char*)(&type_d), sizeof(int));
-                  input_d.read((char*)(&size_d), sizeof(size_t));
+                  //input_d.read((char*)(&width_d), sizeof(int));
+                  //input_d.read((char*)(&height_d), sizeof(int));
+                  //input_d.read((char*)(&type_d), sizeof(int));
+                  //input_d.read((char*)(&size_d), sizeof(size_t));
 
                   char* data_d = new char[size_d];
                   //data_d[size_d] = '\0';
-                  input_d.read(data_d, size_d);
+                  decoded.read(data_d, size_d);
 
                   // Construct the image (clone it so that it won't need our buffer anymore)
                   //cv::Mat m_r = cv::Mat(height_d, width_d, type_d, data_d).clone();

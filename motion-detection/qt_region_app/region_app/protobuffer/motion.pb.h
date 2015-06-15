@@ -214,10 +214,24 @@ class Message : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 cols() const;
   inline void set_cols(::google::protobuf::int32 value);
 
-  // optional bytes data = 7;
+  // optional int32 typemat = 7;
+  inline bool has_typemat() const;
+  inline void clear_typemat();
+  static const int kTypematFieldNumber = 7;
+  inline ::google::protobuf::int32 typemat() const;
+  inline void set_typemat(::google::protobuf::int32 value);
+
+  // optional int32 size = 8;
+  inline bool has_size() const;
+  inline void clear_size();
+  static const int kSizeFieldNumber = 8;
+  inline ::google::protobuf::int32 size() const;
+  inline void set_size(::google::protobuf::int32 value);
+
+  // optional bytes data = 9;
   inline bool has_data() const;
   inline void clear_data();
-  static const int kDataFieldNumber = 7;
+  static const int kDataFieldNumber = 9;
   inline const ::std::string& data() const;
   inline void set_data(const ::std::string& value);
   inline void set_data(const char* value);
@@ -226,10 +240,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_data();
   inline void set_allocated_data(::std::string* data);
 
-  // optional string serverip = 8;
+  // optional string serverip = 10;
   inline bool has_serverip() const;
   inline void clear_serverip();
-  static const int kServeripFieldNumber = 8;
+  static const int kServeripFieldNumber = 10;
   inline const ::std::string& serverip() const;
   inline void set_serverip(const ::std::string& value);
   inline void set_serverip(const char* value);
@@ -238,10 +252,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_serverip();
   inline void set_allocated_serverip(::std::string* serverip);
 
-  // optional string clientip = 9;
+  // optional string clientip = 11;
   inline bool has_clientip() const;
   inline void clear_clientip();
-  static const int kClientipFieldNumber = 9;
+  static const int kClientipFieldNumber = 11;
   inline const ::std::string& clientip() const;
   inline void set_clientip(const ::std::string& value);
   inline void set_clientip(const char* value);
@@ -250,10 +264,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_clientip();
   inline void set_allocated_clientip(::std::string* clientip);
 
-  // optional string payload = 10;
+  // optional string payload = 12;
   inline bool has_payload() const;
   inline void clear_payload();
-  static const int kPayloadFieldNumber = 10;
+  static const int kPayloadFieldNumber = 12;
   inline const ::std::string& payload() const;
   inline void set_payload(const ::std::string& value);
   inline void set_payload(const char* value);
@@ -276,6 +290,10 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_rows();
   inline void set_has_cols();
   inline void clear_has_cols();
+  inline void set_has_typemat();
+  inline void clear_has_typemat();
+  inline void set_has_size();
+  inline void clear_has_size();
   inline void set_has_data();
   inline void clear_has_data();
   inline void set_has_serverip();
@@ -294,11 +312,13 @@ class Message : public ::google::protobuf::Message {
   ::google::protobuf::int32 width_;
   ::google::protobuf::int32 height_;
   ::google::protobuf::int32 rows_;
+  ::google::protobuf::int32 cols_;
+  ::google::protobuf::int32 typemat_;
   ::std::string* data_;
   ::std::string* serverip_;
   ::std::string* clientip_;
   ::std::string* payload_;
-  ::google::protobuf::int32 cols_;
+  ::google::protobuf::int32 size_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -857,15 +877,63 @@ inline void Message::set_cols(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.cols)
 }
 
-// optional bytes data = 7;
-inline bool Message::has_data() const {
+// optional int32 typemat = 7;
+inline bool Message::has_typemat() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void Message::set_has_data() {
+inline void Message::set_has_typemat() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void Message::clear_has_data() {
+inline void Message::clear_has_typemat() {
   _has_bits_[0] &= ~0x00000040u;
+}
+inline void Message::clear_typemat() {
+  typemat_ = 0;
+  clear_has_typemat();
+}
+inline ::google::protobuf::int32 Message::typemat() const {
+  // @@protoc_insertion_point(field_get:motion.Message.typemat)
+  return typemat_;
+}
+inline void Message::set_typemat(::google::protobuf::int32 value) {
+  set_has_typemat();
+  typemat_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.typemat)
+}
+
+// optional int32 size = 8;
+inline bool Message::has_size() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void Message::set_has_size() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void Message::clear_has_size() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void Message::clear_size() {
+  size_ = 0;
+  clear_has_size();
+}
+inline ::google::protobuf::int32 Message::size() const {
+  // @@protoc_insertion_point(field_get:motion.Message.size)
+  return size_;
+}
+inline void Message::set_size(::google::protobuf::int32 value) {
+  set_has_size();
+  size_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.size)
+}
+
+// optional bytes data = 9;
+inline bool Message::has_data() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void Message::set_has_data() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void Message::clear_has_data() {
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void Message::clear_data() {
   if (data_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -933,15 +1001,15 @@ inline void Message::set_allocated_data(::std::string* data) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.data)
 }
 
-// optional string serverip = 8;
+// optional string serverip = 10;
 inline bool Message::has_serverip() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
 inline void Message::set_has_serverip() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000200u;
 }
 inline void Message::clear_has_serverip() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void Message::clear_serverip() {
   if (serverip_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -1009,15 +1077,15 @@ inline void Message::set_allocated_serverip(::std::string* serverip) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.serverip)
 }
 
-// optional string clientip = 9;
+// optional string clientip = 11;
 inline bool Message::has_clientip() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void Message::set_has_clientip() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void Message::clear_has_clientip() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void Message::clear_clientip() {
   if (clientip_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -1085,15 +1153,15 @@ inline void Message::set_allocated_clientip(::std::string* clientip) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.clientip)
 }
 
-// optional string payload = 10;
+// optional string payload = 12;
 inline bool Message::has_payload() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00000800u) != 0;
 }
 inline void Message::set_has_payload() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000800u;
 }
 inline void Message::clear_has_payload() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void Message::clear_payload() {
   if (payload_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
