@@ -62,7 +62,7 @@ CMAKE_BINARY_DIR = /home/pi/motion/motion-detection/motion_src
 CMakeFiles/motion_detect_raspberry.dir/all:
 	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/depend
 	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles  1 2 3 4 5 6 7 8 9 10 11 12 13 14
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles  1 2 3 4 5 6 7 8 9 10 11 12 13
 	@echo "Built target motion_detect_raspberry"
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/all
 
@@ -72,7 +72,7 @@ all: CMakeFiles/motion_detect_raspberry.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/motion_detect_raspberry.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/motion/motion-detection/motion_src/CMakeFiles 14
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/motion/motion-detection/motion_src/CMakeFiles 13
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/motion_detect_raspberry.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/motion/motion-detection/motion_src/CMakeFiles 0
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/rule
