@@ -32,7 +32,7 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
-#include "practical/PracticalSocket.h" 
+#include "practical/PracticalSocket.h"
 #include "practical/sendmessage.h"
 
 #include "recognition/detection.h"
@@ -40,6 +40,9 @@
 #include "protobuffer/motion.pb.h"
 
 #include "b64/base64.h"
+
+//#include "b64/encode.h"
+//#include "b64/decode.h"
 
 using namespace std;
 using namespace cv;
@@ -281,6 +284,7 @@ void* streamCast(void * arg)
     ss.write((char*)    (&size_s),      sizeof(size_t));
     ss.write((char*)     mat.data,      size_s);
     int ss_size = ss.tellp();
+   
     //base64::encoder E;
     //std::stringstream encoded;
     //E.encode(ss, encoded);
@@ -356,6 +360,7 @@ void* streamCast(void * arg)
     
     std::stringstream input_d;
     input_d << mdata;
+    
     //base64::decoder D;
     //stringstream decoded;
     int input_d_size = input_d.tellp();
@@ -843,77 +848,186 @@ int main (int argc, char * const argv[])
     google::protobuf::ShutdownProtobufLibrary();*/
     
     // Read a test image
-    Mat input = imread("img.jpg");
+    //Mat input = imread("img.jpg");
+    
+    CvCapture* capture = cvCreateCameraCapture(0);
+    if (capture == NULL)
+    {
+        std::cout << "No cam found." << std::endl;
+        return 0;
+    }
+    
+    int w = 640; //640; //1280; //320;
+    int h = 480; //480; //720; //240;
+    
+    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
+    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
+    
+    //double width = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
+    //double height = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
+    
+    IplImage* img=0;
+    img = cvQueryFrame( capture );
+    cvSaveImage("img.jpg",img);
+    
+    Mat input(h, w, CV_8UC3); //CV_8U); // CV_8UC3);
+    input = cvQueryFrame(capture);
+    cvtColor(input, input, CV_RGB2GRAY);
     
     // We will need to also serialize the width, height, type and size of the matrix
     int width = input.cols;
     int height = input.rows;
     int type = input.type();
-    size_t size = input.total() * input.elemSize();
     
-    // Initialize a stringstream and write the data
-    stringstream ss;
-    ss.write((char*)(&width), sizeof(int));
-    ss.write((char*)(&height), sizeof(int));
-    ss.write((char*)(&type), sizeof(int));
-    ss.write((char*)(&size), sizeof(size_t));
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
     
-    // Write the whole image data
-    ss.write((char*)input.data, size);
+    motion::Message me;
+    me.set_type(motion::Message::SET_MAT);
+    me.set_time(getTime());
+    me.set_serverip("192.168.1.35");
+    me.set_time(getTime());
     
-    cout  << "width: " << width << endl;
-    cout  << "height: " << height << endl;
-    cout  << "type: " << type << endl;
-    cout  << "size: " << size << endl;
+    int rows = input.rows;
+    int cols = input.cols;
     
-    // Base64 encode the stringstream
-    //base64::encoder E;
-    //stringstream encoded;
-    //E.encode(ss, encoded);
+    //cv::Size size = input.size();
     
-    // Base64 decode the stringstream
-    //base64::decoder D;
-    //stringstream decoded;
-    //D.decode(encoded, decoded);
+    //int total = size.width * size.height * input.channels();
+    //std::cout << "Mat size = " << total << std::endl;
     
-    String      original = ss.str();
-    std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(original.c_str()), original.length());
-    std::string oridecoded = base64_decode(oriencoded);
+    //std::vector<uchar> data(input.ptr(), input.ptr() + total);
+    //std::string matdata(data.begin(), data.end());
+    //std::cout << "String size = " << matdata.length() << std::endl;
     
-    stringstream decoded;
-    //std::stringstream decoded;
-    decoded << oridecoded;
+ 
+    uchar* mData = input.data;//input buffer data
+    uchar* nData = (uchar*)malloc(input.rows * input.cols * input.channels() * sizeof(uchar));//output buffer data
     
-    // The data we need to deserialize
-    int width_d = 0;
-    int height_d = 0;
-    int type_d = 0;
-    size_t size_d = 0;
+    std::cout << input.rows << " " << input.cols << " " << input.channels() << " " << sizeof(uchar) << std::endl;
+    std::cout << input.step << std::endl;
     
-    // Read the width, height, type and size of the buffer
-    decoded.read((char*)(&width_d), sizeof(int));
-    decoded.read((char*)(&height_d), sizeof(int));
-    decoded.read((char*)(&type_d), sizeof(int));
-    decoded.read((char*)(&size_d), sizeof(size_t));
+    //int r,g,b;
+    for(int i = 0;i < input.rows ;i++)
+    {
+        for(int j = 0;j < input.step ;j++)
+        {
+            nData[input.step * i + j ] = mData[input.step * i + j ] / 3;
+            nData[input.step * i + j + 1] = mData[input.step * i + j + 1] / 3;
+            nData[input.step * i + j + 2] = mData[input.step * i + j + 2] / 3;
+        }
+    }
     
-    // Allocate a buffer for the pixels
-    char* data_d = new char[size_d];
-    // Read the pixels from the stringstream
-    decoded.read(data_d, size_d);
+    std::string datastring(reinterpret_cast<char*>(nData));
+
     
-    // Construct the image (clone it so that it won't need our buffer anymore)
-    Mat deserialized = Mat(height_d, width_d, type_d, data_d).clone();
-    cout  << "::::::::::::::::::::::::::::::::::" << endl;
-    cout  << "width: " << width_d << endl;
-    cout  << "height: " << height_d << endl;
-    cout  << "type: " << type_d << endl;
-    cout  << "size: " << size_d << endl;
+    cv::Mat outputImage(image.rows, image.cols, CV_8UC3, (void*)nData);
+    if(! outputImage.data ) // Check
+    {
+        std::cout << "output mat failure" << std::endl ;
+    }
     
-    // Delete our buffer
-    delete[]data_d;
+    imwrite("fuck.jpg", outputImage);
+    
+    //Populate proto
+    me.set_height(height);
+    me.set_width(width);
+    me.set_size(total);
+    me.set_typemat(type);
+    me.set_time(getTime());
+    me.set_rows(rows);
+    me.set_cols(cols);
+    
+    
+    //std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(matdata.c_str()), matdata.length());
+    
+    me.set_data(data);
+    
+    bool array = true;
+    int size_init = me.ByteSize();
+    
+    cout << "+++++++++++++++++CREATING PROTO+++++++++++++++++++"            << endl;
+    cout << " Mat type                          : " << me.typemat()         << endl;
+    cout << " Time                              : " << me.time()            << endl;
+    cout << " proto string size                 : " << matdata.size()            << endl;
+    cout << " Mat size                          : " << input.size()               << endl;
+    cout << " Vector length                     : " << data.size()               << endl;
+    cout << "--------------------------------------------------"            << endl;
+    cout <<  endl;
+    
+    char data_init[size_init];
+    
+    if (array)
+    {
+        try
+        {
+            me.SerializeToArray(data_init, size_init);
+        }
+        catch (google::protobuf::FatalException fe)
+        {
+            std::cout << "PbToZmq " << fe.message() << std::endl;
+        }
+        
+    } else
+    {
+        //string data;
+        //me.SerializeToString(&data);
+        //char bts[data.length()];
+        //strcpy(bts, data.c_str());
+        //sendEcho(me.serverip(), bts, motion::Message::TCP_MSG_PORT);
+    }
+    
+    google::protobuf::ShutdownProtobufLibrary();
+    
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    
+    motion::Message mm;
+    
+    if (array)
+    {
+        
+        mm.ParseFromArray(&data_init, sizeof(data_init));
+    }
+    else
+    {
+        //mm.ParseFromString(&data);
+    }
+    
+    int action          = mm.type();
+    int size_final      = mm.ByteSize();
+    std::string mdata   = mm.data();
+    
+    //std::string decoded = base64_decode(mdata);
+    
+    std::vector<uchar> vectordata(mdata.begin(),mdata.end());
+    cv::Mat data_mat(vectordata,true);
+    cout<<"Height: " << data_mat.rows <<" Width: "<<data_mat.cols<<endl;
+    cv::Mat image(cv::imdecode(data_mat,1)); //put 0 if you want greyscale
+    cout<<"Height: " << image.rows <<" Width: "<<image.cols<<endl;
     
     //Save image converted
-    imwrite("image__decoded__10000.jpg", deserialized);
+    imwrite("image__decoded__10000.jpg", image);
+    
+    cout << "+++++++++++++++++RESTORED PROTO+++++++++++++++++++"            << endl;
+    cout << " Mat type                          : " << mm.typemat()         << endl;
+    cout << " Time                              : " << mm.time()            << endl;
+    cout << " proto string size                 : " << mdata.size()        << endl;
+    cout << " Mat size                          : " << image.size()         << endl;
+    cout << " Vector length                     : " << vectordata.size() << endl;
+    cout << "--------------------------------------------------"            << endl;
+    cout <<  endl;
+
+    cv::Size s = input.size();
+    
+    int t = s.width * s.height * image.channels();
+    std::cout << "Mat size = " << t << std::endl;
+    
+    
+    //Send Message to server
+    //setMessage(me, true);
+    
+    cvReleaseCapture(&capture);
+    
+    google::protobuf::ShutdownProtobufLibrary();
 
 
   /*pthread_mutex_init(&tcpMutex, 0);
