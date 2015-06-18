@@ -27,6 +27,7 @@ SOURCES += main.cpp\
     threads/tcpechothread.cpp \
     socket/socketlistener.cpp \
     protobuffer/motion.pb.cc \
+    b64/base64.cpp \
     b64/cdecode.c \
     b64/cencode.c
 
@@ -45,6 +46,7 @@ HEADERS  += mainwindow.h \
     threads/tcpechothread.h \
     socket/socketlistener.h \
     protobuffer/motion.pb.h \
+    b64/base64.h \
     b64/cdecode.h \
     b64/cencode.h \
     b64/decode.h \

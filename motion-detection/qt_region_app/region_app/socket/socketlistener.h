@@ -25,13 +25,21 @@
 #include <iostream>
 #include <sys/malloc.h>
 
-//#include <google/protobuf/message.h>
 #include "protobuffer/motion.pb.h"
 #include <opencv2/opencv.hpp>
 #include "image/mat2qimage.h"
 
+#include <string>
+#include <cassert>
+#include <limits>
+#include <stdexcept>
+#include <cctype>
+
+#include "b64/base64.h"
 #include "b64/encode.h"
 #include "b64/decode.h"
+
+#include <fstream>
 
 class SocketListener : public QObject
 {

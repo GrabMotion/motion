@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+
 #include "ui_mainwindow.h"
 
 #include <QPoint>
@@ -28,7 +29,7 @@
 #include "./spinner/QtWaitingSpinner.h"
 
 using namespace std;
-
+using namespace cv;
 
 Mat src;
 string filename, xml;
@@ -118,6 +119,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //ui->ips_combo->addItem("192.168.1.47"); //208.70.188.15");
     //ui->connect_button->setEnabled(true);
+
+    //testBase();
 }
 
 void MainWindow::getLocalNetwork()
@@ -848,4 +851,82 @@ void MainWindow::SocketErrorMessage(QString &e)
     qDebug() << "Yes was *not* clicked";
   }*/
 
+}
+
+
+
+std::string get_file_contents(string filename)
+{
+    std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
+    if (in)
+    {
+        std::string contents;
+        in.seekg(0, std::ios::end);
+        contents.resize(in.tellg());
+        in.seekg(0, std::ios::beg);
+        in.read(&contents[0], contents.size());
+        in.close();
+        return(contents);
+    }
+    throw(errno);
+}
+
+
+void MainWindow::testBase()
+{
+
+    // The data we need to deserialize
+    int width_d = 0;
+    int height_d = 0;
+    int type_d = 0;
+    size_t size_d = 0;
+
+    std::string basefile = "/jose/repos/base64oish.txt";
+    string loaded = get_file_contents(basefile);
+
+    std::string oridecoded = base64_decode(loaded);
+
+    stringstream decoded;
+    //std::stringstream decoded;
+    decoded << oridecoded;
+
+    // Read the width, height, type and size of the buffer
+    decoded.read((char*)(&width_d), sizeof(int));
+    decoded.read((char*)(&height_d), sizeof(int));
+    decoded.read((char*)(&type_d), sizeof(int));
+    decoded.read((char*)(&size_d), sizeof(int));
+
+    // Allocate a buffer for the pixels
+    char* data_d = new char[size_d];
+    // Read the pixels from the stringstream
+    decoded.read(data_d, size_d);
+
+    // Construct the image (clone it so that it won't need our buffer anymore)
+    Mat deserialized = Mat(height_d, width_d, type_d, data_d).clone();
+    cout  << "::::::::::::::::::::::::::::::::::" << endl;
+    cout  << "width: " << width_d << endl;
+    cout  << "height: " << height_d << endl;
+    cout  << "type: " << type_d << endl;
+    cout  << "size: " << size_d << endl;
+
+    // Delete our buffer
+    delete[]data_d;
+
+    //Save image converted
+    imwrite("/jose/repos/image__decoded__10000.jpg", deserialized);
+
+    QImage frame = Mat2QImage(deserialized);
+    setRemoteImage(frame);
+
+}
+
+std::string MainWindow::getTime()
+{
+    struct timeval tv;
+    struct tm* ptm;
+    char time_string[40];
+    gettimeofday (&tv, NULL);
+    ptm = localtime (&tv.tv_sec);
+    strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S %z", ptm);
+    return time_string;
 }

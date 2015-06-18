@@ -15,6 +15,11 @@
 #include <sys/time.h>
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+
+#include "b64/base64.h"
+
 
 const unsigned int CONNECT                  = 1000;
 
@@ -94,6 +99,9 @@ private:
     QString q_response;
 
     void SocketErrorMessage(QString &e);
+
+    void testBase();
+    std::string getTime();
 
 public:
     Q_SLOT void remoteMessage(QString str)
