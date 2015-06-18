@@ -70,7 +70,8 @@ void * sendMessage (void * arg)
             
         } else
         {
-           //m.SerializeToString(data);
+            string data_str;
+           m.SerializeToString(&data_str);
         }
        
         sock.send(data, sizeof(data));

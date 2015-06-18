@@ -897,19 +897,19 @@ int main (int argc, char * const argv[])
     me.set_data(oriencoded);
     
     //Write base64 to file.
-    //std::string basefile = "base64oish.txt";
-    //std::ofstream out;
-    //out.open (basefile.c_str());
-    //out << oriencoded << "\n";
-    //out.close();
+    std::string basefile = "base64oish.txt";
+    std::ofstream out;
+    out.open (basefile.c_str());
+    out << oriencoded << "\n";
+    out.close();
     
     sleep(1);
 
     
     bool array = true;
     int size_init = me.ByteSize();
-    
     char data_init[size_init];
+    
     if (array)
     {
         try
@@ -923,8 +923,9 @@ int main (int argc, char * const argv[])
         
     } else
     {
-        //string data;
-        //me.SerializeToString(&data);
+        string data_init_str;
+        me.SerializeToString(&data_init_str);
+        
         //char bts[data.length()];
         //strcpy(bts, data.c_str());
         //sendEcho(me.serverip(), bts, motion::Message::TCP_MSG_PORT);
@@ -943,7 +944,7 @@ int main (int argc, char * const argv[])
     }
     else
     {
-        //mm.ParseFromString(&data);
+        mm.ParseFromString(data_init);
     }
     
     int action = mm.type();
@@ -963,13 +964,13 @@ int main (int argc, char * const argv[])
     int width_d = 0;
     int height_d = 0;
     int type_d = 0;
-    size_t size_d = 0;
+    int size_d = 0;
     
     // Read the width, height, type and size of the buffer
     decoded.read((char*)(&width_d), sizeof(int));
     decoded.read((char*)(&height_d), sizeof(int));
     decoded.read((char*)(&type_d), sizeof(int));
-    decoded.read((char*)(&size_d), sizeof(size_t));
+    decoded.read((char*)(&size_d), sizeof(int));
     
     // Allocate a buffer for the pixels
     char* data_d = new char[size_d];
@@ -990,9 +991,8 @@ int main (int argc, char * const argv[])
     //Save image converted
     imwrite("image__decoded__10000.jpg", deserialized);
     
-    
     //Send Message to server
-    //setMessage(me, true);
+    setMessage(me, array);
     
 
     google::protobuf::ShutdownProtobufLibrary();
