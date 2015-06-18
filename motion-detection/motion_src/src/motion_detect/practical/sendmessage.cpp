@@ -18,13 +18,13 @@ struct message_thread_args
 };
 struct message_thread_args MessageStructThread;
 
-const unsigned int RCVBUFSIZE = 500000;     // Size of receive buffer
+const unsigned int RCVBUFSIZE = 4096;     // Size of receive buffer
 const int MAXRCVSTRING = 4096;          // Longest string to receive
 
 
 void * sendMessage (void * arg)
 {
-    
+
     struct message_thread_args *args = (struct message_thread_args *) arg;
     
     bool array = args->array;
@@ -34,7 +34,7 @@ void * sendMessage (void * arg)
     
     string servAddress = m.serverip();
     
-    cout << "+++++++++++SENDING PROTO++++++++++++++" << endl;
+    
     
     cout << "::servAddress:: " << servAddress <<  endl;
     
@@ -43,7 +43,7 @@ void * sendMessage (void * arg)
     
     cout << "::echoServPort:: " << echoServPort <<  endl;
     
-    char * echoBuffer[RCVBUFSIZE + 1];
+    char echoBuffer[RCVBUFSIZE + 1];
     
     try
     {
@@ -52,18 +52,21 @@ void * sendMessage (void * arg)
         
         // Establish connection with the echo server
         TCPSocket sock(servAddress, echoServPort);
-       
-        //string data;
+
+        
         int size = m.ByteSize();
+        
+        //Initialize objects to serialize.
         char data[size];
+        string datastr;
         
         if (array)
         {
-            cout << "ByteSize:: " << size <<  endl;
+            cout << "ByteArraySize:: " << size <<  endl;
             try
             {
                 m.SerializeToArray(&data, size);
-                //m.SerializeToArray(&data, size);
+                
             }
             catch (google::protobuf::FatalException fe)
             {
@@ -72,18 +75,36 @@ void * sendMessage (void * arg)
             
         } else
         {
-           //m.SerializeToString(data);
+            cout << "ByteStringSize:: " << size <<  endl;
+            try
+            {
+                //m.SerializeToString(data);
+                //char bts[datastr.length()];
+                //strcpy(bts, datastr.c_str());
+                //sock.send(bts, sizeof(bts));
+                
+            }
+            catch (google::protobuf::FatalException fe)
+            {
+                std::cout << "PbToZmq " << fe.message() << std::endl;
+            }
+            
         }
         
         sock.send(data, sizeof(data));
+        
+        
+        cout << "::1:: " << endl;
         
         // Buffer for echo string + \0
         int bytesReceived = 0;              // Bytes read on each recv()
         int totalBytesReceived = 0;         // Total bytes read
         
+        cout << "::2:: " << endl;
+        
         GOOGLE_PROTOBUF_VERIFY_VERSION;
         
-        motion::Message mr;
+        motion::Message mm;
 
         while (totalBytesReceived < sizeof(data)) {
             // Receive up to the buffer size bytes from the sender
@@ -95,22 +116,25 @@ void * sendMessage (void * arg)
             echoBuffer[bytesReceived] = '\0';        // Terminate the string!
             cout << "Received message: " << echoBuffer;                      // Print the echo buffer
             
-            //const string & data = echoBuffer;
+            cout << "+++++++++++REPLY PROTO++++++++++++++" << endl;
+            
+            const string & data = echoBuffer;
+            mm.ParseFromString(data);
             receive_proto.Clear();
-            receive_proto = mr;
+            receive_proto = mm;
+            int size_final = mm.ByteSize();
             
-            restoreProto(true, echoBuffer, "MAT_REMOTE.jpg");
-            
-            
-            
+            int type = mm.type();
+            cout << "+++++++++++" << "RESPONSE TYPE: " << size_final << "++++++++++++++" << endl;
+
         }
         cout << endl;
         
+                cout << "::3:: " << endl;
+        
+        google::protobuf::ShutdownProtobufLibrary();
         delete data;
-        
-        // Destructor closes the socket
-        
-        
+    
     } catch(SocketException &e)
     {
         cout << "::error:: " << e.what() << endl;
@@ -118,9 +142,6 @@ void * sendMessage (void * arg)
         exit(1);
     }
     
-    //std::stringstream strm;
-    //strm << echoBuffer;
-
     pthread_cancel(thread_message);
     
     
@@ -128,6 +149,8 @@ void * sendMessage (void * arg)
 
 void setMessage(motion::Message m, bool array)
 {
+    
+    cout << "+++++++++++SENDING PROTO++++++++++++++" << endl;
 
     MessageStructThread.message         = m;
     MessageStructThread.array           = array;

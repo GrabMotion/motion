@@ -54,6 +54,8 @@ ADD_EXECUTABLE(motion_detect_raspberry
 	src/motion_detect/b64/cencode.h
 	src/motion_detect/b64/decode.h
 	src/motion_detect/b64/encode.h
+	src/motion_detect/b64/base64.cpp
+	src/motion_detect/b64/base64.h
 )
 
 TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm ${PROTOBUF_LIBRARIES})

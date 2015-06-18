@@ -19,5 +19,3 @@ extern pthread_t thread_message;
 
 void setMessage(motion::Message m, bool array);
 void * sendMessage (void * arg);
-
-extern void restoreProto(bool isarray, char ** data, std::string file);
