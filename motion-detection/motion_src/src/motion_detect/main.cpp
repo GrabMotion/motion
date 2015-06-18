@@ -29,6 +29,8 @@
 #include <vector>
 #include <functional>
 
+#include <fstream>
+
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
@@ -832,6 +834,22 @@ void * broadcastsender ( void * args ) {
 
 }
 
+std::string get_file_contents(string filename)
+{
+    std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
+    if (in)
+    {
+        std::string contents;
+        in.seekg(0, std::ios::end);
+        contents.resize(in.tellg());
+        in.seekg(0, std::ios::beg);
+        in.read(&contents[0], contents.size());
+        in.close();
+        return(contents);
+    }
+    throw(errno);
+}
+
 int main (int argc, char * const argv[])
 {
     
@@ -851,6 +869,7 @@ int main (int argc, char * const argv[])
     int type = input.type();
     size_t size = input.total() * input.elemSize();
     
+
     // Initialize a stringstream and write the data
     stringstream ss;
     ss.write((char*)(&width), sizeof(int));
@@ -866,19 +885,75 @@ int main (int argc, char * const argv[])
     cout  << "type: " << type << endl;
     cout  << "size: " << size << endl;
     
-    // Base64 encode the stringstream
-    //base64::encoder E;
-    //stringstream encoded;
-    //E.encode(ss, encoded);
-    
-    // Base64 decode the stringstream
-    //base64::decoder D;
-    //stringstream decoded;
-    //D.decode(encoded, decoded);
+    motion::Message me;
+    me.set_type(motion::Message::SET_MAT);
+    me.set_time(getTime());
+    me.set_serverip("192.168.1.35");
+    me.set_time(getTime());
     
     String      original = ss.str();
     std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(original.c_str()), original.length());
-    std::string oridecoded = base64_decode(oriencoded);
+    
+    me.set_data(oriencoded);
+    
+    //Write base64 to file.
+    //std::string basefile = "base64oish.txt";
+    //std::ofstream out;
+    //out.open (basefile.c_str());
+    //out << oriencoded << "\n";
+    //out.close();
+    
+    sleep(1);
+
+    
+    bool array = true;
+    int size_init = me.ByteSize();
+    
+    char data_init[size_init];
+    if (array)
+    {
+        try
+        {
+            me.SerializeToArray(data_init, size_init);
+        }
+        catch (google::protobuf::FatalException fe)
+        {
+            std::cout << "PbToZmq " << fe.message() << std::endl;
+        }
+        
+    } else
+    {
+        //string data;
+        //me.SerializeToString(&data);
+        //char bts[data.length()];
+        //strcpy(bts, data.c_str());
+        //sendEcho(me.serverip(), bts, motion::Message::TCP_MSG_PORT);
+    }
+    
+    google::protobuf::ShutdownProtobufLibrary();
+    
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    
+    motion::Message mm;
+    
+    if (array)
+    {
+        
+        mm.ParseFromArray(&data_init, sizeof(data_init));
+    }
+    else
+    {
+        //mm.ParseFromString(&data);
+    }
+    
+    int action = mm.type();
+    int size_final = mm.ByteSize();
+    std::string mdata = mm.data();
+
+    //Read bease64 from file
+    //string loaded = get_file_contents(basefile);
+    
+    std::string oridecoded = base64_decode(mdata);
     
     stringstream decoded;
     //std::stringstream decoded;
@@ -914,7 +989,14 @@ int main (int argc, char * const argv[])
     
     //Save image converted
     imwrite("image__decoded__10000.jpg", deserialized);
+    
+    
+    //Send Message to server
+    //setMessage(me, true);
+    
 
+    google::protobuf::ShutdownProtobufLibrary();
+    
 
   /*pthread_mutex_init(&tcpMutex, 0);
 

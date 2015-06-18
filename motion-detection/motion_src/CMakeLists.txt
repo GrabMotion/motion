@@ -47,9 +47,8 @@ ADD_EXECUTABLE(motion_detect_raspberry
 	src/motion_detect/tinyxml/tinyxmlparser.cpp
         src/motion_detect/ntp/hwclock.c
 	src/motion_detect/protobuffer/motion.pb.h
-	src/motion_detect/protobuffer/motion.pb.cc
-	src/motion_detect/b64/base64.cpp
-	src/motion_detect/b64/base64.h
+	src/motion_detect/protobuffer/motion.pb.cc	
+	src/motion_detect/b64/base64.cpp    	src/motion_detect/b64/base64.h
 )
 
 TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm ${PROTOBUF_LIBRARIES})
