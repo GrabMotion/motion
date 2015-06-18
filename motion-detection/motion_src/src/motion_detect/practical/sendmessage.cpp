@@ -25,14 +25,21 @@ const int MAXRCVSTRING = 4096;          // Longest string to receive
 void * sendMessage (void * arg)
 {
     
+    cout << "::1::" << endl;
+    
     struct message_thread_args *args = (struct message_thread_args *) arg;
     
     bool array = args->array;
+
+        cout << "::2::" << endl;
     
     motion::Message m = args->message;
     send_proto = m;
     
+        cout << "::3::" << endl;
+    
     string servAddress = m.serverip();
+    
     
     cout << "::servAddress:: " << servAddress <<  endl;
     
@@ -132,12 +139,16 @@ void setMessage(motion::Message m, bool array)
     MessageStructThread.message         = m;
     MessageStructThread.array           = array;
     
+    cout << "::10::" << endl;
+    
     // run the streaming client as a separate thread
     runm = pthread_create(&thread_message, NULL, sendMessage, &MessageStructThread);
     if ( runm  != 0) {
         cerr << "Unable to create streamVideo thread" << endl;
         cout << "BroadcastSender pthread_create failed." << endl;
     }
+    
+        cout << "::11::" << endl;
     
     //pthread_join(    thread_message,          (void**) &runm);
     

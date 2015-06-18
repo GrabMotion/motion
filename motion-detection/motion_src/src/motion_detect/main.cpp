@@ -219,10 +219,15 @@ void sendEcho(std::string serv, char *echo, short port )
 void* streamCast(void * arg)
 {
     
+    bool array = true; //Protobuff serializa to array or string, true to array;
+    
+    //Reading params.
     struct screenshot_thread_args *args = (struct screenshot_thread_args *) arg;
     
+    //Loading proto.
     motion::Message message = args->msg;
     
+    //Preparing camera
     CvCapture* capture = cvCreateCameraCapture(0);
     if (capture == NULL)
     {
@@ -230,90 +235,74 @@ void* streamCast(void * arg)
         return 0;
     }
     
+    //Output size.
     int w = 640; //640; //1280; //320;
     int h = 480; //480; //720; //240;
     
+    //Cam properties.
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
     
-    //double width = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
-    //double height = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
-    
+    //Optional image to disk to match quality with MAT.
     IplImage* img=0;
     img = cvQueryFrame( capture );
     cvSaveImage("img.jpg",img);
     
-    Mat mat(h, w, CV_8UC3); //CV_8U); // CV_8UC3);
-    mat = cvQueryFrame(capture);
-    cvtColor(mat, mat, CV_RGB2GRAY);
-    imwrite("image_1.jpg", mat);
+    //Create mat and color. TODO, set color.
+    Mat input(h, w, CV_8UC3); //CV_8U); // CV_8UC3);
+    input = cvQueryFrame(capture);
+    cvtColor(input, input, CV_RGB2GRAY);
+    imwrite("image_1.jpg", input);
     
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    int width = input.cols;
+    int height = input.rows;
+    int type = input.type();
+    int size = input.total() * input.elemSize();
     
+    // Initialize a stringstream and write the mat for the proto data().
+    stringstream ss;
+    ss.write((char*)(&width), sizeof(int));
+    ss.write((char*)(&height), sizeof(int));
+    ss.write((char*)(&type), sizeof(int));
+    ss.write((char*)(&size), sizeof(int));
+    // Write the whole image data
+    ss.write((char*)input.data, size);
+    
+    //Convert char mat to base64 to fill data.
+    String original = ss.str();
+    std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(original.c_str()), original.length());
+    
+    cout  << "width: " << width << endl;
+    cout  << "height: " << height << endl;
+    cout  << "type: " << type << endl;
+    cout  << "size: " << size << endl;
+    
+    //Populate proto.
     motion::Message me;
     me.set_type(motion::Message::SET_MAT);
-    
-    me.set_serverip(message.serverip());
     me.set_time(getTime());
-    
-    int rows = mat.rows;
-    int cols = mat.cols;
-    cv::Size s = mat.size();
-    
-    // We will need to also serialize the width, height, type and size of the matrix
-    int width_s     = mat.cols;
-    int height_s    = mat.rows;
-    int type_s      = mat.type();
-    size_t size_s   = mat.total() * mat.elemSize();
-    
-    //Populate proto
-    me.set_height(height_s); //s.height);
-    me.set_width(width_s);  //s.width);
-    me.set_size(size_s);
-    me.set_typemat(type_s);
+    me.set_serverip(receive_proto.serverip());
     me.set_time(getTime());
-    me.set_rows(rows);
-    me.set_cols(cols);
-
-    // Initialize a stringstream and write the mat data
-    std::stringstream ss;
-    ss.write((char*)    (&width_s),     sizeof(int));
-    ss.write((char*)    (&height_s),    sizeof(int));
-    ss.write((char*)    (&type_s),      sizeof(int));
-    ss.write((char*)    (&size_s),      sizeof(size_t));
-    ss.write((char*)     mat.data,      size_s);
-    int ss_size = ss.tellp();
-    //base64::encoder E;
-    //std::stringstream encoded;
-    //E.encode(ss, encoded);
-    //std::string mat_encoded = encoded.str();
-    //me.set_data(mat_encoded);
+    me.set_data(oriencoded);
     
-    bool array = true;
+    //Write base64 to file. TODO, removeme.
+    //std::string basefile = "base64oish.txt";
+    //std::ofstream out;
+    //out.open (basefile.c_str());
+    //out << oriencoded << "\n";
+    //out.close();
+    
+    //Init response.
     int size_init = me.ByteSize();
-    
-    cout << "+++++++++++++++++CREATING PROTO+++++++++++++++++++"            << endl;
-    cout << " Mat type                          : " << type_s               << endl;
-    cout << " Time                              : " << me.time()            << endl;
-    cout << " proto size                        : " << size_init            << endl;
-    cout << " Mat size                          : " << size_s               << endl;
-    cout << "--------------------------------------------------"            << endl;
-    cout << " stringstream ss size              : " << ss_size              << endl;
-    //cout << " stringstream encoded size         : " << encoded.tellp()      << endl;
-    //cout << " string data encoded size          : " << mat_encoded.size()   << endl;
-    cout << "--------------------------------------------------"            << endl;
-    cout << " width                             : " << me.width()           << endl;
-    cout << " rows                              : " << rows                 << endl;
-    cout << " height                            : " << me.height()          << endl;
-    cout << " cols                              : " << cols                 << endl;
-    cout <<  endl;
-    
     char data_init[size_init];
+    
+    cout  << "Mat size: " << size_init << endl;
     
     if (array)
     {
         try
         {
+            //Serialize proto.
             me.SerializeToArray(data_init, size_init);
         }
         catch (google::protobuf::FatalException fe)
@@ -323,94 +312,18 @@ void* streamCast(void * arg)
         
     } else
     {
-        //string data;
-        //me.SerializeToString(&data);
-        //char bts[data.length()];
-        //strcpy(bts, data.c_str());
-        //sendEcho(me.serverip(), bts, motion::Message::TCP_MSG_PORT);
+        string data_init_str;
+        me.SerializeToString(&data_init_str);
     }
-    
-    google::protobuf::ShutdownProtobufLibrary();
-    
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-    
-    motion::Message mm;
-    
-    if (array)
-    {
-        
-        mm.ParseFromArray(&data_init, sizeof(data_init));
-    }
-    else
-    {
-        //mm.ParseFromString(&data);
-    }
-    
-    int action = mm.type();
-    int size_final = mm.ByteSize();
-    std::string mdata = mm.data();
-   
-    // The data we need to deserialize
-    int width_d     = 0;
-    int height_d    = 0;
-    int type_d      = 0;
-    size_t size_d   = 0;
-    
-    std::stringstream input_d;
-    input_d << mdata;
-    //base64::decoder D;
-    //stringstream decoded;
-    int input_d_size = input_d.tellp();
-    //D.decode(input_d, decoded);
-    //decoded.read((char*)(&width_d), sizeof(int));
-    /*decoded.read((char*)(&height_d), sizeof(int));
-    decoded.read((char*)(&type_d), sizeof(int));
-    decoded.read((char*)(&size_d), sizeof(size_t));
-    char * data_d = new char[size_d];
-    decoded.read(data_d, size_d);*/
-
-    //cv::Mat m_d = cv::Mat(height_d, width_d, type_d, data_d).clone();
-    
-    //Save image converted
-    //imwrite("image_2.jpg", m_d);
-
-    // Construct the image (clone it so that it won't need our buffer anymore)
-    //cv::Mat m_d = Mat(height_d, width_d, type_d, data_d).clone();
-    //cv::Mat m_d = Mat(mm.height(), mm.width(), mm.typemat(), data_d).clone();
-    
-    cout << "+++++++++++++++++RESTORING PROTO+++++++++++++++++++"           << endl;
-    cout << " Mat type                          : " << type_d               << endl;
-    cout << " Time                              : " << mm.time()            << endl;
-    cout << " proto size                        : " << mm.ByteSize()        << endl;
-    cout << " Mat size                          : " << size_d               << endl;
-    cout << "--------------------------------------------------"            << endl;
-    cout << " stringstream input_d size         : " << input_d_size         << endl;
-    //cout << " stringstream encoded size         : " << decoded.tellp()      << endl;
-    cout << " char data size                    : " << size_d               << endl;
-    cout << "--------------------------------------------------"            << endl;
-    cout << " width                             : " << width_d              << endl;
-    cout << " rows                              : " << mm.rows()            << endl;
-    cout << " height                            : " << height_d             << endl;
-    cout << " cols                              : " << mm.cols()            << endl;
-    cout << "--------------------------------------------------"            << endl;
     
     //Send Message to server
-    //setMessage(me, true);
-    
-    cout << "_1_" << endl;
+    setMessage(me, array);
     
     google::protobuf::ShutdownProtobufLibrary();
     
-    cout << "_2_" << endl;
+    // Delete data
+    delete[]data_init;
 
-    cvReleaseCapture(&capture);
-    
-    cout << "_3_" << endl;
-    
-    //delete data_d;
-    
-    cout << "_4_" << endl;
-    
     return 0;
 }
 
@@ -861,7 +774,7 @@ int main (int argc, char * const argv[])
     google::protobuf::ShutdownProtobufLibrary();*/
     
     // Read a test image
-    Mat input = imread("img.jpg");
+    /*Mat input = imread("img.jpg");
     
     // We will need to also serialize the width, height, type and size of the matrix
     int width = input.cols;
@@ -869,7 +782,6 @@ int main (int argc, char * const argv[])
     int type = input.type();
     size_t size = input.total() * input.elemSize();
     
-
     // Initialize a stringstream and write the data
     stringstream ss;
     ss.write((char*)(&width), sizeof(int));
@@ -879,29 +791,33 @@ int main (int argc, char * const argv[])
     
     // Write the whole image data
     ss.write((char*)input.data, size);
+
+    // Convert encoded mat data to base64.
+    String      original = ss.str();
+    std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(original.c_str()), original.length());
+    
     
     cout  << "width: " << width << endl;
     cout  << "height: " << height << endl;
     cout  << "type: " << type << endl;
     cout  << "size: " << size << endl;
     
+    //Populate proto.
     motion::Message me;
     me.set_type(motion::Message::SET_MAT);
     me.set_time(getTime());
     me.set_serverip("192.168.1.35");
     me.set_time(getTime());
     
-    String      original = ss.str();
-    std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(original.c_str()), original.length());
     
     me.set_data(oriencoded);
     
     //Write base64 to file.
-    std::string basefile = "base64oish.txt";
-    std::ofstream out;
-    out.open (basefile.c_str());
-    out << oriencoded << "\n";
-    out.close();
+    //std::string basefile = "base64oish.txt";
+    //std::ofstream out;
+    //out.open (basefile.c_str());
+    //out << oriencoded << "\n";
+    //out.close();
     
     sleep(1);
 
@@ -930,6 +846,8 @@ int main (int argc, char * const argv[])
         //strcpy(bts, data.c_str());
         //sendEcho(me.serverip(), bts, motion::Message::TCP_MSG_PORT);
     }
+    
+    
     
     google::protobuf::ShutdownProtobufLibrary();
     
@@ -980,10 +898,10 @@ int main (int argc, char * const argv[])
     // Construct the image (clone it so that it won't need our buffer anymore)
     Mat deserialized = Mat(height_d, width_d, type_d, data_d).clone();
     cout  << "::::::::::::::::::::::::::::::::::" << endl;
-    cout  << "width: " << width_d << endl;
+    cout  << "width: "  << width_d   << endl;
     cout  << "height: " << height_d << endl;
-    cout  << "type: " << type_d << endl;
-    cout  << "size: " << size_d << endl;
+    cout  << "type: "   << type_d     << endl;
+    cout  << "size: "   << size_d     << endl;
     
     // Delete our buffer
     delete[]data_d;
@@ -995,10 +913,10 @@ int main (int argc, char * const argv[])
     setMessage(me, array);
     
 
-    google::protobuf::ShutdownProtobufLibrary();
+    google::protobuf::ShutdownProtobufLibrary();*/
     
 
-  /*pthread_mutex_init(&tcpMutex, 0);
+  pthread_mutex_init(&tcpMutex, 0);
 
     // UDP
    runb = pthread_create(&thread_broadcast, NULL, broadcastsender, NULL);
@@ -1024,7 +942,7 @@ int main (int argc, char * const argv[])
     
    pthread_mutex_destroy(&tcpMutex);
    
-   cout << "return 0" << endl;*/
+   cout << "return 0" << endl;
    
    
    
