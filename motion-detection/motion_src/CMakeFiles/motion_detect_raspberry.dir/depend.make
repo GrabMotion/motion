@@ -4,10 +4,15 @@
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cdecode.o: src/motion_detect/b64/../b64/cdecode.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cdecode.o: src/motion_detect/b64/cdecode.c
 
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o: src/motion_detect/b64/../b64/cencode.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o: src/motion_detect/b64/cencode.c
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o: src/motion_detect/ntp/hwclock.c
 
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o: src/motion_detect/b64/../b64/base64.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o: src/motion_detect/b64/base64.cpp
+
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/b64/base64.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/b64/cdecode.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/b64/cencode.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/b64/decode.h
@@ -23,6 +28,10 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/incl
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/extension_set.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/generated_enum_reflection.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/generated_message_util.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/io/coded_stream.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/io/zero_copy_stream.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/io/zero_copy_stream_impl.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/io/zero_copy_stream_impl_lite.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/message.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/message_lite.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/repeated_field.h
@@ -42,6 +51,7 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/incl
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/stubs/common.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/stubs/once.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/stubs/platform_macros.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/stubs/stl_util.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/stubs/template_util.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/stubs/type_traits.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/unknown_field_set.h
@@ -84,6 +94,10 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/extension_set.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/generated_enum_reflection.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/generated_message_util.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/io/coded_stream.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/io/zero_copy_stream.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/io/zero_copy_stream_impl.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/io/zero_copy_stream_impl_lite.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/message.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/message_lite.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/repeated_field.h
@@ -103,6 +117,7 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/stubs/common.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/stubs/once.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/stubs/platform_macros.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/stubs/stl_util.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/stubs/template_util.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/stubs/type_traits.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o: /usr/local/include/google/protobuf/unknown_field_set.h

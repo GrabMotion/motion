@@ -11,6 +11,15 @@
 #include <errno.h>
 #include <vector>
 
+#include <unistd.h>
+#include <google/protobuf/message.h>
+#include <google/protobuf/descriptor.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+
+using namespace google::protobuf::io;
+
 struct message_thread_args
 {
     motion::Message message;
@@ -18,8 +27,8 @@ struct message_thread_args
 };
 struct message_thread_args MessageStructThread;
 
-const unsigned int RCVBUFSIZE = 4096;     // Size of receive buffer
-const int MAXRCVSTRING = 4096;          // Longest string to receive
+const unsigned int RCVBUFSIZE = 200000;     // Size of receive buffer
+//const int MAXRCVSTRING = 4096;          // Longest string to receive
 
 
 void * sendMessage (void * arg)
@@ -33,8 +42,6 @@ void * sendMessage (void * arg)
     send_proto = m;
     
     string servAddress = m.serverip();
-    
-    
     
     cout << "::servAddress:: " << servAddress <<  endl;
     
@@ -54,7 +61,7 @@ void * sendMessage (void * arg)
         TCPSocket sock(servAddress, echoServPort);
 
         
-        int size = m.ByteSize();
+        int size = m.ByteSize() * 2;
         
         //Initialize objects to serialize.
         char data[size];
@@ -91,8 +98,16 @@ void * sendMessage (void * arg)
             
         }
         
-        sock.send(data, sizeof(data));
+        /*int siz = 110000; //m.ByteSize()+4;
+        char *pkt = new char [siz];
+        google::protobuf::io::ArrayOutputStream aos(pkt,siz);
+        CodedOutputStream *coded_output = new CodedOutputStream(&aos);
+        coded_output->WriteVarint32(m.ByteSize());
+        m.SerializeToCodedStream(coded_output);*/
+    
+        //sock.send(pkt, siz);
         
+        sock.send(data, sizeof(data));
         
         cout << "::1:: " << endl;
         
@@ -112,9 +127,9 @@ void * sendMessage (void * arg)
                 cerr << "Unable to read";
                 exit(1);
             }
-            totalBytesReceived += bytesReceived;     // Keep tally of total bytes
-            echoBuffer[bytesReceived] = '\0';        // Terminate the string!
-            cout << "Received message: " << echoBuffer;                      // Print the echo buffer
+            totalBytesReceived += bytesReceived;                // Keep tally of total bytes
+            echoBuffer[bytesReceived] = '\0';                   // Terminate the string!
+            cout << "Received message: " << echoBuffer << endl; // Print the echo buffer
             
             cout << "+++++++++++REPLY PROTO++++++++++++++" << endl;
             
@@ -125,13 +140,10 @@ void * sendMessage (void * arg)
             int size_final = mm.ByteSize();
             
             int type = mm.type();
-            cout << "+++++++++++" << "RESPONSE TYPE: " << size_final << "++++++++++++++" << endl;
+            cout << "+++++++++++" << "RESPONSE TYPE: " << size_final << " ++++++" << endl;
 
         }
         cout << endl;
-        
-                cout << "::3:: " << endl;
-        
         google::protobuf::ShutdownProtobufLibrary();
         delete data;
     

@@ -46,6 +46,15 @@
 
 #include <fstream>
 
+#include <unistd.h>
+#include <google/protobuf/message.h>
+#include <google/protobuf/descriptor.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+
+using namespace google::protobuf::io;
+
 
 using namespace std;
 using namespace cv;
@@ -84,10 +93,11 @@ string NETWORK_IP;
 //Protobuffer
 motion::Message send_proto;
 motion::Message receive_proto;
+motion::Message streamCastMessage();
 
 #define MAXDATASIZE 1000
 
-#define RCVBUFSIZE 500000
+#define RCVBUFSIZE 1024
 
 //const unsigned int RCVBUFSIZE = 100000; //4096; //32;     // Size of receive buffer
 const int MAXRCVSTRING = 4096;          // Longest string to receive
@@ -218,12 +228,11 @@ void sendEcho(std::string serv, char *echo, short port )
 
 }
 
-void* streamCast(void * arg)
+motion::Message streamCastMessage()
 {
     
-    struct screenshot_thread_args *args = (struct screenshot_thread_args *) arg;
-    
-    motion::Message message = args->msg;
+    //struct screenshot_thread_args *args = (struct screenshot_thread_args *) arg
+    //motion::Message message = args->msg;
     
     cout << "CAPTURING !!!!!!!!!!!!!" << endl;
     
@@ -231,11 +240,11 @@ void* streamCast(void * arg)
     if (capture == NULL)
     {
         std::cout << "No cam found." << std::endl;
-        return 0;
+
     }
     
-    int w = 640; //640; //1280; //320;
-    int h = 480; //480; //720; //240;
+    int w = 1280; //640; //1280; //320;
+    int h = 720;  //480; //720;  //240;
     
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
@@ -256,7 +265,7 @@ void* streamCast(void * arg)
     motion::Message me;
     me.set_type(motion::Message::SET_MAT);
     
-    me.set_serverip(message.serverip());
+    //me.set_serverip(message.serverip());
     me.set_time(getTimeRasp());
     
     int rows = mat.rows;
@@ -273,13 +282,14 @@ void* streamCast(void * arg)
     int width_s     = mat.cols;
     int height_s    = mat.rows;
     int type_s      = mat.type();
-    int size_s   = mat.total() * mat.elemSize();
+    int size_s      = mat.total() * mat.elemSize();
     
     me.set_size(size_s);
     me.set_typemat(type_s);
     
     // Initialize a stringstream and write the data
     int size_init = me.ByteSize();
+    
     // Write the whole image data
     std::stringstream ss;
     ss.write((char*)    (&width_s),     sizeof(int));
@@ -288,38 +298,26 @@ void* streamCast(void * arg)
     ss.write((char*)    (&size_s),      sizeof(int));
     ss.write((char*)     mat.data,      size_s);
     
-    cout << "width      : " << me.width() << endl;
+    cout << "width      : " << me.width()  << endl;
     cout << "rows       : " << rows << endl;
     cout << "height     : " << me.height() << endl;
     cout << "cols       : " << cols << endl;
     cout << "Mat type   : " << me.type() << endl;
     cout << "Mat size   : " << size_s << endl;
     cout << "Proto size : " << size_init << endl;
-
-    // Base64 encode the stringstream
-    //base64::encoder E;
-    //std::stringstream encoded;
-    //E.encode(ss, encoded);
+    
+    std::string ssstring = ss.str();
     
     // Convert encoded mat data to base64.
-    String      original = ss.str();
-    std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(original.c_str()), original.length());
+    std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(ssstring.c_str()), ssstring.length());
     
     int ori_size = oriencoded.size();
-    
     cout << "ori_size   : " << ori_size << endl;
     
-    //Write base64 to file for checking.
-    std::string basefile = "base64oish.txt";
-    std::ofstream out;
-    out.open (basefile.c_str());
-    out << oriencoded << "\n";
-    out.close();
-
     //Store into proto
     me.set_data(oriencoded);
     
-    bool array = true;
+    /*bool array = true;
     char * data_init[size_init];
     string datastr;
     
@@ -334,20 +332,99 @@ void* streamCast(void * arg)
         me.SerializeToString(&datastr);
     }
     
-    setMessage(me, array);
+    //setMessage(me, array);*/
     
-    cout << "::100::" << endl;
+    //Write base64 to file for checking.
+    std::string basefile = "base64oish.txt";
+    std::ofstream out;
+    out.open (basefile.c_str());
+    out << me.data() << "\n";
+    out.close();
     
     cvReleaseCapture(&capture);
     
     google::protobuf::ShutdownProtobufLibrary();
     
     
-    delete data_init;
+    //Comentar, tira error ()
+   // delete data_init;
     
     
-    return 0;
+    return me;
 }
+
+void* streamCast(void * arg)
+{
+
+motion::Message payload = streamCastMessage();
+cout<<"size after serilizing is "<<payload.ByteSize()<<endl;
+int siz = payload.ByteSize()+4;
+char *pkt = new char [siz];
+google::protobuf::io::ArrayOutputStream aos(pkt,siz);
+CodedOutputStream *coded_output = new CodedOutputStream(&aos);
+coded_output->WriteVarint32(payload.ByteSize());
+payload.SerializeToCodedStream(coded_output);
+
+int host_port= 1101;
+char* host_name="192.168.1.35";
+
+struct sockaddr_in my_addr;
+
+char buffer[1024];
+int bytecount;
+int buffer_len=0;
+
+int hsock;
+int * p_int;
+int err;
+
+hsock = socket(AF_INET, SOCK_STREAM, 0);
+if(hsock == -1){
+    printf("Error initializing socket %d\n",errno);
+    goto FINISH;
+}
+
+p_int = (int*)malloc(sizeof(int));
+*p_int = 1;
+
+if( (setsockopt(hsock, SOL_SOCKET, SO_REUSEADDR, (char*)p_int, sizeof(int)) == -1 )||
+   (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) ){
+    printf("Error setting options %d\n",errno);
+    free(p_int);
+    goto FINISH;
+}
+free(p_int);
+
+my_addr.sin_family = AF_INET ;
+my_addr.sin_port = htons(host_port);
+
+memset(&(my_addr.sin_zero), 0, 8);
+my_addr.sin_addr.s_addr = inet_addr(host_name);
+if( connect( hsock, (struct sockaddr*)&my_addr, sizeof(my_addr)) == -1 ){
+    if((err = errno) != EINPROGRESS){
+        fprintf(stderr, "Error connecting socket %d\n", errno);
+        goto FINISH;
+    }
+}
+
+//for (int i =0;i<10000;i++){
+    //for (int j = 0 ;j<10;j++) {
+        
+        if( (bytecount=send(hsock, (void *) pkt,siz,0))== -1 ) {
+            fprintf(stderr, "Error sending data %d\n", errno);
+            goto FINISH;
+        }
+        printf("Sent bytes %d\n", bytecount);
+        //usleep(5);
+    //}
+//}
+delete pkt;
+    
+FINISH:
+    close(hsock);
+
+}
+
 
 int screenshot(motion::Message m)
 {
@@ -732,7 +809,7 @@ void * broadcastsender ( void * args ) {
    
    for (int i=0; i<ip_vector.size(); i++)
    {
-        if ( i==0 | i==1) 
+        if ( i==0 | i==1)
         {
              NETWORK_IP +=  ip_vector[i] + ".";
         }

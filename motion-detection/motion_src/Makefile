@@ -115,6 +115,21 @@ motion_detect_raspberry/fast:
 .PHONY : motion_detect_raspberry/fast
 
 # target to build an object file
+src/motion_detect/b64/base64.o:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o
+.PHONY : src/motion_detect/b64/base64.o
+
+# target to preprocess a source file
+src/motion_detect/b64/base64.i:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.i
+.PHONY : src/motion_detect/b64/base64.i
+
+# target to generate assembly for a file
+src/motion_detect/b64/base64.s:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.s
+.PHONY : src/motion_detect/b64/base64.s
+
+# target to build an object file
 src/motion_detect/b64/cdecode.o:
 	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cdecode.o
 .PHONY : src/motion_detect/b64/cdecode.o
@@ -333,6 +348,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... motion_detect_raspberry"
 	@echo "... rebuild_cache"
+	@echo "... src/motion_detect/b64/base64.o"
+	@echo "... src/motion_detect/b64/base64.i"
+	@echo "... src/motion_detect/b64/base64.s"
 	@echo "... src/motion_detect/b64/cdecode.o"
 	@echo "... src/motion_detect/b64/cdecode.i"
 	@echo "... src/motion_detect/b64/cdecode.s"
