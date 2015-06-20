@@ -1,5 +1,5 @@
-#ifndef SOCKETLISTENER_H
-#define SOCKETLISTENER_H
+#ifndef STREAMLISTENER_H
+#define STREAMLISTENER_H
 
 #include <QMainWindow>
 #include <QObject>
@@ -9,7 +9,6 @@
 #include <QtWidgets/qdialog.h>
 #include <QMessageBox>
 
-#include "socket/PracticalSocket.h"
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <sys/socket.h>
@@ -36,8 +35,6 @@
 #include <cctype>
 
 #include "b64/base64.h"
-//#include "b64/encode.h"
-//#include "b64/decode.h"
 
 #include <google/protobuf/message.h>
 
@@ -46,25 +43,19 @@
 
 #include <fstream>
 
-class SocketListener : public QObject
+class StreamListener : public QObject
 {
     Q_OBJECT
 public:
-    explicit SocketListener(QObject *parent = 0);
-    std::string from_ip;
-    void startListening(QObject *parent);
+    explicit StreamListener(QObject *parent = 0);
 
-    void * HandleTCPClient (TCPSocket *sock, QObject *parent);
-    static void * threadMain   (void * arg);
-    static void * socketThread (void * args);
-    static void * watch_echo   (void * args);
+    void startListening(QObject *parent);
+    static void * socketThread(void * args);
+    static google::protobuf::uint32 readHdr(char *buf);
+    static void readBody(int csock,google::protobuf::uint32 siz, QObject *parent);
+    static void * socketHandler (void* lp);
 
 private:
-    pthread_t thread_wait_echo;
-    pthread_mutex_t echo_mutex;
-    pthread_cond_t echo_response;
-    bool echo_received;
-    int resutl_echo;
 
 public:
     std::string socket_response;
@@ -72,4 +63,4 @@ public:
 
 };
 
-#endif // SOCKETLISTENER_H
+#endif // STREAMLISTENER_H

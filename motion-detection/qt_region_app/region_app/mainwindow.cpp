@@ -28,6 +28,11 @@
 #include <ifaddrs.h>
 #include "./spinner/QtWaitingSpinner.h"
 
+#include <pthread.h>
+
+
+
+using namespace google::protobuf::io;
 using namespace std;
 using namespace cv;
 
@@ -40,10 +45,8 @@ int coor_num = 0;
 int count_clicks;
 
 MainWindow::MainWindow(QWidget *parent) :
-
     QMainWindow(parent),
     ui(new Ui::MainWindow)
-
 {
     ui->setupUi(this);
 
@@ -56,8 +59,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(broadcast_thread, SIGNAL(BroadcastTimeoutSocketException()), this, SLOT(broadcastTimeoutSocketException()));
 
     //Socket Listener Class -- Cannot connect received
-    socket_listener = new SocketListener(this);
-    socket_listener->startListening(this);
+    //socket_listener = new SocketListener(this);
+    //socket_listener->startListening(this);
+
+    //Stream Listener Class -- Cannot connect received
+    stream_listener = new StreamListener(this);
+    stream_listener->startListening(this);
 
     //Mount Shares
     mount_thread = new MountThread(this);
@@ -853,8 +860,6 @@ void MainWindow::SocketErrorMessage(QString &e)
 
 }
 
-
-
 std::string get_file_contents(string filename)
 {
     std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
@@ -881,7 +886,7 @@ void MainWindow::testBase()
     int type_d = 0;
     size_t size_d = 0;
 
-    std::string basefile = "/jose/repos/base64oish.txt";
+    std::string basefile = "/jose/repos/base64oish_MAC.txt";
     string loaded = get_file_contents(basefile);
 
     std::string oridecoded = base64_decode(loaded);

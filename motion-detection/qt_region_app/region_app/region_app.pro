@@ -28,8 +28,7 @@ SOURCES += main.cpp\
     socket/socketlistener.cpp \
     protobuffer/motion.pb.cc \
     b64/base64.cpp \
-    b64/cdecode.c \
-    b64/cencode.c
+    socket/streamlistener.cpp
 
 HEADERS  += mainwindow.h \
     drawing/mouse_coordinates.h \
@@ -47,10 +46,7 @@ HEADERS  += mainwindow.h \
     socket/socketlistener.h \
     protobuffer/motion.pb.h \
     b64/base64.h \
-    b64/cdecode.h \
-    b64/cencode.h \
-    b64/decode.h \
-    b64/encode.h
+    socket/streamlistener.h
 
 FORMS    += mainwindow.ui
 

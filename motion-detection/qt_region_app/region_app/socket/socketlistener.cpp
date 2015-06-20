@@ -1,8 +1,11 @@
 #include "socket/socketlistener.h"
 
-using namespace std;
+#include <google/protobuf/stubs/common.h>
 
-#define RCVBUFSIZE 4096
+using namespace std;
+using namespace google::protobuf::io;
+
+#define RCVBUFSIZE 200000
 
 SocketListener::SocketListener(QObject *parent): QObject(parent){}
 
@@ -38,35 +41,42 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
     recvMsgSize = sock->recv(echoBuffer, RCVBUFSIZE);
     cout << "recvMsgSize: " << recvMsgSize << endl;
 
+    //QByteArray databuf = QByteArray((char*) echoBuffer, sizeof(echoBuffer));
+    //QByteArray databuf = QByteArray(reinterpret_cast<char*>(echoBuffer), sizeof(echoBuffer));
 
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-        motion::Message mm;
-        bool array = true;
+    motion::Message mm;
+    bool array = true;
 
-        if (array)
-        {
-            mm.ParseFromArray(&echoBuffer, sizeof(echoBuffer));
-        }
-        else
-        {
-            mm.ParseFromString(echoBuffer);
-        }
+    if (array)
+    {
+        mm.ParseFromArray(&echoBuffer, sizeof(echoBuffer));
+    }
+    else
+    {
+        mm.ParseFromString(echoBuffer);
+    }
+
+    if (mm.IsInitialized())
+    {
 
         int action = mm.type();
         int size_init = mm.ByteSize();
+        int size_data_primitive = mm.data().size();
         std::string mdata = mm.data();
-
-        //Decode from base64
-        std::string oridecoded = base64_decode(mdata);
-        int ori_size = oridecoded.size();
+        int size_encoded = mdata.size();
 
         //Write base64 to file for checking.
         std::string basefile = "/jose/repos/base64oish_MAC.txt";
         std::ofstream out;
         out.open (basefile.c_str());
-        out << oridecoded << "\n";
+        out << mdata.c_str() << "\n";
         out.close();
+
+        //Decode from base64
+        std::string oridecoded = base64_decode(mdata.c_str());
+        int ori_size = oridecoded.size();
 
         //cast to stringstream to read data.
         std::stringstream decoded;
@@ -89,15 +99,19 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
         // Read the pixels from the stringstream
         decoded.read(data_d, size_d);
 
-        cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"          << endl;
-        cout << "width      : " << width_d      << endl;
-        cout << "rows       : " << mm.rows()    << endl;
-        cout << "height     : " << height_d     << endl;
-        cout << "cols       : " << mm.cols()    << endl;
-        cout << "Mat type   : " << type_d       << endl;
-        cout << "Mat size   : " << size_d       << endl;
-        cout << "Proto size : " << size_init    << endl;
-        cout << "ori_size   : " << ori_size     << endl;
+        cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"   << endl;
+        cout << "time       : " << mm.time()                            << endl;
+        cout << "width      : " << width_d                              << endl;
+        cout << "rows       : " << mm.rows()                            << endl;
+        cout << "height     : " << height_d                             << endl;
+        cout << "cols       : " << mm.cols()                            << endl;
+        cout << "Mat type   : " << type_d                               << endl;
+        cout << "Mat size   : " << mm.size()                            << endl;
+        cout << "Proto size : " << size_init                            << endl;
+        cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
+        cout << "ori_size               : " << ori_size                 << endl;
+        cout << "size_encoded           : " << size_encoded             << endl;
+        cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
         cout <<  endl;
 
         // Construct the image (clone it so that it won't need our buffer anymore)
@@ -111,17 +125,20 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
         QImage frame = Mat2QImage(deserialized);
         QMetaObject::invokeMethod(parent, "remoteImage", Q_ARG(QImage, frame));
 
-        //Build andswer proto.
-        motion::Message mr;
-        mr.set_type(motion::Message::SET_MAT);
-        string datar;
-        mr.SerializeToString(&datar);
-        char bts[datar.length()];
-        strcpy(bts, datar.c_str());
-        google::protobuf::ShutdownProtobufLibrary();
+    }
 
-        //Send reply.
-        sock->send(bts, strlen(bts));
+    //Build andswer proto.
+    motion::Message mr;
+    mr.set_type(motion::Message::SET_MAT);
+    //mr.set_data(mm.data());
+    string datar;
+    mr.SerializeToString(&datar);
+    char bts[datar.length()];
+    strcpy(bts, datar.c_str());
+    google::protobuf::ShutdownProtobufLibrary();
+
+    //Send reply.
+    sock->send(bts, strlen(bts));
 
 }
 

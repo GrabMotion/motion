@@ -8,6 +8,7 @@
 #include "threads/mountthread.h"
 #include "threads/tcpechothread.h"
 #include "socket/socketlistener.h"
+#include "socket/streamlistener.h"
 
 #include "protobuffer/motion.pb.h"
 
@@ -17,6 +18,21 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include <fcntl.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <stdio.h>
+#include <netinet/in.h>
+#include <resolv.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
+
+#include <iostream>
+#include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
 
 #include "b64/base64.h"
 
@@ -59,16 +75,16 @@ public:
     ~MainWindow();
 
     //Threads
-    BroadcastThread *broadcast_thread;
-    StreamingThread *streaming_thread;
-    TCPEchoThread *tcpecho_thread;
-    MountThread *mount_thread;
-    SocketListener *socket_listener;
+    BroadcastThread     *broadcast_thread;
+    StreamingThread     *streaming_thread;
+    TCPEchoThread       *tcpecho_thread;
+    MountThread         *mount_thread;
+    SocketListener      *socket_listener;
+    StreamListener      *stream_listener;
 
     std::string NETWORK_IP;
     QString share;
     QString getShare();
-
 
 private:
     Ui::MainWindow *ui;
@@ -102,6 +118,7 @@ private:
 
     void testBase();
     std::string getTime();
+
 
 public:
     Q_SLOT void remoteMessage(QString str)
@@ -150,7 +167,6 @@ private slots:
     void on_scrrenshot_clicked();
     void on_save_region_clicked();
     void on_get_time_clicked();
-
 
     void on_set_time_clicked();
 
