@@ -109,7 +109,7 @@ private:
     QString getSharedFolder();
     void getLocalNetwork();
     void setRemoteMessage(QString str);
-    void setRemoteImage(QImage image);
+    void setRemoteProto(motion::Message payload);
 
     std::string result_message;
     QString q_response;
@@ -125,14 +125,15 @@ public:
     {
         setRemoteMessage(str);
     }
-    Q_SLOT void remoteImage(QImage image)
-    {
-        setRemoteImage(image);
-    }
     Q_SLOT void remoteError(QString &e)
     {
         SocketErrorMessage(e);
     }
+    Q_SLOT void remoteProto(motion::Message payload)
+    {
+        setRemoteProto(payload);
+    }
+
 
 private slots:
 
@@ -164,13 +165,12 @@ private slots:
 
     void on_disconnect_clicked();
 
-    void on_scrrenshot_clicked();
+    void on_screenshot_clicked();
     void on_save_region_clicked();
     void on_get_time_clicked();
 
     void on_set_time_clicked();
 
-    void on_test_mat_clicked();
 
 signals:
     void SocketReceivedSignal(std::string);

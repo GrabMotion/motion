@@ -276,7 +276,7 @@ color: rgb(255, 252, 253);</string>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0,1,0">
      <item>
-      <widget class="QPushButton" name="scrrenshot">
+      <widget class="QPushButton" name="screenshot">
        <property name="text">
         <string>ScreenShot</string>
        </property>
@@ -441,19 +441,6 @@ color: rgb(255, 252, 253);</string>
     </property>
     <property name="text">
      <string/>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="test_mat">
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>300</y>
-      <width>115</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>test_mat</string>
     </property>
    </widget>
   </widget>

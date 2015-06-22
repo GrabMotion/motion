@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
 
-    ui->scrrenshot->setEnabled(false);
+    ui->screenshot->setEnabled(false);
     ui->save_region->setEnabled(false);
     ui->start_recognition->setEnabled(false);
 
@@ -202,7 +202,7 @@ void MainWindow::ResultEcho(string response)
             ui->start_recognition->setEnabled(true);
             ui->status_label->setText(qpayload);
             ui->status_label->setStyleSheet("background-color: lightgreen;");
-            ui->scrrenshot->setEnabled(true);
+            ui->screenshot->setEnabled(true);
             mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
             break;
 
@@ -228,11 +228,6 @@ void MainWindow::ResultEcho(string response)
 char* convert2char(QString input)
 {
     return (char*)input.data();
-}
-
-void MainWindow::setRemoteImage(QImage image)
-{
-    ui->output->setPixmap(QPixmap::fromImage(image));
 }
 
 void MainWindow::setRemoteMessage(QString qstr)
@@ -551,14 +546,14 @@ void MainWindow::on_list_files_clicked(const QModelIndex &index)
 
 void MainWindow::ShareUmounted(){}
 
-void MainWindow::on_scrrenshot_clicked()
+void MainWindow::on_screenshot_clicked()
 {
 
-    QString qtip = ui->ips_combo->currentText();
+    QString qt_ip = ui->ips_combo->currentText();
     QString share = getSharedFolder();
 
-    string scree_shot = share.toStdString() + "/"  + qtip.toStdString() +  "/screenshots/screen.jpg"; //region + "region.xml";
-    string screenshots = share.toStdString() + "/"  + qtip.toStdString() +  "/screenshots"; //region + "region.xml";
+    string scree_shot = share.toStdString() + "/"  + qt_ip.toStdString() +  "/screenshots/screen.jpg"; //region + "region.xml";
+    string screenshots = share.toStdString() + "/"  + qt_ip.toStdString() +  "/screenshots"; //region + "region.xml";
 
     QString scree_shot_file = QString::fromStdString(scree_shot);
     QString screenshots_file = QString::fromStdString(scree_shot);
@@ -574,13 +569,33 @@ void MainWindow::on_scrrenshot_clicked()
             dir.remove(dirFile);
         }
     }
-
-    QString qt_ip = ui->ips_combo->currentText();
-    QByteArray ba_ip = qt_ip.toLatin1();
-    char *c_str_ip = ba_ip.data();
     QString sh = getSharedFolder();
 
-    streaming_thread->StartStreaming(c_str_ip, qt_ip, sh);
+    //QString sh = getSharedFolder();
+    //streaming_thread->StartStreaming(c_str_ip, qt_ip, sh);
+
+    tcpecho_thread = new TCPEchoThread(this);
+    //dataconnect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
+
+    std::string qt_ip_str = qt_ip.toUtf8().constData();
+    QByteArray ba_ip = qt_ip.toLatin1();
+    char *c_str_ip = ba_ip.data();
+
+    char buf[MAXDATASIZE];
+    string data;
+    motion::Message m;
+    m.set_type(motion::Message::ActionType::Message_ActionType_GET_MAT);
+    m.set_serverip(getIpAddress());
+    m.SerializeToString(&data);
+    char bts[data.length()];
+    strcpy(bts, data.c_str());
+
+    tcpecho_thread->SendEcho(c_str_ip, bts);
+
+    google::protobuf::ShutdownProtobufLibrary();
+
+    tcpecho_thread->terminate();
+
 }
 
 
@@ -813,35 +828,6 @@ void MainWindow::on_set_time_clicked()
     tcpecho_thread->terminate();
 }
 
-void MainWindow::on_test_mat_clicked()
-{
-
-    tcpecho_thread = new TCPEchoThread(this);
-    //dataconnect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-
-    QString qt_ip = ui->ips_combo->currentText();
-    std::string qt_ip_str = qt_ip.toUtf8().constData();
-    QByteArray ba_ip = qt_ip.toLatin1();
-    char *c_str_ip = ba_ip.data();
-
-    char buf[MAXDATASIZE];
-    string data;
-    motion::Message m;
-    m.set_type(motion::Message::ActionType::Message_ActionType_GET_MAT);
-    m.set_serverip(getIpAddress());
-    m.SerializeToString(&data);
-    char bts[data.length()];
-    strcpy(bts, data.c_str());
-
-    tcpecho_thread->SendEcho(c_str_ip, bts);
-
-    google::protobuf::ShutdownProtobufLibrary();
-
-    tcpecho_thread->terminate();
-
-}
-
-
 void MainWindow::SocketErrorMessage(QString &e)
 {
     QMessageBox* msgBox 	= new QMessageBox();
@@ -921,8 +907,7 @@ void MainWindow::testBase()
     imwrite("/jose/repos/image__decoded__10000.jpg", deserialized);
 
     QImage frame = Mat2QImage(deserialized);
-    setRemoteImage(frame);
-
+    ui->output->setPixmap(QPixmap::fromImage(frame));
 }
 
 std::string MainWindow::getTime()
@@ -934,4 +919,69 @@ std::string MainWindow::getTime()
     ptm = localtime (&tv.tv_sec);
     strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S %z", ptm);
     return time_string;
+}
+
+void MainWindow::setRemoteProto(motion::Message payload)
+{
+
+      int action = payload.type();
+      int size_init = payload.ByteSize();
+      int size_data_primitive = payload.data().size();
+      std::string mdata = payload.data();
+      int size_encoded = mdata.size();
+
+      //Write base64 to file for checking.
+      std::string basefile = "/jose/repos/base64oish_MAC.txt";
+      std::ofstream out;
+      out.open (basefile.c_str());
+      out << mdata << "\n";
+      out.close();
+
+      //Decode from base64
+      std::string oridecoded = base64_decode(mdata);
+      int ori_size = oridecoded.size();
+
+      //cast to stringstream to read data.
+      std::stringstream decoded;
+      decoded << oridecoded;
+
+      // The data we need to deserialize.
+      int width_d = 0;
+      int height_d = 0;
+      int type_d = 0;
+      int size_d = 0;
+
+      // Read the width, height, type and size of the buffer
+      decoded.read((char*)(&width_d), sizeof(int));
+      decoded.read((char*)(&height_d), sizeof(int));
+      decoded.read((char*)(&type_d), sizeof(int));
+      decoded.read((char*)(&size_d), sizeof(int));
+
+      // Allocate a buffer for the pixels
+      char* data_d = new char[size_d];
+      // Read the pixels from the stringstream
+      decoded.read(data_d, size_d);
+
+      // Construct the image (clone it so that it won't need our buffer anymore)
+      cv::Mat deserialized = cv::Mat(height_d, width_d, type_d, data_d).clone();
+
+      //Render image.
+      imwrite("/jose/repos/image_2.jpg", deserialized);
+      QImage frame = Mat2QImage(deserialized);
+       ui->output->setPixmap(QPixmap::fromImage(frame));
+
+      //QMetaObject::invokeMethod(parent, "remoteImage", Q_ARG(QImage, frame));
+
+      cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"   << endl;
+      cout << "Mat size   : " << deserialized.size                            << endl;
+      cout << "Char type  : " << type_d                               << endl;
+      cout << "Proto size : " << payload.size()                         << endl;
+      cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
+      cout << "size_encoded           : " << size_encoded             << endl;
+      cout << "ori_size               : " << ori_size                 << endl;
+      cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
+      cout <<  endl;
+
+      // Delete our buffer
+      delete[]data_d;
 }

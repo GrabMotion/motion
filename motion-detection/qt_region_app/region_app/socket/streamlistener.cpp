@@ -53,7 +53,10 @@ void StreamListener::readBody(int csock,google::protobuf::uint32 siz, QObject *p
   //Print the message
   //cout<<"Message is "<<payload.DebugString();
 
-  int action = payload.type();
+  qRegisterMetaType<motion::Message>("motion::Message");
+  QMetaObject::invokeMethod(parent, "remoteProto", Q_ARG(motion::Message, payload));
+
+  /*int action = payload.type();
   int size_init = payload.ByteSize();
   int size_data_primitive = payload.data().size();
   std::string mdata = payload.data();
@@ -110,7 +113,7 @@ void StreamListener::readBody(int csock,google::protobuf::uint32 siz, QObject *p
   cout <<  endl;
 
   // Delete our buffer
-  delete[]data_d;
+  delete[]data_d;*/
 }
 
 void * StreamListener::socketHandler (void* lp)
