@@ -17,6 +17,7 @@ SET(CMAKE_DEPENDS_CHECK_CXX
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/sendmessage.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.cc" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/streamlistener.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/streaming/remotecam.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/streaming/remotecam.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/streaming/send_data.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/streaming/send_data.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinystr.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.o"
@@ -41,6 +42,7 @@ SET(CMAKE_C_TARGET_INCLUDE_PATH
   "/src/motion_detect/practical"
   "/src/motion_detect/ntp"
   "/src/motion_detect/b64"
+  "/src/motion_detect/socket"
   )
 SET(CMAKE_CXX_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})
 SET(CMAKE_Fortran_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})

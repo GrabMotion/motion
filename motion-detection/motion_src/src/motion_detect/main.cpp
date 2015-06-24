@@ -24,27 +24,20 @@
 #include <net/if.h>
 #include <ctime>
 #include <sys/time.h>
-
 #include <errno.h>
 #include <vector>
 #include <functional>
+#include <fstream>
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
 #include "practical/PracticalSocket.h" 
 #include "practical/sendmessage.h"
-
 #include "recognition/detection.h"
-
 #include "protobuffer/motion.pb.h"
-
-#include "b64/encode.h"
-#include "b64/decode.h"
-
+#include "socket/streamlistener.h"
 #include "b64/base64.h"
-
-#include <fstream>
 
 #include <unistd.h>
 #include <google/protobuf/message.h>
@@ -54,7 +47,6 @@
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 
 using namespace google::protobuf::io;
-
 
 using namespace std;
 using namespace cv;
@@ -110,12 +102,14 @@ char * setMessageValueBody(int value, std::string body);
 int resutl_watch_detected;
 std::string image_file_recognized;
 
-struct recognition_thread_args
+struct arg_struct
 {
-    bool writeImages;
-    bool writeCrops;
+    motion::Message message;
 };
-struct recognition_thread_args RecognitionahaStructThread;
+void * startRecognition(void * arg);
+
+void runCommand(int value);
+
 int getGlobalStringToInt(std::string id)
 {
     return atoi( id.c_str() );
@@ -258,6 +252,8 @@ motion::Message streamCastMessage()
     cvtColor(mat, mat, CV_RGB2GRAY);
     imwrite("MAT.jpg", mat);
     
+    //http://vgl-ait.org/cvwiki/doku.php?id=opencv:tutorial:extract_rgb_and_hsv_value_from_an_image
+    
     cout << "+++++++++++CREATING PROTO++++++++++++++" << endl;
     
     GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -317,23 +313,6 @@ motion::Message streamCastMessage()
     //Store into proto
     me.set_data(oriencoded);
     
-    /*bool array = true;
-    char * data_init[size_init];
-    string datastr;
-    
-    //Send serialized proto to the server.
-    if (array)
-    {
-        me.SerializeToArray(&data_init, size_init);
-        
-    } else
-    {
-        
-        me.SerializeToString(&datastr);
-    }
-    
-    //setMessage(me, array);*/
-    
     //Write base64 to file for checking.
     std::string basefile = "base64oish.txt";
     std::ofstream out;
@@ -345,84 +324,79 @@ motion::Message streamCastMessage()
     
     google::protobuf::ShutdownProtobufLibrary();
     
-    
-    //Comentar, tira error ()
-   // delete data_init;
-    
-    
     return me;
 }
 
 void* streamCast(void * arg)
 {
-
-motion::Message payload = streamCastMessage();
-cout<<"size after serilizing is "<<payload.ByteSize()<<endl;
-int siz = payload.ByteSize()+4;
-char *pkt = new char [siz];
-google::protobuf::io::ArrayOutputStream aos(pkt,siz);
-CodedOutputStream *coded_output = new CodedOutputStream(&aos);
-coded_output->WriteVarint32(payload.ByteSize());
-payload.SerializeToCodedStream(coded_output);
-
-int host_port= 1101;
-char* host_name="192.168.1.35";
-
-struct sockaddr_in my_addr;
-
-char buffer[1024];
-int bytecount;
-int buffer_len=0;
-
-int hsock;
-int * p_int;
-int err;
-
-hsock = socket(AF_INET, SOCK_STREAM, 0);
-if(hsock == -1){
-    printf("Error initializing socket %d\n",errno);
-    goto FINISH;
-}
-
-p_int = (int*)malloc(sizeof(int));
-*p_int = 1;
-
-if( (setsockopt(hsock, SOL_SOCKET, SO_REUSEADDR, (char*)p_int, sizeof(int)) == -1 )||
-   (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) ){
-    printf("Error setting options %d\n",errno);
-    free(p_int);
-    goto FINISH;
-}
-free(p_int);
-
-my_addr.sin_family = AF_INET ;
-my_addr.sin_port = htons(host_port);
-
-memset(&(my_addr.sin_zero), 0, 8);
-my_addr.sin_addr.s_addr = inet_addr(host_name);
-if( connect( hsock, (struct sockaddr*)&my_addr, sizeof(my_addr)) == -1 ){
-    if((err = errno) != EINPROGRESS){
-        fprintf(stderr, "Error connecting socket %d\n", errno);
+    
+    motion::Message payload = streamCastMessage();
+    cout<<"size after serilizing is "<<payload.ByteSize()<<endl;
+    int siz = payload.ByteSize()+4;
+    char *pkt = new char [siz];
+    google::protobuf::io::ArrayOutputStream aos(pkt,siz);
+    CodedOutputStream *coded_output = new CodedOutputStream(&aos);
+    coded_output->WriteVarint32(payload.ByteSize());
+    payload.SerializeToCodedStream(coded_output);
+    
+    int host_port= 1101;
+    char* host_name="192.168.1.35";
+    
+    struct sockaddr_in my_addr;
+    
+    char buffer[1024];
+    int bytecount;
+    int buffer_len=0;
+    
+    int hsock;
+    int * p_int;
+    int err;
+    
+    hsock = socket(AF_INET, SOCK_STREAM, 0);
+    if(hsock == -1){
+        printf("Error initializing socket %d\n",errno);
         goto FINISH;
     }
-}
-
-//for (int i =0;i<10000;i++){
-    //for (int j = 0 ;j<10;j++) {
-        
-        if( (bytecount=send(hsock, (void *) pkt,siz,0))== -1 ) {
-            fprintf(stderr, "Error sending data %d\n", errno);
+    
+    p_int = (int*)malloc(sizeof(int));
+    *p_int = 1;
+    
+    if( (setsockopt(hsock, SOL_SOCKET, SO_REUSEADDR, (char*)p_int, sizeof(int)) == -1 )||
+       (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) ){
+        printf("Error setting options %d\n",errno);
+        free(p_int);
+        goto FINISH;
+    }
+    free(p_int);
+    
+    my_addr.sin_family = AF_INET ;
+    my_addr.sin_port = htons(host_port);
+    
+    memset(&(my_addr.sin_zero), 0, 8);
+    my_addr.sin_addr.s_addr = inet_addr(host_name);
+    if( connect( hsock, (struct sockaddr*)&my_addr, sizeof(my_addr)) == -1 ){
+        if((err = errno) != EINPROGRESS){
+            fprintf(stderr, "Error connecting socket %d\n", errno);
             goto FINISH;
         }
-        printf("Sent bytes %d\n", bytecount);
+    }
+    
+    //for (int i =0;i<10000;i++){
+        //for (int j = 0 ;j<10;j++) {
+    
+            if( (bytecount=send(hsock, (void *) pkt,siz,0))== -1 ) {
+                fprintf(stderr, "Error sending data %d\n", errno);
+                goto FINISH;
+            }
+            printf("Sent bytes %d\n", bytecount);
         //usleep(5);
+        //}
     //}
-//}
-delete pkt;
+    delete pkt;
     
 FINISH:
     close(hsock);
-
+    
 }
 
 
@@ -454,6 +428,8 @@ void runCommand(int value)
     
     string dataconnect;
     int echoStringLen;
+    
+    struct arg_struct arguments;
     
     switch (value)
     {
@@ -556,10 +532,9 @@ void runCommand(int value)
             
         case motion::Message::START_RECOGNITION:
             
-            RecognitionahaStructThread.writeCrops = true;
-            RecognitionahaStructThread.writeImages = true;
+            arguments.message = receive_proto;
             
-            runr = pthread_create(&thread_recognition, NULL, startRecognition, &RecognitionahaStructThread);
+            runr = pthread_create(&thread_recognition, NULL, startRecognition, (void*) &arguments);
             if ( runr  != 0) {
                 cerr << "Unable to create thread" << endl;
                 cout << "startRecognition pthread_create failed." << endl;
@@ -622,7 +597,6 @@ int HandleTCPClient(TCPSocket *sock)
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
       echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
       
-
       const string & data = echoBuffer;
       
       GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -658,16 +632,6 @@ int HandleTCPClient(TCPSocket *sock)
       
       google::protobuf::ShutdownProtobufLibrary();
       
-      
-      /*char * message_send;
-      std::string command = "";
-      char *response;
-      char* init;
-      char buf[MAXDATASIZE];
-      string data;*/
-      
-      //sock->send(echoBuffer, recvMsgSize);
-      
   }
   return value;
     
@@ -696,21 +660,6 @@ void * ThreadMain(void *clntSock)
     pthread_exit(NULL);
     return (void *) resutl_echo;
 }
-
-/*void * watch_echo (void * t)
-{
-    pthread_mutex_lock(&echo_mutex);
-    while (!echo_received)
-    {
-        pthread_cond_wait(&echo_response, &echo_mutex);
-        std::cout << "RECIBIDO!!!. resutl_echo " << resutl_echo << endl;
-        
-        RunUICommand(resutl_echo, from_ip);
-        
-    }
-    pthread_mutex_lock(&echo_mutex);
-    pthread_exit(NULL);
-}*/
 
 void * socketThread (void * args)
 {
@@ -880,6 +829,11 @@ int main (int argc, char * const argv[])
    //pthread_join(    thread_broadcast,          (void**) &runb);
    cout << "join thread_echo" << endl;
    
+    //Stream Socket Server.
+   StreamListener * stream_listener = new StreamListener();
+   stream_listener->startListening();
+
+    
     pthread_join(    thread_socket,               (void**) &runs);
     
    cout << "LAST!!! = " << runs << endl;

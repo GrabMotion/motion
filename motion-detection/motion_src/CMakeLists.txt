@@ -11,9 +11,10 @@ INCLUDE_DIRECTORIES(
 	${RECOGNITION_DIRECTORY}/src/motion_detect/recognition
 	${PROTOBUFF_DIRECTORY}  /src/motion_detect/protobuffer
 	${STREAMING_DIRECTORY}  /src/motion_detect/streaming	
-	${SOCKET_DIRECTORY}  	/src/motion_detect/practical
+	${PRACTICAL_DIRECTORY}  	/src/motion_detect/practical
 	${NTP_DIRECTORY}        /src/motion_detect/ntp
 	${BASE64_DIRECTORY}     /src/motion_detect/b64
+	${SOCKET_DIRECTORY}  /src/motion_detect/socket
 )
 
 FIND_PACKAGE(Protobuf REQUIRED)
@@ -56,6 +57,8 @@ ADD_EXECUTABLE(motion_detect_raspberry
 	src/motion_detect/b64/encode.h
 	src/motion_detect/b64/base64.cpp
 	src/motion_detect/b64/base64.h
+	src/motion_detect/socket/streamlistener.cpp
+	src/motion_detect/socket/streamlistener.h
 )
 
 TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm ${PROTOBUF_LIBRARIES})

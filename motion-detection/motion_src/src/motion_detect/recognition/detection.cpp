@@ -32,6 +32,8 @@
 #include <cstring>
 
 #include "../recognition/detection.h"
+#include "../protobuffer/motion.pb.h"
+#include "../b64/base64.h"
 
 using namespace std;
 using namespace cv;
@@ -306,15 +308,38 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
     return 0;
 }
 
+struct arg_struct
+{
+    motion::Message message;
+};
+
+
 void * startRecognition(void * arg)
 {
     
     pthread_mutex_t detectMutex;
     pthread_mutex_init(&detectMutex, 0);
     
-    struct recognition_thread_args *args = (struct recognition_thread_args *) arg;
+    struct arg_struct *args = (struct arg_struct *) arg;
     
-    bool writeImages = true, writeCroop = false;
+    motion::Message m = args->message;
+    
+    std::string region_encoded = m.regiondata();
+    
+    std::cout << "region_encoded: " << region_encoded << endl;
+    
+    std::string file_region = base64_decode(region_encoded);
+    
+    std::cout << "file_region: " << file_region << endl;
+    
+    bool writeImages = m.storeimage();
+    
+    std::cout << "writeImages: " << writeImages << endl;
+    
+    bool writeCroop  = m.storecrop();
+    
+    std::cout << "writeCroop: " << writeCroop << endl;
+    
     bool send_number_detected = true;
     
     const string DIR        = "../../src/motion_web/pics/";          // directory where the images will be stored
@@ -335,15 +360,14 @@ void * startRecognition(void * arg)
     // floating point seconds elapsed since start
     double sec;
     
-    // Create pics directory if not exist. 
-    //directoryExistsOrCreate(DIR.c_str());
-    
-    // Create region directory if not exist. 
+    // Create region directory if not exist.
     //directoryExistsOrCreate(REGION.c_str());
     //{
         // Detect motion in a region in steadof window
-       string file_region = REGION + "region" + EXT_DATA;
-       parseRegionXML(file_region, region);
+    
+       //string file_region = REGION + "region" + EXT_DATA;
+       //parseRegionXML(file_region, region);
+    
     //}
     
     // Create log directory if not exist. 
@@ -356,7 +380,6 @@ void * startRecognition(void * arg)
         logfile.close();
     }
     
-    std::cout << "llega" << std::endl;
     
     // Format of directory
     string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
@@ -416,27 +439,6 @@ void * startRecognition(void * arg)
     int countWhile;
     
     init_time = clock();
-    
-    //Socket.
-    /*string servAddress = args->machine_ip;
-    char *echoString = args->message;   // Second arg: string to echo
-    bool loop = args->loop;
-    int echoStringLen = strlen(echoString);   // Determine input length
-    unsigned short echoServPort = args->port;
-    char echoBuffer[RCVBUFSIZE + 1];
-
-    try
-    {
-        
-        // Establish connection with the echo server
-        TCPSocket sock(servAddress, echoServPort);
-
-    } catch(SocketException &e)
-    {
-        cerr << e.what() << endl;
-        exit(1);
-    }*/
-
     
     // All settings have been set, now go in endless loop and
     // take as many pictures you want..
