@@ -44,7 +44,7 @@ void StreamListener::readBody(int csock,google::protobuf::uint32 siz, QObject *p
   //After the message's length is read, PushLimit() is used to prevent the CodedInputStream
   //from reading beyond that length.Limits are used when parsing length-delimited
   //embedded messages
-  google::protobuf::io::CodedInputStream::Limit msgLimit = coded_input.PushLimit(siz);
+  google::protobuf::io::CodedInputStream::Limit msgLimit = coded_input.PushLimit(siz+4);
 
   //De-Serialize
   payload.ParseFromCodedStream(&coded_input);
@@ -53,67 +53,10 @@ void StreamListener::readBody(int csock,google::protobuf::uint32 siz, QObject *p
   //Print the message
   //cout<<"Message is "<<payload.DebugString();
 
+  // Send proto to the MainWindow.
   qRegisterMetaType<motion::Message>("motion::Message");
   QMetaObject::invokeMethod(parent, "remoteProto", Q_ARG(motion::Message, payload));
 
-  /*int action = payload.type();
-  int size_init = payload.ByteSize();
-  int size_data_primitive = payload.data().size();
-  std::string mdata = payload.data();
-  int size_encoded = mdata.size();
-
-  //Write base64 to file for checking.
-  std::string basefile = "/jose/repos/base64oish_MAC.txt";
-  std::ofstream out;
-  out.open (basefile.c_str());
-  out << mdata << "\n";
-  out.close();
-
-  //Decode from base64
-  std::string oridecoded = base64_decode(mdata);
-  int ori_size = oridecoded.size();
-
-  //cast to stringstream to read data.
-  std::stringstream decoded;
-  decoded << oridecoded;
-
-  // The data we need to deserialize.
-  int width_d = 0;
-  int height_d = 0;
-  int type_d = 0;
-  int size_d = 0;
-
-  // Read the width, height, type and size of the buffer
-  decoded.read((char*)(&width_d), sizeof(int));
-  decoded.read((char*)(&height_d), sizeof(int));
-  decoded.read((char*)(&type_d), sizeof(int));
-  decoded.read((char*)(&size_d), sizeof(int));
-
-  // Allocate a buffer for the pixels
-  char* data_d = new char[size_d];
-  // Read the pixels from the stringstream
-  decoded.read(data_d, size_d);
-
-  // Construct the image (clone it so that it won't need our buffer anymore)
-  cv::Mat deserialized = cv::Mat(height_d, width_d, type_d, data_d).clone();
-
-  //Render image.
-  imwrite("/jose/repos/image_2.jpg", deserialized);
-  QImage frame = Mat2QImage(deserialized);
-  QMetaObject::invokeMethod(parent, "remoteImage", Q_ARG(QImage, frame));
-
-  cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"   << endl;
-  cout << "Mat size   : " << deserialized.size                            << endl;
-  cout << "Char type  : " << type_d                               << endl;
-  cout << "Proto size : " << payload.size()                         << endl;
-  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
-  cout << "size_encoded           : " << size_encoded             << endl;
-  cout << "ori_size               : " << ori_size                 << endl;
-  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
-  cout <<  endl;
-
-  // Delete our buffer
-  delete[]data_d;*/
 }
 
 void * StreamListener::socketHandler (void* lp)

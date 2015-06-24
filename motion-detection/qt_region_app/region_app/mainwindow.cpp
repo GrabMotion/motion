@@ -30,14 +30,12 @@
 
 #include <pthread.h>
 
-
-
 using namespace google::protobuf::io;
 using namespace std;
 using namespace cv;
 
-Mat src;
-string filename, xml;
+Mat main_mat;
+std::string filename, xml;
 Scalar color(0,0,255); // red color
 vector<Point2f> coor;
 vector<Point2f> contour;
@@ -71,8 +69,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mount_thread, SIGNAL(SharedMounted(QString)), this, SLOT(SharedMounted(QString)));
 
     //Streaming Resutl
-    streaming_thread = new StreamingThread(this);
-    connect(streaming_thread, SIGNAL(StreamingUpdateLabelImage(std::string, Mat)), this, SLOT(StreamingUpdateLabelImage(std::string, Mat)));
+    //streaming_thread = new StreamingThread(this);
+    //connect(streaming_thread, SIGNAL(StreamingUpdateLabelImage(std::string, Mat)), this, SLOT(StreamingUpdateLabelImage(std::string, Mat)));
 
     //Mouse Events
     connect(ui->qt_drawing_output, SIGNAL(sendMousePosition(QPoint&)), this, SLOT(showMousePosition(QPoint&)));
@@ -366,12 +364,12 @@ void MainWindow::BroadcastReceived(QString ip)
     ui->connect_button->setEnabled(true);
 }
 
-void MainWindow::StreamingUpdateLabelImage(std::string path, Mat mat)
+/*void MainWindow::StreamingUpdateLabelImage(std::string path, Mat mat)
 {
     src = mat;
     QPixmap pixmap((QString::fromStdString(path)));
     ui->output->setPixmap(pixmap);
-}
+}*/
 
 void MainWindow::broadcastTimeoutSocketException()
 {
@@ -406,7 +404,7 @@ void MainWindow::on_connect_button_clicked()
     std::string qt_ip_str = qt_ip.toUtf8().constData();
     char *c_str_ip = ba_ip.data();
 
-    char buf[MAXDATASIZE];
+    //char buf[MAXDATASIZE];
     string data;
     motion::Message m;
     m.set_type(motion::Message::ActionType::Message_ActionType_CONNECT);
@@ -581,7 +579,8 @@ void MainWindow::on_screenshot_clicked()
     QByteArray ba_ip = qt_ip.toLatin1();
     char *c_str_ip = ba_ip.data();
 
-    char buf[MAXDATASIZE];
+    //char buf[MAXDATASIZE];
+
     string data;
     motion::Message m;
     m.set_type(motion::Message::ActionType::Message_ActionType_GET_MAT);
@@ -595,30 +594,6 @@ void MainWindow::on_screenshot_clicked()
     google::protobuf::ShutdownProtobufLibrary();
 
     tcpecho_thread->terminate();
-
-}
-
-
-void MainWindow::on_start_recognition_toggled(bool checked)
-{
-
-    if (checked){
-
-        std::string command = getGlobalIntToString(START_RECOGNITION);
-        tcpecho_thread = new TCPEchoThread(this);
-        connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-        tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
-        tcpecho_thread->terminate();
-
-    }
-    else
-    {
-        std::string command = getGlobalIntToString(STOP_RECOGNITION);
-        tcpecho_thread = new TCPEchoThread(this);
-        connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-        tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
-        tcpecho_thread->terminate();
-    }
 
 }
 
@@ -642,7 +617,7 @@ void MainWindow::on_get_time_clicked()
 
 /////////////SAVE_XML////////////////
 
-void savePointsAsXML(vector<Point2f> &contour ){
+void MainWindow::savePointsAsXML(vector<Point2f> &contour ){
 
     TiXmlDocument doc;
     TiXmlDeclaration decl("1.0", "", "");
@@ -658,6 +633,20 @@ void savePointsAsXML(vector<Point2f> &contour ){
         cout << "file saved succesfully.\n";
     else
         cout << "file not saved, something went wrong!\n";
+
+    // Declare a printer
+    TiXmlPrinter printer;
+
+    // attach it to the document you want to convert in to a std::string
+    doc.Accept(&printer);
+
+    // Create a std::string and copy your document data in to the string
+    std::string xml_temp = printer.CStr();
+
+    std::string xmldecoded = base64_encode(reinterpret_cast<const unsigned char*>(xml_temp.c_str()), xml_temp.length());
+
+    xmlstring = QString::fromStdString(xmldecoded);
+
 }
 
 /////////////MOUSE////////////////
@@ -667,8 +656,8 @@ void MainWindow::Mouse_Pressed_Right_Click(vector<Point2f>&coor)
     vector<Point2f> & contour = coor;
     vector<Point2f> insideContour;
 
-    for(int j = 0; j < src.rows; j++){
-        for(int i = 0; i < src.cols; i++){
+    for(int j = 0; j < main_mat.rows; j++){
+        for(int i = 0; i < main_mat.cols; i++){
             Point2f p(i,j);
             if(pointPolygonTest(contour,p,false) >= 0) // yes inside
                 insideContour.push_back(p);
@@ -685,9 +674,9 @@ void MainWindow::on_save_region_clicked()
     coor = contour;
     vector<Point2f> insideContour;
 
-    for(int j = 0; j < src.rows; j++)
+    for(int j = 0; j < main_mat.rows; j++)
     {
-        for(int i = 0; i < src.cols; i++)
+        for(int i = 0; i < main_mat.cols; i++)
         {
             Point2f p(i,j);
             if(pointPolygonTest(contour,p,false) >= 0) // yes inside
@@ -792,6 +781,56 @@ void MainWindow::split(const string& s, char c, vector<string>& v)
       if (j == string::npos)
          v.push_back(s.substr(i, s.length()));
    }
+}
+
+void MainWindow::on_start_recognition_toggled(bool checked)
+{
+
+    if (checked)
+    {
+        GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+        string data;
+        motion::Message mr;
+        mr.set_type(motion::Message::ActionType::Message_ActionType_START_RECOGNITION);
+
+        struct timeval tv;
+        struct tm* ptm;
+        char time_string[40];
+        gettimeofday (&tv, NULL);
+        ptm = localtime (&tv.tv_sec);
+        strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S", ptm);
+        mr.set_time(time_string);
+
+        mr.set_serverip(getIpAddress());
+        std::string utf8_xml = xmlstring.toUtf8().constData();
+        cout << "utf8_xml: " << utf8_xml.size() << endl;
+        mr.set_regiondata(utf8_xml);
+        mr.set_storeimage(true);
+        mr.set_storecrop(false);
+
+        //mr.SerializeToString(&data);
+        //char bts[data.length()];
+        //strcpy(bts, data.c_str());
+
+        stream_sender = new StreamSender(this);
+        //connect(stream_sender, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
+        stream_sender->sendStream(getActiveTerminalIPString(), mr);
+        stream_sender->terminate();
+
+        delete ptm;
+        google::protobuf::ShutdownProtobufLibrary();
+
+    }
+    else
+    {
+        std::string command = getGlobalIntToString(STOP_RECOGNITION);
+        tcpecho_thread = new TCPEchoThread(this);
+        connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
+        tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
+        tcpecho_thread->terminate();
+    }
+
 }
 
 void MainWindow::on_start_recognition_clicked(){}
@@ -903,6 +942,8 @@ void MainWindow::testBase()
     // Delete our buffer
     delete[]data_d;
 
+    google::protobuf::ShutdownProtobufLibrary();
+
     //Save image converted
     imwrite("/jose/repos/image__decoded__10000.jpg", deserialized);
 
@@ -963,17 +1004,17 @@ void MainWindow::setRemoteProto(motion::Message payload)
       decoded.read(data_d, size_d);
 
       // Construct the image (clone it so that it won't need our buffer anymore)
-      cv::Mat deserialized = cv::Mat(height_d, width_d, type_d, data_d).clone();
+      main_mat = cv::Mat(height_d, width_d, type_d, data_d).clone();
 
       //Render image.
-      imwrite("/jose/repos/image_2.jpg", deserialized);
-      QImage frame = Mat2QImage(deserialized);
-       ui->output->setPixmap(QPixmap::fromImage(frame));
+      imwrite("/jose/repos/image_2.jpg", main_mat);
+      QImage frame = Mat2QImage(main_mat);
+      ui->output->setPixmap(QPixmap::fromImage(frame));
 
       //QMetaObject::invokeMethod(parent, "remoteImage", Q_ARG(QImage, frame));
 
       cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"   << endl;
-      cout << "Mat size   : " << deserialized.size                            << endl;
+      cout << "Mat size   : " << main_mat.size                            << endl;
       cout << "Char type  : " << type_d                               << endl;
       cout << "Proto size : " << payload.size()                         << endl;
       cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
@@ -982,6 +1023,20 @@ void MainWindow::setRemoteProto(motion::Message payload)
       cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
       cout <<  endl;
 
+      google::protobuf::ShutdownProtobufLibrary();
+
       // Delete our buffer
       delete[]data_d;
+}
+
+
+char * MainWindow::getTimeRasp()
+{
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    return time_rasp;
 }

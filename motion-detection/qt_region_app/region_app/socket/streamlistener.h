@@ -50,10 +50,11 @@ public:
     explicit StreamListener(QObject *parent = 0);
 
     void startListening(QObject *parent);
-    static void * socketThread(void * args);
     static google::protobuf::uint32 readHdr(char *buf);
     static void readBody(int csock,google::protobuf::uint32 siz, QObject *parent);
     static void * socketHandler (void* lp);
+    static void * socketThread  (void * args);
+
 
 private:
 

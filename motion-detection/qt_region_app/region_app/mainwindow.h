@@ -9,6 +9,7 @@
 #include "threads/tcpechothread.h"
 #include "socket/socketlistener.h"
 #include "socket/streamlistener.h"
+#include "socket/streamsender.h"
 
 #include "protobuffer/motion.pb.h"
 
@@ -81,10 +82,13 @@ public:
     MountThread         *mount_thread;
     SocketListener      *socket_listener;
     StreamListener      *stream_listener;
+    StreamSender        *stream_sender;
 
     std::string NETWORK_IP;
     QString share;
     QString getShare();
+
+    QString xmlstring;
 
 private:
     Ui::MainWindow *ui;
@@ -118,6 +122,10 @@ private:
 
     void testBase();
     std::string getTime();
+
+    char * getTimeRasp();
+
+    void savePointsAsXML(vector<Point2f> &contour );
 
 
 public:
@@ -153,7 +161,7 @@ private slots:
     //sockets
     void BroadcastReceived(QString);
     void broadcastTimeoutSocketException();
-    void StreamingUpdateLabelImage(std::string, Mat);
+    //void StreamingUpdateLabelImage(std::string, Mat);
     void ResultEcho(string);
 
     //shares
