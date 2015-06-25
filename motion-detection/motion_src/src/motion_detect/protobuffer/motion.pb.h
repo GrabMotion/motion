@@ -225,22 +225,46 @@ class Message : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 size() const;
   inline void set_size(::google::protobuf::int32 value);
 
-  // optional bytes data = 9;
-  inline bool has_data() const;
-  inline void clear_data();
-  static const int kDataFieldNumber = 9;
-  inline const ::std::string& data() const;
-  inline void set_data(const ::std::string& value);
-  inline void set_data(const char* value);
-  inline void set_data(const void* value, size_t size);
-  inline ::std::string* mutable_data();
-  inline ::std::string* release_data();
-  inline void set_allocated_data(::std::string* data);
+  // optional bytes data_1 = 10;
+  inline bool has_data_1() const;
+  inline void clear_data_1();
+  static const int kData1FieldNumber = 10;
+  inline const ::std::string& data_1() const;
+  inline void set_data_1(const ::std::string& value);
+  inline void set_data_1(const char* value);
+  inline void set_data_1(const void* value, size_t size);
+  inline ::std::string* mutable_data_1();
+  inline ::std::string* release_data_1();
+  inline void set_allocated_data_1(::std::string* data_1);
 
-  // optional string serverip = 10;
+  // optional bytes data_2 = 11;
+  inline bool has_data_2() const;
+  inline void clear_data_2();
+  static const int kData2FieldNumber = 11;
+  inline const ::std::string& data_2() const;
+  inline void set_data_2(const ::std::string& value);
+  inline void set_data_2(const char* value);
+  inline void set_data_2(const void* value, size_t size);
+  inline ::std::string* mutable_data_2();
+  inline ::std::string* release_data_2();
+  inline void set_allocated_data_2(::std::string* data_2);
+
+  // optional bytes data_3 = 12;
+  inline bool has_data_3() const;
+  inline void clear_data_3();
+  static const int kData3FieldNumber = 12;
+  inline const ::std::string& data_3() const;
+  inline void set_data_3(const ::std::string& value);
+  inline void set_data_3(const char* value);
+  inline void set_data_3(const void* value, size_t size);
+  inline ::std::string* mutable_data_3();
+  inline ::std::string* release_data_3();
+  inline void set_allocated_data_3(::std::string* data_3);
+
+  // optional string serverip = 13;
   inline bool has_serverip() const;
   inline void clear_serverip();
-  static const int kServeripFieldNumber = 10;
+  static const int kServeripFieldNumber = 13;
   inline const ::std::string& serverip() const;
   inline void set_serverip(const ::std::string& value);
   inline void set_serverip(const char* value);
@@ -249,10 +273,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_serverip();
   inline void set_allocated_serverip(::std::string* serverip);
 
-  // optional string clientip = 11;
+  // optional string clientip = 14;
   inline bool has_clientip() const;
   inline void clear_clientip();
-  static const int kClientipFieldNumber = 11;
+  static const int kClientipFieldNumber = 14;
   inline const ::std::string& clientip() const;
   inline void set_clientip(const ::std::string& value);
   inline void set_clientip(const char* value);
@@ -261,10 +285,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_clientip();
   inline void set_allocated_clientip(::std::string* clientip);
 
-  // optional string payload = 12;
+  // optional string payload = 15;
   inline bool has_payload() const;
   inline void clear_payload();
-  static const int kPayloadFieldNumber = 12;
+  static const int kPayloadFieldNumber = 15;
   inline const ::std::string& payload() const;
   inline void set_payload(const ::std::string& value);
   inline void set_payload(const char* value);
@@ -273,10 +297,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_payload();
   inline void set_allocated_payload(::std::string* payload);
 
-  // optional string regionfilename = 13;
+  // optional string regionfilename = 16;
   inline bool has_regionfilename() const;
   inline void clear_regionfilename();
-  static const int kRegionfilenameFieldNumber = 13;
+  static const int kRegionfilenameFieldNumber = 16;
   inline const ::std::string& regionfilename() const;
   inline void set_regionfilename(const ::std::string& value);
   inline void set_regionfilename(const char* value);
@@ -285,10 +309,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_regionfilename();
   inline void set_allocated_regionfilename(::std::string* regionfilename);
 
-  // optional bytes regiondata = 14;
+  // optional bytes regiondata = 17;
   inline bool has_regiondata() const;
   inline void clear_regiondata();
-  static const int kRegiondataFieldNumber = 14;
+  static const int kRegiondataFieldNumber = 17;
   inline const ::std::string& regiondata() const;
   inline void set_regiondata(const ::std::string& value);
   inline void set_regiondata(const char* value);
@@ -297,31 +321,31 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_regiondata();
   inline void set_allocated_regiondata(::std::string* regiondata);
 
-  // optional int32 instance = 15;
+  // optional int32 instance = 18;
   inline bool has_instance() const;
   inline void clear_instance();
-  static const int kInstanceFieldNumber = 15;
+  static const int kInstanceFieldNumber = 18;
   inline ::google::protobuf::int32 instance() const;
   inline void set_instance(::google::protobuf::int32 value);
 
-  // optional bool storeimage = 16;
+  // optional bool storeimage = 19;
   inline bool has_storeimage() const;
   inline void clear_storeimage();
-  static const int kStoreimageFieldNumber = 16;
+  static const int kStoreimageFieldNumber = 19;
   inline bool storeimage() const;
   inline void set_storeimage(bool value);
 
-  // optional bool storecrop = 17;
+  // optional bool storecrop = 20;
   inline bool has_storecrop() const;
   inline void clear_storecrop();
-  static const int kStorecropFieldNumber = 17;
+  static const int kStorecropFieldNumber = 20;
   inline bool storecrop() const;
   inline void set_storecrop(bool value);
 
-  // optional string amount = 18;
+  // optional string amount = 21;
   inline bool has_amount() const;
   inline void clear_amount();
-  static const int kAmountFieldNumber = 18;
+  static const int kAmountFieldNumber = 21;
   inline const ::std::string& amount() const;
   inline void set_amount(const ::std::string& value);
   inline void set_amount(const char* value);
@@ -330,10 +354,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_amount();
   inline void set_allocated_amount(::std::string* amount);
 
-  // optional string filepath = 19;
+  // optional string filepath = 22;
   inline bool has_filepath() const;
   inline void clear_filepath();
-  static const int kFilepathFieldNumber = 19;
+  static const int kFilepathFieldNumber = 22;
   inline const ::std::string& filepath() const;
   inline void set_filepath(const ::std::string& value);
   inline void set_filepath(const char* value);
@@ -342,17 +366,17 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_filepath();
   inline void set_allocated_filepath(::std::string* filepath);
 
-  // optional int32 idinstance = 21;
+  // optional int32 idinstance = 23;
   inline bool has_idinstance() const;
   inline void clear_idinstance();
-  static const int kIdinstanceFieldNumber = 21;
+  static const int kIdinstanceFieldNumber = 23;
   inline ::google::protobuf::int32 idinstance() const;
   inline void set_idinstance(::google::protobuf::int32 value);
 
-  // optional string start = 22;
+  // optional string start = 24;
   inline bool has_start() const;
   inline void clear_start();
-  static const int kStartFieldNumber = 22;
+  static const int kStartFieldNumber = 24;
   inline const ::std::string& start() const;
   inline void set_start(const ::std::string& value);
   inline void set_start(const char* value);
@@ -361,10 +385,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_start();
   inline void set_allocated_start(::std::string* start);
 
-  // optional string end = 23;
+  // optional string end = 25;
   inline bool has_end() const;
   inline void clear_end();
-  static const int kEndFieldNumber = 23;
+  static const int kEndFieldNumber = 25;
   inline const ::std::string& end() const;
   inline void set_end(const ::std::string& value);
   inline void set_end(const char* value);
@@ -391,8 +415,12 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_typemat();
   inline void set_has_size();
   inline void clear_has_size();
-  inline void set_has_data();
-  inline void clear_has_data();
+  inline void set_has_data_1();
+  inline void clear_has_data_1();
+  inline void set_has_data_2();
+  inline void clear_has_data_2();
+  inline void set_has_data_3();
+  inline void clear_has_data_3();
   inline void set_has_serverip();
   inline void clear_has_serverip();
   inline void set_has_clientip();
@@ -431,11 +459,13 @@ class Message : public ::google::protobuf::Message {
   ::google::protobuf::int32 rows_;
   ::google::protobuf::int32 cols_;
   ::google::protobuf::int32 typemat_;
-  ::std::string* data_;
+  ::std::string* data_1_;
+  ::std::string* data_2_;
+  ::std::string* data_3_;
   ::std::string* serverip_;
-  ::std::string* clientip_;
   ::google::protobuf::int32 size_;
   ::google::protobuf::int32 instance_;
+  ::std::string* clientip_;
   ::std::string* payload_;
   ::std::string* regionfilename_;
   ::std::string* regiondata_;
@@ -705,91 +735,243 @@ inline void Message::set_size(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.size)
 }
 
-// optional bytes data = 9;
-inline bool Message::has_data() const {
+// optional bytes data_1 = 10;
+inline bool Message::has_data_1() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void Message::set_has_data() {
+inline void Message::set_has_data_1() {
   _has_bits_[0] |= 0x00000100u;
 }
-inline void Message::clear_has_data() {
+inline void Message::clear_has_data_1() {
   _has_bits_[0] &= ~0x00000100u;
 }
-inline void Message::clear_data() {
-  if (data_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    data_->clear();
+inline void Message::clear_data_1() {
+  if (data_1_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_1_->clear();
   }
-  clear_has_data();
+  clear_has_data_1();
 }
-inline const ::std::string& Message::data() const {
-  // @@protoc_insertion_point(field_get:motion.Message.data)
-  return *data_;
+inline const ::std::string& Message::data_1() const {
+  // @@protoc_insertion_point(field_get:motion.Message.data_1)
+  return *data_1_;
 }
-inline void Message::set_data(const ::std::string& value) {
-  set_has_data();
-  if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    data_ = new ::std::string;
+inline void Message::set_data_1(const ::std::string& value) {
+  set_has_data_1();
+  if (data_1_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_1_ = new ::std::string;
   }
-  data_->assign(value);
-  // @@protoc_insertion_point(field_set:motion.Message.data)
+  data_1_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.data_1)
 }
-inline void Message::set_data(const char* value) {
-  set_has_data();
-  if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    data_ = new ::std::string;
+inline void Message::set_data_1(const char* value) {
+  set_has_data_1();
+  if (data_1_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_1_ = new ::std::string;
   }
-  data_->assign(value);
-  // @@protoc_insertion_point(field_set_char:motion.Message.data)
+  data_1_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.data_1)
 }
-inline void Message::set_data(const void* value, size_t size) {
-  set_has_data();
-  if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    data_ = new ::std::string;
+inline void Message::set_data_1(const void* value, size_t size) {
+  set_has_data_1();
+  if (data_1_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_1_ = new ::std::string;
   }
-  data_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:motion.Message.data)
+  data_1_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.data_1)
 }
-inline ::std::string* Message::mutable_data() {
-  set_has_data();
-  if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    data_ = new ::std::string;
+inline ::std::string* Message::mutable_data_1() {
+  set_has_data_1();
+  if (data_1_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_1_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:motion.Message.data)
-  return data_;
+  // @@protoc_insertion_point(field_mutable:motion.Message.data_1)
+  return data_1_;
 }
-inline ::std::string* Message::release_data() {
-  clear_has_data();
-  if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+inline ::std::string* Message::release_data_1() {
+  clear_has_data_1();
+  if (data_1_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
   } else {
-    ::std::string* temp = data_;
-    data_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    ::std::string* temp = data_1_;
+    data_1_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     return temp;
   }
 }
-inline void Message::set_allocated_data(::std::string* data) {
-  if (data_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete data_;
+inline void Message::set_allocated_data_1(::std::string* data_1) {
+  if (data_1_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete data_1_;
   }
-  if (data) {
-    set_has_data();
-    data_ = data;
+  if (data_1) {
+    set_has_data_1();
+    data_1_ = data_1;
   } else {
-    clear_has_data();
-    data_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    clear_has_data_1();
+    data_1_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:motion.Message.data)
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.data_1)
 }
 
-// optional string serverip = 10;
-inline bool Message::has_serverip() const {
+// optional bytes data_2 = 11;
+inline bool Message::has_data_2() const {
   return (_has_bits_[0] & 0x00000200u) != 0;
 }
-inline void Message::set_has_serverip() {
+inline void Message::set_has_data_2() {
   _has_bits_[0] |= 0x00000200u;
 }
-inline void Message::clear_has_serverip() {
+inline void Message::clear_has_data_2() {
   _has_bits_[0] &= ~0x00000200u;
+}
+inline void Message::clear_data_2() {
+  if (data_2_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_2_->clear();
+  }
+  clear_has_data_2();
+}
+inline const ::std::string& Message::data_2() const {
+  // @@protoc_insertion_point(field_get:motion.Message.data_2)
+  return *data_2_;
+}
+inline void Message::set_data_2(const ::std::string& value) {
+  set_has_data_2();
+  if (data_2_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_2_ = new ::std::string;
+  }
+  data_2_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.data_2)
+}
+inline void Message::set_data_2(const char* value) {
+  set_has_data_2();
+  if (data_2_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_2_ = new ::std::string;
+  }
+  data_2_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.data_2)
+}
+inline void Message::set_data_2(const void* value, size_t size) {
+  set_has_data_2();
+  if (data_2_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_2_ = new ::std::string;
+  }
+  data_2_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.data_2)
+}
+inline ::std::string* Message::mutable_data_2() {
+  set_has_data_2();
+  if (data_2_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_2_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.data_2)
+  return data_2_;
+}
+inline ::std::string* Message::release_data_2() {
+  clear_has_data_2();
+  if (data_2_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = data_2_;
+    data_2_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message::set_allocated_data_2(::std::string* data_2) {
+  if (data_2_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete data_2_;
+  }
+  if (data_2) {
+    set_has_data_2();
+    data_2_ = data_2;
+  } else {
+    clear_has_data_2();
+    data_2_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.data_2)
+}
+
+// optional bytes data_3 = 12;
+inline bool Message::has_data_3() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void Message::set_has_data_3() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void Message::clear_has_data_3() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void Message::clear_data_3() {
+  if (data_3_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_3_->clear();
+  }
+  clear_has_data_3();
+}
+inline const ::std::string& Message::data_3() const {
+  // @@protoc_insertion_point(field_get:motion.Message.data_3)
+  return *data_3_;
+}
+inline void Message::set_data_3(const ::std::string& value) {
+  set_has_data_3();
+  if (data_3_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_3_ = new ::std::string;
+  }
+  data_3_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.data_3)
+}
+inline void Message::set_data_3(const char* value) {
+  set_has_data_3();
+  if (data_3_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_3_ = new ::std::string;
+  }
+  data_3_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.data_3)
+}
+inline void Message::set_data_3(const void* value, size_t size) {
+  set_has_data_3();
+  if (data_3_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_3_ = new ::std::string;
+  }
+  data_3_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.data_3)
+}
+inline ::std::string* Message::mutable_data_3() {
+  set_has_data_3();
+  if (data_3_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    data_3_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.data_3)
+  return data_3_;
+}
+inline ::std::string* Message::release_data_3() {
+  clear_has_data_3();
+  if (data_3_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = data_3_;
+    data_3_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message::set_allocated_data_3(::std::string* data_3) {
+  if (data_3_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete data_3_;
+  }
+  if (data_3) {
+    set_has_data_3();
+    data_3_ = data_3;
+  } else {
+    clear_has_data_3();
+    data_3_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.data_3)
+}
+
+// optional string serverip = 13;
+inline bool Message::has_serverip() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void Message::set_has_serverip() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void Message::clear_has_serverip() {
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void Message::clear_serverip() {
   if (serverip_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -857,15 +1039,15 @@ inline void Message::set_allocated_serverip(::std::string* serverip) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.serverip)
 }
 
-// optional string clientip = 11;
+// optional string clientip = 14;
 inline bool Message::has_clientip() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00001000u) != 0;
 }
 inline void Message::set_has_clientip() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00001000u;
 }
 inline void Message::clear_has_clientip() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline void Message::clear_clientip() {
   if (clientip_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -933,15 +1115,15 @@ inline void Message::set_allocated_clientip(::std::string* clientip) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.clientip)
 }
 
-// optional string payload = 12;
+// optional string payload = 15;
 inline bool Message::has_payload() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
+  return (_has_bits_[0] & 0x00002000u) != 0;
 }
 inline void Message::set_has_payload() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00002000u;
 }
 inline void Message::clear_has_payload() {
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline void Message::clear_payload() {
   if (payload_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -1009,15 +1191,15 @@ inline void Message::set_allocated_payload(::std::string* payload) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.payload)
 }
 
-// optional string regionfilename = 13;
+// optional string regionfilename = 16;
 inline bool Message::has_regionfilename() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
+  return (_has_bits_[0] & 0x00004000u) != 0;
 }
 inline void Message::set_has_regionfilename() {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00004000u;
 }
 inline void Message::clear_has_regionfilename() {
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline void Message::clear_regionfilename() {
   if (regionfilename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -1085,15 +1267,15 @@ inline void Message::set_allocated_regionfilename(::std::string* regionfilename)
   // @@protoc_insertion_point(field_set_allocated:motion.Message.regionfilename)
 }
 
-// optional bytes regiondata = 14;
+// optional bytes regiondata = 17;
 inline bool Message::has_regiondata() const {
-  return (_has_bits_[0] & 0x00002000u) != 0;
+  return (_has_bits_[0] & 0x00008000u) != 0;
 }
 inline void Message::set_has_regiondata() {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00008000u;
 }
 inline void Message::clear_has_regiondata() {
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline void Message::clear_regiondata() {
   if (regiondata_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -1161,15 +1343,15 @@ inline void Message::set_allocated_regiondata(::std::string* regiondata) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.regiondata)
 }
 
-// optional int32 instance = 15;
+// optional int32 instance = 18;
 inline bool Message::has_instance() const {
-  return (_has_bits_[0] & 0x00004000u) != 0;
+  return (_has_bits_[0] & 0x00010000u) != 0;
 }
 inline void Message::set_has_instance() {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00010000u;
 }
 inline void Message::clear_has_instance() {
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline void Message::clear_instance() {
   instance_ = 0;
@@ -1185,15 +1367,15 @@ inline void Message::set_instance(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.instance)
 }
 
-// optional bool storeimage = 16;
+// optional bool storeimage = 19;
 inline bool Message::has_storeimage() const {
-  return (_has_bits_[0] & 0x00008000u) != 0;
+  return (_has_bits_[0] & 0x00020000u) != 0;
 }
 inline void Message::set_has_storeimage() {
-  _has_bits_[0] |= 0x00008000u;
+  _has_bits_[0] |= 0x00020000u;
 }
 inline void Message::clear_has_storeimage() {
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline void Message::clear_storeimage() {
   storeimage_ = false;
@@ -1209,15 +1391,15 @@ inline void Message::set_storeimage(bool value) {
   // @@protoc_insertion_point(field_set:motion.Message.storeimage)
 }
 
-// optional bool storecrop = 17;
+// optional bool storecrop = 20;
 inline bool Message::has_storecrop() const {
-  return (_has_bits_[0] & 0x00010000u) != 0;
+  return (_has_bits_[0] & 0x00040000u) != 0;
 }
 inline void Message::set_has_storecrop() {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00040000u;
 }
 inline void Message::clear_has_storecrop() {
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline void Message::clear_storecrop() {
   storecrop_ = false;
@@ -1233,15 +1415,15 @@ inline void Message::set_storecrop(bool value) {
   // @@protoc_insertion_point(field_set:motion.Message.storecrop)
 }
 
-// optional string amount = 18;
+// optional string amount = 21;
 inline bool Message::has_amount() const {
-  return (_has_bits_[0] & 0x00020000u) != 0;
+  return (_has_bits_[0] & 0x00080000u) != 0;
 }
 inline void Message::set_has_amount() {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00080000u;
 }
 inline void Message::clear_has_amount() {
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline void Message::clear_amount() {
   if (amount_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -1309,15 +1491,15 @@ inline void Message::set_allocated_amount(::std::string* amount) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.amount)
 }
 
-// optional string filepath = 19;
+// optional string filepath = 22;
 inline bool Message::has_filepath() const {
-  return (_has_bits_[0] & 0x00040000u) != 0;
+  return (_has_bits_[0] & 0x00100000u) != 0;
 }
 inline void Message::set_has_filepath() {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00100000u;
 }
 inline void Message::clear_has_filepath() {
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline void Message::clear_filepath() {
   if (filepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -1385,15 +1567,15 @@ inline void Message::set_allocated_filepath(::std::string* filepath) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.filepath)
 }
 
-// optional int32 idinstance = 21;
+// optional int32 idinstance = 23;
 inline bool Message::has_idinstance() const {
-  return (_has_bits_[0] & 0x00080000u) != 0;
+  return (_has_bits_[0] & 0x00200000u) != 0;
 }
 inline void Message::set_has_idinstance() {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00200000u;
 }
 inline void Message::clear_has_idinstance() {
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline void Message::clear_idinstance() {
   idinstance_ = 0;
@@ -1409,15 +1591,15 @@ inline void Message::set_idinstance(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.idinstance)
 }
 
-// optional string start = 22;
+// optional string start = 24;
 inline bool Message::has_start() const {
-  return (_has_bits_[0] & 0x00100000u) != 0;
+  return (_has_bits_[0] & 0x00400000u) != 0;
 }
 inline void Message::set_has_start() {
-  _has_bits_[0] |= 0x00100000u;
+  _has_bits_[0] |= 0x00400000u;
 }
 inline void Message::clear_has_start() {
-  _has_bits_[0] &= ~0x00100000u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline void Message::clear_start() {
   if (start_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -1485,15 +1667,15 @@ inline void Message::set_allocated_start(::std::string* start) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.start)
 }
 
-// optional string end = 23;
+// optional string end = 25;
 inline bool Message::has_end() const {
-  return (_has_bits_[0] & 0x00200000u) != 0;
+  return (_has_bits_[0] & 0x00800000u) != 0;
 }
 inline void Message::set_has_end() {
-  _has_bits_[0] |= 0x00200000u;
+  _has_bits_[0] |= 0x00800000u;
 }
 inline void Message::clear_has_end() {
-  _has_bits_[0] &= ~0x00200000u;
+  _has_bits_[0] &= ~0x00800000u;
 }
 inline void Message::clear_end() {
   if (end_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {

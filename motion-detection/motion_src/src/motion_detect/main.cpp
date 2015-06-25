@@ -222,6 +222,29 @@ void sendEcho(std::string serv, char *echo, short port )
 
 }
 
+std::vector<std::string> split(std::string const & s, size_t count)
+{
+    size_t minsize = s.size()/count;
+    int extra = s.size() - minsize * count;
+    std::vector<std::string> tokens;
+    for(size_t i = 0, offset=0 ; i < count ; ++i, --extra)
+    {
+        size_t size = minsize + (extra>0?1:0);
+        if ( (offset + size) < s.size())
+            tokens.push_back(s.substr(offset,size));
+        else
+            tokens.push_back(s.substr(offset, s.size() - offset));
+        offset += size;
+    }
+    return tokens;
+}
+
+int div_ceil(int numerator, int denominator)
+{
+    std::div_t res = std::div(numerator, denominator);
+    return res.rem ? (res.quot + 1) : res.quot;
+}
+
 motion::Message streamCastMessage()
 {
     
@@ -302,22 +325,35 @@ motion::Message streamCastMessage()
     cout << "Mat size   : " << size_s << endl;
     cout << "Proto size : " << size_init << endl;
     
+    cout << "+++++++++++SERIALIZING PROTO++++++++++++++" << endl;
+    
     std::string ssstring = ss.str();
     
     // Convert encoded mat data to base64.
-    std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(ssstring.c_str()), ssstring.length());
+    std::string enc = base64_encode(reinterpret_cast<const unsigned char*>(ssstring.c_str()), ssstring.length());
     
-    int ori_size = oriencoded.size();
+    int ori_size = enc.size();
     cout << "ori_size   : " << ori_size << endl;
     
-    //Store into proto
-    me.set_data(oriencoded);
+    int s3 = div_ceil(enc.size(), 3);
+    std::string p_1 = enc.substr(0, s3);
+    std::string p_2 = enc.substr(p_1.size(), s3);
+    std::string p_3 = enc.substr( p_1.size() + p_2.size(), enc.size() + 100);
+
+    cout << "p_1 : " << p_1.size() << endl;
+    cout << "p_2 : " << p_2.size() << endl;
+    cout << "p_3 : " << p_3.size() << endl;
+    
+    //Store into proto split in 3
+    me.set_data_1(p_1);
+    me.set_data_2(p_2);
+    me.set_data_3(p_3);
     
     //Write base64 to file for checking.
     std::string basefile = "base64oish.txt";
     std::ofstream out;
     out.open (basefile.c_str());
-    out << me.data() << "\n";
+    out << enc << "\n";
     out.close();
     
     cvReleaseCapture(&capture);
@@ -330,14 +366,6 @@ motion::Message streamCastMessage()
 void* streamCast(void * arg)
 {
     
-    motion::Message payload = streamCastMessage();
-    cout<<"size after serilizing is "<<payload.ByteSize()<<endl;
-    int siz = payload.ByteSize()+4;
-    char *pkt = new char [siz];
-    google::protobuf::io::ArrayOutputStream aos(pkt,siz);
-    CodedOutputStream *coded_output = new CodedOutputStream(&aos);
-    coded_output->WriteVarint32(payload.ByteSize());
-    payload.SerializeToCodedStream(coded_output);
     
     int host_port= 1101;
     char* host_name="192.168.1.35";
@@ -382,7 +410,16 @@ void* streamCast(void * arg)
     }
     
     //for (int i =0;i<10000;i++){
-        //for (int j = 0 ;j<10;j++) {
+        //for (int j = 0 ;j<3;j++) {
+    
+            motion::Message payload = streamCastMessage();
+            cout<<"size after serilizing is "<<payload.ByteSize()<<endl;
+            int siz = payload.ByteSize()+4;
+            char *pkt = new char [siz];
+            google::protobuf::io::ArrayOutputStream aos(pkt,siz);
+            CodedOutputStream *coded_output = new CodedOutputStream(&aos);
+            coded_output->WriteVarint32(payload.ByteSize());
+            payload.SerializeToCodedStream(coded_output);
     
             if( (bytecount=send(hsock, (void *) pkt,siz,0))== -1 ) {
                 fprintf(stderr, "Error sending data %d\n", errno);
@@ -390,7 +427,7 @@ void* streamCast(void * arg)
             }
             printf("Sent bytes %d\n", bytecount);
         //usleep(5);
-        //}
+       //}
     //}
     delete pkt;
     

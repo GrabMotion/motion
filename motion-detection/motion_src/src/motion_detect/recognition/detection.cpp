@@ -20,16 +20,22 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "opencv2/opencv.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "../tinyxml/tinyxml.h"
-#include "../tinyxml/tinystr.h"
 #include <string>
 #include <vector>
 #include <functional>
 #include <ctime>
 #include <unistd.h>
 #include <cstring>
+
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <cstdio>
+
+#include "opencv2/opencv.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "../tinyxml/tinyxml.h"
+#include "../tinyxml/tinystr.h"
 
 #include "../recognition/detection.h"
 #include "../protobuffer/motion.pb.h"
@@ -339,6 +345,14 @@ void * startRecognition(void * arg)
     bool writeCroop  = m.storecrop();
     
     std::cout << "writeCroop: " << writeCroop << endl;
+    
+    //Write base64 to file for checking.
+    std::string basefile = "xmlEncoded.txt";
+    std::ofstream out;
+    out.open (basefile.c_str());
+    out << region_encoded << "\n";
+    out.close();
+
     
     bool send_number_detected = true;
     
