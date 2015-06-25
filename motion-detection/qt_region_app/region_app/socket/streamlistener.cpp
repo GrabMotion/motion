@@ -20,22 +20,23 @@ google::protobuf::uint32 StreamListener::readHdr(char *buf)
 {
   google::protobuf::uint32 size;
   google::protobuf::io::ArrayInputStream ais(buf,4);
-  CodedInputStream coded_input(&ais);
+  google::protobuf::io::CodedInputStream coded_input(&ais);
   coded_input.ReadVarint32(&size);//Decode the HDR and get the size
   cout<<"size of payload is "<<size<<endl;
   return size;
 }
 
-void StreamListener::readBody(int csock,google::protobuf::uint32 siz, QObject *parent)
+motion::Message StreamListener::readBody(int csock,google::protobuf::uint32 siz, QObject *parent)
 {
   int bytecount;
   motion::Message payload;
   char buffer [siz+4];//size of the payload and hdr
   //Read the entire buffer including the hdr
-  if((bytecount = recv(csock, (void *)buffer, 4+siz, MSG_WAITALL))== -1){
+  if((bytecount = recv(csock, (void *)buffer, siz+4, MSG_WAITALL))== -1){
                 fprintf(stderr, "Error receiving data %d\n", errno);
         }
   cout<<"Second read byte count is "<<bytecount<<endl;
+
   //Assign ArrayInputStream with enough memory
   google::protobuf::io::ArrayInputStream ais(buffer,siz+4);
   CodedInputStream coded_input(&ais);
@@ -44,18 +45,16 @@ void StreamListener::readBody(int csock,google::protobuf::uint32 siz, QObject *p
   //After the message's length is read, PushLimit() is used to prevent the CodedInputStream
   //from reading beyond that length.Limits are used when parsing length-delimited
   //embedded messages
-  google::protobuf::io::CodedInputStream::Limit msgLimit = coded_input.PushLimit(siz+4);
+  google::protobuf::io::CodedInputStream::Limit msgLimit = coded_input.PushLimit(siz);
+    //De-Serialize
+    payload.ParseFromCodedStream(&coded_input);
+    //Once the embedded message has been parsed, PopLimit() is called to undo the limit
+    coded_input.PopLimit(msgLimit);
+    //Print the message
 
-  //De-Serialize
-  payload.ParseFromCodedStream(&coded_input);
-  //Once the embedded message has been parsed, PopLimit() is called to undo the limit
-  coded_input.PopLimit(msgLimit);
-  //Print the message
-  //cout<<"Message is "<<payload.DebugString();
+    return payload;
 
-  // Send proto to the MainWindow.
-  qRegisterMetaType<motion::Message>("motion::Message");
-  QMetaObject::invokeMethod(parent, "remoteProto", Q_ARG(motion::Message, payload));
+    google::protobuf::ShutdownProtobufLibrary();
 
 }
 
@@ -72,6 +71,7 @@ void * StreamListener::socketHandler (void* lp)
     //log_packet logp;
 
     memset(buffer, '\0', 4);
+   motion::Message payload;
 
     while (1)
     {
@@ -83,10 +83,14 @@ void * StreamListener::socketHandler (void* lp)
             break;
 
         cout<<"First read byte count is "<<bytecount<<endl;
-        StreamListener::readBody(*csock,StreamListener::readHdr(buffer), parent);
+        payload = StreamListener::readBody(*csock,StreamListener::readHdr(buffer), parent);
     }
 
+    // Send proto to the MainWindow.
+    qRegisterMetaType<motion::Message>("motion::Message");
+    QMetaObject::invokeMethod(parent, "remoteProto", Q_ARG(motion::Message, payload));
 
+    google::protobuf::ShutdownProtobufLibrary();
 
 FINISH:
         free(csock);

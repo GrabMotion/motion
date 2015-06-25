@@ -276,7 +276,7 @@ void MainWindow::setRemoteMessage(QString qstr)
             cv::Mat data_mat;
             if(mm.ByteSize() > 0)
             {
-                std::string mdata = mm.data();
+                std::string mdata = mm.data_1();
                 typedef unsigned char byte;
                 std::vector<byte> vectordata(mdata.begin(),mdata.end());
                 cv::Mat data_mat(vectordata,true);
@@ -902,6 +902,13 @@ std::string get_file_contents(string filename)
 }
 
 
+int div_ceil(int numerator, int denominator)
+{
+    std::div_t res = std::div(numerator, denominator);
+    return res.rem ? (res.quot + 1) : res.quot;
+}
+
+
 void MainWindow::testBase()
 {
 
@@ -911,10 +918,34 @@ void MainWindow::testBase()
     int type_d = 0;
     size_t size_d = 0;
 
-    std::string basefile = "/jose/repos/base64oish_MAC.txt";
-    string loaded = get_file_contents(basefile);
+    std::string basefile = "/jose/repos/base64oish.txt";
+    string enc = get_file_contents(basefile);
 
-    std::string oridecoded = base64_decode(loaded);
+        int ori_size = enc.size();
+        cout << "ori_size   : " << ori_size << endl;
+
+        int s3 = div_ceil(enc.size(), 3);
+        cout << "round_size   : " << s3 << endl;
+
+        std::string p_1 = enc.substr(0, s3);
+
+
+
+        cout << "p_1   : " << p_1.size() << endl;
+
+        std::string p_2 = enc.substr(p_1.size(), s3);
+        cout << "p_2   : " << p_2.size() << endl;
+
+
+
+        std::string p_3 = enc.substr( p_1.size() + p_2.size(), enc.size() + 100);
+
+        cout << "p_3   : " << p_3.size() << endl;
+
+
+    std::string all_ps = p_1 + p_2 + p_3;
+
+    std::string oridecoded = base64_decode(all_ps);
 
     stringstream decoded;
     //std::stringstream decoded;
@@ -967,20 +998,50 @@ void MainWindow::setRemoteProto(motion::Message payload)
 
       int action = payload.type();
       int size_init = payload.ByteSize();
-      int size_data_primitive = payload.data().size();
-      std::string mdata = payload.data();
-      int size_encoded = mdata.size();
+
+      std::string p_1 = payload.data_1();
+
+      std::string basefile1 = "/jose/repos/1.txt";
+      std::ofstream out1;
+      out1.open (basefile1.c_str());
+      out1 << p_1 << "\n";
+      out1.close();
+
+      sleep(3);
+
+      std::string p_2 = payload.data_2();
+
+      std::string basefile2 = "/jose/repos/2.txt";
+      std::ofstream out2;
+      out2.open (basefile2.c_str());
+      out2 << p_2 << "\n";
+      out2.close();
+
+      sleep(3);
+
+      std::string p_3 = payload.data_3();
+
+      std::string basefile3 = "/jose/repos/3.txt";
+      std::ofstream out3;
+      out3.open (basefile3.c_str());
+      out3 << p_3 << "\n";
+      out3.close();
+
+      std:string all_data =  p_1 + p_2 + p_3;
+
+      sleep(3);
+
+      int ori_size = all_data.size();
 
       //Write base64 to file for checking.
       std::string basefile = "/jose/repos/base64oish_MAC.txt";
       std::ofstream out;
       out.open (basefile.c_str());
-      out << mdata << "\n";
+      out << all_data << "\n";
       out.close();
 
       //Decode from base64
-      std::string oridecoded = base64_decode(mdata);
-      int ori_size = oridecoded.size();
+      std::string oridecoded = base64_decode(all_data);
 
       //cast to stringstream to read data.
       std::stringstream decoded;
@@ -1018,7 +1079,6 @@ void MainWindow::setRemoteProto(motion::Message payload)
       cout << "Char type  : " << type_d                               << endl;
       cout << "Proto size : " << payload.size()                         << endl;
       cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
-      cout << "size_encoded           : " << size_encoded             << endl;
       cout << "ori_size               : " << ori_size                 << endl;
       cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
       cout <<  endl;

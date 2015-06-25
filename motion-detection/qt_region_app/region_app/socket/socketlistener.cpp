@@ -63,8 +63,8 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
 
         int action = mm.type();
         int size_init = mm.ByteSize();
-        int size_data_primitive = mm.data().size();
-        std::string mdata = mm.data();
+        int size_data_primitive = mm.data_1().size();
+        std::string mdata = mm.data_1();
         int size_encoded = mdata.size();
 
         //Write base64 to file for checking.
