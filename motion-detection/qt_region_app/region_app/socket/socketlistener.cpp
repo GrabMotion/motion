@@ -63,8 +63,8 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
 
         int action = mm.type();
         int size_init = mm.ByteSize();
-        int size_data_primitive = mm.data_1().size();
-        std::string mdata = mm.data_1();
+        int size_data_primitive = mm.data().size();
+        std::string mdata = mm.data();
         int size_encoded = mdata.size();
 
         //Write base64 to file for checking.
@@ -102,11 +102,7 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
         cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"   << endl;
         cout << "time       : " << mm.time()                            << endl;
         cout << "width      : " << width_d                              << endl;
-        cout << "rows       : " << mm.rows()                            << endl;
-        cout << "height     : " << height_d                             << endl;
-        cout << "cols       : " << mm.cols()                            << endl;
         cout << "Mat type   : " << type_d                               << endl;
-        cout << "Mat size   : " << mm.size()                            << endl;
         cout << "Proto size : " << size_init                            << endl;
         cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
         cout << "ori_size               : " << ori_size                 << endl;

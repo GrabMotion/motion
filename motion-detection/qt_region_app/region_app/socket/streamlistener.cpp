@@ -5,7 +5,7 @@
 using namespace std;
 using namespace google::protobuf::io;
 
-#define RCVBUFSIZE 200000
+#define RCVBUFSIZE 100000
 
 StreamListener::StreamListener(QObject *parent): QObject(parent){}
 
@@ -15,6 +15,8 @@ struct message_thread_args
     QObject *parent;
 };
 struct message_thread_args StructThread;
+
+std::string image_buffer;
 
 google::protobuf::uint32 StreamListener::readHdr(char *buf)
 {
@@ -26,7 +28,8 @@ google::protobuf::uint32 StreamListener::readHdr(char *buf)
   return size;
 }
 
-motion::Message StreamListener::readBody(int csock,google::protobuf::uint32 siz, QObject *parent)
+int StreamListener::readBody(int csock,google::protobuf::uint32 siz, QObject *parent)
+
 {
   int bytecount;
   motion::Message payload;
@@ -38,7 +41,7 @@ motion::Message StreamListener::readBody(int csock,google::protobuf::uint32 siz,
   cout<<"Second read byte count is "<<bytecount<<endl;
 
   //Assign ArrayInputStream with enough memory
-  google::protobuf::io::ArrayInputStream ais(buffer,siz+4);
+  google::protobuf::io::ArrayInputStream ais(&buffer, siz);
   CodedInputStream coded_input(&ais);
   //Read an unsigned integer with Varint encoding, truncating to 32 bits.
   coded_input.ReadVarint32(&siz);
@@ -46,51 +49,91 @@ motion::Message StreamListener::readBody(int csock,google::protobuf::uint32 siz,
   //from reading beyond that length.Limits are used when parsing length-delimited
   //embedded messages
   google::protobuf::io::CodedInputStream::Limit msgLimit = coded_input.PushLimit(siz);
-    //De-Serialize
-    payload.ParseFromCodedStream(&coded_input);
-    //Once the embedded message has been parsed, PopLimit() is called to undo the limit
-    coded_input.PopLimit(msgLimit);
-    //Print the message
 
-    return payload;
+  //De-Serialize
+  payload.ParseFromCodedStream(&coded_input);
+  //Once the embedded message has been parsed, PopLimit() is called to undo the limit
+  coded_input.PopLimit(msgLimit);
 
-    google::protobuf::ShutdownProtobufLibrary();
+  cout << "+++++++++++RECEIVING PROTO++++++++++++++" << endl;
+
+  if (payload.has_type())
+  {
+      cout << "Type             :: " <<  payload.type()  <<  endl;
+  }
+  if (payload.has_time())
+  {
+      cout << "Time             :: " <<  payload.time()  <<  endl;
+  }
+  google::protobuf::int32 data_total = payload.data_total();
+  google::protobuf::int32 data_amount = payload.data_amount();
+
+  cout << "Data total       :: " <<  data_total  <<  endl;
+  cout << "Data amount      :: " <<  data_amount  <<  endl;
+
+  image_buffer += payload.data();
+  cout << "Buffer size      :: " <<  image_buffer.size()  <<  endl;
+
+  if ( data_amount == (data_total-1) )
+  {
+      cout << "+++++++++++RECEIVED++++++++++++++" << endl;
+      payload.data().empty();
+      //Put all image together back into ptoto.
+      payload.set_data(image_buffer);
+      // Send proto to the MainWindow.
+      qRegisterMetaType<motion::Message>("motion::Message");
+      QMetaObject::invokeMethod(parent, "remoteProto", Q_ARG(motion::Message, payload));
+  }
+
+  google::protobuf::ShutdownProtobufLibrary();
+
+  return data_amount;
 
 }
 
 void * StreamListener::socketHandler (void* lp)
 {
 
-  struct message_thread_args *args = (struct message_thread_args *) lp;
-  int *csock = args->lp;
-  QObject *parent = args->parent;
+    struct message_thread_args *args = (struct message_thread_args *) lp;
+    int *csock = args->lp;
+    QObject *parent = args->parent;
 
-    char buffer[4];
+    cout << "+++++++++++++++++++++++++++++++SOCKET INITIAIZATION+++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+
+    char buffer[RCVBUFSIZE];
     int bytecount=0;
     string output,pl;
-    //log_packet logp;
+    memset(buffer, '\0', RCVBUFSIZE);
 
-    memset(buffer, '\0', 4);
-   motion::Message payload;
 
     while (1)
     {
         //Peek into the socket and get the packet size
-        if((bytecount = recv(*csock, buffer,4, MSG_PEEK))== -1){
+        if((bytecount = recv(*csock, buffer, RCVBUFSIZE, MSG_PEEK))== -1){
             fprintf(stderr, "Error receiving data %d\n", errno);
         }
         else if (bytecount == 0)
             break;
 
-        cout<<"First read byte count is "<<bytecount<<endl;
-        payload = StreamListener::readBody(*csock,StreamListener::readHdr(buffer), parent);
+        cout<<"First read byte    :: "<<bytecount<<endl;
+
+        int count = StreamListener::readBody(*csock,StreamListener::readHdr(buffer), parent);
+
+        cout<<"Sleeping    :: " << endl;
+
+        usleep(500);
+
+        cout<<"Sending Reply    :: " << endl;
+        std::stringstream o;
+        o << count;
+        const char* pkt = o.str().c_str();
+
+        if( (bytecount=send(*csock, (void *) pkt, 4, 0))== -1 )
+        {
+            fprintf(stderr, "Error sending data %d\n", errno);
+                    close(*csock);
+        }
     }
-
-    // Send proto to the MainWindow.
-    qRegisterMetaType<motion::Message>("motion::Message");
-    QMetaObject::invokeMethod(parent, "remoteProto", Q_ARG(motion::Message, payload));
-
-    google::protobuf::ShutdownProtobufLibrary();
 
 FINISH:
         free(csock);

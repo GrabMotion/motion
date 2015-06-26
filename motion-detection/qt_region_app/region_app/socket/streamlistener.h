@@ -34,6 +34,7 @@
 #include <stdexcept>
 #include <cctype>
 
+
 #include "b64/base64.h"
 
 #include <google/protobuf/message.h>
@@ -42,6 +43,10 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 
 #include <fstream>
+#include <stdio.h>
+#include <iostream>
+#include <stdio.h>
+
 
 class StreamListener : public QObject
 {
@@ -51,12 +56,12 @@ public:
 
     void startListening(QObject *parent);
     static google::protobuf::uint32 readHdr(char *buf);
-    static motion::Message readBody(int csock,google::protobuf::uint32 siz, QObject *parent);
+    static int readBody(int csock,google::protobuf::uint32 siz, QObject *parent);
     static void * socketHandler (void* lp);
     static void * socketThread  (void * args);
 
-
 private:
+
 
 public:
     std::string socket_response;

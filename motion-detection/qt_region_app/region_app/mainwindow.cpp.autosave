@@ -56,6 +56,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(broadcast_thread, SIGNAL(BroadcastReceived(QString)), this, SLOT(BroadcastReceived(QString)));
     connect(broadcast_thread, SIGNAL(BroadcastTimeoutSocketException()), this, SLOT(broadcastTimeoutSocketException()));
 
+    tcpecho_thread = new TCPEchoThread(this);
+    connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
+    
+    
     //Socket Listener Class -- Cannot connect received
     socket_listener = new SocketListener(this);
     socket_listener->startListening(this);

@@ -120,7 +120,7 @@ private:
 
     void SocketErrorMessage(QString &e);
 
-    void testBase();
+    int testBase();
     std::string getTime();
 
     char * getTimeRasp();
