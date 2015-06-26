@@ -85,7 +85,7 @@ string NETWORK_IP;
 //Protobuffer
 motion::Message send_proto;
 motion::Message receive_proto;
-motion::Message streamCastMessage();
+vector<std::string> splitMatToVector(int package);
 
 #define MAXDATASIZE 1000
 
@@ -245,11 +245,42 @@ int div_ceil(int numerator, int denominator)
     return res.rem ? (res.quot + 1) : res.quot;
 }
 
-motion::Message streamCastMessage()
+vector<std::string> splitStringBySize(std::string payload, int package)
+{
+    int s3 = div_ceil(payload.size(), package);
+    vector<std::string> splitted;
+    int pos, length, buff=package;
+    
+    for (int i=1; i<s3; i++)
+    {
+        if (i==1)
+        {
+            pos = 0;
+            length = package;
+        }
+        else if (i==(s3-1))
+        {
+            buff += package;
+            pos = buff;
+            length = payload.size() + 100;
+        }
+        else
+        {
+            buff += package;
+            pos = buff;
+            length = package;
+        }
+        std:string block;
+        block = payload.substr(pos, length);
+        splitted.push_back(block);
+    }
+
+    return splitted;
+}
+
+vector<std::string> splitMatToVector(int package)
 {
     
-    //struct screenshot_thread_args *args = (struct screenshot_thread_args *) arg
-    //motion::Message message = args->msg;
     
     cout << "CAPTURING !!!!!!!!!!!!!" << endl;
     
@@ -277,37 +308,11 @@ motion::Message streamCastMessage()
     
     //http://vgl-ait.org/cvwiki/doku.php?id=opencv:tutorial:extract_rgb_and_hsv_value_from_an_image
     
-    cout << "+++++++++++CREATING PROTO++++++++++++++" << endl;
-    
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-    
-    motion::Message me;
-    me.set_type(motion::Message::SET_MAT);
-    
-    //me.set_serverip(message.serverip());
-    me.set_time(getTimeRasp());
-    
-    int rows = mat.rows;
-    int cols = mat.cols;
-    
-    me.set_rows(rows);
-    me.set_cols(cols);
-    
-    cv::Size s = mat.size();
-    me.set_height(h);
-    me.set_width(w);
-    
     // We will need to also serialize the width, height, type and size of the matrix
     int width_s     = mat.cols;
     int height_s    = mat.rows;
     int type_s      = mat.type();
     int size_s      = mat.total() * mat.elemSize();
-    
-    me.set_size(size_s);
-    me.set_typemat(type_s);
-    
-    // Initialize a stringstream and write the data
-    int size_init = me.ByteSize();
     
     // Write the whole image data
     std::stringstream ss;
@@ -317,14 +322,6 @@ motion::Message streamCastMessage()
     ss.write((char*)    (&size_s),      sizeof(int));
     ss.write((char*)     mat.data,      size_s);
     
-    cout << "width      : " << me.width()  << endl;
-    cout << "rows       : " << rows << endl;
-    cout << "height     : " << me.height() << endl;
-    cout << "cols       : " << cols << endl;
-    cout << "Mat type   : " << me.type() << endl;
-    cout << "Mat size   : " << size_s << endl;
-    cout << "Proto size : " << size_init << endl;
-    
     cout << "+++++++++++SERIALIZING PROTO++++++++++++++" << endl;
     
     std::string ssstring = ss.str();
@@ -333,40 +330,31 @@ motion::Message streamCastMessage()
     std::string enc = base64_encode(reinterpret_cast<const unsigned char*>(ssstring.c_str()), ssstring.length());
     
     int ori_size = enc.size();
-    cout << "ori_size   : " << ori_size << endl;
+    cout << "ori_size               : " << ori_size << endl;
     
-    int s3 = div_ceil(enc.size(), 3);
-    std::string p_1 = enc.substr(0, s3);
-    std::string p_2 = enc.substr(p_1.size(), s3);
-    std::string p_3 = enc.substr( p_1.size() + p_2.size(), enc.size() + 100);
-
-    cout << "p_1 : " << p_1.size() << endl;
-    cout << "p_2 : " << p_2.size() << endl;
-    cout << "p_3 : " << p_3.size() << endl;
+    vector<std::string> images_trim = splitStringBySize(enc, package);
     
-    //Store into proto split in 3
-    me.set_data_1(p_1);
-    me.set_data_2(p_2);
-    me.set_data_3(p_3);
+    std::string all_blocks;
+    for (int j=0; j<images_trim.size(); j++)
+    {
+        all_blocks += images_trim.at(j);
+    }
     
     //Write base64 to file for checking.
-    std::string basefile = "base64oish.txt";
+    std::string basefile = "all_blocks.txt";
     std::ofstream out;
     out.open (basefile.c_str());
-    out << enc << "\n";
+    out << all_blocks << "\n";
     out.close();
     
     cvReleaseCapture(&capture);
     
-    google::protobuf::ShutdownProtobufLibrary();
-    
-    return me;
+    return images_trim;
 }
 
 void* streamCast(void * arg)
 {
-    
-    
+
     int host_port= 1101;
     char* host_name="192.168.1.35";
     
@@ -383,17 +371,17 @@ void* streamCast(void * arg)
     hsock = socket(AF_INET, SOCK_STREAM, 0);
     if(hsock == -1){
         printf("Error initializing socket %d\n",errno);
-        goto FINISH;
+        close(hsock);
     }
     
     p_int = (int*)malloc(sizeof(int));
     *p_int = 1;
     
-    if( (setsockopt(hsock, SOL_SOCKET, SO_REUSEADDR, (char*)p_int, sizeof(int)) == -1 )||
-       (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) ){
+    if( (setsockopt(hsock, SOL_SOCKET, SO_REUSEADDR, (char*)p_int, sizeof(int)) == -1 )|| (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) )
+    {
         printf("Error setting options %d\n",errno);
         free(p_int);
-        goto FINISH;
+        close(hsock);
     }
     free(p_int);
     
@@ -402,40 +390,89 @@ void* streamCast(void * arg)
     
     memset(&(my_addr.sin_zero), 0, 8);
     my_addr.sin_addr.s_addr = inet_addr(host_name);
-    if( connect( hsock, (struct sockaddr*)&my_addr, sizeof(my_addr)) == -1 ){
-        if((err = errno) != EINPROGRESS){
+    if( connect( hsock, (struct sockaddr*)&my_addr, sizeof(my_addr)) == -1 )
+    {
+        if((err = errno) != EINPROGRESS)
+        {
             fprintf(stderr, "Error connecting socket %d\n", errno);
-            goto FINISH;
+            close(hsock);
         }
     }
     
-    //for (int i =0;i<10000;i++){
-        //for (int j = 0 ;j<3;j++) {
+    vector<std::string> image_array = splitMatToVector(100000);
     
-            motion::Message payload = streamCastMessage();
-            cout<<"size after serilizing is "<<payload.ByteSize()<<endl;
-            int siz = payload.ByteSize()+4;
-            char *pkt = new char [siz];
-            google::protobuf::io::ArrayOutputStream aos(pkt,siz);
-            CodedOutputStream *coded_output = new CodedOutputStream(&aos);
-            coded_output->WriteVarint32(payload.ByteSize());
-            payload.SerializeToCodedStream(coded_output);
+    cout << "Array count            : " << image_array.size() << endl;
+    int total = image_array.size();
     
-            if( (bytecount=send(hsock, (void *) pkt,siz,0))== -1 ) {
-                fprintf(stderr, "Error sending data %d\n", errno);
-                goto FINISH;
-            }
-            printf("Sent bytes %d\n", bytecount);
-        //usleep(5);
-       //}
-    //}
-    delete pkt;
+    for (int i=0; i<image_array.size(); i++)
+    {
+        
+        GOOGLE_PROTOBUF_VERIFY_VERSION;
     
-FINISH:
-    close(hsock);
-    
-}
+        cout << "+++++++++++SENDING PROTO++++++++++++++" << endl;
+        
+        motion::Message me;
+        me.set_type(motion::Message::SET_MAT);
+        
+        me.set_time(getTimeRasp());
+        
+        me.set_data_amount(i);
+        me.set_data_total(total);
+        
+        std::string data = image_array.at(i);
+        me.set_data(data);
+        
+        cout << "Image array_size       : " << data.size() << endl;
+        cout << "Data amount            : " << i << endl;
+        cout << "Total amount           : " << total << endl;
+        cout << "Payload ByteSize       : " << me.ByteSize() << endl;
+        
+        int siz = 0;
+        siz = me.ByteSize()+4;
+        char *pkt = new char [siz];
+        google::protobuf::io::ArrayOutputStream aos(pkt,siz);
+        CodedOutputStream *coded_output = new CodedOutputStream(&aos);
+        coded_output->WriteVarint32(me.ByteSize());
+        me.SerializeToCodedStream(coded_output);
+        
+        //Send proto
+        if( (bytecount=send(hsock, (void *) pkt,siz,0))== -1 )
+        {
+            fprintf(stderr, "Error sending data %d\n", errno);
+            close(hsock);
+        }
+        
+        printf("Sent bytes             : %d\n", bytecount);
+        delete pkt;
+        google::protobuf::ShutdownProtobufLibrary();
+        cout << "+++++++++++PROTO SENT++++++++++++++" << endl;
+        
+        //Wait for receive notification.
+        char buffer[4];
+        if((bytecount = recv(hsock, buffer,4, MSG_PEEK))== -1){
+                fprintf(stderr, "Error receiving data %d\n", errno);
+        }
+        printf("Reply received for   :: %s" , buffer);
+        cout << "::" <<  endl;
+        
+        int ia = (int)buffer;
+        
+        if (ia==i)
+        {
+            cout << "CONTINUE!" << endl;
+            continue;
+        } else
+        {
+            cout << "CLOSE!" << endl;
+            close(hsock);
+            break;
+        }
 
+        //delete buffer;
+        //cout << "::2::" << endl;
+        
+    }
+}
 
 int screenshot(motion::Message m)
 {
@@ -561,7 +598,6 @@ void runCommand(int value)
             printf("The system time is set to %s\n", text_time);
             
             m.set_type(motion::Message::TIME_SET);
-            m.set_payload(time_string);
             
             setMessage(m, false);
             
@@ -844,7 +880,7 @@ int main (int argc, char * const argv[])
     mf.set_time("timess");
     screenshot(mf);
     google::protobuf::ShutdownProtobufLibrary();*/
-    
+
 
   pthread_mutex_init(&tcpMutex, 0);
 
