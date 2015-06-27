@@ -265,6 +265,36 @@ src/motion_detect/socket/streamlistener.s:
 .PHONY : src/motion_detect/socket/streamlistener.s
 
 # target to build an object file
+src/motion_detect/socket/udp-recv.o:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o
+.PHONY : src/motion_detect/socket/udp-recv.o
+
+# target to preprocess a source file
+src/motion_detect/socket/udp-recv.i:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.i
+.PHONY : src/motion_detect/socket/udp-recv.i
+
+# target to generate assembly for a file
+src/motion_detect/socket/udp-recv.s:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.s
+.PHONY : src/motion_detect/socket/udp-recv.s
+
+# target to build an object file
+src/motion_detect/socket/udp-send.o:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o
+.PHONY : src/motion_detect/socket/udp-send.o
+
+# target to preprocess a source file
+src/motion_detect/socket/udp-send.i:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.i
+.PHONY : src/motion_detect/socket/udp-send.i
+
+# target to generate assembly for a file
+src/motion_detect/socket/udp-send.s:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.s
+.PHONY : src/motion_detect/socket/udp-send.s
+
+# target to build an object file
 src/motion_detect/streaming/remotecam.o:
 	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/streaming/remotecam.o
 .PHONY : src/motion_detect/streaming/remotecam.o
@@ -393,6 +423,12 @@ help:
 	@echo "... src/motion_detect/socket/streamlistener.o"
 	@echo "... src/motion_detect/socket/streamlistener.i"
 	@echo "... src/motion_detect/socket/streamlistener.s"
+	@echo "... src/motion_detect/socket/udp-recv.o"
+	@echo "... src/motion_detect/socket/udp-recv.i"
+	@echo "... src/motion_detect/socket/udp-recv.s"
+	@echo "... src/motion_detect/socket/udp-send.o"
+	@echo "... src/motion_detect/socket/udp-send.i"
+	@echo "... src/motion_detect/socket/udp-send.s"
 	@echo "... src/motion_detect/streaming/remotecam.o"
 	@echo "... src/motion_detect/streaming/remotecam.i"
 	@echo "... src/motion_detect/streaming/remotecam.s"

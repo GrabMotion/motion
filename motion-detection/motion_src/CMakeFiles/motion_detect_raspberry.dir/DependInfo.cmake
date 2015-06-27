@@ -8,6 +8,8 @@ SET(CMAKE_DEPENDS_CHECK_C
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/cdecode.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cdecode.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/cencode.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/ntp/hwclock.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/udp-recv.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/udp-send.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o"
   )
 SET(CMAKE_C_COMPILER_ID "GNU")
 SET(CMAKE_DEPENDS_CHECK_CXX

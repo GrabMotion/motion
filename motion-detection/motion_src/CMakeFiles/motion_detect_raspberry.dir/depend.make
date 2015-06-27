@@ -9,6 +9,37 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o: src/moti
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o: src/motion_detect/ntp/hwclock.c
 
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: src/motion_detect/socket/../protobuffer/motion.pb.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: src/motion_detect/socket/udp-recv.c
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/descriptor.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/extension_set.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/generated_enum_reflection.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/generated_message_util.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/message.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/message_lite.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/repeated_field.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_arm64_gcc.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_arm_gcc.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_arm_qnx.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_atomicword_compat.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_generic_gcc.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_macosx.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_mips_gcc.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_pnacl.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_solaris.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_tsan.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_x86_gcc.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/atomicops_internals_x86_msvc.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/common.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/once.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/platform_macros.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/template_util.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/stubs/type_traits.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: /usr/local/include/google/protobuf/unknown_field_set.h
+
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o: src/motion_detect/socket/udp-send.c
+
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o: src/motion_detect/b64/../b64/base64.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o: src/motion_detect/b64/base64.cpp
 

@@ -37,6 +37,9 @@
 #include "recognition/detection.h"
 #include "protobuffer/motion.pb.h"
 #include "socket/streamlistener.h"
+//#include "socket/udp-recv.c"
+//#include "socket/udp-send.c"
+
 #include "b64/base64.h"
 
 #include <unistd.h>
@@ -45,6 +48,10 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <netdb.h>
 
 using namespace google::protobuf::io;
 
@@ -86,6 +93,9 @@ string NETWORK_IP;
 motion::Message send_proto;
 motion::Message receive_proto;
 motion::Message streamCastMessage();
+
+//UDP
+int udpsend(motion::Message m);
 
 #define MAXDATASIZE 1000
 
@@ -222,6 +232,7 @@ void sendEcho(std::string serv, char *echo, short port )
 
 }
 
+
 motion::Message streamCastMessage()
 {
     
@@ -311,13 +322,13 @@ motion::Message streamCastMessage()
     cout << "ori_size   : " << ori_size << endl;
     
     //Store into proto
-    me.set_data(oriencoded);
+    me.set_payload("jjjjjjjjjjjjjjjjjjjbkjbkbjh hj hjgkhjvk hgghvhgvgvvhvhhghgkhkhbkhbkhbkhbkhbkhbk");//oriencoded);
     
     //Write base64 to file for checking.
     std::string basefile = "base64oish.txt";
     std::ofstream out;
     out.open (basefile.c_str());
-    out << me.data() << "\n";
+    out << me.payload() << "\n";
     out.close();
     
     cvReleaseCapture(&capture);
@@ -381,17 +392,17 @@ void* streamCast(void * arg)
         }
     }
     
-    //for (int i =0;i<10000;i++){
-        //for (int j = 0 ;j<10;j++) {
+    for (int i =0;i<10000;i++){
+        for (int j = 0 ;j<10;j++) {
     
             if( (bytecount=send(hsock, (void *) pkt,siz,0))== -1 ) {
                 fprintf(stderr, "Error sending data %d\n", errno);
                 goto FINISH;
             }
             printf("Sent bytes %d\n", bytecount);
-        //usleep(5);
-        //}
-    //}
+        usleep(5);
+        }
+    }
     delete pkt;
     
 FINISH:
@@ -421,24 +432,90 @@ int screenshot(motion::Message m)
     
 }
 
+#define BUFLEN 2048
+#define MSGS 5	/* number of messages to send */
+#define SERVICE_PORT	21234	/* hard-coded port number */
+
+int udpsend(motion::Message m)
+{
+    
+    struct sockaddr_in myaddr, remaddr;
+    int fd, i, slen=sizeof(remaddr);
+    char *server = "192.168.1.35";	/* change this to use a different server */
+    //char buf[BUFLEN];
+    
+    printf("Sending packet %d to %s port %d size %d\n", i, server, SERVICE_PORT, m.ByteSize()); //strlen(buf));
+    
+
+    std::string buf;
+    m.SerializeToString(&buf);
+    
+    /* create a socket */
+    
+    if ((fd=socket(AF_INET, SOCK_DGRAM, 0))==-1)
+        printf("socket created\n");
+    
+    /* bind it to all local addresses and pick any port number */
+    
+    memset((char *)&myaddr, 0, sizeof(myaddr));
+    myaddr.sin_family = AF_INET;
+    myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    myaddr.sin_port = htons(0);
+    
+    if (bind(fd, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
+        perror("bind failed");
+        return 0;
+    }
+    
+    /* now define remaddr, the address to whom we want to send messages */
+    /* For convenience, the host address is expressed as a numeric IP address */
+    /* that we will convert to a binary format via inet_aton */
+    
+    memset((char *) &remaddr, 0, sizeof(remaddr));
+    remaddr.sin_family = AF_INET;
+    remaddr.sin_port = htons(SERVICE_PORT);
+    if (inet_aton(server, &remaddr.sin_addr)==0) {
+        fprintf(stderr, "inet_aton() failed\n");
+        exit(1);
+    }
+    
+    /* now let's send the messages */
+    
+    //for (i=0; i < MSGS; i++) {
+    
+    printf("Sending packet %d to %s port %d size %d\n", i, server, SERVICE_PORT, m.ByteSize()); //strlen(buf));
+    //sprintf(buf, "This is packet %d", i);
+    //if (sendto(fd, buf, strlen(buf), 0, (struct sockaddr *)&remaddr, slen)==-1)
+    
+    if(sendto(fd, buf.data(), strlen(buf.c_str()), 0, (struct sockaddr *)&remaddr, sizeof(remaddr)))
+        perror("sendto");
+    
+    //}
+    close(fd);
+    return 0;
+}
+
+
+
 void runCommand(int value)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     motion::Message m;
     
+    std::string datastr;
+    
     string dataconnect;
-    int echoStringLen;
     
     struct arg_struct arguments;
     
     switch (value)
     {
             
-        /*case motion::Message::CONNECT:
+        case motion::Message::CONNECT:
             
             //connectStreaming(from_ip);
             
-            m.set_type(motion::Message::CONNECT);
+            /*m.set_type(motion::Message::CONNECT);
             m.set_serverip(receive_proto.serverip());
             m.set_time(getTimeRasp());
             m.SerializeToString(&dataconnect);
@@ -448,11 +525,24 @@ void runCommand(int value)
             
             //sock->send(bts, sizeof(bts));
             
-            cout << " ::SII:: " << endl;
+            cout << " ::SII:: " << endl;&
             
-            setMessage(m, false);
+            setMessage(m, false);*/
             
-            break;*/
+            //Initialize objects to serialize.
+            
+            m = streamCastMessage();
+            
+           
+            
+            //s = m.ByteSize();
+            //char data[s];
+            //cout << "SIZE___:: " << s << endl;
+            //m.SerializeToArray(&data, s);
+            
+            udpsend(m);
+            
+            break;
             
         case motion::Message::GET_MAT:
             
