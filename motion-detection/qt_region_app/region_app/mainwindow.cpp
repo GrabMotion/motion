@@ -56,6 +56,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(broadcast_thread, SIGNAL(BroadcastReceived(QString)), this, SLOT(BroadcastReceived(QString)));
     connect(broadcast_thread, SIGNAL(BroadcastTimeoutSocketException()), this, SLOT(broadcastTimeoutSocketException()));
 
+    tcpecho_thread = new TCPEchoThread(this);
+    //connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
+
     //Socket Listener Class -- Cannot connect received
     socket_listener = new SocketListener(this);
     socket_listener->startListening(this);
@@ -196,7 +199,7 @@ void MainWindow::ResultEcho(string response)
 
     switch (action)
     {
-        case motion::Message::CONNECT:
+        case motion::Message::ENGAGE:
             ui->start_recognition->setEnabled(true);
             ui->status_label->setText(qpayload);
             ui->status_label->setStyleSheet("background-color: lightgreen;");
@@ -219,136 +222,13 @@ void MainWindow::ResultEcho(string response)
 
     google::protobuf::ShutdownProtobufLibrary();
 
-    tcpecho_thread->terminate();
+    //tcpecho_thread->terminate();
     mount_thread->terminate();
 }
 
 char* convert2char(QString input)
 {
     return (char*)input.data();
-}
-
-void MainWindow::setRemoteMessage(QString qstr)
-{
-
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-    std::string response = qstr.toUtf8().constData();
-
-    int action;
-    motion::Message mm;
-    mm.ParseFromString(response);
-
-    action = mm.type();
-
-    //char* str = convert2char(qstr);
-    //int action;
-    //motion::Message mm;
-    //mm.ParseFromArray(&str, sizeof(str));
-
-    if (mm.has_type())
-    {
-        action = mm.type();
-    }
-
-    std::string payload;
-    QString qpayload;
-    std::string mtime;
-
-    if (mm.has_payload())
-    {
-        payload = mm.payload();
-        qpayload = QString::fromStdString(payload);
-    }
-
-    if (mm.has_time())
-    {
-       mtime  = mm.time();
-    }
-
-    std::cout << "Action received:: " << action << " time: " << mtime << std::endl;
-
-    switch (action)
-    {
-        case motion::Message::SET_MAT:
-            motion::Message mbytes;
-            //mbytes.ParseFromArray(response.data(), response.size());
-            cv::Mat data_mat;
-            if(mm.ByteSize() > 0)
-            {
-                std::string mdata = mm.data();
-                typedef unsigned char byte;
-                std::vector<byte> vectordata(mdata.begin(),mdata.end());
-                cv::Mat data_mat(vectordata,true);
-                QImage frame = Mat2QImage(data_mat);
-                //QPixmap pixmap((QString::fromStdString(path)));
-                ui->output->setPixmap(QPixmap::fromImage(frame));
-            }
-            break;
-    }
-
-    /*
-    detection::Message main_message;
-    fstream input(str, ios::in | ios::binary);
-    main_message.ParseFromIstream(&input);
-
-    for (int i = 0; i < main_message.motion_size(); i++)
-    {
-        detection::Motion main_motion = main_message.motion(i);
-        google::protobuf::uint32 idMotion;
-        idMotion = main_motion.idmotion();
-
-        detection::Motion::Action main_action;
-
-        for (int j = 0; j < main_motion.action_size(); j++)
-        {
-            detection::Motion::Action main_action = main_motion.action(j);
-            action = main_action.idaction();
-        }
-
-
-    }
-    */
-
-    google::protobuf::ShutdownProtobufLibrary();
-
-
-    /*
-    std::string message = str.toStdString();
-    int value;
-
-    if (str.size()>4)
-    {
-      std::string id_action = message.substr (0,4);
-      value = atoi(id_action.c_str());
-      result_message = message.substr (4,message.size());
-    }
-    else
-    {
-      value = atoi(message.c_str());
-    }
-
-    q_response = QString::fromStdString(result_message);
-    */
-
-    /*switch(action)
-    {
-
-        case TIME_SET:
-            ui->remote_time_response->setText(q_response);
-            break;
-
-        case GET_TIME:
-            ui->remote_terminal_time->setText(q_response);
-            break;
-
-        case AMOUNT_DETECTED:
-            //refresh_results();
-            ui->amount_detected->setText(q_response);
-            break;
-    }*/
-
-
 }
 
 void MainWindow::on_search_button_clicked ()
@@ -389,46 +269,6 @@ std::string MainWindow::getActiveTerminalIPString()
     return qs.toLocal8Bit().constData();
 }
 
-#define MAXDATASIZE 20
-
-void MainWindow::on_connect_button_clicked()
-{
-
-    spinner_folders->start();
-
-    tcpecho_thread = new TCPEchoThread(this);
-    connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-
-    QString qt_ip = ui->ips_combo->currentText();
-    QByteArray ba_ip = qt_ip.toLatin1();
-    std::string qt_ip_str = qt_ip.toUtf8().constData();
-    char *c_str_ip = ba_ip.data();
-
-    //char buf[MAXDATASIZE];
-    string data;
-    motion::Message m;
-    m.set_type(motion::Message::ActionType::Message_ActionType_CONNECT);
-    m.set_serverip(qt_ip_str);
-
-    struct timeval tv;
-    struct tm* ptm;
-    char time_string[40];
-    gettimeofday (&tv, NULL);
-    ptm = localtime (&tv.tv_sec);
-    strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S", ptm);
-    m.set_time(time_string);
-
-    m.SerializeToString(&data);
-    char bts[data.length()];
-    strcpy(bts, data.c_str());
-
-    tcpecho_thread->SendEcho(c_str_ip, bts);
-
-    tcpecho_thread->terminate();
-
-    google::protobuf::ShutdownProtobufLibrary();
-
-}
 
 void MainWindow::refresh_results()
 {
@@ -617,11 +457,21 @@ void MainWindow::on_disconnect_clicked()
 
 void MainWindow::on_get_time_clicked()
 {
-    std::string command = getGlobalIntToString(GET_TIME);
-    tcpecho_thread = new TCPEchoThread(this);
-    connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-    tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
 
+    QString qt_ip = ui->ips_combo->currentText();
+    QByteArray ba_ip = qt_ip.toLatin1();
+    std::string qt_ip_str = qt_ip.toUtf8().constData();
+    char *c_str_ip = ba_ip.data();
+
+    string data;
+    motion::Message m;
+    m.set_type(motion::Message::ActionType::Message_ActionType_GET_TIME);
+    m.set_serverip(getIpAddress());
+    m.SerializeToString(&data);
+    char bts[data.length()];
+    strcpy(bts, data.c_str());
+
+    tcpecho_thread->SendEcho(c_str_ip, bts);
 }
 
 /////////////SAVE_XML////////////////
@@ -1012,7 +862,108 @@ int MainWindow::testBase()
     return 0;
 }
 
-std::string MainWindow::getTime()
+
+void MainWindow::remoteProto(motion::Message payload)
+{
+
+      int action = payload.type();
+
+      switch (action)
+      {
+          case motion::Message::LOOP_MAT:
+
+              if (payload.has_time())
+              {
+                  QString rt = QString::fromUtf8(payload.time().c_str());
+                  ui->label_mat_piture->setText(rt);
+              }
+
+              google::protobuf::int32 data_total = payload.data_total();
+              google::protobuf::int32 data_amount = payload.data_amount();
+
+              cout << "Data total       :: " <<  data_total  <<  endl;
+              cout << "Data amount      :: " <<  data_amount  <<  endl;
+
+              image_buffer += payload.data();
+              cout << "Buffer size      :: " <<  image_buffer.size()  <<  endl;
+
+              if ( data_amount == (data_total-1) )
+              {
+                  cout << "+++++++++++RECEIVED++++++++++++++" << endl;
+
+                  //Decode from base64
+                  std::string oridecoded = base64_decode(image_buffer);
+
+                  //cast to stringstream to read data.
+                  std::stringstream decoded;
+                  decoded << oridecoded;
+
+                  // The data we need to deserialize.
+                  int width_d = 0;
+                  int height_d = 0;
+                  int type_d = 0;
+                  int size_d = 0;
+
+                  // Read the width, height, type and size of the buffer
+                  decoded.read((char*)(&width_d), sizeof(int));
+                  decoded.read((char*)(&height_d), sizeof(int));
+                  decoded.read((char*)(&type_d), sizeof(int));
+                  decoded.read((char*)(&size_d), sizeof(int));
+
+                  // Allocate a buffer for the pixels
+                  char* data_d = new char[size_d];
+                  // Read the pixels from the stringstream
+                  decoded.read(data_d, size_d);
+
+                  // Construct the image (clone it so that it won't need our buffer anymore)
+                  main_mat = cv::Mat(height_d, width_d, type_d, data_d).clone();
+
+                  //Render image.
+                  imwrite("/jose/repos/image_2.jpg", main_mat);
+                  QImage frame = Mat2QImage(main_mat);
+                  ui->output->setPixmap(QPixmap::fromImage(frame));
+
+                  cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"   << endl;
+                  cout << "Char type  : " << type_d                               << endl;
+                  cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
+                  cout <<  endl;
+
+                  google::protobuf::ShutdownProtobufLibrary();
+
+                  // Delete our buffer
+                  delete[]data_d;
+
+              }
+
+
+          break;
+      }
+
+
+      /*int size_init = payload.ByteSize();
+
+      //Write base64 to file for checking.
+      std::string basefile = "IMAGE_DATA.txt";
+      std::ofstream out;
+      out.open (basefile.c_str());
+      out << payload.data() << "\n";
+      out.close();*/
+
+
+}
+
+
+char * MainWindow::getTimeChat()
+{
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    return time_rasp;
+}
+std::string MainWindow::getTimeStr()
 {
     struct timeval tv;
     struct tm* ptm;
@@ -1022,73 +973,31 @@ std::string MainWindow::getTime()
     strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S %z", ptm);
     return time_string;
 }
-
-void MainWindow::setRemoteProto(motion::Message payload)
+char * MainWindow::getTerMinalIpFromCombo()
 {
-
-      int action = payload.type();
-      int size_init = payload.ByteSize();
-
-      //Write base64 to file for checking.
-      std::string basefile = "IMAGE_DATA.txt";
-      std::ofstream out;
-      out.open (basefile.c_str());
-      out << payload.data() << "\n";
-      out.close();
-
-      //Decode from base64
-      std::string oridecoded = base64_decode(payload.data());
-
-      //cast to stringstream to read data.
-      std::stringstream decoded;
-      decoded << oridecoded;
-
-      // The data we need to deserialize.
-      int width_d = 0;
-      int height_d = 0;
-      int type_d = 0;
-      int size_d = 0;
-
-      // Read the width, height, type and size of the buffer
-      decoded.read((char*)(&width_d), sizeof(int));
-      decoded.read((char*)(&height_d), sizeof(int));
-      decoded.read((char*)(&type_d), sizeof(int));
-      decoded.read((char*)(&size_d), sizeof(int));
-
-      // Allocate a buffer for the pixels
-      char* data_d = new char[size_d];
-      // Read the pixels from the stringstream
-      decoded.read(data_d, size_d);
-
-      // Construct the image (clone it so that it won't need our buffer anymore)
-      main_mat = cv::Mat(height_d, width_d, type_d, data_d).clone();
-
-      //Render image.
-      imwrite("/jose/repos/image_2.jpg", main_mat);
-      QImage frame = Mat2QImage(main_mat);
-      ui->output->setPixmap(QPixmap::fromImage(frame));
-
-      //QMetaObject::invokeMethod(parent, "remoteImage", Q_ARG(QImage, frame));
-
-      cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"   << endl;
-      cout << "Char type  : " << type_d                               << endl;
-      cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
-      cout <<  endl;
-
-      google::protobuf::ShutdownProtobufLibrary();
-
-      // Delete our buffer
-      delete[]data_d;
+    QString qt_ip = ui->ips_combo->currentText();
+    QByteArray ba_ip = qt_ip.toLatin1();
+    std::string qt_ip_str = qt_ip.toUtf8().constData();
+    char *c_str_ip = ba_ip.data();
 }
 
-
-char * MainWindow::getTimeRasp()
+void MainWindow::on_connect_button_clicked()
 {
-    struct timeval tr;
-    struct tm* ptmr;
-    char time_rasp[40];
-    gettimeofday (&tr, NULL);
-    ptmr = localtime (&tr.tv_sec);
-    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
-    return time_rasp;
+
+    spinner_folders->start();
+
+    string data;
+    motion::Message m;
+    m.set_type(motion::Message::ActionType::Message_ActionType_ENGAGE);
+    m.set_serverip(getIpAddress());
+    m.set_time(getTimeChat());
+
+    m.SerializeToString(&data);
+    char bts[data.length()];
+    strcpy(bts, data.c_str());
+
+    tcpecho_thread->SendEcho(getTerMinalIpFromCombo(), bts);
+
+    google::protobuf::ShutdownProtobufLibrary();
+
 }

@@ -19,7 +19,6 @@ SOURCES += main.cpp\
     socket/PracticalSocket.cpp \
     threads/broadcastthread.cpp \
     threads/mountthread.cpp \
-    threads/streamingthread.cpp \
     tinyxml/tinystr.cpp \
     tinyxml/tinyxml.cpp \
     tinyxml/tinyxmlerror.cpp \
@@ -34,7 +33,6 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     drawing/mouse_coordinates.h \
     threads/broadcastthread.h \
-    threads/streamingthread.h \
     threads/mountthread.h \
     image/mat2qimage.h \
     socket/PracticalSocket.h \

@@ -15,6 +15,8 @@
 
 #include <QMessageBox>
 
+#include "protobuffer/motion.pb.h"
+
 using namespace std;
 
 class TCPEchoThread : public QThread
@@ -27,8 +29,6 @@ public:
     void send(string svradress, char * message);
 
 private:
-    const int RCVBUFSIZE                = 32;
-    const unsigned int TCP_ECHO_PORT    = 5010;
 
 signals:
    void ResultEcho(string);

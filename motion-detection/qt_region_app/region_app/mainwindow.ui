@@ -70,7 +70,7 @@
      <item>
       <widget class="QPushButton" name="connect_button">
        <property name="text">
-        <string>Connect </string>
+        <string>Engage</string>
        </property>
       </widget>
      </item>
@@ -438,6 +438,22 @@ color: rgb(255, 252, 253);</string>
       <width>241</width>
       <height>161</height>
      </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_mat_piture">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>490</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string/>

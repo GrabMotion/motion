@@ -4,6 +4,8 @@ TCPEchoThread::TCPEchoThread(QObject *parent): QThread(parent){}
 
 using namespace std;
 
+const int RCVBUFSIZE  =  100500;
+
 void TCPEchoThread::SendEcho (string svradress, string command)
 {
     char * message = new char[command.size() + 1];
@@ -23,7 +25,7 @@ void TCPEchoThread::send (string svradress, char * message)
   char *echoString = message;   // Second arg: string to echo
   int echoStringLen = strlen(echoString);   // Determine input length
 
-  unsigned short echoServPort = TCP_ECHO_PORT;
+  unsigned short echoServPort = motion::Message::ActionType::Message_ActionType_TCP_ECHO_PORT;
 
   char echoBuffer[RCVBUFSIZE + 1];
 
@@ -35,31 +37,6 @@ void TCPEchoThread::send (string svradress, char * message)
 
     // Send the string to the echo server
     sock.send(echoString, echoStringLen);
-
-        // Buffer for echo string + \0
-    int bytesReceived = 0;              // Bytes read on each recv()
-    int totalBytesReceived = 0;         // Total bytes read
-    // Receive the same string back from the server
-    //cout << "Received: " << endl;                 // Setup to print the echoed string
-
-    while (totalBytesReceived < echoStringLen) {
-      // Receive up to the buffer size bytes from the sender
-      if ((bytesReceived = (sock.recv(echoBuffer, RCVBUFSIZE))) <= 0) {
-        cerr << "Unable to read";
-        exit(1);
-      }
-      totalBytesReceived += bytesReceived;     // Keep tally of total bytes
-      echoBuffer[bytesReceived] = '\0';        // Terminate the string!
-      //cout << "Received message: " << echoBuffer;                      // Print the echo buffer
-    }
-    //cout << endl;
-
-    std::stringstream strm;
-    strm << echoBuffer;
-
-    const string & data = echoBuffer;
-
-    emit ResultEcho(data);
 
   } catch(SocketException &e) {
     cerr << e.what() << endl;

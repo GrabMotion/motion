@@ -4,7 +4,6 @@
 #include <QMainWindow>
 
 #include "threads/broadcastthread.h"
-#include "threads/streamingthread.h"
 #include "threads/mountthread.h"
 #include "threads/tcpechothread.h"
 #include "socket/socketlistener.h"
@@ -77,7 +76,6 @@ public:
 
     //Threads
     BroadcastThread     *broadcast_thread;
-    StreamingThread     *streaming_thread;
     TCPEchoThread       *tcpecho_thread;
     MountThread         *mount_thread;
     SocketListener      *socket_listener;
@@ -89,6 +87,7 @@ public:
     QString getShare();
 
     QString xmlstring;
+    std::string image_buffer;
 
 private:
     Ui::MainWindow *ui;
@@ -112,8 +111,7 @@ private:
     QString ipPath;
     QString getSharedFolder();
     void getLocalNetwork();
-    void setRemoteMessage(QString str);
-    void setRemoteProto(motion::Message payload);
+    void remoteProto(motion::Message payload);
 
     std::string result_message;
     QString q_response;
@@ -121,27 +119,20 @@ private:
     void SocketErrorMessage(QString &e);
 
     int testBase();
-    std::string getTime();
 
-    char * getTimeRasp();
+    std::string getTimeStr();
+    char * getTimeChat();
+    char * getTerMinalIpFromCombo();
 
-    void savePointsAsXML(vector<Point2f> &contour );
+    void savePointsAsXML(vector<cv::Point2f> &contour );
+
 
 
 public:
-    Q_SLOT void remoteMessage(QString str)
+    Q_SLOT void setremoteProto(motion::Message payload)
     {
-        setRemoteMessage(str);
+        remoteProto(payload);
     }
-    Q_SLOT void remoteError(QString &e)
-    {
-        SocketErrorMessage(e);
-    }
-    Q_SLOT void remoteProto(motion::Message payload)
-    {
-        setRemoteProto(payload);
-    }
-
 
 private slots:
 
