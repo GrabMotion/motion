@@ -20,20 +20,22 @@
 
 using namespace google::protobuf::io;
 
+const int MAXDATASIZE  =  100500;
+const int PAYLOADSIZE  =  100000;
+
+pthread_t thread_echo_socket;
+
 struct message_thread_args
 {
     motion::Message message;
     bool array;
 };
-struct message_thread_args MessageStructThread;
-
-const unsigned int RCVBUFSIZE = 200000;     // Size of receive buffer
-//const int MAXRCVSTRING = 4096;          // Longest string to receive
+struct message_thread_args SocketStruct;
 
 
-void * sendMessage (void * arg)
+void * protoSend (void * arg)
 {
-
+   
     struct message_thread_args *args = (struct message_thread_args *) arg;
     
     bool array = args->array;
@@ -45,23 +47,22 @@ void * sendMessage (void * arg)
     
     cout << "::servAddress:: " << servAddress <<  endl;
     
-    int port = motion::Message::TCP_MSG_PORT;
+    int port = motion::Message::TCP_ECHO_PORT;
     unsigned short echoServPort = port;
     
     cout << "::echoServPort:: " << echoServPort <<  endl;
     
-    char echoBuffer[RCVBUFSIZE + 1];
+    char echoBuffer[MAXDATASIZE + 1];
     
     try
     {
         
-        std::cout << "Establish connection with the echo server :: " << servAddress << " " << echoServPort << std::endl;
+        std::cout << "Establish connection with the echo server :: " << servAddress << " port: " << echoServPort << std::endl;
         
         // Establish connection with the echo server
         TCPSocket sock(servAddress, echoServPort);
 
-        
-        int size = m.ByteSize() * 2;
+        int size = m.ByteSize();
         
         //Initialize objects to serialize.
         char data[size];
@@ -85,11 +86,7 @@ void * sendMessage (void * arg)
             cout << "ByteStringSize:: " << size <<  endl;
             try
             {
-                //m.SerializeToString(data);
-                //char bts[datastr.length()];
-                //strcpy(bts, datastr.c_str());
-                //sock.send(bts, sizeof(bts));
-                
+                m.SerializeToString(&datastr);
             }
             catch (google::protobuf::FatalException fe)
             {
@@ -98,55 +95,39 @@ void * sendMessage (void * arg)
             
         }
         
-        /*int siz = 110000; //m.ByteSize()+4;
-        char *pkt = new char [siz];
-        google::protobuf::io::ArrayOutputStream aos(pkt,siz);
-        CodedOutputStream *coded_output = new CodedOutputStream(&aos);
-        coded_output->WriteVarint32(m.ByteSize());
-        m.SerializeToCodedStream(coded_output);*/
-    
-        //sock.send(pkt, siz);
+        //std::vector<char*> protov(size+4);
+        //protov.push_back(data);
+        //protov.push_back("hola");
         
-        sock.send(data, sizeof(data));
         
-        cout << "::1:: " << endl;
         
-        // Buffer for echo string + \0
-        int bytesReceived = 0;              // Bytes read on each recv()
-        int totalBytesReceived = 0;         // Total bytes read
-        
-        cout << "::2:: " << endl;
-        
-        GOOGLE_PROTOBUF_VERIFY_VERSION;
-        
-        motion::Message mm;
-
-        while (totalBytesReceived < sizeof(data)) {
-            // Receive up to the buffer size bytes from the sender
-            if ((bytesReceived = (sock.recv(echoBuffer, RCVBUFSIZE))) <= 0) {
-                cerr << "Unable to read";
-                exit(1);
+        if (array)
+        {
+            
+            // send
+            //char buff[10000];
+            size_t len = strlen(data);
+            char *p = data;
+            ssize_t n;
+            while ( len > 0 && (n=sock.send(&p,len,0)) > 0 ) {
+                p += n;
+                len =- (size_t)n;
             }
-            totalBytesReceived += bytesReceived;                // Keep tally of total bytes
-            echoBuffer[bytesReceived] = '\0';                   // Terminate the string!
-            cout << "Received message: " << echoBuffer << endl; // Print the echo buffer
+            if ( len > 0 || n < 0 ) {
+                // oops, something went wrong
+            }
             
-            cout << "+++++++++++REPLY PROTO++++++++++++++" << endl;
-            
-            const string & data = echoBuffer;
-            mm.ParseFromString(data);
-            receive_proto.Clear();
-            receive_proto = mm;
-            int size_final = mm.ByteSize();
-            
-            int type = mm.type();
-            cout << "+++++++++++" << "RESPONSE TYPE: " << size_final << " ++++++" << endl;
-
+            //sock.send(&protov, protov.size());
+            //sock.send(data, sizeof(data));
+        } else
+        {
+            char bts[datastr.length()];
+            strcpy(bts, datastr.c_str());
+            sock.send(bts, sizeof(bts));
         }
-        cout << endl;
+        
         google::protobuf::ShutdownProtobufLibrary();
-        delete data;
-    
+       
     } catch(SocketException &e)
     {
         cout << "::error:: " << e.what() << endl;
@@ -154,28 +135,29 @@ void * sendMessage (void * arg)
         exit(1);
     }
     
-    pthread_cancel(thread_message);
+    pthread_cancel(thread_echo_socket);
     
     
 }
 
-void setMessage(motion::Message m, bool array)
+void protoSocket(motion::Message m, bool array)
 {
     
     cout << "+++++++++++SENDING PROTO++++++++++++++" << endl;
 
-    MessageStructThread.message         = m;
-    MessageStructThread.array           = array;
-    
+    SocketStruct.message         = m;
+    SocketStruct.array           = array;
+
     // run the streaming client as a separate thread
-    runm = pthread_create(&thread_message, NULL, sendMessage, &MessageStructThread);
+    runm = pthread_create(&thread_echo_socket, NULL, &protoSend, &SocketStruct);
+    
     if ( runm  != 0) {
         cerr << "Unable to create streamVideo thread" << endl;
         cout << "BroadcastSender pthread_create failed." << endl;
     }
     
-    //pthread_join(    thread_message,          (void**) &runm);
+    //pthread_join(    thread_echo_socket,          (void**) &runm);
     
-    //pthread_cancel(thread_message);
+    //pthread_cancel(thread_echo_socket);
     
 }
