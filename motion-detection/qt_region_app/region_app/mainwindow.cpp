@@ -61,8 +61,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //socket_listener->startListening(this);
 
     //Stream Listener Class -- Cannot connect received
-    stream_listener = new StreamListener(this);
-    stream_listener->startListening(this);
+    //stream_listener = new StreamListener(this);
+    //stream_listener->startListening(this);
+
+    udp_server = new UDPServer();
+    udp_server->startListening(this);
 
     //Mount Shares
     mount_thread = new MountThread(this);
@@ -962,7 +965,7 @@ std::string MainWindow::getTime()
     return time_string;
 }
 
-void MainWindow::setRemoteProto(motion::Message payload)
+/*void MainWindow::setRemoteProto(motion::Message payload)
 {
 
       int action = payload.type();
@@ -1027,10 +1030,83 @@ void MainWindow::setRemoteProto(motion::Message payload)
 
       // Delete our buffer
       delete[]data_d;
+}*/
+
+void MainWindow::remoteProto(motion::Message payload)
+{
+
+      int action = payload.type();
+
+      switch (action)
+      {
+          case motion::Message::SET_MAT:
+
+              if (payload.has_time())
+              {
+                  QString rt = QString::fromUtf8(payload.time().c_str());
+                  ui->label_mat_piture->setText(rt);
+              }
+
+              std::string pay = payload.payload();
+
+              //Decode from base64
+              std::string oridecoded = base64_decode(payload.data());
+
+              //Write base64 to file for checking.
+              std::string basefile = "/jose/repos/UDP.txt";
+              std::ofstream out;
+              out.open (basefile.c_str());
+              out << payload.data() << "\n";
+              out.close();
+
+              //cast to stringstream to read data.
+              std::stringstream decoded;
+              decoded << oridecoded;
+
+              // The data we need to deserialize.
+              int width_d = 0;
+              int height_d = 0;
+              int type_d = 0;
+              int size_d = 0;
+
+              // Read the width, height, type and size of the buffer
+              decoded.read((char*)(&width_d), sizeof(int));
+              decoded.read((char*)(&height_d), sizeof(int));
+              decoded.read((char*)(&type_d), sizeof(int));
+              decoded.read((char*)(&size_d), sizeof(int));
+
+              // Allocate a buffer for the pixels
+              char* data_d = new char[size_d];
+              // Read the pixels from the stringstream
+              decoded.read(data_d, size_d);
+
+              // Construct the image (clone it so that it won't need our buffer anymore)
+              main_mat = cv::Mat(height_d, width_d, type_d, data_d).clone();
+
+              //Render image.
+              imwrite("/jose/repos/image_2.jpg", main_mat);
+              QImage frame = Mat2QImage(main_mat);
+              ui->output->setPixmap(QPixmap::fromImage(frame));
+
+              cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"   << endl;
+              cout << "Char type  : " << type_d                               << endl;
+              cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
+              cout <<  endl;
+
+              google::protobuf::ShutdownProtobufLibrary();
+
+              // Delete our buffer
+              delete[]data_d;
+
+
+          break;
+      }
+
+
+
 }
 
-
-char * MainWindow::getTimeRasp()
+char * MainWindow::getTimeChat()
 {
     struct timeval tr;
     struct tm* ptmr;
@@ -1040,3 +1116,21 @@ char * MainWindow::getTimeRasp()
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     return time_rasp;
 }
+std::string MainWindow::getTimeStr()
+{
+    struct timeval tv;
+    struct tm* ptm;
+    char time_string[40];
+    gettimeofday (&tv, NULL);
+    ptm = localtime (&tv.tv_sec);
+    strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S %z", ptm);
+    return time_string;
+}
+char * MainWindow::getTerMinalIpFromCombo()
+{
+    QString qt_ip = ui->ips_combo->currentText();
+    QByteArray ba_ip = qt_ip.toLatin1();
+    std::string qt_ip_str = qt_ip.toUtf8().constData();
+    char *c_str_ip = ba_ip.data();
+}
+

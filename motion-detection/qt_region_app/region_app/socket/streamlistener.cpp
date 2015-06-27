@@ -31,10 +31,13 @@ void StreamListener::readBody(int csock,google::protobuf::uint32 siz, QObject *p
   int bytecount;
   motion::Message payload;
   char buffer [siz+4];//size of the payload and hdr
+
   //Read the entire buffer including the hdr
-  if((bytecount = recv(csock, (void *)buffer, 4+siz, MSG_WAITALL))== -1){
-                fprintf(stderr, "Error receiving data %d\n", errno);
-        }
+  if((bytecount = recv(csock, (void *)buffer, 4+siz, MSG_WAITALL))== -1)
+  {
+        fprintf(stderr, "Error receiving data %d\n", errno);
+  }
+
   cout<<"Second read byte count is "<<bytecount<<endl;
   //Assign ArrayInputStream with enough memory
   google::protobuf::io::ArrayInputStream ais(buffer,siz+4);
@@ -54,8 +57,8 @@ void StreamListener::readBody(int csock,google::protobuf::uint32 siz, QObject *p
   //cout<<"Message is "<<payload.DebugString();
 
   // Send proto to the MainWindow.
-  qRegisterMetaType<motion::Message>("motion::Message");
-  QMetaObject::invokeMethod(parent, "remoteProto", Q_ARG(motion::Message, payload));
+  //qRegisterMetaType<motion::Message>("motion::Message");
+  //QMetaObject::invokeMethod(parent, "remoteProto", Q_ARG(motion::Message, payload));
 
 }
 

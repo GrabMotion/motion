@@ -10,6 +10,7 @@
 #include "socket/socketlistener.h"
 #include "socket/streamlistener.h"
 #include "socket/streamsender.h"
+#include "socket/udpserver.h"
 
 #include "protobuffer/motion.pb.h"
 
@@ -83,6 +84,7 @@ public:
     SocketListener      *socket_listener;
     StreamListener      *stream_listener;
     StreamSender        *stream_sender;
+    UDPServer           *udp_server;
 
     std::string NETWORK_IP;
     QString share;
@@ -123,25 +125,20 @@ private:
     void testBase();
     std::string getTime();
 
-    char * getTimeRasp();
+    std::string getTimeStr();
+    char * getTimeChat();
+    char * getTerMinalIpFromCombo();
+
+    void remoteProto(motion::Message payload);
 
     void savePointsAsXML(vector<Point2f> &contour );
 
 
 public:
-    Q_SLOT void remoteMessage(QString str)
+    Q_SLOT void setremoteProto(motion::Message payload)
     {
-        setRemoteMessage(str);
+        remoteProto(payload);
     }
-    Q_SLOT void remoteError(QString &e)
-    {
-        SocketErrorMessage(e);
-    }
-    Q_SLOT void remoteProto(motion::Message payload)
-    {
-        setRemoteProto(payload);
-    }
-
 
 private slots:
 

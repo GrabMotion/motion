@@ -55,7 +55,6 @@ public:
     static void * socketHandler (void* lp);
     static void * socketThread  (void * args);
 
-
 private:
 
 public:

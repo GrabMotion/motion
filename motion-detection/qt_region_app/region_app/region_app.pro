@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     protobuffer/motion.pb.cc \
     b64/base64.cpp \
     socket/streamlistener.cpp \
-    socket/streamsender.cpp
+    socket/streamsender.cpp \
+    socket/udpserver.cpp
 
 HEADERS  += mainwindow.h \
     drawing/mouse_coordinates.h \
@@ -48,7 +49,8 @@ HEADERS  += mainwindow.h \
     protobuffer/motion.pb.h \
     b64/base64.h \
     socket/streamlistener.h \
-    socket/streamsender.h
+    socket/streamsender.h \
+    socket/udpserver.h
 
 FORMS    += mainwindow.ui
 

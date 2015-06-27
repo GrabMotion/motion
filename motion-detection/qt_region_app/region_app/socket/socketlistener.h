@@ -11,7 +11,6 @@
 
 #include "socket/PracticalSocket.h"
 #include <arpa/inet.h>
-#include <pthread.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -40,7 +39,6 @@
 //#include "b64/decode.h"
 
 #include <google/protobuf/message.h>
-
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 
