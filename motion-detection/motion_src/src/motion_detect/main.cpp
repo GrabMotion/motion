@@ -341,23 +341,41 @@ motion::Message streamCastMessage()
 void* streamCast(void * arg)
 {
     
-    motion::Message payload = streamCastMessage();
-    cout<<"size after serilizing is "<<payload.ByteSize()<<endl;
-    int siz = payload.ByteSize()+4;
-    char *pkt = new char [siz];
-    google::protobuf::io::ArrayOutputStream aos(pkt,siz);
-    CodedOutputStream *coded_output = new CodedOutputStream(&aos);
-    coded_output->WriteVarint32(payload.ByteSize());
-    payload.SerializeToCodedStream(coded_output);
+    cout << "CAPTURING !!!!!!!!!!!!!" << endl;
+    
+    CvCapture* capture = cvCreateCameraCapture(0);
+    if (capture == NULL)
+    {
+        std::cout << "No cam found." << std::endl;
+        
+    }
+    
+    int w = 1280; //640; //1280; //320;
+    int h = 720;  //480; //720;  //240;
+    
+    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
+    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
+    
+    //IplImage* img=0;
+    //img = cvQueryFrame( capture );
+    //cvSaveImage("IplImage.JPG",img);
+    
+    Mat mat(h, w, CV_8UC3); //CV_8U); // CV_8UC3);
+    mat = cvQueryFrame(capture);
+    cvtColor(mat, mat, CV_RGB2GRAY);
+    imwrite("MAT.jpg", mat);
+    
+    mat = (mat.reshape(0,1)); // to make it continuous
+    int  imgSize = mat.total()*mat.elemSize();
+    
+    /////////////////
     
     int host_port= 1101;
     char* host_name="192.168.1.35";
     
     struct sockaddr_in my_addr;
     
-    char buffer[1024];
-    int bytecount;
-    int buffer_len=0;
+    int bytes;
     
     int hsock;
     int * p_int;
@@ -392,18 +410,15 @@ void* streamCast(void * arg)
         }
     }
     
-    for (int i =0;i<10000;i++){
-        for (int j = 0 ;j<10;j++) {
-    
-            if( (bytecount=send(hsock, (void *) pkt,siz,0))== -1 ) {
-                fprintf(stderr, "Error sending data %d\n", errno);
-                goto FINISH;
-            }
-            printf("Sent bytes %d\n", bytecount);
-        usleep(5);
-        }
+    if( (bytes=send(hsock, (void *) mat.data, imgSize,0))== -1 ) {
+        fprintf(stderr, "Error sending data %d\n", errno);
+        goto FINISH;
     }
-    delete pkt;
+    fprintf(stderr, "Bytes sent %d\n", bytes);
+    
+    
+    cvReleaseCapture(&capture);
+    
     
 FINISH:
     close(hsock);
@@ -531,16 +546,14 @@ void runCommand(int value)
             
             //Initialize objects to serialize.
             
-            m = streamCastMessage();
-            
-           
+            //m = streamCastMessage();
             
             //s = m.ByteSize();
             //char data[s];
             //cout << "SIZE___:: " << s << endl;
             //m.SerializeToArray(&data, s);
             
-            udpsend(m);
+            //udpsend(m);
             
             break;
             
