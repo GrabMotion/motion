@@ -1,158 +1,185 @@
 #include "socket/MatListener.h"
 
-#include <google/protobuf/stubs/common.h>
-
-using namespace std;
-using namespace cv;
-using namespace google::protobuf::io;
-
-#define RCVBUFSIZE 200000
-
 MatListener::MatListener(QObject *parent): QObject(parent){}
 
-struct mat_thread_args
+static cv::Mat     img;
+static int     is_data_ready;
+static int     listenSock, connectSock;
+static int 	listenPort;
+
+static pthread_mutex_t mutex;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * This is the streaming server, run as separate thread
+ */
+void* MatListener::streamServer(void* arg)
 {
-    int * lp;
-    QObject *parent;
-};
-struct mat_thread_args MatThread;
+        struct  sockaddr_in   serverAddr,  clientAddr;
+        socklen_t             clientAddrLen = sizeof(clientAddr);
 
-void * MatListener::socketHandler (void* lp)
-{
+        /* make this thread cancellable using pthread_cancel() */
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+        pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
-  struct mat_thread_args *args = (struct mat_thread_args *) lp;
-  int *csock = args->lp;
-  QObject *parent = args->parent;
+        if ((listenSock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+            quit("socket() failed.", 1);
+        }
 
-    int bytes=0;
+        int listenPort = 11111;
 
-    cv::Mat img = Mat::zeros( 720, 1280, CV_8UC3);
-    int  imgSize = img.total()*img.elemSize();
-    uchar sockData[imgSize];
+        serverAddr.sin_family = PF_INET;
+        serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+        serverAddr.sin_port = htons(listenPort);
 
-    for (int i = 0; i < imgSize; i += bytes)
-    {
-        if ((bytes = recv(*csock, sockData +i, imgSize  - i, 0)) == -1)
+        std::cout << "serverAddr: " << serverAddr.sin_addr.s_addr << " listenPort: " << listenPort << std::endl;
+
+
+        if (::bind(listenSock, (sockaddr*)&serverAddr, sizeof(serverAddr)) < 0)
         {
-            //goto FINISH;
-            cout << "recv failed" << endl;
+            quit("bind() failed", 1);
         }
-    }
 
-    cout << "Mat received" << endl;
-
-     // Assign pixel value to img
-    int ptr=0;
-    for (int i = 0;  i < img.rows; i++)
-    {
-        for (int j = 0; j < img.cols; j++)
+        if (listen(listenSock, 5) == -1)
         {
-            img.at<cv::Vec3b>(i,j) = cv::Vec3b(sockData[ptr+ 0],sockData[ptr+1],sockData[ptr+2]);
-            ptr=ptr+3;
+            quit("listen() failed.", 1);
         }
-    }
 
-    cout <<  "Mat built..." << endl;
+        int  imgSize = img.total()*img.elemSize();
+        char sockData[imgSize];
+        int  bytes=0;
 
-    qRegisterMetaType<motion::Message>("cv::Mat");
-    QMetaObject::invokeMethod(parent, "setremoteMat", Q_ARG(cv::Mat, img));
+        std::cout << "imgSize: " << imgSize << std::endl;
 
+        /* start receiving images */
+        while(1)
+        {
+            std::cout << "-->Waiting for TCP connection on port " << listenPort << " ...\n\n";
 
-FINISH:
-    close(*csock);
-
-    /*while (1)
-    {
-        //Peek into the socket and get the packet size
-        if((bytecount = recv(*csock, buffer,4, MSG_PEEK))== -1){
-            fprintf(stderr, "Error receiving data %d\n", errno);
-        }
-        else if (bytecount == 0)
-            break;
-
-        cout<<"First read byte count is "<<bytecount<<endl;
-    }*/
-
-    return 0;
-}
-
-
-void * MatListener::socketThread(void * args)
-{
-
-    struct mat_thread_args *arg = (struct mat_thread_args *) args;
-    //int *csock = arg->lp;
-    QObject *parent = arg->parent;
-
-    int host_port= 1101;
-    struct sockaddr_in my_addr;
-
-    int hsock;
-    int * p_int ;
-    int err;
-
-    socklen_t addr_size = 0;
-    int* csock;
-    sockaddr_in sadr;
-    pthread_t thread_id=0;
-
-    hsock = socket(AF_INET, SOCK_STREAM, 0);
-    if(hsock == -1){
-            printf("Error initializing socket %d\n", errno);
-    }
-
-    p_int = (int*)malloc(sizeof(int));
-    *p_int = 1;
-
-    if( (setsockopt(hsock, SOL_SOCKET, SO_REUSEADDR, (char*)p_int, sizeof(int)) == -1 )||
-            (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) ){
-            printf("Error setting options %d\n", errno);
-            free(p_int);
-    }
-    free(p_int);
-
-    my_addr.sin_family = AF_INET ;
-    my_addr.sin_port = htons(host_port);
-
-    memset(&(my_addr.sin_zero), 0, 8);
-    my_addr.sin_addr.s_addr = INADDR_ANY ;
-
-    if( ::bind( hsock, (sockaddr*)&my_addr, sizeof(my_addr)) == -1 ){
-            fprintf(stderr,"Error binding to socket, make sure nothing else is listening on this port %d\n",errno);
-    }
-    if(listen( hsock, 10) == -1 ){
-            fprintf(stderr, "Error listening %d\n",errno);
-    }
-
-    while(true)
-    {
-            printf("waiting for a connection\n");
-            csock = (int*)malloc(sizeof(int));
-            MatThread.lp = csock;
-            MatThread.parent = parent;
-            if((*csock = accept( hsock, (sockaddr*)&sadr, &addr_size))!= -1)
+            /* accept a request from a client */
+            if ((connectSock = accept(listenSock, (sockaddr*)&clientAddr, &clientAddrLen)) == -1)
             {
-                    printf("---------------------\nReceived connection from %s\n",inet_ntoa(sadr.sin_addr));
-                    pthread_create(&thread_id, 0, &MatListener::socketHandler, &MatThread); //(void*) csock );
-                    pthread_detach(thread_id);
+                    quit("accept() failed", 1);
             }
             else
             {
-                    fprintf(stderr, "Error accepting %d\n", errno);
+                std::cout << "-->Receiving image from " << inet_ntoa(clientAddr.sin_addr) << ":" << ntohs(clientAddr.sin_port) << "..." << endl;
             }
-    }
+
+            memset(sockData, 0x0, sizeof(sockData));
+
+            while(1)
+            {
+                if (is_data_ready==0)
+                {
+                    for (int i = 0; i < imgSize; i += bytes)
+                    {
+                        if ((bytes = recv(connectSock, sockData +i, imgSize  - i, 0)) == -1)
+                        {
+                            quit("recv failed", 1);
+                        }
+                        std::cout << "bytes received:" << bytes << std::endl;
+                    }
+
+                    /* convert the received data to OpenCV's Mat format, thread safe */
+                    pthread_mutex_lock(&mutex);
+                        for (int i = 0;  i < img.rows; i++)
+                        {
+                            for (int j = 0; j < img.cols; j++)
+                            {
+                                (img.row(i)).col(j) = (uchar)sockData[((img.cols)*i)+j];
+                            }
+                        }
+                        is_data_ready = 1;
+                        memset(sockData, 0x0, sizeof(sockData));
+                    pthread_mutex_unlock(&mutex);
+
+                 }
+            }
+        }
+
+        /* have we terminated yet? */
+        pthread_testcancel();
+
+        /* no, take a rest for a while */
+        usleep(1000);
+
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * This function provides a way to exit nicely from the system
+ */
+void MatListener::quit(std::string msg, int retval)
+{
+        if (retval == 0) {
+                std::cout << (msg == "NULL" ? "" : msg) << "\n" <<endl;
+        } else {
+                std::cerr << (msg == "NULL" ? "" : msg) << "\n" <<endl;
+        }
+
+        if (listenSock){
+                close(listenSock);
+        }
+
+        if (connectSock){
+                close(connectSock);
+        }
+
+        if (!img.empty()){
+                (img.release());
+        }
+
+        pthread_mutex_destroy(&mutex);
+        //exit(retval);
+}
+
+void * MatListener::streamThread(void * args)
+{
+    QObject *parent = (QObject *)args;
+
+   pthread_t thread_s;
+   int width, height, key;
+
+   width = 640;
+   height = 480;
+
+   img = cv::Mat::zeros( height,width, CV_8U); //CV_8UC1);
+
+   /* run the streaming server as a separate thread */
+   if (pthread_create(&thread_s, NULL, &MatListener::streamServer, NULL))
+   {
+           quit("pthread_create failed.", 1);
+   }
+
+   while(1)
+   {
+           pthread_mutex_lock(&mutex);
+               if (is_data_ready)
+               {
+                       qRegisterMetaType<cv::Mat>("cv::Mat");
+                       QMetaObject::invokeMethod(parent, "setremoteMat", Q_ARG(cv::Mat, img));
+                       is_data_ready = 0;
+               }
+           pthread_mutex_unlock(&mutex);
+   }
+
+   if (pthread_cancel(thread_s))
+   {
+        quit("pthread_cancel failed.", 1);
+   }
 
 }
 
 void MatListener::startListening(QObject *parent)
 {
+    mutex = PTHREAD_MUTEX_INITIALIZER;
+
     pthread_t thread_socket;
     int runs;
-    MatThread.parent = parent;
     //Socket
-    runs = pthread_create(&thread_socket, NULL, &MatListener::socketThread, &MatThread);
+    runs = pthread_create(&thread_socket, NULL, &MatListener::streamThread, parent);
     if ( runs  != 0) {
-        cerr << "Unable to create thread" << endl;
-        cout << "BroadcastSender pthread_create failed." << endl;
+        std::cerr << "Unable to create thread" << endl;
+        std::cout << "BroadcastSender pthread_create failed." << endl;
     }
 }

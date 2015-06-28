@@ -9,40 +9,22 @@
 #include <QtWidgets/qdialog.h>
 #include <QMessageBox>
 
-#include <arpa/inet.h>
-#include <pthread.h>
+#include <netinet/in.h>
 #include <sys/socket.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <iostream>
+#include <arpa/inet.h>
 #include <fstream>
-#include <stdio.h>
-#include <cstdio>
-
-#include <string>
-#include <sstream>
 #include <iostream>
-#include <sys/malloc.h>
+#include <pthread.h>
+#include <unistd.h>
 
-#include "protobuffer/motion.pb.h"
-#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
 #include "image/mat2qimage.h"
-
-#include <string>
-#include <cassert>
-#include <limits>
-#include <stdexcept>
-#include <cctype>
-
 #include "b64/base64.h"
 
-#include <google/protobuf/message.h>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-
-#include <fstream>
+using namespace cv;
 
 class MatListener : public QObject
 {
@@ -50,16 +32,12 @@ class MatListener : public QObject
 public:
     explicit MatListener(QObject *parent = 0);
 
-    void startListening(QObject *parent);
-    static google::protobuf::uint32 readHdr(char *buf);
-    static void readBody(int csock,google::protobuf::uint32 siz, QObject *parent);
-    static void * socketHandler (void* lp);
-    static void * socketThread  (void * args);
+    void startListening (QObject *parent);
+    static void * streamThread(void * args);
+    static void * streamServer(void* arg);
+    static void  quit(std::string msg, int retval);
 
 private:
-
-public:
-    std::string socket_response;
 
 
 };

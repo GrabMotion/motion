@@ -51,7 +51,6 @@ HEADERS  += mainwindow.h \
     b64/base64.h \
     socket/streamlistener.h \
     socket/streamsender.h \
-    socket/matreceiver.h \
     socket/matlistener.h \
     socket/udpserver.h
 
