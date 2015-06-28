@@ -11,6 +11,7 @@
 #include "socket/streamlistener.h"
 #include "socket/streamsender.h"
 #include "socket/udpserver.h"
+#include "socket/matlistener.h"
 
 #include "protobuffer/motion.pb.h"
 
@@ -85,6 +86,7 @@ public:
     StreamListener      *stream_listener;
     StreamSender        *stream_sender;
     UDPServer           *udp_server;
+    MatListener         *mat_listener;
 
     std::string NETWORK_IP;
     QString share;
@@ -130,6 +132,7 @@ private:
     char * getTerMinalIpFromCombo();
 
     void remoteProto(motion::Message payload);
+    void remoteMat(cv::Mat mat);
 
     void savePointsAsXML(vector<Point2f> &contour );
 
@@ -138,6 +141,10 @@ public:
     Q_SLOT void setremoteProto(motion::Message payload)
     {
         remoteProto(payload);
+    }
+    Q_SLOT void setremoteMat(cv::Mat mat)
+    {
+        remoteMat(mat);
     }
 
 private slots:

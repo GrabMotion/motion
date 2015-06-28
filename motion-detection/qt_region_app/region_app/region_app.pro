@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     b64/base64.cpp \
     socket/streamlistener.cpp \
     socket/streamsender.cpp \
-    socket/udpserver.cpp
+    socket/udpserver.cpp \
+    socket/matlistener.cpp
 
 HEADERS  += mainwindow.h \
     drawing/mouse_coordinates.h \
@@ -50,6 +51,8 @@ HEADERS  += mainwindow.h \
     b64/base64.h \
     socket/streamlistener.h \
     socket/streamsender.h \
+    socket/matreceiver.h \
+    socket/matlistener.h \
     socket/udpserver.h
 
 FORMS    += mainwindow.ui

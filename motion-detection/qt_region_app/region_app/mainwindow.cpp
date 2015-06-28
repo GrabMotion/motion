@@ -34,6 +34,9 @@ using namespace google::protobuf::io;
 using namespace std;
 using namespace cv;
 
+//Socket
+//http://beej.us/guide/bgnet/output/html/singlepage/bgnet.html
+
 Mat main_mat;
 std::string filename, xml;
 Scalar color(0,0,255); // red color
@@ -64,8 +67,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //stream_listener = new StreamListener(this);
     //stream_listener->startListening(this);
 
-    udp_server = new UDPServer();
-    udp_server->startListening(this);
+    //udp_server = new UDPServer();
+    //udp_server->startListening(this);
+
+    mat_listener = new MatListener(this);
+    mat_listener->startListening(this);
 
     //Mount Shares
     mount_thread = new MountThread(this);
@@ -92,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
 
-    ui->screenshot->setEnabled(false);
+    //ui->screenshot->setEnabled(false);
     ui->save_region->setEnabled(false);
     ui->start_recognition->setEnabled(false);
 
@@ -1102,8 +1108,12 @@ void MainWindow::remoteProto(motion::Message payload)
           break;
       }
 
+}
 
-
+void MainWindow::remoteMat(cv::Mat mat)
+{
+    QImage frame = Mat2QImage(mat);
+    ui->output->setPixmap(QPixmap::fromImage(frame));
 }
 
 char * MainWindow::getTimeChat()
