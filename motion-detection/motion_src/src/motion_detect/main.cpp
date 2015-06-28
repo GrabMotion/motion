@@ -37,7 +37,7 @@
 #include "recognition/detection.h"
 #include "protobuffer/motion.pb.h"
 #include "socket/streamlistener.h"
-//#include "socket/udp-recv.c"
+#include "socket/netcvc.h"
 //#include "socket/udp-send.c"
 
 #include "b64/base64.h"
@@ -93,6 +93,9 @@ string NETWORK_IP;
 motion::Message send_proto;
 motion::Message receive_proto;
 motion::Message streamCastMessage();
+
+//Capture
+bool stop_capture;
 
 //UDP
 int udpsend(motion::Message m);
@@ -554,6 +557,8 @@ void runCommand(int value)
             //m.SerializeToArray(&data, s);
             
             //udpsend(m);
+            
+            netcvc();
             
             break;
             
