@@ -1,0 +1,52 @@
+package motion;  
+  
+message Message 
+{    
+	required ActionType type 		= 1 [default = ENGAGE];
+	
+	optional string time 			= 2;  
+	
+	optional bytes data 			= 3;
+	optional int32 data_amount		= 4;
+	optional int32 data_total 		= 5;
+	
+	optional string serverip 		= 6;
+	optional string clientip 		= 7;
+	
+	optional string payload			= 8;
+	
+	optional bool recognizing       = 11;
+
+	repeated Instance instance      = 12; 
+	optional bool storeimage 		= 13;
+	optional bool storecrop 		= 14;
+	optional string code            = 15;
+	optional bytes 	regiondata		= 16;
+	
+	enum ActionType 
+	{
+		 ENGAGE                   = 1000;
+		 START_RECOGNITION        = 1002;
+		 STOP_RECOGNITION         = 1003;
+		 DISSCONNECT              = 1004;
+		 GET_TIME                 = 1005;
+		 SET_TIME                 = 1006;
+		 TIME_SET                 = 1007;
+		 START_STREAMING	      = 1008;
+		 STOP_STREAMING			  = 1009;
+		 TCP_ECHO_PORT            = 5010;
+		 TCP_STREAMING_PORT       = 5020;
+		 UDP_PORT                 = 5030;
+	}
+	
+	message Instance
+	{
+		required int32 		idinstance 		= 1;
+		optional string 	amount 			= 4;
+		optional string 	filepath	 	= 5;
+		optional string instancestart		= 6;	
+		optional string instanceend			= 7;
+		optional string regionfilename		= 9;
+	}
+}  
+
