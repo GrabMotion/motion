@@ -25,11 +25,9 @@ void StreamSender::sendStream(std::string host, motion::Message payload)
         std::copy(host.begin(), host.end(), host_name);
         host_name[host.size()] = '\0'; // don't forget the terminating 0
 
-        //char* host_name="192.168.1.3";
-
         struct sockaddr_in my_addr;
 
-        char buffer[1024];
+        char buffer[16384];
         int bytecount;
         int buffer_len=0;
 
@@ -38,7 +36,8 @@ void StreamSender::sendStream(std::string host, motion::Message payload)
         int err;
 
         hsock = socket(AF_INET, SOCK_STREAM, 0);
-        if(hsock == -1){
+        if(hsock == -1)
+        {
             printf("Error initializing socket %d\n",errno);
             goto FINISH;
         }
@@ -47,7 +46,8 @@ void StreamSender::sendStream(std::string host, motion::Message payload)
         *p_int = 1;
 
         if( (setsockopt(hsock, SOL_SOCKET, SO_REUSEADDR, (char*)p_int, sizeof(int)) == -1 )||
-           (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) ){
+           (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) )
+        {
             printf("Error setting options %d\n",errno);
             free(p_int);
             goto FINISH;
@@ -59,26 +59,33 @@ void StreamSender::sendStream(std::string host, motion::Message payload)
 
         memset(&(my_addr.sin_zero), 0, 8);
         my_addr.sin_addr.s_addr = inet_addr(host_name);
-        if( ::connect( hsock, (struct sockaddr*)&my_addr, sizeof(my_addr)) == -1 ){
+        if( ::connect( hsock, (struct sockaddr*)&my_addr, sizeof(my_addr)) == -1 )
+        {
             if((err = errno) != EINPROGRESS){
                 fprintf(stderr, "Error connecting socket %d\n", errno);
                 goto FINISH;
             }
         }
 
-        //for (int i =0;i<10000;i++){
-            //for (int j = 0 ;j<10;j++) {
-
+        while (1)
+        {
+            if (bytecount<=siz)
+            {
                 if( (bytecount=send(hsock, (void *) pkt,siz,0))== -1 ) {
                     fprintf(stderr, "Error sending data %d\n", errno);
                     goto FINISH;
                 }
                 printf("Sent bytes %d\n", bytecount);
-            //usleep(5);
-            //}
-        //}
+                usleep(5);
+            }
+            else {
+               break;
+            }
+        }
+
         delete pkt;
 
     FINISH:
         close(hsock);
+
 }

@@ -5,7 +5,10 @@
 using namespace std;
 using namespace google::protobuf::io;
 
-#define RCVBUFSIZE 200000
+#define RCVBUFSIZE 16384
+//Minimum = 4096 bytes ~ 4KB
+//Default = 16384 bytes ~ 16 KB
+//Maximum = 4022272 bytes ~ 3.835 MB
 
 SocketListener::SocketListener(QObject *parent): QObject(parent){}
 
@@ -100,7 +103,7 @@ void * SocketListener::socketThread (void * args)
 
     try
     {
-        TCPServerSocket servSock(motion::Message::TCP_MSG_PORT);   // Socket descriptor for server
+        TCPServerSocket servSock(motion::Message::TCP_ECHO_PORT);   // Socket descriptor for server
         for (;;) {      // Run forever
 
             cout << "new TCPServerSocket() runt::" << runt << endl;

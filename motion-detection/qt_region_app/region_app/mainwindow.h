@@ -21,7 +21,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#include <fcntl.h>
+//#include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -32,35 +32,26 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-
+#include <fstream>
+#include <string>
 #include <iostream>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 
 #include "b64/base64.h"
 
+#include "drawing/mouse_coordinates.h"
 
-const unsigned int CONNECT                  = 1000;
-
-const unsigned int STOP_STREAMING           = 1002;
-const unsigned int PAUSE_STREAMING          = 1003;
-
-const unsigned int START_RECOGNITION        = 1004;
-const unsigned int STOP_RECOGNITION         = 1005;
-
-const unsigned int DISSCONNECT              = 1006;
-
-const unsigned int GET_TIME                 = 1007;
-const unsigned int SET_TIME                 = 1008;
-const unsigned int TIME_SET                 = 1009;
-
-const unsigned int AMOUNT_DETECTED          = 1010;
-const unsigned int FILE_RECOGNIZED          = 1011;
-
-const unsigned int TCP_ECHO_PORT            = 5010;
-const unsigned int UDP_PORT                 = 5020;
-const unsigned int STREAMING_VIDEO_PORT     = 5030;
-const unsigned int TCP_MSG_PORT             = 5040;
+#include <sstream>
+#include <vector>
+#include <iostream>
+#include <string>
 
 class QtWaitingSpinner;
 
@@ -116,7 +107,7 @@ private:
     QString ipPath;
     QString getSharedFolder();
     void getLocalNetwork();
-    void setRemoteMessage(QString str);
+
     void setRemoteProto(motion::Message payload);
 
     std::string result_message;
@@ -134,8 +125,11 @@ private:
     void remoteProto(motion::Message payload);
     void remoteMat(cv::Mat mat);
 
-    void savePointsAsXML(vector<Point2f> &contour );
+    void loadMat();
 
+    vector<Point2f> stringToVectorPoint2f(std::string storedcoord);
+
+    std::string region_resutl;
 
 public:
     Q_SLOT void setremoteProto(motion::Message payload)
@@ -157,10 +151,7 @@ private slots:
 
     //mouse
     void Mouse_current_pos();
-    void Mouse_pressed(std::vector<cv::Point2f>&);
-    void Mouse_left();
     void showMousePosition(QPoint&);
-    void Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&);
 
     //sockets
     void BroadcastReceived(QString);
@@ -183,9 +174,12 @@ private slots:
 
     void on_set_time_clicked();
 
+    void savedRegionResutl(QString re);
+
 
 signals:
-    void SocketReceivedSignal(std::string);
+    void drawLinesSignal(std::vector<cv::Point2f> lines);
+
 
 };
 

@@ -21,8 +21,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "image/mat2qimage.h"
-#include "b64/base64.h"
+#include "protobuffer/motion.pb.h"
+
 
 using namespace cv;
 

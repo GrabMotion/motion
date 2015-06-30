@@ -9,7 +9,6 @@ static int 	listenPort;
 
 static pthread_mutex_t mutex;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * This is the streaming server, run as separate thread
  */
@@ -22,11 +21,12 @@ void* MatListener::streamServer(void* arg)
         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
         pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
-        if ((listenSock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+        if ((listenSock = socket(PF_INET, SOCK_STREAM, 0)) < 0)
+        {
             quit("socket() failed.", 1);
         }
 
-        int listenPort = 11111;
+        int listenPort = motion::Message::TCP_STREAMING_PORT;
 
         serverAddr.sin_family = PF_INET;
         serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -130,7 +130,6 @@ void MatListener::quit(std::string msg, int retval)
         }
 
         pthread_mutex_destroy(&mutex);
-        //exit(retval);
 }
 
 void * MatListener::streamThread(void * args)
@@ -143,7 +142,7 @@ void * MatListener::streamThread(void * args)
    width = 640;
    height = 480;
 
-   img = cv::Mat::zeros( height,width, CV_8U); //CV_8UC1);
+   img = cv::Mat::zeros( height,width, CV_8UC1); //CV_8UC1);
 
    /* run the streaming server as a separate thread */
    if (pthread_create(&thread_s, NULL, &MatListener::streamServer, NULL))

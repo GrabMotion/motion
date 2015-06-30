@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-
 #include "ui_mainwindow.h"
 
 #include <QPoint>
@@ -38,12 +37,6 @@ using namespace cv;
 //http://beej.us/guide/bgnet/output/html/singlepage/bgnet.html
 
 Mat main_mat;
-std::string filename, xml;
-Scalar color(0,0,255); // red color
-vector<Point2f> coor;
-vector<Point2f> contour;
-int coor_num = 0;
-int count_clicks;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -82,24 +75,26 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(streaming_thread, SIGNAL(StreamingUpdateLabelImage(std::string, Mat)), this, SLOT(StreamingUpdateLabelImage(std::string, Mat)));
 
     //Mouse Events
-    connect(ui->qt_drawing_output, SIGNAL(sendMousePosition(QPoint&)), this, SLOT(showMousePosition(QPoint&)));
+    //connect(ui->qt_drawing_output, SIGNAL(discoverMouseCoordinates(mouse_coordinates&)), this, SLOT(getMouseCoordinates(mouse_coordinates mc)));
+    //connect(ui->qt_drawing_output, SIGNAL(Mouse_Pressed(std::vector<cv::Point2f>&)), this, SLOT(Mouse_pressed(std::vector<cv::Point2f>&)));
+    //connect(ui->qt_drawing_output, SIGNAL(Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&)), this, SLOT(Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&)));
+    //connect(ui->qt_drawing_output, SIGNAL(Mouse_Left()), this, SLOT(Mouse_left()));
 
+    connect(ui->qt_drawing_output, SIGNAL(sendMousePosition(QPoint&)), this, SLOT(showMousePosition(QPoint&)));
     connect(ui->qt_drawing_output, SIGNAL(Mouse_Pos()), this, SLOT(Mouse_current_pos()));
-    connect(ui->qt_drawing_output, SIGNAL(Mouse_Pressed(std::vector<cv::Point2f>&)), this, SLOT(Mouse_pressed(std::vector<cv::Point2f>&)));
-    connect(ui->qt_drawing_output, SIGNAL(Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&)), this, SLOT(Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&)));
-    connect(ui->qt_drawing_output, SIGNAL(Mouse_Left()), this, SLOT(Mouse_left()));
+    connect(ui->qt_drawing_output, SIGNAL(savedRegionResutl(QString)), this, SLOT(savedRegionResutl(QString)));
 
     ui->connect_button->setEnabled(false);
     ui->list_folders->setEnabled(false);
     ui->list_files->setEnabled(false);
-    ui->start_recognition->setEnabled(false);
+    //ui->start_recognition->setEnabled(false);
     //ui->save_region->setEnabled(false);
     ui->rec_with_images->setEnabled(false);
 
     ui->output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
 
     //ui->screenshot->setEnabled(false);
-    ui->save_region->setEnabled(false);
+    //ui->save_region->setEnabled(false);
     ui->start_recognition->setEnabled(false);
 
     m_spinner = new QtWaitingSpinner(this);
@@ -134,8 +129,14 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->ips_combo->addItem("192.168.1.47"); //208.70.188.15");
     //ui->connect_button->setEnabled(true);
 
-    //testBase();
+    testBase();
+    loadMat();
 }
+
+//void MainWindow::getMouseCoordinates(mouse_coordinates mouse)
+//{
+//    m_coordinates = new mouse_coordinates();
+//}
 
 void MainWindow::getLocalNetwork()
 {
@@ -205,7 +206,7 @@ void MainWindow::ResultEcho(string response)
 
     switch (action)
     {
-        case motion::Message::CONNECT:
+        case motion::Message::ENGAGE:
             ui->start_recognition->setEnabled(true);
             ui->status_label->setText(qpayload);
             ui->status_label->setStyleSheet("background-color: lightgreen;");
@@ -237,128 +238,6 @@ char* convert2char(QString input)
     return (char*)input.data();
 }
 
-void MainWindow::setRemoteMessage(QString qstr)
-{
-
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-    std::string response = qstr.toUtf8().constData();
-
-    int action;
-    motion::Message mm;
-    mm.ParseFromString(response);
-
-    action = mm.type();
-
-    //char* str = convert2char(qstr);
-    //int action;
-    //motion::Message mm;
-    //mm.ParseFromArray(&str, sizeof(str));
-
-    if (mm.has_type())
-    {
-        action = mm.type();
-    }
-
-    std::string payload;
-    QString qpayload;
-    std::string mtime;
-
-    if (mm.has_payload())
-    {
-        payload = mm.payload();
-        qpayload = QString::fromStdString(payload);
-    }
-
-    if (mm.has_time())
-    {
-       mtime  = mm.time();
-    }
-
-    std::cout << "Action received:: " << action << " time: " << mtime << std::endl;
-
-    switch (action)
-    {
-        case motion::Message::SET_MAT:
-            motion::Message mbytes;
-            //mbytes.ParseFromArray(response.data(), response.size());
-            cv::Mat data_mat;
-            if(mm.ByteSize() > 0)
-            {
-                std::string mdata = mm.data();
-                typedef unsigned char byte;
-                std::vector<byte> vectordata(mdata.begin(),mdata.end());
-                cv::Mat data_mat(vectordata,true);
-                QImage frame = Mat2QImage(data_mat);
-                //QPixmap pixmap((QString::fromStdString(path)));
-                ui->output->setPixmap(QPixmap::fromImage(frame));
-            }
-            break;
-    }
-
-    /*
-    detection::Message main_message;
-    fstream input(str, ios::in | ios::binary);
-    main_message.ParseFromIstream(&input);
-
-    for (int i = 0; i < main_message.motion_size(); i++)
-    {
-        detection::Motion main_motion = main_message.motion(i);
-        google::protobuf::uint32 idMotion;
-        idMotion = main_motion.idmotion();
-
-        detection::Motion::Action main_action;
-
-        for (int j = 0; j < main_motion.action_size(); j++)
-        {
-            detection::Motion::Action main_action = main_motion.action(j);
-            action = main_action.idaction();
-        }
-
-
-    }
-    */
-
-    google::protobuf::ShutdownProtobufLibrary();
-
-
-    /*
-    std::string message = str.toStdString();
-    int value;
-
-    if (str.size()>4)
-    {
-      std::string id_action = message.substr (0,4);
-      value = atoi(id_action.c_str());
-      result_message = message.substr (4,message.size());
-    }
-    else
-    {
-      value = atoi(message.c_str());
-    }
-
-    q_response = QString::fromStdString(result_message);
-    */
-
-    /*switch(action)
-    {
-
-        case TIME_SET:
-            ui->remote_time_response->setText(q_response);
-            break;
-
-        case GET_TIME:
-            ui->remote_terminal_time->setText(q_response);
-            break;
-
-        case AMOUNT_DETECTED:
-            //refresh_results();
-            ui->amount_detected->setText(q_response);
-            break;
-    }*/
-
-
-}
 
 void MainWindow::on_search_button_clicked ()
 {
@@ -416,7 +295,7 @@ void MainWindow::on_connect_button_clicked()
     //char buf[MAXDATASIZE];
     string data;
     motion::Message m;
-    m.set_type(motion::Message::ActionType::Message_ActionType_CONNECT);
+    m.set_type(motion::Message::ActionType::Message_ActionType_ENGAGE);
     m.set_serverip(qt_ip_str);
     m.SerializeToString(&data);
     char bts[data.length()];
@@ -489,10 +368,8 @@ void MainWindow::SharedMounted(QString folder)
     QByteArray xml_region = region_file.toLatin1();
     const char *xmlfile = xml_region.data();
 
-    xml = xmlfile;
-
-    QFile * xmlFile = new QFile(region_file);
-
+    //xml = xmlfile;
+    //QFile * xmlFile = new QFile(region_file);
     /*if (QFile(region_file).exists())
     {
         QString path = region;
@@ -506,10 +383,10 @@ void MainWindow::SharedMounted(QString folder)
 
     }*/
 
-    if( ! xmlFile->open(QIODevice::WriteOnly) )
-    {
-      QMessageBox::warning(NULL, "Test", "Unable to open: " + region_file , "OK");
-    }
+    //if( ! xmlFile->open(QIODevice::WriteOnly) )
+    //{
+    //  QMessageBox::warning(NULL, "Test", "Unable to open: " + region_file , "OK");
+    //}
 
     spinner_folders->stop();
 }
@@ -592,7 +469,7 @@ void MainWindow::on_screenshot_clicked()
 
     string data;
     motion::Message m;
-    m.set_type(motion::Message::ActionType::Message_ActionType_GET_MAT);
+    m.set_type(motion::Message::ActionType::Message_ActionType_START_STREAMING);
     m.set_serverip(getIpAddress());
     m.SerializeToString(&data);
     char bts[data.length()];
@@ -608,114 +485,33 @@ void MainWindow::on_screenshot_clicked()
 
 void MainWindow::on_disconnect_clicked()
 {
-    std::string command = getGlobalIntToString(DISSCONNECT);
+    /*std::string command = getGlobalIntToString(DISSCONNECT);
     tcpecho_thread = new TCPEchoThread(this);
     connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
     tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
-    tcpecho_thread->terminate();
+    tcpecho_thread->terminate();*/
 }
 
 void MainWindow::on_get_time_clicked()
 {
-    std::string command = getGlobalIntToString(GET_TIME);
+    /*std::string command = getGlobalIntToString(GET_TIME);
     tcpecho_thread = new TCPEchoThread(this);
     connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-    tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
+    tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);*/
 
-}
-
-/////////////SAVE_XML////////////////
-
-void MainWindow::savePointsAsXML(vector<Point2f> &contour ){
-
-    TiXmlDocument doc;
-    TiXmlDeclaration decl("1.0", "", "");
-    doc.InsertEndChild(decl);
-    for(int i = 0; i <= contour.size(); i++)
-    {
-        TiXmlElement point("point");
-        point.SetAttribute("x",contour[i].x);
-        point.SetAttribute("y",contour[i].y);
-        doc.InsertEndChild(point);
-    }
-    if(doc.SaveFile(xml.c_str()))
-        cout << "file saved succesfully.\n";
-    else
-        cout << "file not saved, something went wrong!\n";
-
-    // Declare a printer
-    TiXmlPrinter printer;
-
-    // attach it to the document you want to convert in to a std::string
-    doc.Accept(&printer);
-
-    // Create a std::string and copy your document data in to the string
-    std::string xml_temp = printer.CStr();
-
-    std::string xmldecoded = base64_encode(reinterpret_cast<const unsigned char*>(xml_temp.c_str()), xml_temp.length());
-
-    xmlstring = QString::fromStdString(xmldecoded);
-
-}
-
-/////////////MOUSE////////////////
-
-void MainWindow::Mouse_Pressed_Right_Click(vector<Point2f>&coor)
-{
-    vector<Point2f> & contour = coor;
-    vector<Point2f> insideContour;
-
-    for(int j = 0; j < main_mat.rows; j++){
-        for(int i = 0; i < main_mat.cols; i++){
-            Point2f p(i,j);
-            if(pointPolygonTest(contour,p,false) >= 0) // yes inside
-                insideContour.push_back(p);
-        }
-    }
-    cout << "# points inside contour: " << insideContour.size() << endl;
-    savePointsAsXML(insideContour);
 }
 
 void MainWindow::on_save_region_clicked()
 {
-    //TODO
-    //vector<Point2f> & contour = coor;
-    coor = contour;
-    vector<Point2f> insideContour;
-
-    for(int j = 0; j < main_mat.rows; j++)
-    {
-        for(int i = 0; i < main_mat.cols; i++)
-        {
-            Point2f p(i,j);
-            if(pointPolygonTest(contour,p,false) >= 0) // yes inside
-                insideContour.push_back(p);
-        }
-    }
-    cout << "# points inside contour: " << insideContour.size() << endl;
-    savePointsAsXML(insideContour);
-    count_clicks=0;
+    ui->qt_drawing_output->SaveRegion();
 }
-
 
 void MainWindow::showMousePosition( QPoint & pos )
 {
     ui->label_xy->setText("x: " + QString::number(pos.x()) + " y : "  + QString::number(pos.y()) );
 }
 
-void MainWindow::Mouse_pressed(vector<Point2f>&coor)
-{
-    contour = coor;
-    count_clicks++;
-    if (count_clicks>2)
-    {
-        ui->save_region->setEnabled(true);
-    }
-    cout << "PRESSED at (x,t): " <<  ui->output->x() << " " << ui->output->y() << endl;
-}
-
 void MainWindow::Mouse_current_pos(){}
-void MainWindow::Mouse_left(){}
 
 void MainWindow::closeEvent (QCloseEvent *event)
 {
@@ -730,8 +526,8 @@ void MainWindow::closeEvent (QCloseEvent *event)
     }
 }
 
-
-std::string MainWindow::getIpAddress () {
+std::string MainWindow::getIpAddress ()
+{
 
     struct ifaddrs * ifAddrStruct=NULL;
     struct ifaddrs * ifa=NULL;
@@ -815,12 +611,9 @@ void MainWindow::on_start_recognition_toggled(bool checked)
         std::string utf8_xml = xmlstring.toUtf8().constData();
         cout << "utf8_xml: " << utf8_xml.size() << endl;
         mr.set_regiondata(utf8_xml);
+
         mr.set_storeimage(true);
         mr.set_storecrop(false);
-
-        //mr.SerializeToString(&data);
-        //char bts[data.length()];
-        //strcpy(bts, data.c_str());
 
         stream_sender = new StreamSender(this);
         //connect(stream_sender, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
@@ -833,11 +626,11 @@ void MainWindow::on_start_recognition_toggled(bool checked)
     }
     else
     {
-        std::string command = getGlobalIntToString(STOP_RECOGNITION);
+        /*std::string command = getGlobalIntToString(STOP_RECOGNITION);
         tcpecho_thread = new TCPEchoThread(this);
         connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
         tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
-        tcpecho_thread->terminate();
+        tcpecho_thread->terminate();*/
     }
 
 }
@@ -857,7 +650,7 @@ void MainWindow::on_set_time_clicked()
 
     cout << "time_string TIME :: " << time_string << endl;
 
-    std::string command = getGlobalIntToString(SET_TIME);
+    std::string command = getGlobalIntToString(452346254734573);
 
     char * message = new char[command.size() + 1];
     std::copy(command.begin(), command.end(), message);
@@ -914,8 +707,70 @@ std::string get_file_contents(string filename)
 void MainWindow::testBase()
 {
 
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+    ::motion::Message testm;
+
+    testm.set_type(motion::Message::ActionType::Message_ActionType_START_RECOGNITION);
+    testm.set_data("hola");
+    testm.set_code("code");
+    testm.set_payload("gkbfdgdfkhg kfsdhgkjhdfkjhgdfhgkjsfdhgkhdfsjkgnkfjdgnkhdfnsjghfkdsjhgnksdfhgknhdfkjghskdfhgkjsdhnkj");
+
+    motion::Message::Instance * inst = testm.add_instance();
+
+    inst->set_idinstance(0);
+    inst->set_amount("amount");
+    inst->set_filepath("hola");
+
+    motion::Message::Instance * inst1 = testm.add_instance();
+
+    inst1->set_idinstance(1);
+    inst1->set_amount("fndgfdhgdf gsdfgfdgsdfgsfdgsdfgsdfg");
+    inst1->set_filepath("fdgksdfkgdfgkdfjkgkjhfd");
+
+    std::string file = "/jose/repos/motion/mm.pb";
+
+    int size_init = testm.ByteSize();
+    char data_init[size_init];
+
+    try
+    {
+        testm.SerializeToArray(data_init, size_init);
+    }
+    catch (google::protobuf::FatalException fe)
+    {
+        std::cout << "PbToZmq " << fe.message() << std::endl;
+    }
+
+    std:string enc = base64_encode(reinterpret_cast<const unsigned char*>(data_init),sizeof(data_init));
+
+    std::string basefile = file;
+    std::ofstream out;
+    out.open (basefile.c_str());
+    out << enc << "\n";
+    out.close();
+
+    string loaded = get_file_contents(file);
+
+    std::string oridecoded = base64_decode(loaded);
+
+    motion::Message testmm;
+    testmm.ParseFromArray(oridecoded.c_str(), oridecoded.size());
+
+    cout << "data: " << testmm.data();
+
+    for (int i = 0; i < testmm.instance_size(); i++)
+    {
+        const motion::Message::Instance & ins = testmm.instance(i);
+        cout << "amount: " << ins.amount() << endl;
+        cout << "id: " << ins.idinstance() << endl;
+        cout << "filepatgh: " << ins.filepath() << endl;
+    }
+
+    google::protobuf::ShutdownProtobufLibrary();
+
     // The data we need to deserialize
-    int width_d = 0;
+    /*int width_d = 0;
     int height_d = 0;
     int type_d = 0;
     size_t size_d = 0;
@@ -957,7 +812,7 @@ void MainWindow::testBase()
     imwrite("/jose/repos/image__decoded__10000.jpg", deserialized);
 
     QImage frame = Mat2QImage(deserialized);
-    ui->output->setPixmap(QPixmap::fromImage(frame));
+    ui->output->setPixmap(QPixmap::fromImage(frame));*/
 }
 
 std::string MainWindow::getTime()
@@ -971,24 +826,13 @@ std::string MainWindow::getTime()
     return time_string;
 }
 
-/*void MainWindow::setRemoteProto(motion::Message payload)
+void MainWindow::loadMat()
 {
 
-      int action = payload.type();
-      int size_init = payload.ByteSize();
-      int size_data_primitive = payload.data().size();
-      std::string mdata = payload.data();
-      int size_encoded = mdata.size();
+      std::string mat = "/jose/repos/motion/mat.txt";
+      string loaded = get_file_contents(mat);
 
-      //Write base64 to file for checking.
-      std::string basefile = "/jose/repos/base64oish_MAC.txt";
-      std::ofstream out;
-      out.open (basefile.c_str());
-      out << mdata << "\n";
-      out.close();
-
-      //Decode from base64
-      std::string oridecoded = base64_decode(mdata);
+      std::string oridecoded = base64_decode(loaded);
       int ori_size = oridecoded.size();
 
       //cast to stringstream to read data.
@@ -1025,9 +869,7 @@ std::string MainWindow::getTime()
       cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"   << endl;
       cout << "Mat size   : " << main_mat.size                            << endl;
       cout << "Char type  : " << type_d                               << endl;
-      cout << "Proto size : " << payload.size()                         << endl;
       cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
-      cout << "size_encoded           : " << size_encoded             << endl;
       cout << "ori_size               : " << ori_size                 << endl;
       cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
       cout <<  endl;
@@ -1036,7 +878,46 @@ std::string MainWindow::getTime()
 
       // Delete our buffer
       delete[]data_d;
-}*/
+
+      std::string basefile = "/jose/repos/motion/region.txt";
+      string storedcoord = get_file_contents(basefile);
+      vector<Point2f> coordinates = stringToVectorPoint2f(storedcoord);
+      ui->qt_drawing_output->drawLinesSlot(coordinates);
+}
+
+vector<Point2f> MainWindow::stringToVectorPoint2f(std::string storedcoord)
+{
+
+    vector<Point2f> coordinates;
+    std::stringstream ss(storedcoord);
+    string d;
+    int c=0, x=0, y=0, t=0;
+    while (ss >> d)
+    {
+        d = d.erase( d.size() - 1 );
+        bool fi = d.find("[");
+        if (!fi)
+        {
+            d = d.erase(0 , 1);
+        }
+
+        float cor =  atof (d.c_str());
+        if (c==0)
+        {
+            x = cor;
+            c++;
+         } else
+        {
+            y = cor;
+            cv::Point2f p(x, y);
+            coordinates.push_back(p);
+            c=0;x=0;y=0;
+        }
+        t++;
+    }
+    return coordinates;
+}
+
 
 void MainWindow::remoteProto(motion::Message payload)
 {
@@ -1045,69 +926,13 @@ void MainWindow::remoteProto(motion::Message payload)
 
       switch (action)
       {
-          case motion::Message::SET_MAT:
 
-              if (payload.has_time())
-              {
-                  QString rt = QString::fromUtf8(payload.time().c_str());
-                  ui->label_mat_piture->setText(rt);
-              }
-
-              std::string pay = payload.payload();
-
-              //Decode from base64
-              std::string oridecoded = base64_decode(payload.data());
-
-              //Write base64 to file for checking.
-              std::string basefile = "/jose/repos/UDP.txt";
-              std::ofstream out;
-              out.open (basefile.c_str());
-              out << payload.data() << "\n";
-              out.close();
-
-              //cast to stringstream to read data.
-              std::stringstream decoded;
-              decoded << oridecoded;
-
-              // The data we need to deserialize.
-              int width_d = 0;
-              int height_d = 0;
-              int type_d = 0;
-              int size_d = 0;
-
-              // Read the width, height, type and size of the buffer
-              decoded.read((char*)(&width_d), sizeof(int));
-              decoded.read((char*)(&height_d), sizeof(int));
-              decoded.read((char*)(&type_d), sizeof(int));
-              decoded.read((char*)(&size_d), sizeof(int));
-
-              // Allocate a buffer for the pixels
-              char* data_d = new char[size_d];
-              // Read the pixels from the stringstream
-              decoded.read(data_d, size_d);
-
-              // Construct the image (clone it so that it won't need our buffer anymore)
-              main_mat = cv::Mat(height_d, width_d, type_d, data_d).clone();
-
-              //Render image.
-              imwrite("/jose/repos/image_2.jpg", main_mat);
-              QImage frame = Mat2QImage(main_mat);
-              ui->output->setPixmap(QPixmap::fromImage(frame));
-
-              cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"   << endl;
-              cout << "Char type  : " << type_d                               << endl;
-              cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
-              cout <<  endl;
-
-              google::protobuf::ShutdownProtobufLibrary();
-
-              // Delete our buffer
-              delete[]data_d;
-
-
-          break;
       }
+}
 
+void MainWindow::savedRegionResutl(QString re)
+{
+    region_resutl = re.toUtf8().constData();
 }
 
 void MainWindow::remoteMat(cv::Mat mat)
