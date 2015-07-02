@@ -2,7 +2,7 @@
 
 
 const int MAXRCVSTRING                      = 4096; // Longest string to receive
-const unsigned int UDP_PORT                 = 5020;
+//const unsigned int UDP_PORT                 = 5020;
 
 BroadcastThread::BroadcastThread(QObject *parent): QThread(parent)
 {
@@ -12,7 +12,7 @@ BroadcastThread::BroadcastThread(QObject *parent): QThread(parent)
 void BroadcastThread::run()
 {
 
-        unsigned short echoServPort = UDP_PORT;     // First arg:  local port
+        unsigned short echoServPort = motion::Message::UDP_PORT;     // First arg:  local port
         char recvString[MAXRCVSTRING + 1]; // Buffer for echo string + \0
 
         try

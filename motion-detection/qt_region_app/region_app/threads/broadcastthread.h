@@ -13,6 +13,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string>
+#include "protobuffer/motion.pb.h"
 
 
 using namespace std;

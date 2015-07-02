@@ -27,6 +27,7 @@ const ::google::protobuf::Descriptor* Message_Instance_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Message_Instance_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* Message_ActionType_descriptor_ = NULL;
+const ::google::protobuf::EnumDescriptor* Message_SocketType_descriptor_ = NULL;
 
 }  // namespace
 
@@ -38,7 +39,7 @@ void protobuf_AssignDesc_motion_2eproto() {
       "motion.proto");
   GOOGLE_CHECK(file != NULL);
   Message_descriptor_ = file->message_type(0);
-  static const int Message_offsets_[14] = {
+  static const int Message_offsets_[15] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, time_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, data_),
@@ -52,7 +53,8 @@ void protobuf_AssignDesc_motion_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, storeimage_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, storecrop_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, code_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, regiondata_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, regioncoords_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, starttime_),
   };
   Message_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -86,6 +88,7 @@ void protobuf_AssignDesc_motion_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Message_Instance));
   Message_ActionType_descriptor_ = Message_descriptor_->enum_type(0);
+  Message_SocketType_descriptor_ = Message_descriptor_->enum_type(1);
 }
 
 namespace {
@@ -120,7 +123,7 @@ void protobuf_AddDesc_motion_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014motion.proto\022\006motion\"\267\005\n\007Message\0220\n\004ty"
+    "\n\014motion.proto\022\006motion\"\226\010\n\007Message\0220\n\004ty"
     "pe\030\001 \002(\0162\032.motion.Message.ActionType:\006EN"
     "GAGE\022\014\n\004time\030\002 \001(\t\022\014\n\004data\030\003 \001(\014\022\023\n\013data"
     "_amount\030\004 \001(\005\022\022\n\ndata_total\030\005 \001(\005\022\020\n\010ser"
@@ -128,16 +131,25 @@ void protobuf_AddDesc_motion_2eproto() {
     "\030\010 \001(\t\022\023\n\013recognizing\030\013 \001(\010\022*\n\010instance\030"
     "\014 \003(\0132\030.motion.Message.Instance\022\022\n\nstore"
     "image\030\r \001(\010\022\021\n\tstorecrop\030\016 \001(\010\022\014\n\004code\030\017"
-    " \001(\t\022\022\n\nregiondata\030\020 \001(\014\032\204\001\n\010Instance\022\022\n"
-    "\nidinstance\030\001 \002(\005\022\016\n\006amount\030\004 \001(\t\022\020\n\010fil"
-    "epath\030\005 \001(\t\022\025\n\rinstancestart\030\006 \001(\t\022\023\n\013in"
-    "stanceend\030\007 \001(\t\022\026\n\016regionfilename\030\t \001(\t\""
-    "\356\001\n\nActionType\022\013\n\006ENGAGE\020\350\007\022\026\n\021START_REC"
-    "OGNITION\020\352\007\022\025\n\020STOP_RECOGNITION\020\353\007\022\020\n\013DI"
-    "SSCONNECT\020\354\007\022\r\n\010GET_TIME\020\355\007\022\r\n\010SET_TIME\020"
-    "\356\007\022\r\n\010TIME_SET\020\357\007\022\024\n\017START_STREAMING\020\360\007\022"
-    "\023\n\016STOP_STREAMING\020\361\007\022\022\n\rTCP_ECHO_PORT\020\222\'"
-    "\022\027\n\022TCP_STREAMING_PORT\020\234\'\022\r\n\010UDP_PORT\020\246\'", 720);
+    " \001(\t\022\024\n\014regioncoords\030\020 \001(\t\022\021\n\tstarttime\030"
+    "\021 \001(\t\032\204\001\n\010Instance\022\022\n\nidinstance\030\001 \002(\005\022\016"
+    "\n\006amount\030\004 \001(\t\022\020\n\010filepath\030\005 \001(\t\022\025\n\rinst"
+    "ancestart\030\006 \001(\t\022\023\n\013instanceend\030\007 \001(\t\022\026\n\016"
+    "regionfilename\030\t \001(\t\"\205\002\n\nActionType\022\013\n\006E"
+    "NGAGE\020\350\007\022\016\n\tREC_START\020\352\007\022\020\n\013REC_RUNNING\020"
+    "\353\007\022\r\n\010REC_STOP\020\354\007\022\r\n\010UNENGAGE\020\355\007\022\r\n\010GET_"
+    "TIME\020\356\007\022\r\n\010SET_TIME\020\357\007\022\r\n\010TIME_SET\020\360\007\022\017\n"
+    "\nSTRM_START\020\361\007\022\016\n\tSTRM_STOP\020\362\007\022\021\n\014TAKE_P"
+    "ICTURE\020\363\007\022\020\n\013DISSCONNECT\020\364\007\022\020\n\013RESPONSE_"
+    "OK\020\310\001\022\022\n\rRESPONSE_NEXT\020\311\001\022\021\n\014RESPONSE_EN"
+    "D\020\312\001\"\260\002\n\nSocketType\022\031\n\025SOCKET_PROTO_TOST"
+    "RING\020\n\022\030\n\024SOCKET_PROTO_TOARRAY\020\013\022\025\n\021SOCK"
+    "ET_PLAIN_TEXT\020\014\022\024\n\020SPLITTED_MESSAGE\020\r\022\022\n"
+    "\016SINGLE_MESSAGE\020\016\022\036\n\030SOCKET_BUFFER_SMALL"
+    "_SIZE\020\320\206\003\022\037\n\031SOCKET_BUFFER_MEDIUM_SIZE\020\360"
+    "\223\t\022\034\n\026SOCKET_BUFFER_BIG_SIZE\020\300\232\014\022\022\n\rTCP_"
+    "ECHO_PORT\020\222\'\022\027\n\022TCP_STREAMING_PORT\020\234\'\022\r\n"
+    "\010UDP_PORT\020\246\'\022\021\n\014TCP_MSG_PORT\020\260\'", 1071);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "motion.proto", &protobuf_RegisterTypes);
   Message::default_instance_ = new Message();
@@ -162,6 +174,9 @@ const ::google::protobuf::EnumDescriptor* Message_ActionType_descriptor() {
 }
 bool Message_ActionType_IsValid(int value) {
   switch(value) {
+    case 200:
+    case 201:
+    case 202:
     case 1000:
     case 1002:
     case 1003:
@@ -171,9 +186,9 @@ bool Message_ActionType_IsValid(int value) {
     case 1007:
     case 1008:
     case 1009:
-    case 5010:
-    case 5020:
-    case 5030:
+    case 1010:
+    case 1011:
+    case 1012:
       return true;
     default:
       return false;
@@ -182,20 +197,64 @@ bool Message_ActionType_IsValid(int value) {
 
 #ifndef _MSC_VER
 const Message_ActionType Message::ENGAGE;
-const Message_ActionType Message::START_RECOGNITION;
-const Message_ActionType Message::STOP_RECOGNITION;
-const Message_ActionType Message::DISSCONNECT;
+const Message_ActionType Message::REC_START;
+const Message_ActionType Message::REC_RUNNING;
+const Message_ActionType Message::REC_STOP;
+const Message_ActionType Message::UNENGAGE;
 const Message_ActionType Message::GET_TIME;
 const Message_ActionType Message::SET_TIME;
 const Message_ActionType Message::TIME_SET;
-const Message_ActionType Message::START_STREAMING;
-const Message_ActionType Message::STOP_STREAMING;
-const Message_ActionType Message::TCP_ECHO_PORT;
-const Message_ActionType Message::TCP_STREAMING_PORT;
-const Message_ActionType Message::UDP_PORT;
+const Message_ActionType Message::STRM_START;
+const Message_ActionType Message::STRM_STOP;
+const Message_ActionType Message::TAKE_PICTURE;
+const Message_ActionType Message::DISSCONNECT;
+const Message_ActionType Message::RESPONSE_OK;
+const Message_ActionType Message::RESPONSE_NEXT;
+const Message_ActionType Message::RESPONSE_END;
 const Message_ActionType Message::ActionType_MIN;
 const Message_ActionType Message::ActionType_MAX;
 const int Message::ActionType_ARRAYSIZE;
+#endif  // _MSC_VER
+const ::google::protobuf::EnumDescriptor* Message_SocketType_descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return Message_SocketType_descriptor_;
+}
+bool Message_SocketType_IsValid(int value) {
+  switch(value) {
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 5010:
+    case 5020:
+    case 5030:
+    case 5040:
+    case 50000:
+    case 150000:
+    case 200000:
+      return true;
+    default:
+      return false;
+  }
+}
+
+#ifndef _MSC_VER
+const Message_SocketType Message::SOCKET_PROTO_TOSTRING;
+const Message_SocketType Message::SOCKET_PROTO_TOARRAY;
+const Message_SocketType Message::SOCKET_PLAIN_TEXT;
+const Message_SocketType Message::SPLITTED_MESSAGE;
+const Message_SocketType Message::SINGLE_MESSAGE;
+const Message_SocketType Message::SOCKET_BUFFER_SMALL_SIZE;
+const Message_SocketType Message::SOCKET_BUFFER_MEDIUM_SIZE;
+const Message_SocketType Message::SOCKET_BUFFER_BIG_SIZE;
+const Message_SocketType Message::TCP_ECHO_PORT;
+const Message_SocketType Message::TCP_STREAMING_PORT;
+const Message_SocketType Message::UDP_PORT;
+const Message_SocketType Message::TCP_MSG_PORT;
+const Message_SocketType Message::SocketType_MIN;
+const Message_SocketType Message::SocketType_MAX;
+const int Message::SocketType_ARRAYSIZE;
 #endif  // _MSC_VER
 #ifndef _MSC_VER
 const int Message_Instance::kIdinstanceFieldNumber;
@@ -732,7 +791,8 @@ const int Message::kInstanceFieldNumber;
 const int Message::kStoreimageFieldNumber;
 const int Message::kStorecropFieldNumber;
 const int Message::kCodeFieldNumber;
-const int Message::kRegiondataFieldNumber;
+const int Message::kRegioncoordsFieldNumber;
+const int Message::kStarttimeFieldNumber;
 #endif  // !_MSC_VER
 
 Message::Message()
@@ -766,7 +826,8 @@ void Message::SharedCtor() {
   storeimage_ = false;
   storecrop_ = false;
   code_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  regiondata_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  regioncoords_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  starttime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -794,8 +855,11 @@ void Message::SharedDtor() {
   if (code_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete code_;
   }
-  if (regiondata_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete regiondata_;
+  if (regioncoords_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete regioncoords_;
+  }
+  if (starttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete starttime_;
   }
   if (this != default_instance_) {
   }
@@ -863,16 +927,21 @@ void Message::Clear() {
       }
     }
   }
-  if (_has_bits_[8 / 32] & 15616) {
+  if (_has_bits_[8 / 32] & 32000) {
     ZR_(recognizing_, storecrop_);
     if (has_code()) {
       if (code_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         code_->clear();
       }
     }
-    if (has_regiondata()) {
-      if (regiondata_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-        regiondata_->clear();
+    if (has_regioncoords()) {
+      if (regioncoords_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        regioncoords_->clear();
+      }
+    }
+    if (has_starttime()) {
+      if (starttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        starttime_->clear();
       }
     }
   }
@@ -1097,16 +1166,37 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(130)) goto parse_regiondata;
+        if (input->ExpectTag(130)) goto parse_regioncoords;
         break;
       }
 
-      // optional bytes regiondata = 16;
+      // optional string regioncoords = 16;
       case 16: {
         if (tag == 130) {
-         parse_regiondata:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
-                input, this->mutable_regiondata()));
+         parse_regioncoords:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_regioncoords()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->regioncoords().data(), this->regioncoords().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "regioncoords");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(138)) goto parse_starttime;
+        break;
+      }
+
+      // optional string starttime = 17;
+      case 17: {
+        if (tag == 138) {
+         parse_starttime:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_starttime()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->starttime().data(), this->starttime().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "starttime");
         } else {
           goto handle_unusual;
         }
@@ -1232,10 +1322,24 @@ void Message::SerializeWithCachedSizes(
       15, this->code(), output);
   }
 
-  // optional bytes regiondata = 16;
-  if (has_regiondata()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
-      16, this->regiondata(), output);
+  // optional string regioncoords = 16;
+  if (has_regioncoords()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->regioncoords().data(), this->regioncoords().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "regioncoords");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      16, this->regioncoords(), output);
+  }
+
+  // optional string starttime = 17;
+  if (has_starttime()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->starttime().data(), this->starttime().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "starttime");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      17, this->starttime(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -1348,11 +1452,26 @@ void Message::SerializeWithCachedSizes(
         15, this->code(), target);
   }
 
-  // optional bytes regiondata = 16;
-  if (has_regiondata()) {
+  // optional string regioncoords = 16;
+  if (has_regioncoords()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->regioncoords().data(), this->regioncoords().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "regioncoords");
     target =
-      ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        16, this->regiondata(), target);
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        16, this->regioncoords(), target);
+  }
+
+  // optional string starttime = 17;
+  if (has_starttime()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->starttime().data(), this->starttime().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "starttime");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        17, this->starttime(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -1446,11 +1565,18 @@ int Message::ByteSize() const {
           this->code());
     }
 
-    // optional bytes regiondata = 16;
-    if (has_regiondata()) {
+    // optional string regioncoords = 16;
+    if (has_regioncoords()) {
       total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::BytesSize(
-          this->regiondata());
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->regioncoords());
+    }
+
+    // optional string starttime = 17;
+    if (has_starttime()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->starttime());
     }
 
   }
@@ -1527,8 +1653,11 @@ void Message::MergeFrom(const Message& from) {
     if (from.has_code()) {
       set_code(from.code());
     }
-    if (from.has_regiondata()) {
-      set_regiondata(from.regiondata());
+    if (from.has_regioncoords()) {
+      set_regioncoords(from.regioncoords());
+    }
+    if (from.has_starttime()) {
+      set_starttime(from.starttime());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -1568,7 +1697,8 @@ void Message::Swap(Message* other) {
     std::swap(storeimage_, other->storeimage_);
     std::swap(storecrop_, other->storecrop_);
     std::swap(code_, other->code_);
-    std::swap(regiondata_, other->regiondata_);
+    std::swap(regioncoords_, other->regioncoords_);
+    std::swap(starttime_, other->starttime_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

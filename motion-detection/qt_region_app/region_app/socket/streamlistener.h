@@ -57,6 +57,7 @@ public:
 
 private:
 
+
 public:
     std::string socket_response;
 

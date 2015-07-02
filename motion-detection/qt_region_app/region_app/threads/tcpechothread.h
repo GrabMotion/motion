@@ -13,6 +13,8 @@
 #include <string>
 #include <stdio.h>
 
+#include "protobuffer/motion.pb.h"
+
 #include <QMessageBox>
 
 using namespace std;

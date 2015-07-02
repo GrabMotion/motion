@@ -52,9 +52,24 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(broadcast_thread, SIGNAL(BroadcastReceived(QString)), this, SLOT(BroadcastReceived(QString)));
     connect(broadcast_thread, SIGNAL(BroadcastTimeoutSocketException()), this, SLOT(broadcastTimeoutSocketException()));
 
-    //Socket Listener Class -- Cannot connect received
-    //socket_listener = new SocketListener(this);
-    //socket_listener->startListening(this);
+    //Socket Listener Class
+    socket_listener = new SocketListener(this);
+    socket_listener->startListening(this);
+
+    //Video Streamig
+    mat_listener = new MatListener(this);
+    mat_listener->startListening(this);
+
+    //Mount Shares
+    mount_thread = new MountThread(this);
+    connect(mount_thread, SIGNAL(SharedMounted(QString)), this, SLOT(SharedMounted(QString)));
+
+    //Mouse Operations
+    connect(ui->qt_drawing_output, SIGNAL(sendMousePosition(QPoint&)), this, SLOT(showMousePosition(QPoint&)));
+    connect(ui->qt_drawing_output, SIGNAL(Mouse_Pos()), this, SLOT(Mouse_current_pos()));
+    connect(ui->qt_drawing_output, SIGNAL(savedRegionResutl(QString)), this, SLOT(savedRegionResutl(QString)));
+
+    enableDisableButtons(false);
 
     //Stream Listener Class -- Cannot connect received
     //stream_listener = new StreamListener(this);
@@ -62,13 +77,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //udp_server = new UDPServer();
     //udp_server->startListening(this);
-
-    mat_listener = new MatListener(this);
-    mat_listener->startListening(this);
-
-    //Mount Shares
-    mount_thread = new MountThread(this);
-    connect(mount_thread, SIGNAL(SharedMounted(QString)), this, SLOT(SharedMounted(QString)));
 
     //Streaming Resutl
     //streaming_thread = new StreamingThread(this);
@@ -80,23 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(ui->qt_drawing_output, SIGNAL(Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&)), this, SLOT(Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&)));
     //connect(ui->qt_drawing_output, SIGNAL(Mouse_Left()), this, SLOT(Mouse_left()));
 
-    connect(ui->qt_drawing_output, SIGNAL(sendMousePosition(QPoint&)), this, SLOT(showMousePosition(QPoint&)));
-    connect(ui->qt_drawing_output, SIGNAL(Mouse_Pos()), this, SLOT(Mouse_current_pos()));
-    connect(ui->qt_drawing_output, SIGNAL(savedRegionResutl(QString)), this, SLOT(savedRegionResutl(QString)));
-
-    ui->connect_button->setEnabled(false);
-    ui->list_folders->setEnabled(false);
-    ui->list_files->setEnabled(false);
-    //ui->start_recognition->setEnabled(false);
-    //ui->save_region->setEnabled(false);
-    ui->rec_with_images->setEnabled(false);
-
-    ui->output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
-
-    //ui->screenshot->setEnabled(false);
-    //ui->save_region->setEnabled(false);
-    ui->start_recognition->setEnabled(false);
-
+    //Spinner
     m_spinner = new QtWaitingSpinner(this);
     QVBoxLayout *spinnerLayout = new QVBoxLayout;
     spinnerLayout->insertWidget(0, m_spinner);
@@ -129,6 +121,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->ips_combo->addItem("192.168.1.47"); //208.70.188.15");
     //ui->connect_button->setEnabled(true);
 
+    //Tests
     testBase();
     loadMat();
 }
@@ -177,61 +170,7 @@ int getGlobalStringToInt(std::string id){
    return atoi( id.c_str() );
 }
 
-void MainWindow::ResultEcho(string response)
-{
 
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-    int action;
-    motion::Message m;
-    m.ParseFromString(response);
-
-    action = m.type();
-    std::string payload;
-    QString qpayload;
-    std::string mtime;
-
-    if (m.has_payload())
-    {
-        payload = m.payload();
-        qpayload = QString::fromStdString(payload);
-    }
-
-    if (m.has_time())
-    {
-       mtime  = m.time();
-    }
-
-    std::cout << "Action received:: " << action << " time: " << mtime << std::endl;
-
-    switch (action)
-    {
-        case motion::Message::ENGAGE:
-            ui->start_recognition->setEnabled(true);
-            ui->status_label->setText(qpayload);
-            ui->status_label->setStyleSheet("background-color: lightgreen;");
-            ui->screenshot->setEnabled(true);
-            mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
-            break;
-
-
-    }
-
-    /*if (response.compare(getGlobalIntToString(CONNECT)) == 0)
-    {
-
-
-    }
-    else if (response.compare(getGlobalIntToString(GET_TIME)) == 0)
-    {
-
-    }*/
-
-    google::protobuf::ShutdownProtobufLibrary();
-
-    tcpecho_thread->terminate();
-    mount_thread->terminate();
-}
 
 char* convert2char(QString input)
 {
@@ -249,7 +188,7 @@ void MainWindow::BroadcastReceived(QString ip)
 {
     m_spinner->stop();
     ui->ips_combo->addItem(ip);
-    ui->connect_button->setEnabled(true);
+    ui->engage_button->setEnabled(true);
 }
 
 /*void MainWindow::StreamingUpdateLabelImage(std::string path, Mat mat)
@@ -267,7 +206,7 @@ void MainWindow::broadcastTimeoutSocketException()
     msgBox->setText("No terminal found on the network.");
     msgBox->setWindowFlags(Qt::WindowStaysOnTopHint);
     msgBox->show();
-    ui->connect_button->setEnabled(false);
+    ui->engage_button->setEnabled(false);
 }
 
 std::string MainWindow::getActiveTerminalIPString()
@@ -277,33 +216,33 @@ std::string MainWindow::getActiveTerminalIPString()
     return qs.toLocal8Bit().constData();
 }
 
-#define MAXDATASIZE 20
+void MainWindow::on_engage_button_clicked()
+{
+   setMessageBodyAndSend(motion::Message::ActionType::Message_ActionType_ENGAGE);
+}
 
-void MainWindow::on_connect_button_clicked()
+void MainWindow::setMessageBodyAndSend(motion::Message::ActionType type)
 {
 
     spinner_folders->start();
-
-    tcpecho_thread = new TCPEchoThread(this);
-    connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
 
     QString qt_ip = ui->ips_combo->currentText();
     QByteArray ba_ip = qt_ip.toLatin1();
     std::string qt_ip_str = qt_ip.toUtf8().constData();
     char *c_str_ip = ba_ip.data();
 
-    //char buf[MAXDATASIZE];
     string data;
     motion::Message m;
-    m.set_type(motion::Message::ActionType::Message_ActionType_ENGAGE);
-    m.set_serverip(qt_ip_str);
+    m.set_type(type);
+    m.set_serverip(getIpAddress());
+
+    m.set_time(getTime());
     m.SerializeToString(&data);
+
     char bts[data.length()];
     strcpy(bts, data.c_str());
 
-    tcpecho_thread->SendEcho(c_str_ip, bts);
-
-    tcpecho_thread->terminate();
+    sendSocket(c_str_ip, bts);
 
     google::protobuf::ShutdownProtobufLibrary();
 
@@ -430,7 +369,12 @@ void MainWindow::on_list_files_clicked(const QModelIndex &index)
 
 void MainWindow::ShareUmounted(){}
 
-void MainWindow::on_screenshot_clicked()
+void MainWindow::on_stream_clicked()
+{
+
+}
+
+void MainWindow::on_picture_clicked()
 {
 
     QString qt_ip = ui->ips_combo->currentText();
@@ -455,55 +399,34 @@ void MainWindow::on_screenshot_clicked()
     }
     QString sh = getSharedFolder();
 
-    //QString sh = getSharedFolder();
-    //streaming_thread->StartStreaming(c_str_ip, qt_ip, sh);
-
-    tcpecho_thread = new TCPEchoThread(this);
-    //dataconnect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-
-    std::string qt_ip_str = qt_ip.toUtf8().constData();
-    QByteArray ba_ip = qt_ip.toLatin1();
-    char *c_str_ip = ba_ip.data();
-
-    //char buf[MAXDATASIZE];
-
-    string data;
-    motion::Message m;
-    m.set_type(motion::Message::ActionType::Message_ActionType_START_STREAMING);
-    m.set_serverip(getIpAddress());
-    m.SerializeToString(&data);
-    char bts[data.length()];
-    strcpy(bts, data.c_str());
-
-    tcpecho_thread->SendEcho(c_str_ip, bts);
-
-    google::protobuf::ShutdownProtobufLibrary();
-
-    tcpecho_thread->terminate();
-
-}
-
-void MainWindow::on_disconnect_clicked()
-{
-    /*std::string command = getGlobalIntToString(DISSCONNECT);
-    tcpecho_thread = new TCPEchoThread(this);
-    connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-    tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
-    tcpecho_thread->terminate();*/
-}
-
-void MainWindow::on_get_time_clicked()
-{
-    /*std::string command = getGlobalIntToString(GET_TIME);
-    tcpecho_thread = new TCPEchoThread(this);
-    connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-    tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);*/
+    setMessageBodyAndSend(motion::Message::ActionType::Message_ActionType_TAKE_PICTURE);
 
 }
 
 void MainWindow::on_save_region_clicked()
 {
     ui->qt_drawing_output->SaveRegion();
+}
+
+void MainWindow::on_clear_region_clicked()
+{
+
+}
+
+void MainWindow::on_start_recognition_clicked()
+{
+    setMessageBodyAndSend(motion::Message::ActionType::Message_ActionType_REC_START);
+}
+
+
+void MainWindow::on_disconnect_clicked()
+{
+    setMessageBodyAndSend(motion::Message::ActionType::Message_ActionType_DISSCONNECT);
+}
+
+void MainWindow::on_get_time_clicked()
+{
+    setMessageBodyAndSend(motion::Message::ActionType::Message_ActionType_GET_TIME);
 }
 
 void MainWindow::showMousePosition( QPoint & pos )
@@ -597,7 +520,7 @@ void MainWindow::on_start_recognition_toggled(bool checked)
 
         string data;
         motion::Message mr;
-        mr.set_type(motion::Message::ActionType::Message_ActionType_START_RECOGNITION);
+        mr.set_type(motion::Message::ActionType::Message_ActionType_REC_START);
 
         struct timeval tv;
         struct tm* ptm;
@@ -608,17 +531,17 @@ void MainWindow::on_start_recognition_toggled(bool checked)
         mr.set_time(time_string);
 
         mr.set_serverip(getIpAddress());
-        std::string utf8_xml = xmlstring.toUtf8().constData();
-        cout << "utf8_xml: " << utf8_xml.size() << endl;
-        mr.set_regiondata(utf8_xml);
+        mr.set_regioncoords(region_resutl);
 
         mr.set_storeimage(true);
         mr.set_storecrop(false);
 
-        stream_sender = new StreamSender(this);
+        //stream_sender = new StreamSender(this);
         //connect(stream_sender, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-        stream_sender->sendStream(getActiveTerminalIPString(), mr);
-        stream_sender->terminate();
+        //stream_sender->sendStream(getActiveTerminalIPString(), mr);
+        //stream_sender->terminate();
+
+
 
         delete ptm;
         google::protobuf::ShutdownProtobufLibrary();
@@ -635,7 +558,7 @@ void MainWindow::on_start_recognition_toggled(bool checked)
 
 }
 
-void MainWindow::on_start_recognition_clicked(){}
+
 
 void MainWindow::on_set_time_clicked()
 {
@@ -662,11 +585,8 @@ void MainWindow::on_set_time_clicked()
 
     cout << "buffer:: " << buffer << endl;
 
-    tcpecho_thread = new TCPEchoThread(this);
-    connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-    tcpecho_thread->SendEcho(getActiveTerminalIPString(), buffer);
+    tcpsend_thread->SendEcho(getActiveTerminalIPString(), buffer);
 
-    tcpecho_thread->terminate();
 }
 
 void MainWindow::SocketErrorMessage(QString &e)
@@ -711,7 +631,7 @@ void MainWindow::testBase()
 
     ::motion::Message testm;
 
-    testm.set_type(motion::Message::ActionType::Message_ActionType_START_RECOGNITION);
+    testm.set_type(motion::Message::ActionType::Message_ActionType_REC_START);
     testm.set_data("hola");
     testm.set_code("code");
     testm.set_payload("gkbfdgdfkhg kfsdhgkjhdfkjhgdfhgkjsfdhgkhdfsjkgnkfjdgnkhdfnsjghfkdsjhgnksdfhgknhdfkjghskdfhgkjsdhnkj");
@@ -887,7 +807,6 @@ void MainWindow::loadMat()
 
 vector<Point2f> MainWindow::stringToVectorPoint2f(std::string storedcoord)
 {
-
     vector<Point2f> coordinates;
     std::stringstream ss(storedcoord);
     string d;
@@ -900,7 +819,6 @@ vector<Point2f> MainWindow::stringToVectorPoint2f(std::string storedcoord)
         {
             d = d.erase(0 , 1);
         }
-
         float cor =  atof (d.c_str());
         if (c==0)
         {
@@ -916,18 +834,6 @@ vector<Point2f> MainWindow::stringToVectorPoint2f(std::string storedcoord)
         t++;
     }
     return coordinates;
-}
-
-
-void MainWindow::remoteProto(motion::Message payload)
-{
-
-      int action = payload.type();
-
-      switch (action)
-      {
-
-      }
 }
 
 void MainWindow::savedRegionResutl(QString re)
@@ -968,4 +874,98 @@ char * MainWindow::getTerMinalIpFromCombo()
     std::string qt_ip_str = qt_ip.toUtf8().constData();
     char *c_str_ip = ba_ip.data();
 }
+
+void MainWindow::enableDisableButtons(bool set)
+{
+
+    ui->engage_button->setEnabled(set);
+    ui->list_folders->setEnabled(set);
+    ui->list_files->setEnabled(set);
+    ui->start_recognition->setEnabled(set);
+    ui->save_region->setEnabled(set);
+    ui->rec_with_images->setEnabled(set);
+    ui->stream->setEnabled(set);
+    ui->picture->setEnabled(set);
+    ui->clear_region->setEnabled(set);
+    ui->set_time->setEnabled(set);
+    ui->disconnect->setEnabled(set);
+    ui->get_time->setEnabled(set);
+    ui->amount_label->setEnabled(set);
+    ui->remote_terminal_label->setEnabled(set);
+
+    //qlabel
+    ui->output->setEnabled(set);
+    ui->qt_drawing_output->setEnabled(set);
+
+    if (!set)
+        ui->output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
+    else
+        ui->status_label->setStyleSheet("background-color: lightgreen;");
+        ui->status_label->setText("Engaged");
+
+    ui->output->setStyleSheet("border: 1px solid grey");
+    ui->remote_capture->setStyleSheet("border: 1px solid grey");
+
+}
+
+void MainWindow::sendSocket(string svradress, string command)
+{
+    //TCP Socket
+    tcpsend_thread = new TCPEchoThread(this);
+    connect(tcpsend_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
+    tcpsend_thread->SendEcho(svradress, command);
+}
+
+void MainWindow::ResultEcho(string response)
+{
+
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    int action;
+    motion::Message m;
+    m.ParseFromString(response);
+    action = m.type();
+
+    std::cout << "Action received:: " << action << std::endl;
+    switch (action)
+    {
+        case motion::Message::ENGAGE:
+        {
+            enableDisableButtons(true);
+            ui->engage_button->setDisabled(true);
+            mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
+            mount_thread->terminate();
+            break;
+        }
+        case motion::Message::RESPONSE_OK:
+        {
+            cout << "RESPONSE OK" << endl;
+            break;
+        }
+    }
+    google::protobuf::ShutdownProtobufLibrary();
+}
+
+void MainWindow::remoteProto(motion::Message m)
+{
+      int action = m.type();
+      switch (action)
+      {
+          case motion::Message::ENGAGE:
+            break;
+      }
+      case motion::Message::GET_TIME:
+      {
+          QString gt = QString::fromUtf8(m.time().c_str());
+          ui->remote_terminal_time->setText(gt);
+          break;
+      }
+      case motion::Message::TIME_SET:
+      {
+          QString ts = QString::fromUtf8(m.time().c_str());
+          ui->remote_terminal_time->setText(ts);
+          break;
+      }
+}
+
+
 

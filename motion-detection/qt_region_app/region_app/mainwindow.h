@@ -71,7 +71,7 @@ public:
     //Threads
     BroadcastThread     *broadcast_thread;
     StreamingThread     *streaming_thread;
-    TCPEchoThread       *tcpecho_thread;
+    TCPEchoThread       *tcpsend_thread;
     MountThread         *mount_thread;
     SocketListener      *socket_listener;
     StreamListener      *stream_listener;
@@ -83,7 +83,9 @@ public:
     QString share;
     QString getShare();
 
-    QString xmlstring;
+    std::string getIpAddress();
+    std::string getTime();
+    void remoteProto(motion::Message payload);
 
 private:
     Ui::MainWindow *ui;
@@ -97,7 +99,6 @@ private:
 
     void closeEvent (QCloseEvent *event);
 
-    std::string getIpAddress ();
     void split(const string& s, char c, vector<string>& v);
     std::string local_ip;
 
@@ -114,15 +115,17 @@ private:
     QString q_response;
 
     void SocketErrorMessage(QString &e);
+    void sendSocket(string svradress, string command);
 
     void testBase();
-    std::string getTime();
+    void enableDisableButtons(bool set);
+
 
     std::string getTimeStr();
     char * getTimeChat();
     char * getTerMinalIpFromCombo();
 
-    void remoteProto(motion::Message payload);
+
     void remoteMat(cv::Mat mat);
 
     void loadMat();
@@ -130,6 +133,8 @@ private:
     vector<Point2f> stringToVectorPoint2f(std::string storedcoord);
 
     std::string region_resutl;
+
+    void setMessageBodyAndSend(motion::Message::ActionType type);
 
 public:
     Q_SLOT void setremoteProto(motion::Message payload)
@@ -144,10 +149,17 @@ public:
 private slots:
 
     //buttons
+    void on_engage_button_clicked();
     void on_search_button_clicked();
-    void on_connect_button_clicked();
     void on_start_recognition_clicked();
     void on_start_recognition_toggled(bool checked);
+    void on_disconnect_clicked();
+    void on_save_region_clicked();
+    void on_get_time_clicked();
+    void on_set_time_clicked();
+    void on_picture_clicked();
+    void on_stream_clicked();
+    void on_clear_region_clicked();
 
     //mouse
     void Mouse_current_pos();
@@ -163,18 +175,13 @@ private slots:
     void SharedMounted(QString folder);
     void ShareUmounted();
 
+    //Files
     void on_list_files_clicked(const QModelIndex &index);
     void on_list_folders_clicked(const QModelIndex &index);
 
-    void on_disconnect_clicked();
-
-    void on_screenshot_clicked();
-    void on_save_region_clicked();
-    void on_get_time_clicked();
-
-    void on_set_time_clicked();
-
+    //Region
     void savedRegionResutl(QString re);
+
 
 
 signals:

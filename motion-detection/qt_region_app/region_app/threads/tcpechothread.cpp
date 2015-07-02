@@ -23,7 +23,8 @@ void TCPEchoThread::send (string svradress, char * message)
   char *echoString = message;   // Second arg: string to echo
   int echoStringLen = strlen(echoString);   // Determine input length
 
-  unsigned short echoServPort = TCP_ECHO_PORT;
+  google::protobuf::uint32 pport = motion::Message::TCP_ECHO_PORT;
+  int echoServPort = pport;
 
   char echoBuffer[RCVBUFSIZE + 1];
 
@@ -65,7 +66,5 @@ void TCPEchoThread::send (string svradress, char * message)
     cerr << e.what() << endl;
     exit(1);
   }
-
-  // Destructor closes the socket
 
 }
