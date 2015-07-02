@@ -59,17 +59,17 @@ using namespace std;
 using namespace cv;
 
 void * ThreadMain(void *clntSock);
-int HandleTCPClient(TCPSocket *sock);
+motion::Message::ActionType HandleTCPClient(TCPSocket *sock);
 void RunUICommand(int result, string from_ip);
 void * watch_amount (void * t);
 
 // Threading
 pthread_mutex_t tcpMutex, streamingMutex;
 pthread_t thread_broadcast, thread_echo, thread_socket,
-thread_message, thread_recognition, thread_wait_echo, thread_screenshot;
+thread_message, thread_recognition, thread_wait_echo, thread_screenshot, thread_observer;
 
 //Threads
-int runt, runb, runs, runr, runl, runm, runw, runss;
+int runt, runb, runs, runr, runl, runm, runw, runss, runo;
 
 /// TCP Streaming
 int         clientSock;
@@ -81,7 +81,7 @@ int       	server_camera;
 pthread_cond_t echo_response;
 pthread_mutex_t echo_mutex;
 bool echo_received;
-int resutl_echo;
+motion::Message::ActionType resutl_echo;
 std::string result_message;
 std::string from_ip;
 
@@ -90,17 +90,18 @@ std::string local_ip;
 string NETWORK_IP;
 
 //Protobuffer
-motion::Message send_proto;
-motion::Message receive_proto;
-motion::Message streamCastMessage();
+motion::Message PROTO;
+motion::Message R_PROTO;
+motion::Message T_PROTO;
+motion::Message takePictureToProto();
 
 //Capture
 bool stop_capture;
+bool is_recognizing;
+cv::Mat picture;
 
 //UDP
 int udpsend(motion::Message m);
-
-#define MAXDATASIZE 1000
 
 #define RCVBUFSIZE 1024
 
@@ -120,9 +121,8 @@ struct arg_struct
     motion::Message message;
 };
 void * startRecognition(void * arg);
-
-void runCommand(int value);
-
+void * startObserver(void * arg);
+void runCommand(motion::Message::ActionType value);
 int getGlobalStringToInt(std::string id)
 {
     return atoi( id.c_str() );
@@ -172,75 +172,9 @@ char *getTimeRasp()
     return time_rasp;
 }
 
-void sendEcho(std::string serv, char *echo, short port )
+
+motion::Message takePictureToProto()
 {
-    
-    std::string servAddress  = serv;            //argv[1]; // First arg: server address
-    //char *echoString    = echo;                 //argv[2];   // Second arg: string to echo
-    int echoStringLen   = strlen(echo);   // Determine input length
-    unsigned short echoServPort = port; //(argc == 4) ? atoi(argv[3]) : 7;
-    
-    cout << "servAddress: " << servAddress << endl;
-    cout << "echoServPort: " << echoServPort << endl;
-    
-    try
-    {
-        // Establish connection with the echo server
-        TCPSocket sock(servAddress, echoServPort);
-        
-        // Send the string to the echo server
-        sock.send(echo, echoStringLen);
-        
-        char echoBuffer[RCVBUFSIZE + 1];    // Buffer for echo string + \0
-        int bytesReceived = 0;              // Bytes read on each recv()
-        int totalBytesReceived = 0;         // Total bytes read
-        // Receive the same string back from the server
-        cout << "Received: ";               // Setup to print the echoed string
-        
-        GOOGLE_PROTOBUF_VERIFY_VERSION;
-        
-        motion::Message mr;
-        
-        while (totalBytesReceived < echoStringLen) {
-            // Receive up to the buffer size bytes from the sender
-            if ((bytesReceived = (sock.recv(echoBuffer, RCVBUFSIZE))) <= 0) {
-                cerr << "Unable to read";
-                exit(1);
-            }
-            
-            totalBytesReceived += bytesReceived;     // Keep tally of total bytes
-            echoBuffer[bytesReceived] = '\0';        // Terminate the string!
-            cout << echoBuffer;                      // Print the echo buffer
-            
-            const string & data = echoBuffer;
-            
-            mr.ParseFromString(data);
-            
-            receive_proto.Clear();
-            receive_proto = mr;
-            
-            cout << "Type Received: " << mr.type() << endl;
-
-
-        }
-        cout << endl;
-        
-        // Destructor closes the socket
-        
-    } catch(SocketException &e) {
-        cout << "Error!: " << e.what() << endl;
-        cerr << e.what() << endl;
-        exit(1);
-    }
-
-}
-
-
-motion::Message streamCastMessage()
-{
-    
-    //struct screenshot_thread_args *args = (struct screenshot_thread_args *) arg
-    //motion::Message message = args->msg;
     
     cout << "CAPTURING !!!!!!!!!!!!!" << endl;
     
@@ -266,36 +200,23 @@ motion::Message streamCastMessage()
     cvtColor(mat, mat, CV_RGB2GRAY);
     imwrite("MAT.jpg", mat);
     
-    //http://vgl-ait.org/cvwiki/doku.php?id=opencv:tutorial:extract_rgb_and_hsv_value_from_an_image
+    //Shared mat
+    picture = mat;
     
     cout << "+++++++++++CREATING PROTO++++++++++++++" << endl;
     
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     
     motion::Message me;
-    me.set_type(motion::Message::SET_MAT);
-    
-    //me.set_serverip(message.serverip());
+    me.set_type(motion::Message::TAKE_PICTURE);
+    me.set_serverip(PROTO.serverip());
     me.set_time(getTimeRasp());
-    
-    int rows = mat.rows;
-    int cols = mat.cols;
-    
-    me.set_rows(rows);
-    me.set_cols(cols);
-    
-    cv::Size s = mat.size();
-    me.set_height(h);
-    me.set_width(w);
-    
+
     // We will need to also serialize the width, height, type and size of the matrix
     int width_s     = mat.cols;
     int height_s    = mat.rows;
     int type_s      = mat.type();
     int size_s      = mat.total() * mat.elemSize();
-    
-    me.set_size(size_s);
-    me.set_typemat(type_s);
     
     // Initialize a stringstream and write the data
     int size_init = me.ByteSize();
@@ -308,31 +229,17 @@ motion::Message streamCastMessage()
     ss.write((char*)    (&size_s),      sizeof(int));
     ss.write((char*)     mat.data,      size_s);
     
-    cout << "width      : " << me.width()  << endl;
-    cout << "rows       : " << rows << endl;
-    cout << "height     : " << me.height() << endl;
-    cout << "cols       : " << cols << endl;
-    cout << "Mat type   : " << me.type() << endl;
-    cout << "Mat size   : " << size_s << endl;
-    cout << "Proto size : " << size_init << endl;
-    
-    std::string ssstring = ss.str();
-    
-    // Convert encoded mat data to base64.
-    std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(ssstring.c_str()), ssstring.length());
-    
-    int ori_size = oriencoded.size();
-    cout << "ori_size   : " << ori_size << endl;
-    
     //Store into proto
-    me.set_payload("jjjjjjjjjjjjjjjjjjjbkjbkbjh hj hjgkhjvk hgghvhgvgvvhvhhghgkhkhbkhbkhbkhbkhbkhbk");//oriencoded);
+    me.set_data(ss.str());
     
     //Write base64 to file for checking.
-    std::string basefile = "base64oish.txt";
+    std::string basefile = "base64oish.txt";    
     std::ofstream out;
     out.open (basefile.c_str());
     out << me.payload() << "\n";
     out.close();
+    
+    cout << "ByteSize: " << size_init <<  endl;
     
     cvReleaseCapture(&capture);
     
@@ -513,82 +420,93 @@ int udpsend(motion::Message m)
     return 0;
 }
 
+void * startObserver(void * arg)
+{
+    
+    while (1)
+    {
+        if (R_PROTO.recognizing())
+        {
+            
+           sendMessage(R_PROTO, motion::Message::SOCKET_PROTO_TOARRAY);
+            
+            
+        } else
+        {
+            break;
+        }
+    }
 
+}
 
-void runCommand(int value)
+void runCommand(motion::Message::ActionType value)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-    motion::Message m;
     
-    std::string datastr;
-    
-    string dataconnect;
-    
-    struct arg_struct arguments;
+    cout << "runCommand:: " << value << endl;
     
     switch (value)
     {
             
-        case motion::Message::CONNECT:
+        case motion::Message::RESPONSE_OK:
+        {
+            cout << "RESPONSE OK" << endl;
+            break;
+        }
+        case motion::Message::ENGAGE:
+        {
             
-            //connectStreaming(from_ip);
+            cout << "motion::Message::ENGAGE" << endl;
             
-            /*m.set_type(motion::Message::CONNECT);
-            m.set_serverip(receive_proto.serverip());
-            m.set_time(getTimeRasp());
-            m.SerializeToString(&dataconnect);
-            char bts[dataconnect.length()];
-            strcpy(bts, dataconnect.c_str());
-            echoStringLen = sizeof(bts); //strlen(bts);
+            motion::Message te;
             
-            //sock->send(bts, sizeof(bts));
+            te.set_time(T_PROTO.time());
+            te.set_type(motion::Message::ENGAGE);
             
-            cout << " ::SII:: " << endl;&
+            sendMessage(te, motion::Message::SOCKET_PROTO_TOARRAY);
             
-            setMessage(m, false);*/
+            struct arg_struct arguments;
+           
+            arguments.message = PROTO;
             
-            //Initialize objects to serialize.
+            runo = pthread_create(&thread_observer, NULL, startObserver, (void*) &arguments);
+            if ( runo  != 0) {
+                cerr << "Unable to create thread" << endl;
+                cout << "start observer pthread_create failed." << endl;
+            }
             
-            //m = streamCastMessage();
+            pthread_join( thread_recognition, (void**) &runr);
             
-            //s = m.ByteSize();
-            //char data[s];
-            //cout << "SIZE___:: " << s << endl;
-            //m.SerializeToArray(&data, s);
-            
-            //udpsend(m);
-            
+            break;
+        }
+        case motion::Message::TAKE_PICTURE:
+        {
+            motion::Message picture = takePictureToProto();
+            sendMessage(picture, motion::Message::SOCKET_PROTO_TOARRAY);
+            break;
+        }
+        case motion::Message::STRM_START:
+        {
             netcvc();
-            
             break;
-            
-        case motion::Message::GET_MAT:
-            
-            screenshot(receive_proto);
-            
+        }
+        case motion::Message::STRM_STOP:
+        {
+            stop_capture = true;
             break;
-            
+        }
         case motion::Message::GET_TIME:
-            
-            struct timeval tv;
-            struct tm* ptm;
-            char time_string[40];
-            
-            gettimeofday (&tv, NULL);
-            ptm = localtime (&tv.tv_sec);
-            strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S %z", ptm);
-            
-            cout << "time_string TIME " << time_string << endl;
-            
+        {
+            motion::Message m;
             m.set_type(motion::Message::GET_TIME);
-            m.set_time(time_string);
-            
-            setMessage(m, false);
+            m.set_serverip(PROTO.serverip());
+            m.set_time(getTimeRasp());
+            sendMessage(m, motion::Message::SOCKET_PROTO_TOARRAY);
             
             break;
-            
+        }
         case motion::Message::SET_TIME:
-            
+        {
             struct tm tmremote;
             char *bufr;
             
@@ -631,48 +549,43 @@ void runCommand(int value)
             
             printf("The system time is set to %s\n", text_time);
             
+            motion::Message m;
             m.set_type(motion::Message::TIME_SET);
-            m.set_payload(time_string);
-            
-            setMessage(m, false);
-            
+            m.set_serverip(PROTO.serverip());
+            m.set_time(getTimeRasp());
+            sendMessage(m, motion::Message::SOCKET_PROTO_TOARRAY);
+        
             break;
-            
-        case motion::Message::START_RECOGNITION:
-            
-            arguments.message = receive_proto;
+        }
+        case motion::Message::REC_START:
+        {
+            struct arg_struct arguments;
+            arguments.message = PROTO;
             
             runr = pthread_create(&thread_recognition, NULL, startRecognition, (void*) &arguments);
             if ( runr  != 0) {
                 cerr << "Unable to create thread" << endl;
                 cout << "startRecognition pthread_create failed." << endl;
             }
-            
             pthread_join( thread_recognition, (void**) &runr);
-            
             break;
-            
-        case motion::Message::STOP_RECOGNITION:
-            
+        }
+        case motion::Message::REC_STOP:
+        {
             pthread_cancel(thread_recognition);
-            
             break;
+        }
     }
-    
-    cout << " ::SIIIiII:: " << endl;
-    
-    cout << " ::ShutdownProtobufLibrary:: " << endl;
-    
     google::protobuf::ShutdownProtobufLibrary();
     
 }
 
 
 // TCP client handling function
-int HandleTCPClient(TCPSocket *sock)
+motion::Message::ActionType HandleTCPClient(TCPSocket *sock)
 {
     
-  int value;
+  motion::Message::ActionType value;
   cout << "Handling client ";
   string from;
   try {
@@ -694,12 +607,15 @@ int HandleTCPClient(TCPSocket *sock)
   int bytesReceived = 0;              // Bytes read on each recv()
     int totalBytesReceived = 0;         // Total bytes read
   
+try
+{
+    
   // Send received string and receive again until the end of transmission
-  char echoBuffer[MAXDATASIZE];
+  char echoBuffer[motion::Message::SOCKET_BUFFER_SMALL_SIZE];
   int recvMsgSize;
   std::string message;
     
-  while ((recvMsgSize = sock->recv(echoBuffer, RCVBUFSIZE)) > 0)
+  while ((recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_SMALL_SIZE)) > 0)
   { // Zero means
      
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
@@ -711,24 +627,28 @@ int HandleTCPClient(TCPSocket *sock)
       motion::Message ms;
       ms.ParseFromString(data);
       
-      receive_proto.Clear();
-      receive_proto = ms;
+      PROTO.Clear();
+      PROTO = ms;
       
-      cout << "Type Received: " << ms.type() << endl;
+      cout <<       "Type Received : " << ms.type() << endl;
       
       value = ms.type();
       
       if (ms.has_time())
       {
-            cout << "VALUE!! " << value << " TIME!! " << ms.time() << endl;
+            cout << "Time          : " << ms.time() << endl;
       }
       
+      T_PROTO.set_serverip(ms.serverip());
+      
+      cout <<       "From Ip       : " << T_PROTO.serverip() << endl;
+
       motion::Message mr;
       
       string dataconnect;
       int echoStringLen;
       
-      mr.set_type(ms.type());
+      mr.set_type(motion::Message::RESPONSE_OK);
       mr.set_serverip(ms.serverip());
       mr.set_time(getTimeRasp());
       mr.SerializeToString(&dataconnect);
@@ -736,11 +656,22 @@ int HandleTCPClient(TCPSocket *sock)
       strcpy(bts, dataconnect.c_str());
       echoStringLen = sizeof(bts);
       
+      //Respond socket.
       sock->send(bts, sizeof(bts));
       
+      //Run Command.
+      runCommand(value);
+
       google::protobuf::ShutdownProtobufLibrary();
       
   }
+    
+}
+catch(SocketException &e)
+{
+        cout << "::error:: " << e.what() << endl;
+        cerr << e.what() << endl;
+}
   return value;
     
 }
@@ -804,8 +735,8 @@ void * socketThread (void * args)
             cout << "ThreadMain pthread_create created!!!!!." << endl;
             pthread_join(    thread_echo,               (void**) &runt);
             
-            cout << "EXECUTING!!!." << endl;
-            runCommand(resutl_echo);
+            //cout << "EXECUTING!!!." << endl;
+            //runCommand(resutl_echo);
             
             //cout << "STATUS!!! = " << runt << endl;
             //return (void *) runt;
@@ -839,12 +770,13 @@ std::string getIpAddress () {
     return ip_txt;
 }
 
-void split(const string& s, char c,
-           vector<string>& v) {
+void split(const string& s, char c, vector<string>& v)
+{
    string::size_type i = 0;
    string::size_type j = s.find(c);
 
-   while (j != string::npos) {
+   while (j != string::npos)
+   {
       v.push_back(s.substr(i, j-i));
       i = ++j;
       j = s.find(c, j);
@@ -854,7 +786,8 @@ void split(const string& s, char c,
    }
 }
 
-void * broadcastsender ( void * args ) {
+void * broadcastsender ( void * args )
+{
     
    std::string sech = getIpAddress();
    cout  <<  "IP: " << sech << endl;
@@ -902,22 +835,15 @@ void * broadcastsender ( void * args ) {
     cout  <<  "Error: " << cerr << endl;
     exit(1);
   }
-
 }
-
 
 int main (int argc, char * const argv[])
 {
-    
-    /*motion::Message mf;
-    mf.set_type(motion::Message::SET_MAT);
-    mf.set_serverip("192.168.1.35");
-    mf.set_time("timess");
-    screenshot(mf);
-    google::protobuf::ShutdownProtobufLibrary();*/
-    
 
-  pthread_mutex_init(&tcpMutex, 0);
+    motion::Message T_PROTO;
+    T_PROTO.set_starttime(getTimeRasp());
+
+    pthread_mutex_init(&tcpMutex, 0);
 
     // UDP
    runb = pthread_create(&thread_broadcast, NULL, broadcastsender, NULL);
@@ -941,7 +867,6 @@ int main (int argc, char * const argv[])
    StreamListener * stream_listener = new StreamListener();
    stream_listener->startListening();
 
-    
     pthread_join(    thread_socket,               (void**) &runs);
     
    cout << "LAST!!! = " << runs << endl;

@@ -59,8 +59,8 @@ ADD_EXECUTABLE(motion_detect_raspberry
 	src/motion_detect/b64/base64.h
 	src/motion_detect/socket/streamlistener.cpp
 	src/motion_detect/socket/streamlistener.h
-	src/motion_detect/socket/udp-recv.c
-	src/motion_detect/socket/udp-send.c
+	src/motion_detect/socket/netcvc.cpp
+        src/motion_detect/socket/netcvc.h
 )
 
 TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm ${PROTOBUF_LIBRARIES})

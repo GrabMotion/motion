@@ -6,10 +6,8 @@ using namespace std;
 using namespace google::protobuf::io;
 
 extern motion::Message send_proto;
-extern motion::Message receive_proto;
-extern void runCommand(int value);
-
-#define RCVBUFSIZE 200000
+motion::Message receive_proto;
+extern void runCommand(motion::Message::ActionType value);
 
 StreamListener::StreamListener(){}
 
@@ -61,7 +59,7 @@ void StreamListener::readBody(int csock,google::protobuf::uint32 siz)
     
     std::cout << "Streaming Received: " << payload.type() << std::endl;
     
-    int value = payload.type();
+    motion::Message::ActionType value = payload.type();
     
     if (payload.has_time())
     {

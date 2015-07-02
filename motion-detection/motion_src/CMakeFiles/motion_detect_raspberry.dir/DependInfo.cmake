@@ -8,8 +8,6 @@ SET(CMAKE_DEPENDS_CHECK_C
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/cdecode.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cdecode.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/cencode.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/ntp/hwclock.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o"
-  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/udp-recv.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o"
-  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/udp-send.c" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o"
   )
 SET(CMAKE_C_COMPILER_ID "GNU")
 SET(CMAKE_DEPENDS_CHECK_CXX
@@ -19,6 +17,7 @@ SET(CMAKE_DEPENDS_CHECK_CXX
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/sendmessage.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/sendmessage.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.cc" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/streamlistener.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/streaming/remotecam.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/streaming/remotecam.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/streaming/send_data.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/streaming/send_data.o"

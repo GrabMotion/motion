@@ -38,7 +38,85 @@
 using namespace std;
 using namespace cv;
 
-void parseRegionXML(string file_region, vector<Point2f> &region){
+std::string savePointsAsXMLString(std::vector<cv::Point2f> &contour)
+{
+    
+    TiXmlDocument doc;
+    TiXmlDeclaration decl("1.0", "", "");
+    doc.InsertEndChild(decl);
+    for(int i = 0; i <= contour.size(); i++)
+    {
+        TiXmlElement point("point");
+        point.SetAttribute("x",contour[i].x);
+        point.SetAttribute("y",contour[i].y);
+        doc.InsertEndChild(point);
+    }
+    //if(doc.SaveFile(xml.c_str()))
+    //    cout << "file saved succesfully.\n";
+    //else
+    //    cout << "file not saved, something went wrong!\n";
+    
+    // Declare a printer
+    TiXmlPrinter printer;
+    
+    // attach it to the document you want to convert in to a std::string
+    doc.Accept(&printer);
+    
+    // Create a std::string and copy your document data in to the string
+    return printer.CStr();
+}
+
+std::vector<cv::Point2f> stringToVectorPoint2f(std::string storedcoord)
+{
+    vector<Point2f> coordinates;
+    std::stringstream ss(storedcoord);
+    string d;
+    int c=0, x=0, y=0, t=0;
+    while (ss >> d)
+    {
+        d = d.erase( d.size() - 1 );
+        bool fi = d.find("[");
+        if (!fi)
+        {
+            d = d.erase(0 , 1);
+        }
+        
+        float cor =  atof (d.c_str());
+        if (c==0)
+        {
+            x = cor;
+            c++;
+        } else
+        {
+            y = cor;
+            cv::Point2f p(x, y);
+            coordinates.push_back(p);
+            c=0;x=0;y=0;
+        }
+        t++;
+    }
+    return coordinates;
+}
+
+std::string processRegionString(std::string coordstring)
+{
+    vector<Point2f> cvectro = stringToVectorPoint2f(coordstring);
+    vector<Point2f> insideContour;
+    for(int j = 0; j < picture.rows; j++)
+    {
+        for(int i = 0; i < picture.cols; i++)
+        {
+            Point2f p(i,j);
+            if(pointPolygonTest(cvectro,p,false) >= 0) // yes inside
+                insideContour.push_back(p);
+        }
+    }
+    cout << "# points inside contour: " << insideContour.size() << endl;
+    return savePointsAsXMLString(insideContour);
+}
+
+/*void parseRegionXML(string file_region, vector<Point2f> &region)
+{
     TiXmlDocument doc(file_region.c_str());
     if(doc.LoadFile()) // ok file loaded correctly
     {
@@ -58,8 +136,7 @@ void parseRegionXML(string file_region, vector<Point2f> &region){
         exit(1);
     }
     std::cout << "XML Reguion loaded." << std::endl;
-}
-
+}*/
 
 char * CharArrayPlusChar( const char *array, char c )
 {
@@ -322,25 +399,33 @@ void * startRecognition(void * arg)
     
     struct arg_struct *args = (struct arg_struct *) arg;
     
+    is_recognizing = false;
+    
     motion::Message m = args->message;
+    R_PROTO.Clear();
+    R_PROTO = m;
+    R_PROTO.set_recognizing(false);
     
-    std::string region_encoded = m.regiondata();
-    
-    std::cout << "region_encoded: " << region_encoded << endl;
-    
-    std::string file_region = base64_decode(region_encoded);
+    //Region
+    std::string rcords = R_PROTO.regioncoords();
+    std::string file_region = processRegionString(rcords);
     
     std::cout << "file_region: " << file_region << endl;
+
+    //Write base64 to file for checking.
+    std::string basefile = "file_region.txt";
+    std::ofstream out;
+    out.open (basefile.c_str());
+    out << file_region << "\n";
+    out.close();
     
-    bool writeImages = m.storeimage();
-    
-    std::cout << "writeImages: " << writeImages << endl;
-    
-    bool writeCroop  = m.storecrop();
-    
-    std::cout << "writeCroop: " << writeCroop << endl;
-    
+    bool writeImages = R_PROTO.storeimage();
+    bool writeCroop  = R_PROTO.storecrop();
     bool send_number_detected = true;
+    
+    std::cout << "file_region: " << file_region << endl;
+    std::cout << "writeImages: " << writeImages << endl;
+    std::cout << "writeCroop: " << writeCroop << endl;
     
     const string DIR        = "../../src/motion_web/pics/";          // directory where the images will be stored
     const string REGION     = "../../src/motion_web/pics/region/";   // directory where the regios are stored
@@ -379,7 +464,6 @@ void * startRecognition(void * arg)
         logfile << "Removed files log.\n";
         logfile.close();
     }
-    
     
     // Format of directory
     string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
@@ -444,7 +528,7 @@ void * startRecognition(void * arg)
     // take as many pictures you want..
     while (true)
     {
-        
+        R_PROTO.set_recognizing(true);
         countWhile++;
         
        // Take a new image
@@ -589,7 +673,13 @@ void * startRecognition(void * arg)
            
                 pthread_mutex_lock(&detectMutex);
                 
-                writeXMLInstance(XMLFILE.c_str(), begin.str(), end.str(), instance);     
+                writeXMLInstance(XMLFILE.c_str(), begin.str(), end.str(), instance);
+                
+                motion::Message::Instance * inst = R_PROTO.add_instance();
+                inst->set_idinstance(0);
+                inst->set_amount("amount");
+                inst->set_filepath("hola");
+                
                 
                 pthread_mutex_unlock(&detectMutex);
             }       
@@ -601,16 +691,14 @@ void * startRecognition(void * arg)
             if (count_sequence_cero==1){
                 end_time = clock();
             }
-                
-            //std::cout << " number_of_sequence: 0  "  << "count_sequence_cero: " << count_sequence_cero << " count_save_image: " << std::endl;
             
             // Delay, wait a 1/2 second.
             cvWaitKey (DELAY);
         }
         
     }
-    
-    //return 0;   
+
+    R_PROTO.set_recognizing(false);
     
 }
 

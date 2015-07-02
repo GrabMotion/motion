@@ -420,51 +420,28 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o.provides.build: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o
 
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: CMakeFiles/motion_detect_raspberry.dir/flags.make
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o: src/motion_detect/socket/udp-recv.c
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o: CMakeFiles/motion_detect_raspberry.dir/flags.make
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o: src/motion_detect/socket/netcvc.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_17)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building C object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o"
-	/usr/bin/gcc  $(C_DEFINES) $(C_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o   -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/udp-recv.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.cpp
 
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.i"
-	/usr/bin/gcc  $(C_DEFINES) $(C_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/udp-recv.c > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.i
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.i
 
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.s"
-	/usr/bin/gcc  $(C_DEFINES) $(C_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/udp-recv.c -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.s
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.s
 
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o.requires:
-.PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o.requires
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o.requires:
+.PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o.requires
 
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o.provides: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o.requires
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o.provides.build
-.PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o.provides
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o.provides: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o.requires
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o.provides.build
+.PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o.provides
 
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o.provides.build: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o
-
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o: CMakeFiles/motion_detect_raspberry.dir/flags.make
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o: src/motion_detect/socket/udp-send.c
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_18)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building C object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o"
-	/usr/bin/gcc  $(C_DEFINES) $(C_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o   -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/udp-send.c
-
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.i"
-	/usr/bin/gcc  $(C_DEFINES) $(C_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/udp-send.c > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.i
-
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.s"
-	/usr/bin/gcc  $(C_DEFINES) $(C_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/udp-send.c -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.s
-
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o.requires:
-.PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o.requires
-
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o.provides: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o.requires
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o.provides.build
-.PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o.provides
-
-CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o.provides.build: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o.provides.build: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o
 
 # Object files for target motion_detect_raspberry
 motion_detect_raspberry_OBJECTS = \
@@ -484,8 +461,7 @@ motion_detect_raspberry_OBJECTS = \
 "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o" \
 "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o" \
 "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o" \
-"CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o" \
-"CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o"
+"CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o"
 
 # External object files for target motion_detect_raspberry
 motion_detect_raspberry_EXTERNAL_OBJECTS =
@@ -506,8 +482,7 @@ src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.di
 src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o
 src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o
 src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o
-src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o
-src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o
+src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o
 src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/build.make
 src/motion_detect/motion_detect_raspberry: CMakeFiles/motion_detect_raspberry.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --red --bold "Linking CXX executable src/motion_detect/motion_detect_raspberry"
@@ -533,8 +508,7 @@ CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspbe
 CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o.requires
 CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o.requires
 CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o.requires
-CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-recv.o.requires
-CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/udp-send.o.requires
+CMakeFiles/motion_detect_raspberry.dir/requires: CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o.requires
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/requires
 
 CMakeFiles/motion_detect_raspberry.dir/clean:

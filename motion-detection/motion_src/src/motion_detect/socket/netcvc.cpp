@@ -6,7 +6,7 @@ int             is_data_ready = 1;
 int             clientSockMat;
 char*     	server_ip_mat;
 int       	server_port_mat;
-extern bool stop_capture;
+
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -23,17 +23,15 @@ int netcvc()
         }
 
         server_ip_mat   = "192.168.1.37";
-        server_port_mat = 11111;
+        server_port_mat = motion::Message::TCP_STREAMING_PORT;
 
         capture >> img0;
-        img1 = Mat::zeros(img0.rows, img0.cols ,CV_8U);
+        img1 = Mat::zeros(img0.rows, img0.cols ,CV_8UC1);
 
         // run the streaming client as a separate thread 
         if (pthread_create(&thread_c, NULL, streamClient, NULL)) {
                 quit("\n--> pthread_create failed.", 1);
         }
-
-        //cout << "\n--> Press 'q' to quit. \n\n" << endl;
 
         /* print the width and height of the frame, needed by the client */
         cout << "\n--> Transferring  (" << img0.cols << "x" << img0.rows << ")  images to the:  " << server_ip_mat << ":" << server_port_mat << endl;
@@ -56,7 +54,7 @@ int netcvc()
             
                 if (stop_capture)
                     break;
-            
+        
         }
 
         /* user has pressed 'q', terminate the streaming client */
