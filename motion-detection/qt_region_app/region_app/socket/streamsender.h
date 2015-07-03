@@ -29,6 +29,9 @@
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 
 #include "protobuffer/motion.pb.h"
+#include <opencv2/opencv.hpp>
+#include "b64/base64.h"
+
 
 class StreamSender : public QThread
 {

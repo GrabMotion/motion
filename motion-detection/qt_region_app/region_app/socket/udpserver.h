@@ -24,6 +24,7 @@
 
 #include "protobuffer/motion.pb.h"
 
+
 class UDPServer : public QObject
 {
     Q_OBJECT

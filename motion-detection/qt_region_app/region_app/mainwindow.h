@@ -86,6 +86,7 @@ public:
     std::string getIpAddress();
     std::string getTime();
     void remoteProto(motion::Message payload);
+    void resutlEcho(string resutl);
 
 private:
     Ui::MainWindow *ui;
@@ -117,18 +118,34 @@ private:
     void SocketErrorMessage(QString &e);
     void sendSocket(string svradress, string command);
 
-    void testBase();
     void enableDisableButtons(bool set);
-
 
     std::string getTimeStr();
     char * getTimeChat();
     char * getTerMinalIpFromCombo();
 
-
     void remoteMat(cv::Mat mat);
 
-    void loadMat();
+    void testBase();
+    std::string get_file_contents(std::string filename);
+    int pcount = 0;
+    int msg_split_vector_size;
+    int realsize;
+    int packegesize;
+    google::protobuf::uint32 packagesize;
+    vector<string> payload_holder;
+    string payload;
+    bool complete;
+    google::protobuf::uint32 packagetype;
+    google::protobuf::uint32 mode;
+    std::vector<std::string> splitProto(const std::string &s, char delim);
+    vector<string> splitString(string input, string delimiter);
+    std::string ExtractString( std::string source, std::string start, std::string end );
+    std::string strdecoded;
+    bool finished=false;
+    int payload_size;
+
+    void loadMat(string mat);
 
     vector<Point2f> stringToVectorPoint2f(std::string storedcoord);
 
@@ -169,7 +186,6 @@ private slots:
     void BroadcastReceived(QString);
     void broadcastTimeoutSocketException();
     //void StreamingUpdateLabelImage(std::string, Mat);
-    void ResultEcho(string);
 
     //shares
     void SharedMounted(QString folder);

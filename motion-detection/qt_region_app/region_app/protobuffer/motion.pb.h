@@ -530,6 +530,13 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_starttime();
   inline void set_allocated_starttime(::std::string* starttime);
 
+  // optional .motion.Message.SocketType sotype = 18;
+  inline bool has_sotype() const;
+  inline void clear_sotype();
+  static const int kSotypeFieldNumber = 18;
+  inline ::motion::Message_SocketType sotype() const;
+  inline void set_sotype(::motion::Message_SocketType value);
+
   // @@protoc_insertion_point(class_scope:motion.Message)
  private:
   inline void set_has_type();
@@ -560,6 +567,8 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_regioncoords();
   inline void set_has_starttime();
   inline void clear_has_starttime();
+  inline void set_has_sotype();
+  inline void clear_has_sotype();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -580,6 +589,7 @@ class Message : public ::google::protobuf::Message {
   ::std::string* code_;
   ::std::string* regioncoords_;
   ::std::string* starttime_;
+  int sotype_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -1783,6 +1793,31 @@ inline void Message::set_allocated_starttime(::std::string* starttime) {
     starttime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:motion.Message.starttime)
+}
+
+// optional .motion.Message.SocketType sotype = 18;
+inline bool Message::has_sotype() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void Message::set_has_sotype() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void Message::clear_has_sotype() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void Message::clear_sotype() {
+  sotype_ = 10;
+  clear_has_sotype();
+}
+inline ::motion::Message_SocketType Message::sotype() const {
+  // @@protoc_insertion_point(field_get:motion.Message.sotype)
+  return static_cast< ::motion::Message_SocketType >(sotype_);
+}
+inline void Message::set_sotype(::motion::Message_SocketType value) {
+  assert(::motion::Message_SocketType_IsValid(value));
+  set_has_sotype();
+  sotype_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.sotype)
 }
 
 

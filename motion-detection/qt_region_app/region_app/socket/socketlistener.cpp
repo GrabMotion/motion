@@ -85,7 +85,6 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
 
     while (!complete)
     {
-
         cout << "Receiving # : " << pcount << " at: " << mainwindow->getTime() << endl;
 
         recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_MEDIUM_SIZE);
@@ -133,7 +132,6 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
                 cout << "Size: " << splsi.size() << endl;
             }
          }
-
 
          if (pcount>1)
          {
@@ -184,6 +182,7 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
          }
 
          motion::Message mr;
+
          string dataconnect;
          int echoStringLen;
          if (type==motion::Message::SINGLE_MESSAGE)
@@ -257,7 +256,7 @@ void * SocketListener::socketThread (void * args)
 
     try
     {
-        TCPServerSocket servSock(motion::Message::TCP_MSG_PORT);   // Socket descriptor for server
+        TCPServerSocket servSock(motion::Message::TCP_ECHO_PORT);   // Socket descriptor for server
         for (;;) {      // Run forever
 
             cout << "new TCPServerSocket() runt::" << runt << endl;

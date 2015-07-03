@@ -8,6 +8,7 @@ using namespace std;
 UDPServer::UDPServer(QObject *parent) : QObject(parent){}
 UDPServer::~UDPServer(){}
 
+
 void * UDPServer::listen (void * args)
 {
 

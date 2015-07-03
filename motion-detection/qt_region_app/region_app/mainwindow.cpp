@@ -123,7 +123,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Tests
     testBase();
-    loadMat();
+
+    std::string mat = "/jose/repos/motion/mat.txt";
+    string loaded = MainWindow::get_file_contents(mat);
+    std::string oridecoded = base64_decode(loaded);
+    loadMat(oridecoded);
+
 }
 
 //void MainWindow::getMouseCoordinates(mouse_coordinates mouse)
@@ -235,10 +240,8 @@ void MainWindow::setMessageBodyAndSend(motion::Message::ActionType type)
     motion::Message m;
     m.set_type(type);
     m.set_serverip(getIpAddress());
-
     m.set_time(getTime());
     m.SerializeToString(&data);
-
     char bts[data.length()];
     strcpy(bts, data.c_str());
 
@@ -400,6 +403,7 @@ void MainWindow::on_picture_clicked()
     QString sh = getSharedFolder();
 
     setMessageBodyAndSend(motion::Message::ActionType::Message_ActionType_TAKE_PICTURE);
+
 
 }
 
@@ -607,7 +611,7 @@ void MainWindow::SocketErrorMessage(QString &e)
 
 }
 
-std::string get_file_contents(string filename)
+std::string get_file_contents(std::string filename)
 {
     std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
     if (in)
@@ -670,7 +674,7 @@ void MainWindow::testBase()
     out << enc << "\n";
     out.close();
 
-    string loaded = get_file_contents(file);
+    string loaded = MainWindow::get_file_contents(file);
 
     std::string oridecoded = base64_decode(loaded);
 
@@ -746,18 +750,12 @@ std::string MainWindow::getTime()
     return time_string;
 }
 
-void MainWindow::loadMat()
+void MainWindow::loadMat(string mat)
 {
-
-      std::string mat = "/jose/repos/motion/mat.txt";
-      string loaded = get_file_contents(mat);
-
-      std::string oridecoded = base64_decode(loaded);
-      int ori_size = oridecoded.size();
 
       //cast to stringstream to read data.
       std::stringstream decoded;
-      decoded << oridecoded;
+      decoded << mat;
 
       // The data we need to deserialize.
       int width_d = 0;
@@ -784,25 +782,13 @@ void MainWindow::loadMat()
       QImage frame = Mat2QImage(main_mat);
       ui->output->setPixmap(QPixmap::fromImage(frame));
 
-      //QMetaObject::invokeMethod(parent, "remoteImage", Q_ARG(QImage, frame));
-
-      cout << "+++++++++++++++++RECEIVING PROTO+++++++++++++++++++"   << endl;
-      cout << "Mat size   : " << main_mat.size                            << endl;
-      cout << "Char type  : " << type_d                               << endl;
-      cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
-      cout << "ori_size               : " << ori_size                 << endl;
-      cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++"  << endl;
-      cout <<  endl;
-
-      google::protobuf::ShutdownProtobufLibrary();
-
       // Delete our buffer
       delete[]data_d;
 
-      std::string basefile = "/jose/repos/motion/region.txt";
-      string storedcoord = get_file_contents(basefile);
-      vector<Point2f> coordinates = stringToVectorPoint2f(storedcoord);
-      ui->qt_drawing_output->drawLinesSlot(coordinates);
+      //std::string basefile = "/jose/repos/motion/region.txt";
+      //string storedcoord = get_file_contents(basefile);
+      //vector<Point2f> coordinates = stringToVectorPoint2f(storedcoord);
+      //ui->qt_drawing_output->drawLinesSlot(coordinates);
 }
 
 vector<Point2f> MainWindow::stringToVectorPoint2f(std::string storedcoord)
@@ -912,22 +898,55 @@ void MainWindow::sendSocket(string svradress, string command)
 {
     //TCP Socket
     tcpsend_thread = new TCPEchoThread(this);
-    connect(tcpsend_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
     tcpsend_thread->SendEcho(svradress, command);
 }
 
-void MainWindow::ResultEcho(string response)
+
+
+std::string MainWindow::ExtractString( std::string source, std::string start, std::string end )
 {
+     std::size_t startIndex = source.find( start );
+     if( startIndex == std::string::npos )
+     {
+        return "";
+     }
+     startIndex += start.length();
+     std::string::size_type endIndex = source.find( end, startIndex );
+     return source.substr( startIndex, endIndex - startIndex );
+}
 
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-    int action;
-    motion::Message m;
-    m.ParseFromString(response);
-    action = m.type();
+vector<string> MainWindow::splitString(string input, string delimiter)
+{
+     vector<string> output;
+     char *pch;
+     char *str = strdup(input.c_str());
+     pch = strtok (str, delimiter.c_str());
+     while (pch != NULL)
+     {
+        output.push_back(pch);
+        pch = strtok (NULL,  delimiter.c_str());
+     }
+     free(str);
+     return output;
+}
 
-    std::cout << "Action received:: " << action << std::endl;
-    switch (action)
+std::vector<std::string> MainWindow::splitProto(const std::string &s, char delim)
+{
+    std::vector<std::string> elems;
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim))
     {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+void MainWindow::remoteProto(motion::Message m)
+{
+      int action = m.type();
+      switch (action)
+      {
         case motion::Message::ENGAGE:
         {
             enableDisableButtons(true);
@@ -936,36 +955,133 @@ void MainWindow::ResultEcho(string response)
             mount_thread->terminate();
             break;
         }
-        case motion::Message::RESPONSE_OK:
+        case motion::Message::GET_TIME:
         {
-            cout << "RESPONSE OK" << endl;
-            break;
-        }
-    }
-    google::protobuf::ShutdownProtobufLibrary();
-}
-
-void MainWindow::remoteProto(motion::Message m)
-{
-      int action = m.type();
-      switch (action)
-      {
-          case motion::Message::ENGAGE:
-            break;
-      }
-      case motion::Message::GET_TIME:
-      {
           QString gt = QString::fromUtf8(m.time().c_str());
           ui->remote_terminal_time->setText(gt);
           break;
-      }
-      case motion::Message::TIME_SET:
-      {
+        }
+        case motion::Message::TIME_SET:
+        {
           QString ts = QString::fromUtf8(m.time().c_str());
           ui->remote_terminal_time->setText(ts);
           break;
-      }
+        }
+        case motion::Message::TAKE_PICTURE:
+            loadMat(m.data());
+          break;
+    }
 }
+
+
+void MainWindow::resutlEcho(string str)
+{
+
+    string decoded_proto;
+
+    std::string del_1  = "PROTO_START_DELIMETER";
+    std::string del_2  = "PROTO_STOP_DELIMETER";
+
+    int total_size = str.size();
+    std::size_t found = str.find(del_1);
+
+    if (found!=std::string::npos)
+    {
+       std::string lpay = MainWindow::ExtractString(str, del_1, del_2);
+       vector<string> vpay = MainWindow::splitProto(lpay, ':');
+       packagetype = atoi(vpay.at(0).c_str());
+       mode = atoi(vpay.at(1).c_str());
+       int del_pos = str.find(del_2);
+
+       if (packagetype==motion::Message::SINGLE_MESSAGE)
+       {
+           const string & pay = str.substr((del_pos+del_2.size()),(str.size()-del_2.size()));
+           strdecoded = base64_decode(pay);
+           complete=true;
+           finished=true;
+           cout << "SINGLE_MESSAGE :: " <<  pay << endl;
+           cout << "strdecoded :: " <<  strdecoded << endl;
+       }
+       else if (packagetype==motion::Message::SPLITTED_MESSAGE)
+       {
+           msg_split_vector_size = atoi(vpay.at(2).c_str());
+           realsize = atoi(vpay.at(3).c_str());
+           string splsi = str.substr((del_pos+del_2.size()),(str.size()-del_2.size()));
+           int payload_size = splsi.size();
+           payload_holder.push_back(splsi);
+           cout << "SPLITTED_MESSAGE" << endl;
+           cout << "Size: " << splsi.size() << endl;
+       }
+    }
+
+    if (pcount>=1)
+    {
+        payload_holder.push_back(str);
+        pcount++;
+        cout << "SPLITTED::" << pcount << endl;
+        cout << "Size: " << str.size() << endl;
+        if (payload_holder.size()==msg_split_vector_size)
+        {
+            cout << "COMPLETE!!" << endl;
+            for (int j=0; j<payload_holder.size(); j++)
+            {
+                payload += payload_holder.at(j);
+            }
+            strdecoded = base64_decode(payload);
+            pcount=0;
+            finished=true;
+        }
+    }
+
+    if (finished)
+    {
+
+        GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+        motion::Message mm;
+        switch (mode)
+        {
+            case motion::Message::SOCKET_PROTO_TOARRAY:
+            {
+                mm.ParseFromArray(strdecoded.c_str(), strdecoded.size());
+                break;
+             }
+            case motion::Message::SOCKET_PROTO_TOSTRING:
+                mm.ParseFromString(strdecoded);
+                break;
+        }
+
+        //Set response to the mainwindow.
+        remoteProto(mm);
+
+        finished=false;
+        pcount=0;
+        google::protobuf::ShutdownProtobufLibrary();
+
+    }
+    else
+    {
+
+        motion::Message::ActionType reply;
+
+        if (packagetype==motion::Message::SPLITTED_MESSAGE)
+        {
+            if (!finished)
+            {
+               reply =  motion::Message::ActionType::Message_ActionType_RESPONSE_NEXT;
+               pcount++;
+            }
+            else
+            {
+               reply = motion::Message::ActionType::Message_ActionType_RESPONSE_END;
+            }
+        }
+
+        setMessageBodyAndSend(reply);
+    }
+
+}
+
 
 
 
