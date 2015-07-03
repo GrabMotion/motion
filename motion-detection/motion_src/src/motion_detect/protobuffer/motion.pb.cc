@@ -39,7 +39,7 @@ void protobuf_AssignDesc_motion_2eproto() {
       "motion.proto");
   GOOGLE_CHECK(file != NULL);
   Message_descriptor_ = file->message_type(0);
-  static const int Message_offsets_[15] = {
+  static const int Message_offsets_[16] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, time_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, data_),
@@ -55,6 +55,7 @@ void protobuf_AssignDesc_motion_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, regioncoords_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, starttime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, sotype_),
   };
   Message_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -123,7 +124,7 @@ void protobuf_AddDesc_motion_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014motion.proto\022\006motion\"\226\010\n\007Message\0220\n\004ty"
+    "\n\014motion.proto\022\006motion\"\302\010\n\007Message\0220\n\004ty"
     "pe\030\001 \002(\0162\032.motion.Message.ActionType:\006EN"
     "GAGE\022\014\n\004time\030\002 \001(\t\022\014\n\004data\030\003 \001(\014\022\023\n\013data"
     "_amount\030\004 \001(\005\022\022\n\ndata_total\030\005 \001(\005\022\020\n\010ser"
@@ -132,24 +133,25 @@ void protobuf_AddDesc_motion_2eproto() {
     "\014 \003(\0132\030.motion.Message.Instance\022\022\n\nstore"
     "image\030\r \001(\010\022\021\n\tstorecrop\030\016 \001(\010\022\014\n\004code\030\017"
     " \001(\t\022\024\n\014regioncoords\030\020 \001(\t\022\021\n\tstarttime\030"
-    "\021 \001(\t\032\204\001\n\010Instance\022\022\n\nidinstance\030\001 \002(\005\022\016"
-    "\n\006amount\030\004 \001(\t\022\020\n\010filepath\030\005 \001(\t\022\025\n\rinst"
-    "ancestart\030\006 \001(\t\022\023\n\013instanceend\030\007 \001(\t\022\026\n\016"
-    "regionfilename\030\t \001(\t\"\205\002\n\nActionType\022\013\n\006E"
-    "NGAGE\020\350\007\022\016\n\tREC_START\020\352\007\022\020\n\013REC_RUNNING\020"
-    "\353\007\022\r\n\010REC_STOP\020\354\007\022\r\n\010UNENGAGE\020\355\007\022\r\n\010GET_"
-    "TIME\020\356\007\022\r\n\010SET_TIME\020\357\007\022\r\n\010TIME_SET\020\360\007\022\017\n"
-    "\nSTRM_START\020\361\007\022\016\n\tSTRM_STOP\020\362\007\022\021\n\014TAKE_P"
-    "ICTURE\020\363\007\022\020\n\013DISSCONNECT\020\364\007\022\020\n\013RESPONSE_"
-    "OK\020\310\001\022\022\n\rRESPONSE_NEXT\020\311\001\022\021\n\014RESPONSE_EN"
-    "D\020\312\001\"\260\002\n\nSocketType\022\031\n\025SOCKET_PROTO_TOST"
-    "RING\020\n\022\030\n\024SOCKET_PROTO_TOARRAY\020\013\022\025\n\021SOCK"
-    "ET_PLAIN_TEXT\020\014\022\024\n\020SPLITTED_MESSAGE\020\r\022\022\n"
-    "\016SINGLE_MESSAGE\020\016\022\036\n\030SOCKET_BUFFER_SMALL"
-    "_SIZE\020\320\206\003\022\037\n\031SOCKET_BUFFER_MEDIUM_SIZE\020\360"
-    "\223\t\022\034\n\026SOCKET_BUFFER_BIG_SIZE\020\300\232\014\022\022\n\rTCP_"
-    "ECHO_PORT\020\222\'\022\027\n\022TCP_STREAMING_PORT\020\234\'\022\r\n"
-    "\010UDP_PORT\020\246\'\022\021\n\014TCP_MSG_PORT\020\260\'", 1071);
+    "\021 \001(\t\022*\n\006sotype\030\022 \001(\0162\032.motion.Message.S"
+    "ocketType\032\204\001\n\010Instance\022\022\n\nidinstance\030\001 \002"
+    "(\005\022\016\n\006amount\030\004 \001(\t\022\020\n\010filepath\030\005 \001(\t\022\025\n\r"
+    "instancestart\030\006 \001(\t\022\023\n\013instanceend\030\007 \001(\t"
+    "\022\026\n\016regionfilename\030\t \001(\t\"\205\002\n\nActionType\022"
+    "\013\n\006ENGAGE\020\350\007\022\016\n\tREC_START\020\352\007\022\020\n\013REC_RUNN"
+    "ING\020\353\007\022\r\n\010REC_STOP\020\354\007\022\r\n\010UNENGAGE\020\355\007\022\r\n\010"
+    "GET_TIME\020\356\007\022\r\n\010SET_TIME\020\357\007\022\r\n\010TIME_SET\020\360"
+    "\007\022\017\n\nSTRM_START\020\361\007\022\016\n\tSTRM_STOP\020\362\007\022\021\n\014TA"
+    "KE_PICTURE\020\363\007\022\020\n\013DISSCONNECT\020\364\007\022\020\n\013RESPO"
+    "NSE_OK\020\310\001\022\022\n\rRESPONSE_NEXT\020\311\001\022\021\n\014RESPONS"
+    "E_END\020\312\001\"\260\002\n\nSocketType\022\031\n\025SOCKET_PROTO_"
+    "TOSTRING\020\n\022\030\n\024SOCKET_PROTO_TOARRAY\020\013\022\025\n\021"
+    "SOCKET_PLAIN_TEXT\020\014\022\024\n\020SPLITTED_MESSAGE\020"
+    "\r\022\022\n\016SINGLE_MESSAGE\020\016\022\036\n\030SOCKET_BUFFER_S"
+    "MALL_SIZE\020\320\206\003\022\037\n\031SOCKET_BUFFER_MEDIUM_SI"
+    "ZE\020\360\223\t\022\034\n\026SOCKET_BUFFER_BIG_SIZE\020\300\232\014\022\022\n\r"
+    "TCP_ECHO_PORT\020\222\'\022\027\n\022TCP_STREAMING_PORT\020\234"
+    "\'\022\r\n\010UDP_PORT\020\246\'\022\021\n\014TCP_MSG_PORT\020\260\'", 1115);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "motion.proto", &protobuf_RegisterTypes);
   Message::default_instance_ = new Message();
@@ -793,6 +795,7 @@ const int Message::kStorecropFieldNumber;
 const int Message::kCodeFieldNumber;
 const int Message::kRegioncoordsFieldNumber;
 const int Message::kStarttimeFieldNumber;
+const int Message::kSotypeFieldNumber;
 #endif  // !_MSC_VER
 
 Message::Message()
@@ -828,6 +831,7 @@ void Message::SharedCtor() {
   code_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   regioncoords_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   starttime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  sotype_ = 10;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -927,7 +931,7 @@ void Message::Clear() {
       }
     }
   }
-  if (_has_bits_[8 / 32] & 32000) {
+  if (_has_bits_[8 / 32] & 64768) {
     ZR_(recognizing_, storecrop_);
     if (has_code()) {
       if (code_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -944,6 +948,7 @@ void Message::Clear() {
         starttime_->clear();
       }
     }
+    sotype_ = 10;
   }
 
 #undef OFFSET_OF_FIELD_
@@ -1200,6 +1205,26 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(144)) goto parse_sotype;
+        break;
+      }
+
+      // optional .motion.Message.SocketType sotype = 18;
+      case 18: {
+        if (tag == 144) {
+         parse_sotype:
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          if (::motion::Message_SocketType_IsValid(value)) {
+            set_sotype(static_cast< ::motion::Message_SocketType >(value));
+          } else {
+            mutable_unknown_fields()->AddVarint(18, value);
+          }
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -1342,6 +1367,12 @@ void Message::SerializeWithCachedSizes(
       17, this->starttime(), output);
   }
 
+  // optional .motion.Message.SocketType sotype = 18;
+  if (has_sotype()) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      18, this->sotype(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1474,6 +1505,12 @@ void Message::SerializeWithCachedSizes(
         17, this->starttime(), target);
   }
 
+  // optional .motion.Message.SocketType sotype = 18;
+  if (has_sotype()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      18, this->sotype(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -1579,6 +1616,12 @@ int Message::ByteSize() const {
           this->starttime());
     }
 
+    // optional .motion.Message.SocketType sotype = 18;
+    if (has_sotype()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::EnumSize(this->sotype());
+    }
+
   }
   // repeated .motion.Message.Instance instance = 12;
   total_size += 1 * this->instance_size();
@@ -1659,6 +1702,9 @@ void Message::MergeFrom(const Message& from) {
     if (from.has_starttime()) {
       set_starttime(from.starttime());
     }
+    if (from.has_sotype()) {
+      set_sotype(from.sotype());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -1699,6 +1745,7 @@ void Message::Swap(Message* other) {
     std::swap(code_, other->code_);
     std::swap(regioncoords_, other->regioncoords_);
     std::swap(starttime_, other->starttime_);
+    std::swap(sotype_, other->sotype_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

@@ -32,14 +32,10 @@ SET(PROTOBUF_LIBRARIES protobuf)
 
 ADD_EXECUTABLE(motion_detect_raspberry 
 	src/motion_detect/main.cpp
-        src/motion_detect/streaming/remotecam.hpp
-        src/motion_detect/streaming/remotecam.cpp
-        src/motion_detect/streaming/send_data.hpp
-        src/motion_detect/streaming/send_data.cpp
-        src/motion_detect/practical/PracticalSocket.h
+        src/motion_detect/socket/streamlistener.cpp
+	src/motion_detect/socket/streamlistener.h
+	src/motion_detect/practical/PracticalSocket.h
 	src/motion_detect/practical/PracticalSocket.cpp
-	src/motion_detect/practical/sendmessage.h
-	src/motion_detect/practical/sendmessage.cpp
 	src/motion_detect/recognition/detection.h
         src/motion_detect/recognition/detection.cpp 
 	src/motion_detect/tinyxml/tinystr.cpp

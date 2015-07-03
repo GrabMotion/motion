@@ -33,7 +33,7 @@
 #include "opencv2/highgui/highgui.hpp"
 
 #include "practical/PracticalSocket.h" 
-#include "practical/sendmessage.h"
+//#include "practical/sendmessage.h"
 #include "recognition/detection.h"
 #include "protobuffer/motion.pb.h"
 #include "socket/streamlistener.h"
@@ -66,7 +66,7 @@ void * watch_amount (void * t);
 // Threading
 pthread_mutex_t tcpMutex, streamingMutex;
 pthread_t thread_broadcast, thread_echo, thread_socket,
-thread_message, thread_recognition, thread_wait_echo, thread_screenshot, thread_observer;
+thread_message, thread_recognition, thread_wait_echo, thread_observer;
 
 //Threads
 int runt, runb, runs, runr, runl, runm, runw, runss, runo;
@@ -88,12 +88,19 @@ std::string from_ip;
 //TCP
 std::string local_ip;
 string NETWORK_IP;
+vector<std::string> msg_split_vector;
+motion::Message::ActionType value_response;
+int count_sent_split;
+std::string msg;
+vector<std::string> splitStringBySize(std::string payload, int package);
+int div_ceil(int numerator, int denominator);
+std::string IntToString ( int number );
 
 //Protobuffer
 motion::Message PROTO;
 motion::Message R_PROTO;
 motion::Message T_PROTO;
-motion::Message takePictureToProto();
+motion::Message takePictureToProto(motion::Message);
 
 //Capture
 bool stop_capture;
@@ -122,7 +129,7 @@ struct arg_struct
 };
 void * startRecognition(void * arg);
 void * startObserver(void * arg);
-void runCommand(motion::Message::ActionType value);
+motion::Message runCommand(motion::Message m);
 int getGlobalStringToInt(std::string id)
 {
     return atoi( id.c_str() );
@@ -155,12 +162,6 @@ char * setMessageValueBody(int value, std::string body)
     return buffer;
 }
 
-struct screenshot_thread_args
-{
-    motion::Message msg;
-};
-struct screenshot_thread_args ScreenshorStructThread;
-
 char *getTimeRasp()
 {
     struct timeval tr;
@@ -173,189 +174,6 @@ char *getTimeRasp()
 }
 
 
-motion::Message takePictureToProto()
-{
-    
-    cout << "CAPTURING !!!!!!!!!!!!!" << endl;
-    
-    CvCapture* capture = cvCreateCameraCapture(0);
-    if (capture == NULL)
-    {
-        std::cout << "No cam found." << std::endl;
-
-    }
-    
-    int w = 1280; //640; //1280; //320;
-    int h = 720;  //480; //720;  //240;
-    
-    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
-    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
-    
-    IplImage* img=0;
-    img = cvQueryFrame( capture );
-    cvSaveImage("IplImage.JPG",img);
-    
-    Mat mat(h, w, CV_8U); //CV_8U); // CV_8UC3);
-    mat = cvQueryFrame(capture);
-    cvtColor(mat, mat, CV_RGB2GRAY);
-    imwrite("MAT.jpg", mat);
-    
-    //Shared mat
-    picture = mat;
-    
-    cout << "+++++++++++CREATING PROTO++++++++++++++" << endl;
-    
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-    
-    motion::Message me;
-    me.set_type(motion::Message::TAKE_PICTURE);
-    me.set_serverip(PROTO.serverip());
-    me.set_time(getTimeRasp());
-
-    // We will need to also serialize the width, height, type and size of the matrix
-    int width_s     = mat.cols;
-    int height_s    = mat.rows;
-    int type_s      = mat.type();
-    int size_s      = mat.total() * mat.elemSize();
-    
-    // Initialize a stringstream and write the data
-    int size_init = me.ByteSize();
-    
-    // Write the whole image data
-    std::stringstream ss;
-    ss.write((char*)    (&width_s),     sizeof(int));
-    ss.write((char*)    (&height_s),    sizeof(int));
-    ss.write((char*)    (&type_s),      sizeof(int));
-    ss.write((char*)    (&size_s),      sizeof(int));
-    ss.write((char*)     mat.data,      size_s);
-    
-    //Store into proto
-    me.set_data(ss.str());
-    
-    //Write base64 to file for checking.
-    std::string basefile = "base64oish.txt";    
-    std::ofstream out;
-    out.open (basefile.c_str());
-    out << me.payload() << "\n";
-    out.close();
-    
-    cout << "ByteSize: " << size_init <<  endl;
-    
-    cvReleaseCapture(&capture);
-    
-    google::protobuf::ShutdownProtobufLibrary();
-    
-    return me;
-}
-
-void* streamCast(void * arg)
-{
-    
-    cout << "CAPTURING !!!!!!!!!!!!!" << endl;
-    
-    CvCapture* capture = cvCreateCameraCapture(0);
-    if (capture == NULL)
-    {
-        std::cout << "No cam found." << std::endl;
-        
-    }
-    
-    int w = 1280; //640; //1280; //320;
-    int h = 720;  //480; //720;  //240;
-    
-    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
-    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
-    
-    //IplImage* img=0;
-    //img = cvQueryFrame( capture );
-    //cvSaveImage("IplImage.JPG",img);
-    
-    Mat mat(h, w, CV_8UC3); //CV_8U); // CV_8UC3);
-    mat = cvQueryFrame(capture);
-    cvtColor(mat, mat, CV_RGB2GRAY);
-    imwrite("MAT.jpg", mat);
-    
-    mat = (mat.reshape(0,1)); // to make it continuous
-    int  imgSize = mat.total()*mat.elemSize();
-    
-    /////////////////
-    
-    int host_port= 1101;
-    char* host_name="192.168.1.35";
-    
-    struct sockaddr_in my_addr;
-    
-    int bytes;
-    
-    int hsock;
-    int * p_int;
-    int err;
-    
-    hsock = socket(AF_INET, SOCK_STREAM, 0);
-    if(hsock == -1){
-        printf("Error initializing socket %d\n",errno);
-        goto FINISH;
-    }
-    
-    p_int = (int*)malloc(sizeof(int));
-    *p_int = 1;
-    
-    if( (setsockopt(hsock, SOL_SOCKET, SO_REUSEADDR, (char*)p_int, sizeof(int)) == -1 )||
-       (setsockopt(hsock, SOL_SOCKET, SO_KEEPALIVE, (char*)p_int, sizeof(int)) == -1 ) ){
-        printf("Error setting options %d\n",errno);
-        free(p_int);
-        goto FINISH;
-    }
-    free(p_int);
-    
-    my_addr.sin_family = AF_INET ;
-    my_addr.sin_port = htons(host_port);
-    
-    memset(&(my_addr.sin_zero), 0, 8);
-    my_addr.sin_addr.s_addr = inet_addr(host_name);
-    if( connect( hsock, (struct sockaddr*)&my_addr, sizeof(my_addr)) == -1 ){
-        if((err = errno) != EINPROGRESS){
-            fprintf(stderr, "Error connecting socket %d\n", errno);
-            goto FINISH;
-        }
-    }
-    
-    if( (bytes=send(hsock, (void *) mat.data, imgSize,0))== -1 ) {
-        fprintf(stderr, "Error sending data %d\n", errno);
-        goto FINISH;
-    }
-    fprintf(stderr, "Bytes sent %d\n", bytes);
-    
-    
-    cvReleaseCapture(&capture);
-    
-    
-FINISH:
-    close(hsock);
-    
-}
-
-
-int screenshot(motion::Message m)
-{
-    
-    // TCP Streaming
-    ScreenshorStructThread.msg = m;
-    
-    // run the streaming client as a separate thread
-    runss = pthread_create(&thread_screenshot, NULL, streamCast, &ScreenshorStructThread);
-    if ( runss  != 0) {
-        cerr << "Unable to create streamVideo thread" << endl;
-        cout << "BroadcastSender pthread_create failed." << endl;
-    }
-    
-    pthread_join(    thread_screenshot,          (void**) &runss);
-    
-    pthread_cancel(thread_screenshot);
-    
-    return 0;
-    
-}
 
 #define BUFLEN 2048
 #define MSGS 5	/* number of messages to send */
@@ -371,7 +189,7 @@ int udpsend(motion::Message m)
     
     printf("Sending packet %d to %s port %d size %d\n", i, server, SERVICE_PORT, m.ByteSize()); //strlen(buf));
     
-
+    
     std::string buf;
     m.SerializeToString(&buf);
     
@@ -420,6 +238,82 @@ int udpsend(motion::Message m)
     return 0;
 }
 
+
+motion::Message takePictureToProto(motion::Message m)
+{
+    
+    cout << "CAPTURING !!!!!!!!!!!!!" << endl;
+    
+    CvCapture* capture = cvCreateCameraCapture(0);
+    if (capture == NULL)
+    {
+        std::cout << "No cam found." << std::endl;
+
+    }
+    
+    int w = 1280; //640; //1280; //320;
+    int h = 720;  //480; //720;  //240;
+    
+    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
+    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
+    
+    IplImage* img=0;
+    img = cvQueryFrame( capture );
+    cvSaveImage("IplImage.JPG",img);
+    
+    Mat mat(h, w, CV_8U); //CV_8U); // CV_8UC3);
+    mat = cvQueryFrame(capture);
+    cvtColor(mat, mat, CV_RGB2GRAY);
+    imwrite("MAT.jpg", mat);
+    
+    //Shared mat
+    picture = mat;
+    
+    cout << "+++++++++++CREATING PROTO++++++++++++++" << endl;
+    
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    
+    m.set_type(motion::Message::TAKE_PICTURE);
+    m.set_serverip(PROTO.serverip());
+    m.set_time(getTimeRasp());
+    m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
+    
+    // We will need to also serialize the width, height, type and size of the matrix
+    int width_s     = mat.cols;
+    int height_s    = mat.rows;
+    int type_s      = mat.type();
+    int size_s      = mat.total() * mat.elemSize();
+    
+    // Initialize a stringstream and write the data
+    int size_init = m.ByteSize();
+    
+    // Write the whole image data
+    std::stringstream ss;
+    ss.write((char*)    (&width_s),     sizeof(int));
+    ss.write((char*)    (&height_s),    sizeof(int));
+    ss.write((char*)    (&type_s),      sizeof(int));
+    ss.write((char*)    (&size_s),      sizeof(int));
+    ss.write((char*)     mat.data,      size_s);
+    
+    //Store into proto
+    m.set_data(ss.str());
+
+    //Write base64 to file for checking.
+    std::string basefile = "base64oish.txt";    
+    std::ofstream out;
+    out.open (basefile.c_str());
+    out << m.data() << "\n";
+    out.close();
+    
+    cout << "ByteSize: " << size_init <<  endl;
+    
+    cvReleaseCapture(&capture);
+    
+    google::protobuf::ShutdownProtobufLibrary();
+    
+    return m;
+}
+
 void * startObserver(void * arg)
 {
     
@@ -428,7 +322,7 @@ void * startObserver(void * arg)
         if (R_PROTO.recognizing())
         {
             
-           sendMessage(R_PROTO, motion::Message::SOCKET_PROTO_TOARRAY);
+           //sendMessage(R_PROTO, motion::Message::SOCKET_PROTO_TOARRAY);
             
             
         } else
@@ -439,31 +333,77 @@ void * startObserver(void * arg)
 
 }
 
-void runCommand(motion::Message::ActionType value)
+std::string IntToString ( int number )
+{
+    std::ostringstream oss;
+    
+    // Works just like cout
+    oss<< number;
+    
+    // Return the underlying string
+    return oss.str();
+}
+
+
+int div_ceil(int numerator, int denominator)
+{
+    std::div_t res = std::div(numerator, denominator);
+    return res.rem ? (res.quot + 1) : res.quot;
+}
+
+
+vector<std::string> splitStringBySize(std::string payload, int package)
+{
+    int s3 = div_ceil(payload.size(), package);
+    vector<std::string> splitted;
+    int pos, length, buff=package;
+    
+    for (int i=1; i<s3; i++)
+    {
+        if (i==1)
+        {
+            pos = 0;
+            length = package;
+        }
+        else if (i==(s3-1))
+        {
+            buff += package;
+            pos = buff;
+            length = payload.size() + 100;
+        }
+        else
+        {
+            buff += package;
+            pos = buff;
+            length = package;
+        }
+    std:string block;
+        block = payload.substr(pos, length);
+        splitted.push_back(block);
+    }
+    
+    return splitted;
+}
+
+
+motion::Message runCommand(motion::Message m)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     
-    cout << "runCommand:: " << value << endl;
+    cout << "runCommand:: " << m.type() << endl;
     
-    switch (value)
+    switch (m.type())
     {
             
-        case motion::Message::RESPONSE_OK:
-        {
-            cout << "RESPONSE OK" << endl;
-            break;
-        }
         case motion::Message::ENGAGE:
         {
             
             cout << "motion::Message::ENGAGE" << endl;
             
-            motion::Message te;
-            
-            te.set_time(T_PROTO.time());
-            te.set_type(motion::Message::ENGAGE);
-            
-            sendMessage(te, motion::Message::SOCKET_PROTO_TOARRAY);
+            m.set_time(T_PROTO.time());
+            m.set_type(motion::Message::ENGAGE);
+            m.set_starttime(T_PROTO.starttime());
+            m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
             
             struct arg_struct arguments;
            
@@ -481,8 +421,8 @@ void runCommand(motion::Message::ActionType value)
         }
         case motion::Message::TAKE_PICTURE:
         {
-            motion::Message picture = takePictureToProto();
-            sendMessage(picture, motion::Message::SOCKET_PROTO_TOARRAY);
+            cout << "motion::Message::TAKE_PICTURE" << endl;
+            m = takePictureToProto(m);
             break;
         }
         case motion::Message::STRM_START:
@@ -497,12 +437,11 @@ void runCommand(motion::Message::ActionType value)
         }
         case motion::Message::GET_TIME:
         {
-            motion::Message m;
             m.set_type(motion::Message::GET_TIME);
             m.set_serverip(PROTO.serverip());
             m.set_time(getTimeRasp());
-            sendMessage(m, motion::Message::SOCKET_PROTO_TOARRAY);
-            
+            m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
+            //sendMessage(m, motion::Message::SOCKET_PROTO_TOARRAY);
             break;
         }
         case motion::Message::SET_TIME:
@@ -553,7 +492,9 @@ void runCommand(motion::Message::ActionType value)
             m.set_type(motion::Message::TIME_SET);
             m.set_serverip(PROTO.serverip());
             m.set_time(getTimeRasp());
-            sendMessage(m, motion::Message::SOCKET_PROTO_TOARRAY);
+            m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
+            
+            //sendMessage(m, motion::Message::SOCKET_PROTO_TOARRAY);
         
             break;
         }
@@ -575,9 +516,11 @@ void runCommand(motion::Message::ActionType value)
             pthread_cancel(thread_recognition);
             break;
         }
+            
     }
-    google::protobuf::ShutdownProtobufLibrary();
     
+    cout << "::2::" << endl;
+    return m;
 }
 
 
@@ -615,9 +558,10 @@ try
   int recvMsgSize;
   std::string message;
     
-  while ((recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_SMALL_SIZE)) > 0)
-  { // Zero means
-     
+
+    while ((recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_SMALL_SIZE)) > 0)
+    {
+
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
       echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
       
@@ -630,7 +574,7 @@ try
       PROTO.Clear();
       PROTO = ms;
       
-      cout <<       "Type Received : " << ms.type() << endl;
+      cout <<  "Type Received : " << ms.type() << endl;
       
       value = ms.type();
       
@@ -642,29 +586,110 @@ try
       T_PROTO.set_serverip(ms.serverip());
       
       cout <<       "From Ip       : " << T_PROTO.serverip() << endl;
-
-      motion::Message mr;
+    
+      if ( ms.type()==motion::Message::RESPONSE_OK || ms.type()==motion::Message::RESPONSE_END )
+      {
+          cout << "RESPONSE :" <<  ms.type() << endl;
+          count_sent_split=0;
+          return ms.type();
+      }
+      else if (ms.type()==motion::Message::RESPONSE_NEXT)
+      {
+          msg = msg_split_vector.at(count_sent_split);
+          cout << "Sending at: " << getTimeRasp() << endl;
+          count_sent_split=0;
+          sock->send(msg.c_str(), msg.size());
+          return ms.type();
+      }
       
-      string dataconnect;
-      int echoStringLen;
-      
-      mr.set_type(motion::Message::RESPONSE_OK);
-      mr.set_serverip(ms.serverip());
-      mr.set_time(getTimeRasp());
-      mr.SerializeToString(&dataconnect);
-      char bts[dataconnect.length()];
-      strcpy(bts, dataconnect.c_str());
-      echoStringLen = sizeof(bts);
-      
-      //Respond socket.
-      sock->send(bts, sizeof(bts));
+      //Elaborate response.
+      motion::Message m;
       
       //Run Command.
-      runCommand(value);
-
-      google::protobuf::ShutdownProtobufLibrary();
+      m = runCommand(ms);
+        
+      cout << "Serializing proto response." << endl;
       
-  }
+      //Initialize objects to serialize.
+      int size = m.ByteSize();
+      char dataresponse[size];
+      string datastr;
+      switch (m.sotype())
+      {
+              
+        case motion::Message::SOCKET_PROTO_TOARRAY:
+            try
+            {
+                cout << "SerializeToArray." << endl;
+                m.SerializeToArray(&dataresponse, size);
+            }
+            catch (google::protobuf::FatalException fe)
+            {
+                std::cout << "PbToZmq " << fe.message() << std::endl;
+            }
+            break;
+              
+          case motion::Message::SOCKET_PROTO_TOSTRING:
+            try
+            {
+                //m.SerializeToString(dataresponse);
+                //char bts[datastr.length()];
+                //strcpy(bts, datastr.c_str());
+                //sock.send(bts, sizeof(bts));
+            }
+            catch (google::protobuf::FatalException fe)
+            {
+                std::cout << "PbToZmq " << fe.message() << std::endl;
+            }
+            break;
+              
+      }
+      
+    std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
+      
+      if ( size > motion::Message::SOCKET_BUFFER_SMALL_SIZE )
+      {
+          
+          cout << "size > SOCKET_BUFFER_SMALL_SIZE " << size <<  endl;
+          msg_split_vector = splitStringBySize(encoded_proto, motion::Message::SOCKET_BUFFER_MEDIUM_SIZE);
+          std::stringstream ss;
+          string header =
+          "PROTO_START_DELIMETER" +
+          IntToString (motion::Message::SPLITTED_MESSAGE)         + ":" +
+          IntToString (motion::Message::SOCKET_PROTO_TOARRAY)     + ":" +
+          IntToString(msg_split_vector.size())                    + ":" +
+          IntToString(size)                                       + ":" +
+          IntToString(motion::Message::SOCKET_BUFFER_SMALL_SIZE)  + ":" +
+          "PROTO_STOP_DELIMETER";
+          msg = header + msg_split_vector.at(count_sent_split);
+          cout << "package: " << 0 << " header size "  << msg.size() <<  endl;
+          count_sent_split++;
+      }
+      else
+      {
+          cout << "size < SOCKET_BUFFER_SMALL_SIZE " << encoded_proto <<  endl;
+          string header =
+          "PROTO_START_DELIMETER" + IntToString (motion::Message::SINGLE_MESSAGE) + ":" +
+          IntToString (motion::Message::SOCKET_PROTO_TOARRAY)                 +
+          "PROTO_STOP_DELIMETER";
+                cout << "encoded_proto : "  << encoded_proto.size() << endl;
+          msg = header + encoded_proto;
+      }
+      
+      //cout << "msg: "  << msg << endl;
+      //cout << "......................................." << endl;
+      
+      google::protobuf::ShutdownProtobufLibrary();
+    
+      cout << "Socket Sent!" << endl;
+      
+      sock->send(msg.c_str(), msg.size());
+    
+         return ms.type();
+        
+    }
+
+    
     
 }
 catch(SocketException &e)
@@ -720,10 +745,13 @@ void * socketThread (void * args)
     
     try {
         TCPServerSocket servSock(tcp_port);   // Socket descriptor for server
+        
         for (;;) {      // Run forever
+            
             cout << "new TCPServerSocket() runt::" << runt << endl;
             // Create separate memory for client argument
             TCPSocket *clntSock = servSock.accept();
+            
             //runt
             runt =  pthread_create(&thread_echo, NULL, ThreadMain, (void *) clntSock);
             if ( runt  != 0)
@@ -735,7 +763,7 @@ void * socketThread (void * args)
             cout << "ThreadMain pthread_create created!!!!!." << endl;
             pthread_join(    thread_echo,               (void**) &runt);
             
-            //cout << "EXECUTING!!!." << endl;
+            cout << "NEW TCP THREAD!!!." << endl;
             //runCommand(resutl_echo);
             
             //cout << "STATUS!!! = " << runt << endl;

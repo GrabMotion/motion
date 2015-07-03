@@ -7,7 +7,7 @@ using namespace google::protobuf::io;
 
 extern motion::Message send_proto;
 motion::Message receive_proto;
-extern void runCommand(motion::Message::ActionType value);
+//extern void runCommand(motion::Message::ActionType value);
 
 StreamListener::StreamListener(){}
 
@@ -65,7 +65,7 @@ void StreamListener::readBody(int csock,google::protobuf::uint32 siz)
     {
         cout << "VALUE!! " << value << " TIME!! " << payload.time() << endl;
     }
-    runCommand(value);
+    //runCommand(value);
     
     google::protobuf::ShutdownProtobufLibrary();
   
