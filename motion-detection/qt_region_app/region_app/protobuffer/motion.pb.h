@@ -75,6 +75,8 @@ enum Message_SocketType {
   Message_SocketType_SOCKET_PLAIN_TEXT = 12,
   Message_SocketType_SPLITTED_MESSAGE = 13,
   Message_SocketType_SINGLE_MESSAGE = 14,
+  Message_SocketType_SOCKET_BUFFER_NANO_SIZE = 1200,
+  Message_SocketType_SOCKET_BUFFER_MINI_SIZE = 10000,
   Message_SocketType_SOCKET_BUFFER_SMALL_SIZE = 50000,
   Message_SocketType_SOCKET_BUFFER_MEDIUM_SIZE = 150000,
   Message_SocketType_SOCKET_BUFFER_BIG_SIZE = 200000,
@@ -350,6 +352,8 @@ class Message : public ::google::protobuf::Message {
   static const SocketType SOCKET_PLAIN_TEXT = Message_SocketType_SOCKET_PLAIN_TEXT;
   static const SocketType SPLITTED_MESSAGE = Message_SocketType_SPLITTED_MESSAGE;
   static const SocketType SINGLE_MESSAGE = Message_SocketType_SINGLE_MESSAGE;
+  static const SocketType SOCKET_BUFFER_NANO_SIZE = Message_SocketType_SOCKET_BUFFER_NANO_SIZE;
+  static const SocketType SOCKET_BUFFER_MINI_SIZE = Message_SocketType_SOCKET_BUFFER_MINI_SIZE;
   static const SocketType SOCKET_BUFFER_SMALL_SIZE = Message_SocketType_SOCKET_BUFFER_SMALL_SIZE;
   static const SocketType SOCKET_BUFFER_MEDIUM_SIZE = Message_SocketType_SOCKET_BUFFER_MEDIUM_SIZE;
   static const SocketType SOCKET_BUFFER_BIG_SIZE = Message_SocketType_SOCKET_BUFFER_BIG_SIZE;

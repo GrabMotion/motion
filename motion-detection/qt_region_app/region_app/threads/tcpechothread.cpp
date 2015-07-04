@@ -10,7 +10,6 @@ TCPEchoThread::TCPEchoThread(QObject *parent): QThread(parent)
 
 using namespace std;
 
-
 void TCPEchoThread::SendEcho (string svradress, string command)
 {
     char * message = new char[command.size() + 1];
@@ -33,7 +32,7 @@ void TCPEchoThread::send (string svradress, char * message)
 
   google::protobuf::uint32 pport = motion::Message::TCP_ECHO_PORT;
 
-  google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_BIG_SIZE;
+  google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 50;
   int echoServPort = pport;
 
   char echoBuffer[buffersize];
@@ -88,6 +87,8 @@ void TCPEchoThread::send (string svradress, char * message)
     ss << echoBuffer;
 
     string str = ss.str();
+
+    std::cout << "Maximum size of a string is " << str.max_size() << "\n";
 
     mnwindow->resutlEcho(str);
 

@@ -129,21 +129,21 @@ private:
     void testBase();
     std::string get_file_contents(std::string filename);
     int pcount = 0;
-    int msg_split_vector_size;
-    int realsize;
-    int packegesize;
-    google::protobuf::uint32 packagesize;
+    //int msg_split_vector_size;
+    //int realsize;
+    //int packegesize;
+    //google::protobuf::uint32 packagesize;
     vector<string> payload_holder;
-    string payload;
-    bool complete;
-    google::protobuf::uint32 packagetype;
-    google::protobuf::uint32 mode;
+    //string payload;
+    //bool complete;
+    //google::protobuf::uint32 packagetype;
+    //google::protobuf::uint32 mode;
     std::vector<std::string> splitProto(const std::string &s, char delim);
     vector<string> splitString(string input, string delimiter);
     std::string ExtractString( std::string source, std::string start, std::string end );
-    std::string strdecoded;
+
     bool finished=false;
-    int payload_size;
+    //int payload_size;
 
     void loadMat(string mat);
 
@@ -152,6 +152,8 @@ private:
     std::string region_resutl;
 
     void setMessageBodyAndSend(motion::Message::ActionType type);
+
+    std::string IntToString ( int number );
 
 public:
     Q_SLOT void setremoteProto(motion::Message payload)

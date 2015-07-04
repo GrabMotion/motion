@@ -124,7 +124,7 @@ void protobuf_AddDesc_motion_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014motion.proto\022\006motion\"\302\010\n\007Message\0220\n\004ty"
+    "\n\014motion.proto\022\006motion\"\376\010\n\007Message\0220\n\004ty"
     "pe\030\001 \002(\0162\032.motion.Message.ActionType:\006EN"
     "GAGE\022\014\n\004time\030\002 \001(\t\022\014\n\004data\030\003 \001(\014\022\023\n\013data"
     "_amount\030\004 \001(\005\022\022\n\ndata_total\030\005 \001(\005\022\020\n\010ser"
@@ -144,14 +144,16 @@ void protobuf_AddDesc_motion_2eproto() {
     "\007\022\017\n\nSTRM_START\020\361\007\022\016\n\tSTRM_STOP\020\362\007\022\021\n\014TA"
     "KE_PICTURE\020\363\007\022\020\n\013DISSCONNECT\020\364\007\022\020\n\013RESPO"
     "NSE_OK\020\310\001\022\022\n\rRESPONSE_NEXT\020\311\001\022\021\n\014RESPONS"
-    "E_END\020\312\001\"\260\002\n\nSocketType\022\031\n\025SOCKET_PROTO_"
+    "E_END\020\312\001\"\354\002\n\nSocketType\022\031\n\025SOCKET_PROTO_"
     "TOSTRING\020\n\022\030\n\024SOCKET_PROTO_TOARRAY\020\013\022\025\n\021"
     "SOCKET_PLAIN_TEXT\020\014\022\024\n\020SPLITTED_MESSAGE\020"
-    "\r\022\022\n\016SINGLE_MESSAGE\020\016\022\036\n\030SOCKET_BUFFER_S"
-    "MALL_SIZE\020\320\206\003\022\037\n\031SOCKET_BUFFER_MEDIUM_SI"
-    "ZE\020\360\223\t\022\034\n\026SOCKET_BUFFER_BIG_SIZE\020\300\232\014\022\022\n\r"
-    "TCP_ECHO_PORT\020\222\'\022\027\n\022TCP_STREAMING_PORT\020\234"
-    "\'\022\r\n\010UDP_PORT\020\246\'\022\021\n\014TCP_MSG_PORT\020\260\'", 1115);
+    "\r\022\022\n\016SINGLE_MESSAGE\020\016\022\034\n\027SOCKET_BUFFER_N"
+    "ANO_SIZE\020\260\t\022\034\n\027SOCKET_BUFFER_MINI_SIZE\020\220"
+    "N\022\036\n\030SOCKET_BUFFER_SMALL_SIZE\020\320\206\003\022\037\n\031SOC"
+    "KET_BUFFER_MEDIUM_SIZE\020\360\223\t\022\034\n\026SOCKET_BUF"
+    "FER_BIG_SIZE\020\300\232\014\022\022\n\rTCP_ECHO_PORT\020\222\'\022\027\n\022"
+    "TCP_STREAMING_PORT\020\234\'\022\r\n\010UDP_PORT\020\246\'\022\021\n\014"
+    "TCP_MSG_PORT\020\260\'", 1175);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "motion.proto", &protobuf_RegisterTypes);
   Message::default_instance_ = new Message();
@@ -228,10 +230,12 @@ bool Message_SocketType_IsValid(int value) {
     case 12:
     case 13:
     case 14:
+    case 1200:
     case 5010:
     case 5020:
     case 5030:
     case 5040:
+    case 10000:
     case 50000:
     case 150000:
     case 200000:
@@ -247,6 +251,8 @@ const Message_SocketType Message::SOCKET_PROTO_TOARRAY;
 const Message_SocketType Message::SOCKET_PLAIN_TEXT;
 const Message_SocketType Message::SPLITTED_MESSAGE;
 const Message_SocketType Message::SINGLE_MESSAGE;
+const Message_SocketType Message::SOCKET_BUFFER_NANO_SIZE;
+const Message_SocketType Message::SOCKET_BUFFER_MINI_SIZE;
 const Message_SocketType Message::SOCKET_BUFFER_SMALL_SIZE;
 const Message_SocketType Message::SOCKET_BUFFER_MEDIUM_SIZE;
 const Message_SocketType Message::SOCKET_BUFFER_BIG_SIZE;

@@ -270,11 +270,11 @@ color: rgb(255, 252, 253);</string>
      <rect>
       <x>19</x>
       <y>526</y>
-      <width>686</width>
+      <width>795</width>
       <height>32</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0,0,1,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,0,0,0">
      <item>
       <widget class="QPushButton" name="stream">
        <property name="text">
@@ -286,6 +286,16 @@ color: rgb(255, 252, 253);</string>
       <widget class="QPushButton" name="picture">
        <property name="text">
         <string>Picture</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QProgressBar" name="mat_progress">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="value">
+        <number>24</number>
        </property>
       </widget>
      </item>
