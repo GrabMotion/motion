@@ -90,11 +90,12 @@ std::string local_ip;
 string NETWORK_IP;
 vector<std::string> msg_split_vector;
 motion::Message::ActionType value_response;
-int count_sent_split;
+int count_sent_split=0;
 std::string msg;
 vector<std::string> splitStringBySize(std::string payload, int package);
 int div_ceil(int numerator, int denominator);
 std::string IntToString ( int number );
+std::string fixedLength(int value, int digits);
 
 //Protobuffer
 motion::Message PROTO;
@@ -295,8 +296,12 @@ motion::Message takePictureToProto(motion::Message m)
     ss.write((char*)    (&size_s),      sizeof(int));
     ss.write((char*)     mat.data,      size_s);
     
+    std::string ssstring = ss.str();
+    
+    std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(ssstring.c_str()), ssstring.length());
+    
     //Store into proto
-    m.set_data(ss.str());
+    m.set_data(oriencoded.c_str());
 
     //Write base64 to file for checking.
     std::string basefile = "base64oish.txt";    
@@ -523,13 +528,30 @@ motion::Message runCommand(motion::Message m)
     return m;
 }
 
+std::string fixedLength(int value, int digits)
+{
+    unsigned int uvalue = value;
+    if (value < 0) {
+        uvalue = -uvalue;
+    }
+    std::string result;
+    while (digits-- > 0) {
+        result += ('0' + uvalue % 10);
+        uvalue /= 10;
+    }
+    if (value < 0) {
+        result += '-';
+    }
+    std::reverse(result.begin(), result.end());
+    return result;
+}
 
 // TCP client handling function
 motion::Message::ActionType HandleTCPClient(TCPSocket *sock)
 {
     
   motion::Message::ActionType value;
-  cout << "Handling client ";
+  /*cout << "Handling client ";
   string from;
   try {
      from = sock->getForeignAddress();
@@ -545,7 +567,7 @@ motion::Message::ActionType HandleTCPClient(TCPSocket *sock)
   } catch (SocketException &e) {
     cerr << "Unable to get foreign port" << endl;
   }
-  cout << " with thread " << pthread_self() << endl;
+  cout << " with thread " << pthread_self() << endl;*/
 
   int bytesReceived = 0;              // Bytes read on each recv()
     int totalBytesReceived = 0;         // Total bytes read
@@ -554,12 +576,12 @@ try
 {
     
   // Send received string and receive again until the end of transmission
-  char echoBuffer[motion::Message::SOCKET_BUFFER_SMALL_SIZE];
+  char echoBuffer[motion::Message::SOCKET_BUFFER_NANO_SIZE + 50];
   int recvMsgSize;
   std::string message;
     
 
-    while ((recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_SMALL_SIZE)) > 0)
+    while ((recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_NANO_SIZE + 50)) > 0)
     {
 
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
@@ -574,18 +596,18 @@ try
       PROTO.Clear();
       PROTO = ms;
       
-      cout <<  "Type Received : " << ms.type() << endl;
+      cout <<  "Type Received  : " << ms.type() << endl;
       
       value = ms.type();
       
       if (ms.has_time())
       {
-            cout << "Time          : " << ms.time() << endl;
+            cout << "Time           : " << ms.time() << endl;
       }
       
       T_PROTO.set_serverip(ms.serverip());
       
-      cout <<       "From Ip       : " << T_PROTO.serverip() << endl;
+      cout <<       "From Ip        : " << T_PROTO.serverip() << endl;
     
       if ( ms.type()==motion::Message::RESPONSE_OK || ms.type()==motion::Message::RESPONSE_END )
       {
@@ -595,10 +617,20 @@ try
       }
       else if (ms.type()==motion::Message::RESPONSE_NEXT)
       {
-          msg = msg_split_vector.at(count_sent_split);
-          cout << "Sending at: " << getTimeRasp() << endl;
-          count_sent_split=0;
+          string header =
+          "PROTO_START_DELIMETER" +
+            fixedLength(msg_split_vector.size(),3)  + "::" +
+            fixedLength(count_sent_split,3)         + "::" +
+          "PROTO_STOP_DELIMETER";
+          msg = header + msg_split_vector.at(count_sent_split);
+
           sock->send(msg.c_str(), msg.size());
+          
+          cout << "SENDING PACKAGE: " << count_sent_split << " of: " << msg_split_vector.size() << endl;
+          cout << "msg            : " << msg.substr (0,100) << "......" << endl;
+        
+          count_sent_split++;
+          
           return ms.type();
       }
       
@@ -646,38 +678,49 @@ try
       }
       
     std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
+        
+        
       
-      if ( size > motion::Message::SOCKET_BUFFER_SMALL_SIZE )
+        cout << "ENCODED PROTO_:::::::::::::::: " << encoded_proto.size() << endl;
+        
+      if ( size > motion::Message::SOCKET_BUFFER_NANO_SIZE )
       {
           
-          cout << "size > SOCKET_BUFFER_SMALL_SIZE " << size <<  endl;
-          msg_split_vector = splitStringBySize(encoded_proto, motion::Message::SOCKET_BUFFER_MEDIUM_SIZE);
-          std::stringstream ss;
+          msg_split_vector = splitStringBySize(encoded_proto, motion::Message::SOCKET_BUFFER_NANO_SIZE);
+          
           string header =
           "PROTO_START_DELIMETER" +
-          IntToString (motion::Message::SPLITTED_MESSAGE)         + ":" +
-          IntToString (motion::Message::SOCKET_PROTO_TOARRAY)     + ":" +
-          IntToString(msg_split_vector.size())                    + ":" +
-          IntToString(size)                                       + ":" +
-          IntToString(motion::Message::SOCKET_BUFFER_SMALL_SIZE)  + ":" +
+            fixedLength(msg_split_vector.size(),3)  + "::" +
+            fixedLength(count_sent_split,3)         + "::" +
           "PROTO_STOP_DELIMETER";
           msg = header + msg_split_vector.at(count_sent_split);
-          cout << "package: " << 0 << " header size "  << msg.size() <<  endl;
+        
+          //std::string basefile = "encoded_proto_" +  IntToString(count_sent_split) + ".txt";
+          std::string basefile = "encoded_proto.txt";
+          std::ofstream out;
+          out.open (basefile.c_str());
+          out << encoded_proto << "\n";
+          out.close();
+          
+          cout << "SENDING PACKAGE: " << count_sent_split << " of: " << msg_split_vector.size() << endl;
+          cout << "msg            : " << msg.substr (0,100) << "......" << endl;
+          
           count_sent_split++;
+          
       }
       else
       {
-          cout << "size < SOCKET_BUFFER_SMALL_SIZE " << encoded_proto <<  endl;
           string header =
-          "PROTO_START_DELIMETER" + IntToString (motion::Message::SINGLE_MESSAGE) + ":" +
-          IntToString (motion::Message::SOCKET_PROTO_TOARRAY)                 +
+          
+          "PROTO_START_DELIMETER"
+          "001"
+          "::"
+          "000"
+          "::"
           "PROTO_STOP_DELIMETER";
-                cout << "encoded_proto : "  << encoded_proto.size() << endl;
+          
           msg = header + encoded_proto;
       }
-      
-      //cout << "msg: "  << msg << endl;
-      //cout << "......................................." << endl;
       
       google::protobuf::ShutdownProtobufLibrary();
     
@@ -704,7 +747,7 @@ catch(SocketException &e)
 void * ThreadMain(void *clntSock)
 {
     
-    cout << "ThreadMain:: " << endl;
+    //cout << "ThreadMain:: " << endl;
 
   // Guarantees that thread resources are deallocated upon return
   pthread_detach(pthread_self());
@@ -717,7 +760,7 @@ void * ThreadMain(void *clntSock)
     
     pthread_mutex_unlock(&echo_mutex);
 
-    cout << "DELETING:: " << endl;
+    //cout << "DELETING:: " << endl;
     
     delete (TCPSocket *) clntSock;
     //pthread_exit((void *) resutl);
@@ -748,7 +791,7 @@ void * socketThread (void * args)
         
         for (;;) {      // Run forever
             
-            cout << "new TCPServerSocket() runt::" << runt << endl;
+            //cout << "new socket: " << runt << endl;
             // Create separate memory for client argument
             TCPSocket *clntSock = servSock.accept();
             
@@ -760,10 +803,10 @@ void * socketThread (void * args)
                 cout << "ThreadM:::.in pthread_create failed." << endl;
                 exit(1);
             }
-            cout << "ThreadMain pthread_create created!!!!!." << endl;
+            //cout << "ThreadMain pthread_create created!!!!!." << endl;
             pthread_join(    thread_echo,               (void**) &runt);
-            
-            cout << "NEW TCP THREAD!!!." << endl;
+            cout << "-------------------------------" << endl;
+            //cout << "NEW TCP THREAD!!!." << endl;
             //runCommand(resutl_echo);
             
             //cout << "STATUS!!! = " << runt << endl;
