@@ -92,7 +92,6 @@ vector<std::string> msg_split_vector;
 motion::Message::ActionType value_response;
 int count_sent_split=0;
 std::string msg;
-vector<std::string> splitStringBySize(std::string payload, int package);
 int div_ceil(int numerator, int denominator);
 std::string IntToString ( int number );
 std::string fixedLength(int value, int digits);
@@ -356,41 +355,6 @@ int div_ceil(int numerator, int denominator)
     return res.rem ? (res.quot + 1) : res.quot;
 }
 
-
-vector<std::string> splitStringBySize(std::string payload, int package)
-{
-    int s3 = div_ceil(payload.size(), package);
-    vector<std::string> splitted;
-    int pos, length, buff=package;
-    
-    for (int i=1; i<s3; i++)
-    {
-        if (i==1)
-        {
-            pos = 0;
-            length = package;
-        }
-        else if (i==(s3-1))
-        {
-            buff += package;
-            pos = buff;
-            length = payload.size() + 100;
-        }
-        else
-        {
-            buff += package;
-            pos = buff;
-            length = package;
-        }
-    std:string block;
-        block = payload.substr(pos, length);
-        splitted.push_back(block);
-    }
-    
-    return splitted;
-}
-
-
 motion::Message runCommand(motion::Message m)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -618,16 +582,17 @@ try
       else if (ms.type()==motion::Message::RESPONSE_NEXT)
       {
           string header =
-          "PROTO_START_DELIMETER" +
-            fixedLength(msg_split_vector.size(),3)  + "::" +
-            fixedLength(count_sent_split,3)         + "::" +
-          "PROTO_STOP_DELIMETER";
+          "PROSTA" +
+            fixedLength(msg_split_vector.size(),4)  + "::" +
+            fixedLength(count_sent_split,4)         + "::" +
+          "PROSTO";
           msg = header + msg_split_vector.at(count_sent_split);
 
           sock->send(msg.c_str(), msg.size());
           
           cout << "SENDING PACKAGE: " << count_sent_split << " of: " << msg_split_vector.size() << endl;
-          cout << "msg            : " << msg.substr (0,100) << "......" << endl;
+          cout << "Pay Size       :" << msg_split_vector.at(count_sent_split).size() << endl;
+          cout << "msg            : " << msg.substr (0,30) << "......" << endl;
         
           count_sent_split++;
           
@@ -685,17 +650,22 @@ try
         
       if ( size > motion::Message::SOCKET_BUFFER_NANO_SIZE )
       {
+          google::protobuf::uint32 chunck_size = motion::Message::SOCKET_BUFFER_NANO_SIZE;
           
-          msg_split_vector = splitStringBySize(encoded_proto, motion::Message::SOCKET_BUFFER_NANO_SIZE);
+          for (unsigned i = 0; i < encoded_proto.length(); i += chunck_size)
+          {
+              msg_split_vector.push_back(encoded_proto.substr(i, chunck_size));
+          }
           
+          //msg_split_vector = splitStringBySize(encoded_proto, motion::Message::SOCKET_BUFFER_NANO_SIZE);
+        
           string header =
-          "PROTO_START_DELIMETER" +
-            fixedLength(msg_split_vector.size(),3)  + "::" +
-            fixedLength(count_sent_split,3)         + "::" +
-          "PROTO_STOP_DELIMETER";
+          "PROSTA" +
+            fixedLength(msg_split_vector.size(),4)  + "::" +
+            fixedLength(count_sent_split,4)         + "::" +
+          "PROSTO";
           msg = header + msg_split_vector.at(count_sent_split);
         
-          //std::string basefile = "encoded_proto_" +  IntToString(count_sent_split) + ".txt";
           std::string basefile = "encoded_proto.txt";
           std::ofstream out;
           out.open (basefile.c_str());
@@ -703,7 +673,9 @@ try
           out.close();
           
           cout << "SENDING PACKAGE: " << count_sent_split << " of: " << msg_split_vector.size() << endl;
-          cout << "msg            : " << msg.substr (0,100) << "......" << endl;
+          cout << "Pay Size       : " << msg_split_vector.at(count_sent_split).size() << endl;
+          
+          cout << "msg            : " << msg.substr (0,30) << "......" << endl;
           
           count_sent_split++;
           
@@ -712,12 +684,12 @@ try
       {
           string header =
           
-          "PROTO_START_DELIMETER"
-          "001"
+          "PROSTA"
+          "0001"
           "::"
-          "000"
+          "0000"
           "::"
-          "PROTO_STOP_DELIMETER";
+          "PROSTO";
           
           msg = header + encoded_proto;
       }

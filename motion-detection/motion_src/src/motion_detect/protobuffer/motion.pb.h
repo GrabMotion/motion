@@ -75,7 +75,7 @@ enum Message_SocketType {
   Message_SocketType_SOCKET_PLAIN_TEXT = 12,
   Message_SocketType_SPLITTED_MESSAGE = 13,
   Message_SocketType_SINGLE_MESSAGE = 14,
-  Message_SocketType_SOCKET_BUFFER_NANO_SIZE = 1200,
+  Message_SocketType_SOCKET_BUFFER_NANO_SIZE = 1250,
   Message_SocketType_SOCKET_BUFFER_MINI_SIZE = 10000,
   Message_SocketType_SOCKET_BUFFER_SMALL_SIZE = 50000,
   Message_SocketType_SOCKET_BUFFER_MEDIUM_SIZE = 150000,
