@@ -32,7 +32,7 @@ void TCPEchoThread::send (string svradress, char * message)
 
   google::protobuf::uint32 pport = motion::Message::TCP_ECHO_PORT;
 
-  google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 50;
+  google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 24;
   int echoServPort = pport;
 
   char echoBuffer[buffersize];

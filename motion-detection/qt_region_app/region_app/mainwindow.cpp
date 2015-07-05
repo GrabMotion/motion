@@ -633,6 +633,7 @@ std::string MainWindow::get_file_contents(std::string filename)
 void MainWindow::testBase()
 {
 
+
     /*GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     ::motion::Message testm;
@@ -1001,8 +1002,8 @@ void MainWindow::resutlEcho(string str)
 
     string decoded_proto;
 
-    std::string del_1  = "PROTO_START_DELIMETER";
-    std::string del_2  = "PROTO_STOP_DELIMETER";
+    std::string del_1  = "PROSTA";
+    std::string del_2  = "PROSTO";
 
     std::string strdecoded;
     int total__packages;
@@ -1021,11 +1022,16 @@ void MainWindow::resutlEcho(string str)
        current_package = atoi(vpay.at(2).c_str());
 
        int del_pos = str.find(del_2);
-       int until = str.size() - 50;
+       int until = str.size() - 24;
 
        const string & ppayload = str.substr((del_pos+del_2.size()), until);
 
        payload_holder.push_back(ppayload);
+
+       cout << "Rerecving PACKAGE: " << current_package << " of: " << total__packages << endl;
+       cout << "Pay Size       :" << ppayload.size() << endl;
+       cout << "msg            : " << ppayload.substr (0,30) << "......" << endl;
+       cout << "............................................" << endl;
 
        if (current_package==0)
        {
@@ -1033,6 +1039,7 @@ void MainWindow::resutlEcho(string str)
            ui->mat_progress->setMaximum(total__packages);
        }
        ui->mat_progress->setValue(current_package);
+       QApplication::processEvents();
 
        if (total__packages==(current_package+1))
        {
@@ -1080,6 +1087,9 @@ void MainWindow::resutlEcho(string str)
         mm.ParseFromArray(strdecoded.c_str(), strdecoded.size());
 
         remoteProto(mm);
+
+        ui->mat_progress->setValue(0);
+        QApplication::processEvents();
 
         finished=false;
 
