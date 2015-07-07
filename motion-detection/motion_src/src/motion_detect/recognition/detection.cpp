@@ -11,6 +11,8 @@
 //  Copyright (c) 2014 Cedric Verstraeten. All rights reserved.
 //
 
+#include "../recognition/detection.h"
+
 #include <iostream>
 #include <fstream>
 #include <time.h>
@@ -20,8 +22,10 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
+
 #include "../tinyxml/tinyxml.h"
 #include "../tinyxml/tinystr.h"
 #include <string>
@@ -31,40 +35,8 @@
 #include <unistd.h>
 #include <cstring>
 
-#include "../recognition/detection.h"
-#include "../protobuffer/motion.pb.h"
-#include "../b64/base64.h"
-
 using namespace std;
 using namespace cv;
-
-std::string savePointsAsXMLString(std::vector<cv::Point2f> &contour)
-{
-    
-    TiXmlDocument doc;
-    TiXmlDeclaration decl("1.0", "", "");
-    doc.InsertEndChild(decl);
-    for(int i = 0; i <= contour.size(); i++)
-    {
-        TiXmlElement point("point");
-        point.SetAttribute("x",contour[i].x);
-        point.SetAttribute("y",contour[i].y);
-        doc.InsertEndChild(point);
-    }
-    //if(doc.SaveFile(xml.c_str()))
-    //    cout << "file saved succesfully.\n";
-    //else
-    //    cout << "file not saved, something went wrong!\n";
-    
-    // Declare a printer
-    TiXmlPrinter printer;
-    
-    // attach it to the document you want to convert in to a std::string
-    doc.Accept(&printer);
-    
-    // Create a std::string and copy your document data in to the string
-    return printer.CStr();
-}
 
 std::vector<cv::Point2f> stringToVectorPoint2f(std::string storedcoord)
 {
@@ -98,7 +70,7 @@ std::vector<cv::Point2f> stringToVectorPoint2f(std::string storedcoord)
     return coordinates;
 }
 
-std::string processRegionString(std::string coordstring)
+vector<Point2f> processRegionString(std::string coordstring)
 {
     vector<Point2f> cvectro = stringToVectorPoint2f(coordstring);
     vector<Point2f> insideContour;
@@ -112,31 +84,8 @@ std::string processRegionString(std::string coordstring)
         }
     }
     cout << "# points inside contour: " << insideContour.size() << endl;
-    return savePointsAsXMLString(insideContour);
+    return insideContour;
 }
-
-/*void parseRegionXML(string file_region, vector<Point2f> &region)
-{
-    TiXmlDocument doc(file_region.c_str());
-    if(doc.LoadFile()) // ok file loaded correctly
-    {
-        TiXmlElement * point = doc.FirstChildElement("point");
-        int x, y;
-        while (point)
-        {
-            point->Attribute("x",&x);
-            point->Attribute("y",&y);
-            Point2f p(x,y);
-            region.push_back(p);
-            point = point->NextSiblingElement("point");
-        }
-    }
-    else
-    {
-        exit(1);
-    }
-    std::cout << "XML Reguion loaded." << std::endl;
-}*/
 
 char * CharArrayPlusChar( const char *array, char c )
 {
@@ -326,32 +275,83 @@ inline bool createDirectoryTree(
     return true;
 }
 
+// Check if there is motion in the result matrix
+// count the number of changes and return.
+inline int detectMotion(const cv::Mat & motionmat, cv::Mat & result, cv::Mat & result_cropped,
+                        int x_start, int x_stop, int y_start, int y_stop,
+                        int max_deviation,
+                        cv::Scalar & color)
+{
+    // calculate the standard deviation
+    Scalar mean, stddev;
+    meanStdDev(motionmat, mean, stddev);
+    // if not to much changes then the motion is real (neglect agressive snow, temporary sunlight)
+    if(stddev[0] < max_deviation)
+    {
+        int number_of_changes = 0;
+        int min_x = motionmat.cols, max_x = 0;
+        int min_y = motionmat.rows, max_y = 0;
+        // loop over image and detect changes
+        for(int j = y_start; j < y_stop; j+=2){ // height
+            for(int i = x_start; i < x_stop; i+=2){ // width
+                // check if at pixel (j,i) intensity is equal to 255
+                // this means that the pixel is different in the sequence
+                // of images (prev_frame, current_frame, next_frame)
+                if(static_cast<int>(motionmat.at<uchar>(j,i)) == 255)
+                {
+                    number_of_changes++;
+                    if(min_x>i) min_x = i;
+                    if(max_x<i) max_x = i;
+                    if(min_y>j) min_y = j;
+                    if(max_y<j) max_y = j;
+                }
+            }
+        }
+        if(number_of_changes){
+            //check if not out of bounds
+            if(min_x-10 > 0) min_x -= 10;
+            if(min_y-10 > 0) min_y -= 10;
+            if(max_x+10 < result.cols-1) max_x += 10;
+            if(max_y+10 < result.rows-1) max_y += 10;
+            // draw rectangle round the changed pixel
+            Point x(min_x,min_y);
+            Point y(max_x,max_y);
+            Rect rect(x,y);
+            Mat cropped = result(rect);
+            cropped.copyTo(result_cropped);
+            rectangle(result,rect,color,1);
+        }
+        return number_of_changes;
+    }
+    return 0;
+}
 
 // Check if there is motion in the result matrix
 // count the number of changes and return.
-inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
-                        vector<Point2f> & region,
+inline int detectMotionRegion(const cv::Mat & motionmat,
+                        cv::Mat & result,
+                        cv::Mat & result_cropped,
+                        std::vector<cv::Point2f> & region,
                         int max_deviation,
-                        Scalar & color)
+                        cv::Scalar & color)
 {
     
     // calculate the standard deviation
     Scalar mean, stddev;
-    meanStdDev(motion, mean, stddev);
+    meanStdDev(motionmat, mean, stddev);
     
     // if not to much changes then the motion is real (neglect agressive snow, temporary sunlight)
     if(stddev[0] < max_deviation)
     {
         int number_of_changes = 0;
-        int min_x = motion.cols, max_x = 0;
-        int min_y = motion.rows, max_y = 0;
+        int min_x = motionmat.cols, max_x = 0;
+        int min_y = motionmat.rows, max_y = 0;
         // loop over image and detect changes
         int x, y, size = region.size();
-        
         for(int i = 0; i < size; i++){ // loop over region
             x = region[i].x;
             y = region[i].y;
-            if(static_cast<int>(motion.at<uchar>(y,x)) == 255)
+            if(static_cast<int>(motionmat.at<uchar>(y,x)) == 255)
             {
                 number_of_changes++;
                 if(min_x>x) min_x = x;
@@ -394,48 +394,66 @@ struct arg_struct
 void * startRecognition(void * arg)
 {
     
+    cout << "START RECOGNITION." << endl;
+    
     pthread_mutex_t detectMutex;
     pthread_mutex_init(&detectMutex, 0);
     
-    struct arg_struct *args = (struct arg_struct *) arg;
+    //struct arg_struct *args = (struct arg_struct *) arg;
+    //cout << "Passing obj: " << args->message.type() << endl;
     
     is_recognizing = false;
     
-    motion::Message m = args->message;
     R_PROTO.Clear();
-    R_PROTO = m;
-    R_PROTO.set_recognizing(false);
+    R_PROTO = PROTO;
     
     //Region
-    std::string rcords = R_PROTO.regioncoords();
-    std::string file_region = processRegionString(rcords);
+    bool has_region;
+    std::vector<cv::Point2f> region;
+    if (R_PROTO.has_region())
+    {
+        cout << "Has region." << endl;
+        if (R_PROTO.has_regioncoords())
+        {
+            cout << "Has regioncoords." << endl;
+            std::string rc = R_PROTO.regioncoords();
+            cout << "rc." << rc << endl;
+            std::string rcoords = base64_decode(rc);
+            cout << "rcoords." << rcoords << endl;
+            region = processRegionString(rcoords);
+            cout << "REGION SIZE :: " << region.size() << endl;
+            if (region.size()>0)
+                has_region = true;
+            else
+                has_region = false;
+        }
+    }
     
-    std::cout << "file_region: " << file_region << endl;
-
-    //Write base64 to file for checking.
-    std::string basefile = "file_region.txt";
-    std::ofstream out;
-    out.open (basefile.c_str());
-    out << file_region << "\n";
-    out.close();
+    std::string instancecode;
+    if (R_PROTO.has_codename())
+    {
+        cout << "Has code." << endl;
+        std::string instancecode = R_PROTO.codename();
+    }
+    if (instancecode.empty())
+        instancecode = "Prueba";
     
     bool writeImages = R_PROTO.storeimage();
     bool writeCroop  = R_PROTO.storecrop();
     bool send_number_detected = true;
     
-    std::cout << "file_region: " << file_region << endl;
     std::cout << "writeImages: " << writeImages << endl;
     std::cout << "writeCroop: " << writeCroop << endl;
     
     const string DIR        = "../../src/motion_web/pics/";          // directory where the images will be stored
-    const string REGION     = "../../src/motion_web/pics/region/";   // directory where the regios are stored
+    //const string REGION     = "../../src/motion_web/pics/region/";   // directory where the regios are stored
     const string EXT        = ".jpg";                           // extension of the images
     const string EXT_DATA   = ".xml";                           // extension of the data
     const int DELAY         = 500;                              // in mseconds, take a picture every 1/2 second
     const string LOG    = "../../src/motion_web/log";           // log for the export
     const string LOGCLEAR = LOG + "/log_remove";    
-    vector<Point2f> region;                                     // region vector storing xml region
-       
+                                        // region vector storing xml region
+    
     // fps calculated using number of frames / seconds
     double fps; 
     // start and end times
@@ -473,8 +491,8 @@ void * startRecognition(void * arg)
     
     // Set up camera
     CvCapture * camera = cvCaptureFromCAM(CV_CAP_ANY);
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 640); //1280); // width of viewport of camera
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 480); //720); // height of ...
+    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 640); //640); //1280); // width of viewport of camera
+    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 480); //480); //720); // height of ...
     
     // Take images and convert them to gray
     Mat result, result_cropped;
@@ -490,7 +508,7 @@ void * startRecognition(void * arg)
     // result, the result of and operation, calculated on d1 and d2
     // number_of_changes, the amount of changes in the result matrix.
     // color, the color for drawing the rectangle when something has changed.
-    Mat d1, d2, motion;
+    Mat d1, d2, motionmat;
     int number_of_changes, number_of_sequence = 0, count_sequence_cero = 0, count_save_image = 0;
     Scalar mean_, color(0,255,255); // yellow 
     
@@ -528,6 +546,8 @@ void * startRecognition(void * arg)
     // take as many pictures you want..
     while (true)
     {
+        
+        
         R_PROTO.set_recognizing(true);
         countWhile++;
         
@@ -542,16 +562,24 @@ void * startRecognition(void * arg)
         // threshold image, low differences are ignored (ex. contrast change due to sunlight)
         absdiff(prev_frame, next_frame, d1);
         absdiff(next_frame, current_frame, d2);
-        bitwise_and(d1, d2, motion);
-        threshold(motion, motion, 35, 255, CV_THRESH_BINARY);
-        erode(motion, motion, kernel_ero);
+        bitwise_and(d1, d2, motionmat);
+        threshold(motionmat, motionmat, 35, 255, CV_THRESH_BINARY);
+        erode(motionmat, motionmat, kernel_ero);
         
         //number_of_changes = detectMotion(motion, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
         
         
             pthread_mutex_lock(&detectMutex);
         
-                number_of_changes = detectMotion(motion, result, result_cropped, region, max_deviation, color);
+        cout << "region size: " << region.size() << endl;
+                if (!has_region)
+                {
+                    number_of_changes = detectMotion(motionmat, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
+                }
+                else
+                {
+                    number_of_changes = detectMotionRegion(motionmat, result, result_cropped, region, max_deviation, color);
+                }
                 resutl_watch_detected = number_of_changes;
         
                 std::cout << "number_of_changes = " << number_of_changes << std::endl;

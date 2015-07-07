@@ -102,10 +102,11 @@ motion::Message R_PROTO;
 motion::Message T_PROTO;
 motion::Message takePictureToProto(motion::Message);
 
-//Capture
+//Recognition
 bool stop_capture;
 bool is_recognizing;
 cv::Mat picture;
+bool stop_recognizing;
 
 //UDP
 int udpsend(motion::Message m);
@@ -251,8 +252,8 @@ motion::Message takePictureToProto(motion::Message m)
 
     }
     
-    int w = 1280; //640; //1280; //320;
-    int h = 720;  //480; //720;  //240;
+    int w = 640; //640; //1280; //320;
+    int h = 480;  //480; //720;  //240;
     
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
@@ -385,25 +386,28 @@ motion::Message runCommand(motion::Message m)
             }
             
             pthread_join( thread_recognition, (void**) &runr);
-            
-            break;
         }
+        break;
         case motion::Message::TAKE_PICTURE:
         {
             cout << "motion::Message::TAKE_PICTURE" << endl;
             m = takePictureToProto(m);
-            break;
+            
         }
+        break;
         case motion::Message::STRM_START:
         {
             netcvc();
-            break;
+            m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
+            
         }
+        break;
         case motion::Message::STRM_STOP:
         {
             stop_capture = true;
-            break;
+            
         }
+        break;
         case motion::Message::GET_TIME:
         {
             m.set_type(motion::Message::GET_TIME);
@@ -411,8 +415,8 @@ motion::Message runCommand(motion::Message m)
             m.set_time(getTimeRasp());
             m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
             //sendMessage(m, motion::Message::SOCKET_PROTO_TOARRAY);
-            break;
         }
+        break;
         case motion::Message::SET_TIME:
         {
             struct tm tmremote;
@@ -464,31 +468,41 @@ motion::Message runCommand(motion::Message m)
             m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
             
             //sendMessage(m, motion::Message::SOCKET_PROTO_TOARRAY);
-        
-            break;
+    
         }
+        break;
         case motion::Message::REC_START:
         {
-            struct arg_struct arguments;
-            arguments.message = PROTO;
             
-            runr = pthread_create(&thread_recognition, NULL, startRecognition, (void*) &arguments);
+            //std::string  coords = PROTO.regioncoords();
+            //std::string coords_decoded = base64_decode(coords);
+            //cout << "coords_decoded     : " << coords_decoded << endl;
+            //struct arg_struct args;
+            //args.message = PROTO;
+        
+            runr = pthread_create(&thread_recognition, NULL, startRecognition, NULL); //(void*) &args);
             if ( runr  != 0) {
                 cerr << "Unable to create thread" << endl;
                 cout << "startRecognition pthread_create failed." << endl;
             }
-            pthread_join( thread_recognition, (void**) &runr);
-            break;
+            
+            //pthread_join( thread_recognition, (void**) &runr);
+            
+            //while (!R_PROTO.recognizing())
+            //{
+            //    cout << "WAITING FOR RECOGNITION" << endl;
+            //}
+            
         }
+        break;
         case motion::Message::REC_STOP:
         {
-            pthread_cancel(thread_recognition);
-            break;
-        }
+            stop_recognizing = true;
             
+        }
+        break;
     }
-    
-    cout << "::2::" << endl;
+
     return m;
 }
 
@@ -540,23 +554,33 @@ try
 {
     
   // Send received string and receive again until the end of transmission
-  char echoBuffer[motion::Message::SOCKET_BUFFER_NANO_SIZE + 50];
+  char echoBuffer[motion::Message::SOCKET_BUFFER_NANO_SIZE + 24];
   int recvMsgSize;
   std::string message;
     
 
-    while ((recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_NANO_SIZE + 50)) > 0)
+    while ((recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_NANO_SIZE + 24)) > 0)
     {
 
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
       echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
       
-      const string & data = echoBuffer;
-      
+      //const string & data = echoBuffer;
+        
       GOOGLE_PROTOBUF_VERIFY_VERSION;
-      motion::Message ms;
-      ms.ParseFromString(data);
+        
+      stringstream sss;
+      sss << echoBuffer;
+      string strproto = sss.str();
+        
+      std::string strdecoded;
+      strdecoded.clear();
+      strdecoded = base64_decode(strproto);
       
+      motion::Message ms;
+      ms.ParseFromArray(strdecoded.c_str(), strdecoded.size());
+      //ms.ParseFromString(data);
+        
       PROTO.Clear();
       PROTO = ms;
       
@@ -568,10 +592,12 @@ try
       {
             cout << "Time           : " << ms.time() << endl;
       }
+        
+      cout << "............................." << endl;
       
       T_PROTO.set_serverip(ms.serverip());
       
-      cout <<       "From Ip        : " << T_PROTO.serverip() << endl;
+      //cout <<       "From Ip        : " << T_PROTO.serverip() << endl;
     
       if ( ms.type()==motion::Message::RESPONSE_OK || ms.type()==motion::Message::RESPONSE_END )
       {
@@ -590,9 +616,9 @@ try
 
           sock->send(msg.c_str(), msg.size());
           
-          cout << "SENDING PACKAGE: " << count_sent_split << " of: " << msg_split_vector.size() << endl;
-          cout << "Pay Size       :" << msg_split_vector.at(count_sent_split).size() << endl;
-          cout << "msg            : " << msg.substr (0,30) << "......" << endl;
+          //cout << "SENDING PACKAGE: " << count_sent_split << " of: " << msg_split_vector.size() << endl;
+          //cout << "Pay Size       :" << msg_split_vector.at(count_sent_split).size() << endl;
+          //cout << "msg            : " << msg.substr (0,30) << "......" << endl;
         
           count_sent_split++;
           
@@ -609,8 +635,14 @@ try
       
       //Initialize objects to serialize.
       int size = m.ByteSize();
+    
+      cout << "Proto size   : " << size << endl;
+    
       char dataresponse[size];
       string datastr;
+
+      cout << "Sotype       : " << m.sotype() << endl;
+
       switch (m.sotype())
       {
               
@@ -641,11 +673,12 @@ try
             break;
               
       }
+
+        cout << "Encoding." << endl;
+        
       
     std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
         
-        
-      
         cout << "ENCODED PROTO_:::::::::::::::: " << encoded_proto.size() << endl;
         
       if ( size > motion::Message::SOCKET_BUFFER_NANO_SIZE )
@@ -672,10 +705,10 @@ try
           out << encoded_proto << "\n";
           out.close();
           
-          cout << "SENDING PACKAGE: " << count_sent_split << " of: " << msg_split_vector.size() << endl;
-          cout << "Pay Size       : " << msg_split_vector.at(count_sent_split).size() << endl;
+          //cout << "SENDING PACKAGE: " << count_sent_split << " of: " << msg_split_vector.size() << endl;
+          //cout << "Pay Size       : " << msg_split_vector.at(count_sent_split).size() << endl;
           
-          cout << "msg            : " << msg.substr (0,30) << "......" << endl;
+          //cout << "msg            : " << msg.substr (0,30) << "......" << endl;
           
           count_sent_split++;
           
@@ -694,11 +727,16 @@ try
           msg = header + encoded_proto;
       }
       
+        ms.Clear();
       google::protobuf::ShutdownProtobufLibrary();
     
       cout << "Socket Sent!" << endl;
+        
+        
       
       sock->send(msg.c_str(), msg.size());
+        
+        cout << "............................." << endl;
     
          return ms.type();
         
@@ -777,7 +815,7 @@ void * socketThread (void * args)
             }
             //cout << "ThreadMain pthread_create created!!!!!." << endl;
             pthread_join(    thread_echo,               (void**) &runt);
-            cout << "-------------------------------" << endl;
+            //cout << "-------------------------------" << endl;
             //cout << "NEW TCP THREAD!!!." << endl;
             //runCommand(resutl_echo);
             
@@ -880,9 +918,31 @@ void * broadcastsender ( void * args )
   }
 }
 
+std::vector<int> getCameras()
+{
+    std::vector<int> camsv;
+    CvCapture* temp_camera;
+    int maxTested = 3;
+    for (int i = 0; i < maxTested; i++){
+        temp_camera = cvCreateCameraCapture(i);
+        if (temp_camera!=NULL)
+        {
+            camsv.push_back(i);
+            cvReleaseCapture(&temp_camera);
+        }
+    }
+    return camsv;
+}
+
 int main (int argc, char * const argv[])
 {
 
+    std::vector<int> cams = getCameras();
+    for (int i=0; i<cams.size(); i++)
+    {
+        cout << "cam:" << cams.at(i) << endl;
+    }
+    
     motion::Message T_PROTO;
     T_PROTO.set_starttime(getTimeRasp());
 
