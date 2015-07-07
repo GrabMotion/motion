@@ -63,18 +63,9 @@ protected:
     void paintEvent(QPaintEvent *);
 
 signals:
-    //void Mouse_Pressed(std::vector<cv::Point2f>&);
-    //void Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&);
     void Mouse_Pos();
-    //void Mouse_Left();
     void sendMousePosition(QPoint&);
     void savedRegionResutl(QString);
-
-    //void discoverMouseCoordinates(mouse_coordinates&);
-
-
-//private slots:
-    //void drawLinesSlot(std::vector<cv::Point2f> lines);
 
 };
 

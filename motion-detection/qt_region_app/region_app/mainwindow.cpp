@@ -198,13 +198,6 @@ void MainWindow::BroadcastReceived(QString ip)
     ui->engage_button->setEnabled(true);
 }
 
-/*void MainWindow::StreamingUpdateLabelImage(std::string path, Mat mat)
-{
-    src = mat;
-    QPixmap pixmap((QString::fromStdString(path)));
-    ui->output->setPixmap(pixmap);
-}*/
-
 void MainWindow::broadcastTimeoutSocketException()
 {
     m_spinner->stop();
@@ -225,29 +218,38 @@ std::string MainWindow::getActiveTerminalIPString()
 
 void MainWindow::on_engage_button_clicked()
 {
-   setMessageBodyAndSend(motion::Message::ActionType::Message_ActionType_ENGAGE);
+   motion::Message m;
+   m.set_type(motion::Message::ActionType::Message_ActionType_ENGAGE);
+   setMessageBodyAndSend(m);
+   google::protobuf::ShutdownProtobufLibrary();
 }
 
-void MainWindow::setMessageBodyAndSend(motion::Message::ActionType type)
+void MainWindow::setMessageBodyAndSend(motion::Message m)
 {
-
     spinner_folders->start();
-
     QString qt_ip = ui->ips_combo->currentText();
     QByteArray ba_ip = qt_ip.toLatin1();
     std::string qt_ip_str = qt_ip.toUtf8().constData();
     char *c_str_ip = ba_ip.data();
 
-    string data;
-    motion::Message m;
-    m.set_type(type);
+    //string data;
     m.set_serverip(getIpAddress());
     m.set_time(getTime());
-    m.SerializeToString(&data);
-    char bts[data.length()];
-    strcpy(bts, data.c_str());
+    //m.SerializeToString(&data);
 
-    sendSocket(c_str_ip, bts);
+
+    //Initialize objects to serialize.
+    int size = m.ByteSize();
+    char dataresponse[size];
+    string datastr;
+    m.SerializeToArray(&dataresponse, size);
+
+    std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
+
+    //char bts[data.length()];
+    //strcpy(bts, data.c_str());
+
+    sendSocket(c_str_ip, encoded_proto);
 
     google::protobuf::ShutdownProtobufLibrary();
 
@@ -382,6 +384,8 @@ void MainWindow::on_stream_clicked()
 void MainWindow::on_picture_clicked()
 {
 
+    ui->picture->setChecked(true);
+
     QString qt_ip = ui->ips_combo->currentText();
     QString share = getSharedFolder();
 
@@ -404,8 +408,10 @@ void MainWindow::on_picture_clicked()
     }
     QString sh = getSharedFolder();
 
-    setMessageBodyAndSend(motion::Message::ActionType::Message_ActionType_TAKE_PICTURE);
-
+    motion::Message m;
+    m.set_type(motion::Message::ActionType::Message_ActionType_TAKE_PICTURE);
+    setMessageBodyAndSend(m);
+    google::protobuf::ShutdownProtobufLibrary();
 
 }
 
@@ -414,25 +420,23 @@ void MainWindow::on_save_region_clicked()
     ui->qt_drawing_output->SaveRegion();
 }
 
-void MainWindow::on_clear_region_clicked()
-{
-
-}
-
-void MainWindow::on_start_recognition_clicked()
-{
-    setMessageBodyAndSend(motion::Message::ActionType::Message_ActionType_REC_START);
-}
+void MainWindow::on_clear_region_clicked() {}
 
 
 void MainWindow::on_disconnect_clicked()
 {
-    setMessageBodyAndSend(motion::Message::ActionType::Message_ActionType_DISSCONNECT);
+    motion::Message m;
+    m.set_type(motion::Message::ActionType::Message_ActionType_DISSCONNECT);
+    setMessageBodyAndSend(m);
+    google::protobuf::ShutdownProtobufLibrary();
 }
 
 void MainWindow::on_get_time_clicked()
 {
-    setMessageBodyAndSend(motion::Message::ActionType::Message_ActionType_GET_TIME);
+    motion::Message m;
+    m.set_type(motion::Message::ActionType::Message_ActionType_GET_TIME);
+    setMessageBodyAndSend(m);
+    google::protobuf::ShutdownProtobufLibrary();
 }
 
 void MainWindow::showMousePosition( QPoint & pos )
@@ -517,54 +521,35 @@ void MainWindow::split(const string& s, char c, vector<string>& v)
    }
 }
 
+
 void MainWindow::on_start_recognition_toggled(bool checked)
 {
-
-    if (checked)
+    if (!checked)
     {
         GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-        string data;
-        motion::Message mr;
-        mr.set_type(motion::Message::ActionType::Message_ActionType_REC_START);
-
-        struct timeval tv;
-        struct tm* ptm;
-        char time_string[40];
-        gettimeofday (&tv, NULL);
-        ptm = localtime (&tv.tv_sec);
-        strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S", ptm);
-        mr.set_time(time_string);
-
-        mr.set_serverip(getIpAddress());
-        mr.set_regioncoords(region_resutl);
-
-        mr.set_storeimage(true);
-        mr.set_storecrop(false);
-
-        //stream_sender = new StreamSender(this);
-        //connect(stream_sender, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-        //stream_sender->sendStream(getActiveTerminalIPString(), mr);
-        //stream_sender->terminate();
-
-
-
-        delete ptm;
-        google::protobuf::ShutdownProtobufLibrary();
-
+        motion::Message m;
+        m.set_type(motion::Message::ActionType::Message_ActionType_REC_STOP);
+        ui->start_recognition->setChecked(false);
+        setMessageBodyAndSend(m);
     }
     else
     {
-        /*std::string command = getGlobalIntToString(STOP_RECOGNITION);
-        tcpecho_thread = new TCPEchoThread(this);
-        connect(tcpecho_thread, SIGNAL(ResultEcho(string)), this, SLOT(ResultEcho(string)));
-        tcpecho_thread->SendEcho(getActiveTerminalIPString(), command);
-        tcpecho_thread->terminate();*/
+        GOOGLE_PROTOBUF_VERIFY_VERSION;
+        motion::Message m;
+        m.set_type(motion::Message::ActionType::Message_ActionType_REC_START);
+        m.set_region(region);
+        std::string res = region_resutl;
+        std::string resencoded = base64_encode(reinterpret_cast<const unsigned char*>(res.c_str()), res.length());
+        m.set_regioncoords(resencoded.c_str());
+        QString c = ui->code->text();
+        std::string code = c.toUtf8().constData();
+        m.set_codename(code);
+        m.set_storecrop(ui->has_crops->isChecked());
+        m.set_storeimage(ui->has_images->isChecked());
+        ui->start_recognition->setChecked(true);
+        setMessageBodyAndSend(m);
     }
-
 }
-
-
 
 void MainWindow::on_set_time_clicked()
 {
@@ -577,21 +562,13 @@ void MainWindow::on_set_time_clicked()
     ptm = localtime (&tv.tv_sec);
     strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S", ptm);
 
-    cout << "time_string TIME :: " << time_string << endl;
 
-    std::string command = getGlobalIntToString(452346254734573);
-
-    char * message = new char[command.size() + 1];
-    std::copy(command.begin(), command.end(), message);
-    message[command.size()] = '\0'; // don't forget the terminating 0
-
-    char buffer[256];
-    strncpy(buffer, message, sizeof(buffer));
-    strncat(buffer, time_string, sizeof(buffer));
-
-    cout << "buffer:: " << buffer << endl;
-
-    tcpsend_thread->SendEcho(getActiveTerminalIPString(), buffer);
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    motion::Message m;
+    m.set_type(motion::Message::ActionType::Message_ActionType_SET_TIME);
+    m.set_time(time_string);
+    ui->start_recognition->setChecked(false);
+    setMessageBodyAndSend(m);
 
 }
 
@@ -632,8 +609,6 @@ std::string MainWindow::get_file_contents(std::string filename)
 
 void MainWindow::testBase()
 {
-
-
     /*GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     ::motion::Message testm;
@@ -757,50 +732,50 @@ std::string MainWindow::getTime()
 void MainWindow::loadMat(string encodedmat)
 {
 
-        std::string basefile = "/jose/repos/encoded_mat.txt";
-        std::ofstream out;
-        out.open (basefile.c_str());
-        out << encodedmat << "\n";
-        out.close();
+    std::string basefile = "/jose/repos/encoded_mat.txt";
+    std::ofstream out;
+    out.open (basefile.c_str());
+    out << encodedmat << "\n";
+    out.close();
 
-       std::string oridecoded = base64_decode(encodedmat);
+    std::string oridecoded = base64_decode(encodedmat);
 
-       stringstream decoded;
-       //std::stringstream decoded;
-       decoded << oridecoded;
+    stringstream decoded;
+    //std::stringstream decoded;
+    decoded << oridecoded;
 
-      // The data we need to deserialize.
-      int width_d = 0;
-      int height_d = 0;
-      int type_d = 0;
-      int size_d = 0;
+    // The data we need to deserialize.
+    int width_d = 0;
+    int height_d = 0;
+    int type_d = 0;
+    int size_d = 0;
 
-      // Read the width, height, type and size of the buffer
-      decoded.read((char*)(&width_d), sizeof(int));
-      decoded.read((char*)(&height_d), sizeof(int));
-      decoded.read((char*)(&type_d), sizeof(int));
-      decoded.read((char*)(&size_d), sizeof(int));
+    // Read the width, height, type and size of the buffer
+    decoded.read((char*)(&width_d), sizeof(int));
+    decoded.read((char*)(&height_d), sizeof(int));
+    decoded.read((char*)(&type_d), sizeof(int));
+    decoded.read((char*)(&size_d), sizeof(int));
 
-      // Allocate a buffer for the pixels
-      char* data_d = new char[size_d];
-      // Read the pixels from the stringstream
-      decoded.read(data_d, size_d);
+    // Allocate a buffer for the pixels
+    char* data_d = new char[size_d];
+    // Read the pixels from the stringstream
+    decoded.read(data_d, size_d);
 
-      // Construct the image (clone it so that it won't need our buffer anymore)
-      main_mat = cv::Mat(height_d, width_d, type_d, data_d).clone();
+    // Construct the image (clone it so that it won't need our buffer anymore)
+    main_mat = cv::Mat(height_d, width_d, type_d, data_d).clone();
 
-      //Render image.
-      imwrite("/jose/repos/image_2.jpg", main_mat);
-      QImage frame = Mat2QImage(main_mat);
-      ui->output->setPixmap(QPixmap::fromImage(frame));
+    //Render image.
+    imwrite("/jose/repos/image_2.jpg", main_mat);
+    QImage frame = Mat2QImage(main_mat);
+    ui->output->setPixmap(QPixmap::fromImage(frame));
 
-      // Delete our buffer
-      delete[]data_d;
+    // Delete our buffer
+    delete[]data_d;
 
-      //std::string basefile = "/jose/repos/motion/region.txt";
-      //string storedcoord = get_file_contents(basefile);
-      //vector<Point2f> coordinates = stringToVectorPoint2f(storedcoord);
-      //ui->qt_drawing_output->drawLinesSlot(coordinates);
+    //std::string basefile = "/jose/repos/motion/region.txt";
+    //string storedcoord = get_file_contents(basefile);
+    //vector<Point2f> coordinates = stringToVectorPoint2f(storedcoord);
+    //ui->qt_drawing_output->drawLinesSlot(coordinates);
 }
 
 vector<Point2f> MainWindow::stringToVectorPoint2f(std::string storedcoord)
@@ -834,9 +809,31 @@ vector<Point2f> MainWindow::stringToVectorPoint2f(std::string storedcoord)
     return coordinates;
 }
 
-void MainWindow::savedRegionResutl(QString re)
+void MainWindow::savedRegionResutl(QString result)
 {
-    region_resutl = re.toUtf8().constData();
+    //QString result = QString::fromStdString(re);
+
+    std::string rr = result.toUtf8().constData();
+
+    vector<Point2f> scorrd = MainWindow::stringToVectorPoint2f(rr);
+
+    if(scorrd.size()>=4)
+    {
+       ui->qt_drawing_output->drawLinesSlot(scorrd);
+       region_resutl = result.toUtf8().constData();
+       ui->save_region->setEnabled(false);
+       ui->save_region->setText("Region Saved");
+       region=true;
+    }
+    else
+    {
+       QMessageBox* msgBox 	= new QMessageBox();
+       msgBox->setWindowTitle("Region Save Failed");
+       msgBox->setText("Region must contain at least three points.");
+       msgBox->setWindowFlags(Qt::WindowStaysOnTopHint);
+       msgBox->show();
+    }
+
 }
 
 void MainWindow::remoteMat(cv::Mat mat)
@@ -879,9 +876,15 @@ void MainWindow::enableDisableButtons(bool set)
     ui->engage_button->setEnabled(set);
     ui->list_folders->setEnabled(set);
     ui->list_files->setEnabled(set);
+    ui->code->setEnabled(set);
+    ui->code->setText("Prueba");
+    ui->code_label->setEnabled(set);
     ui->start_recognition->setEnabled(set);
     ui->save_region->setEnabled(set);
-    ui->rec_with_images->setEnabled(set);
+    ui->has_images->setEnabled(set);
+    ui->has_crops->setChecked(false);
+    ui->has_images->setChecked(true);
+    ui->has_crops->setEnabled(set);
     ui->stream->setEnabled(set);
     ui->picture->setEnabled(set);
     ui->clear_region->setEnabled(set);
@@ -912,8 +915,6 @@ void MainWindow::sendSocket(string svradress, string command)
     tcpsend_thread = new TCPEchoThread(this);
     tcpsend_thread->SendEcho(svradress, command);
 }
-
-
 
 std::string MainWindow::ExtractString( std::string source, std::string start, std::string end )
 {
@@ -1000,6 +1001,8 @@ void MainWindow::remoteProto(motion::Message m)
 void MainWindow::resutlEcho(string str)
 {
 
+    tcpsend_thread->terminate();
+
     string decoded_proto;
 
     std::string del_1  = "PROSTA";
@@ -1028,10 +1031,10 @@ void MainWindow::resutlEcho(string str)
 
        payload_holder.push_back(ppayload);
 
-       cout << "Rerecving PACKAGE: " << current_package << " of: " << total__packages << endl;
-       cout << "Pay Size       :" << ppayload.size() << endl;
-       cout << "msg            : " << ppayload.substr (0,30) << "......" << endl;
-       cout << "............................................" << endl;
+       //cout << "Rerecving PACKAGE: " << current_package << " of: " << total__packages << endl;
+       //cout << "Pay Size       :" << ppayload.size() << endl;
+       //cout << "msg            : " << ppayload.substr (0,30) << "......" << endl;
+       //cout << "............................................" << endl;
 
        if (current_package==0)
        {
@@ -1059,8 +1062,10 @@ void MainWindow::resutlEcho(string str)
         {
            reply = motion::Message::ActionType::Message_ActionType_RESPONSE_END;
         }
-        setMessageBodyAndSend(reply);
-
+        motion::Message m;
+        m.set_type(reply);
+        setMessageBodyAndSend(m);
+        google::protobuf::ShutdownProtobufLibrary();
     }
     else
     {
@@ -1072,7 +1077,6 @@ void MainWindow::resutlEcho(string str)
         }
         payload_holder.clear();
 
-        //std::string basefile = "/jose/repos/motion/encoded_remote_proto_" + IntToString(current_package) + ".txt";
         std::string basefile = "/jose/repos/motion/encoded_remote_proto.txt";
         std::ofstream out;
         out.open (basefile.c_str());
@@ -1090,15 +1094,11 @@ void MainWindow::resutlEcho(string str)
 
         ui->mat_progress->setValue(0);
         QApplication::processEvents();
+        ui->picture->setChecked(false);
 
         finished=false;
 
         google::protobuf::ShutdownProtobufLibrary();
-
     }
 
 }
-
-
-
-

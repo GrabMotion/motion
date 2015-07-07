@@ -154,30 +154,26 @@ void mouse_coordinates::drawLinesSlot(std::vector<cv::Point2f> lines_array)
 
 void mouse_coordinates::SaveRegion()
 {
-    lines.clear();
 
     update();
 
-    this->setStyleSheet("QLabel { background-color: black }");
+    //this->setStyleSheet("QLabel { background-color: black }");
 
     std::stringstream rr;
     rr << coor;
 
     std::string storedcoord = rr.str();
 
-    std::string basefile = "/jose/repos/motion/region_1.txt";
-    std::ofstream out;
-    out.open (basefile.c_str());
-    out << storedcoord << "\n";
-    out.close();
+    //std::string basefile = "/jose/repos/motion/region_1.txt";
+    //std::ofstream out;
+    //out.open (basefile.c_str());
+    //out << storedcoord << "\n";
+    //out.close();
 
-    vector<Point2f> scorrd = stringToVectorPoint2f(storedcoord);
-
-    drawLinesSlot(scorrd);
-
-    //lines.clear();
-
+    startPoint = QPoint();
+    endPoint = QPoint();
     coor.clear();
+    lines.clear();
 
     emit savedRegionResutl(QString::fromStdString(storedcoord));
 

@@ -150,8 +150,9 @@ private:
     vector<Point2f> stringToVectorPoint2f(std::string storedcoord);
 
     std::string region_resutl;
+    bool region;
 
-    void setMessageBodyAndSend(motion::Message::ActionType type);
+    void setMessageBodyAndSend(motion::Message m);
 
     std::string IntToString ( int number );
 
@@ -170,8 +171,6 @@ private slots:
     //buttons
     void on_engage_button_clicked();
     void on_search_button_clicked();
-    void on_start_recognition_clicked();
-    void on_start_recognition_toggled(bool checked);
     void on_disconnect_clicked();
     void on_save_region_clicked();
     void on_get_time_clicked();
@@ -179,6 +178,7 @@ private slots:
     void on_picture_clicked();
     void on_stream_clicked();
     void on_clear_region_clicked();
+    void on_start_recognition_toggled(bool checked);
 
     //mouse
     void Mouse_current_pos();
@@ -198,7 +198,7 @@ private slots:
     void on_list_folders_clicked(const QModelIndex &index);
 
     //Region
-    void savedRegionResutl(QString re);
+        void savedRegionResutl(QString re);
 
 
 

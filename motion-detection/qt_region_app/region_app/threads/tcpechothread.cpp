@@ -92,7 +92,6 @@ void TCPEchoThread::send (string svradress, char * message)
 
     mnwindow->resutlEcho(str);
 
-    this->terminate();
 
   } catch(SocketException &e) {
     cerr << e.what() << endl;

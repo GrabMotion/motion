@@ -159,7 +159,9 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
              GOOGLE_PROTOBUF_VERIFY_VERSION;
 
              motion::Message mm;
-             switch (mode)
+             mm.ParseFromArray(strdecoded.c_str(), strdecoded.size());
+
+             /*switch (mode)
              {
                  case motion::Message::SOCKET_PROTO_TOARRAY:
                      mm.ParseFromArray(strdecoded.c_str(), strdecoded.size());
@@ -168,7 +170,7 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
                  case motion::Message::SOCKET_PROTO_TOSTRING:
                      mm.ParseFromString(strdecoded);
                      break;
-             }
+             }*/
 
              //Set response to the mainwindow.
              mainwindow->remoteProto(mm);

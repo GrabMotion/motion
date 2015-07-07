@@ -498,26 +498,26 @@ class Message : public ::google::protobuf::Message {
   inline bool storecrop() const;
   inline void set_storecrop(bool value);
 
-  // optional string code = 15;
-  inline bool has_code() const;
-  inline void clear_code();
-  static const int kCodeFieldNumber = 15;
-  inline const ::std::string& code() const;
-  inline void set_code(const ::std::string& value);
-  inline void set_code(const char* value);
-  inline void set_code(const char* value, size_t size);
-  inline ::std::string* mutable_code();
-  inline ::std::string* release_code();
-  inline void set_allocated_code(::std::string* code);
+  // optional string codename = 15;
+  inline bool has_codename() const;
+  inline void clear_codename();
+  static const int kCodenameFieldNumber = 15;
+  inline const ::std::string& codename() const;
+  inline void set_codename(const ::std::string& value);
+  inline void set_codename(const char* value);
+  inline void set_codename(const char* value, size_t size);
+  inline ::std::string* mutable_codename();
+  inline ::std::string* release_codename();
+  inline void set_allocated_codename(::std::string* codename);
 
-  // optional string regioncoords = 16;
+  // optional bytes regioncoords = 16;
   inline bool has_regioncoords() const;
   inline void clear_regioncoords();
   static const int kRegioncoordsFieldNumber = 16;
   inline const ::std::string& regioncoords() const;
   inline void set_regioncoords(const ::std::string& value);
   inline void set_regioncoords(const char* value);
-  inline void set_regioncoords(const char* value, size_t size);
+  inline void set_regioncoords(const void* value, size_t size);
   inline ::std::string* mutable_regioncoords();
   inline ::std::string* release_regioncoords();
   inline void set_allocated_regioncoords(::std::string* regioncoords);
@@ -534,10 +534,17 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_starttime();
   inline void set_allocated_starttime(::std::string* starttime);
 
-  // optional .motion.Message.SocketType sotype = 18;
+  // optional bool region = 18;
+  inline bool has_region() const;
+  inline void clear_region();
+  static const int kRegionFieldNumber = 18;
+  inline bool region() const;
+  inline void set_region(bool value);
+
+  // optional .motion.Message.SocketType sotype = 19;
   inline bool has_sotype() const;
   inline void clear_sotype();
-  static const int kSotypeFieldNumber = 18;
+  static const int kSotypeFieldNumber = 19;
   inline ::motion::Message_SocketType sotype() const;
   inline void set_sotype(::motion::Message_SocketType value);
 
@@ -565,12 +572,14 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_storeimage();
   inline void set_has_storecrop();
   inline void clear_has_storecrop();
-  inline void set_has_code();
-  inline void clear_has_code();
+  inline void set_has_codename();
+  inline void clear_has_codename();
   inline void set_has_regioncoords();
   inline void clear_has_regioncoords();
   inline void set_has_starttime();
   inline void clear_has_starttime();
+  inline void set_has_region();
+  inline void clear_has_region();
   inline void set_has_sotype();
   inline void clear_has_sotype();
 
@@ -585,12 +594,13 @@ class Message : public ::google::protobuf::Message {
   ::std::string* serverip_;
   ::std::string* clientip_;
   ::std::string* payload_;
+  ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance > instance_;
   ::google::protobuf::int32 data_total_;
   bool recognizing_;
   bool storeimage_;
   bool storecrop_;
-  ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance > instance_;
-  ::std::string* code_;
+  bool region_;
+  ::std::string* codename_;
   ::std::string* regioncoords_;
   ::std::string* starttime_;
   int sotype_;
@@ -1571,83 +1581,83 @@ inline void Message::set_storecrop(bool value) {
   // @@protoc_insertion_point(field_set:motion.Message.storecrop)
 }
 
-// optional string code = 15;
-inline bool Message::has_code() const {
+// optional string codename = 15;
+inline bool Message::has_codename() const {
   return (_has_bits_[0] & 0x00001000u) != 0;
 }
-inline void Message::set_has_code() {
+inline void Message::set_has_codename() {
   _has_bits_[0] |= 0x00001000u;
 }
-inline void Message::clear_has_code() {
+inline void Message::clear_has_codename() {
   _has_bits_[0] &= ~0x00001000u;
 }
-inline void Message::clear_code() {
-  if (code_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    code_->clear();
+inline void Message::clear_codename() {
+  if (codename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    codename_->clear();
   }
-  clear_has_code();
+  clear_has_codename();
 }
-inline const ::std::string& Message::code() const {
-  // @@protoc_insertion_point(field_get:motion.Message.code)
-  return *code_;
+inline const ::std::string& Message::codename() const {
+  // @@protoc_insertion_point(field_get:motion.Message.codename)
+  return *codename_;
 }
-inline void Message::set_code(const ::std::string& value) {
-  set_has_code();
-  if (code_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    code_ = new ::std::string;
+inline void Message::set_codename(const ::std::string& value) {
+  set_has_codename();
+  if (codename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    codename_ = new ::std::string;
   }
-  code_->assign(value);
-  // @@protoc_insertion_point(field_set:motion.Message.code)
+  codename_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.codename)
 }
-inline void Message::set_code(const char* value) {
-  set_has_code();
-  if (code_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    code_ = new ::std::string;
+inline void Message::set_codename(const char* value) {
+  set_has_codename();
+  if (codename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    codename_ = new ::std::string;
   }
-  code_->assign(value);
-  // @@protoc_insertion_point(field_set_char:motion.Message.code)
+  codename_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.codename)
 }
-inline void Message::set_code(const char* value, size_t size) {
-  set_has_code();
-  if (code_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    code_ = new ::std::string;
+inline void Message::set_codename(const char* value, size_t size) {
+  set_has_codename();
+  if (codename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    codename_ = new ::std::string;
   }
-  code_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:motion.Message.code)
+  codename_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.codename)
 }
-inline ::std::string* Message::mutable_code() {
-  set_has_code();
-  if (code_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    code_ = new ::std::string;
+inline ::std::string* Message::mutable_codename() {
+  set_has_codename();
+  if (codename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    codename_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:motion.Message.code)
-  return code_;
+  // @@protoc_insertion_point(field_mutable:motion.Message.codename)
+  return codename_;
 }
-inline ::std::string* Message::release_code() {
-  clear_has_code();
-  if (code_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+inline ::std::string* Message::release_codename() {
+  clear_has_codename();
+  if (codename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
   } else {
-    ::std::string* temp = code_;
-    code_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    ::std::string* temp = codename_;
+    codename_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     return temp;
   }
 }
-inline void Message::set_allocated_code(::std::string* code) {
-  if (code_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete code_;
+inline void Message::set_allocated_codename(::std::string* codename) {
+  if (codename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete codename_;
   }
-  if (code) {
-    set_has_code();
-    code_ = code;
+  if (codename) {
+    set_has_codename();
+    codename_ = codename;
   } else {
-    clear_has_code();
-    code_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    clear_has_codename();
+    codename_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:motion.Message.code)
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.codename)
 }
 
-// optional string regioncoords = 16;
+// optional bytes regioncoords = 16;
 inline bool Message::has_regioncoords() const {
   return (_has_bits_[0] & 0x00002000u) != 0;
 }
@@ -1683,7 +1693,7 @@ inline void Message::set_regioncoords(const char* value) {
   regioncoords_->assign(value);
   // @@protoc_insertion_point(field_set_char:motion.Message.regioncoords)
 }
-inline void Message::set_regioncoords(const char* value, size_t size) {
+inline void Message::set_regioncoords(const void* value, size_t size) {
   set_has_regioncoords();
   if (regioncoords_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     regioncoords_ = new ::std::string;
@@ -1799,15 +1809,39 @@ inline void Message::set_allocated_starttime(::std::string* starttime) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.starttime)
 }
 
-// optional .motion.Message.SocketType sotype = 18;
-inline bool Message::has_sotype() const {
+// optional bool region = 18;
+inline bool Message::has_region() const {
   return (_has_bits_[0] & 0x00008000u) != 0;
 }
-inline void Message::set_has_sotype() {
+inline void Message::set_has_region() {
   _has_bits_[0] |= 0x00008000u;
 }
-inline void Message::clear_has_sotype() {
+inline void Message::clear_has_region() {
   _has_bits_[0] &= ~0x00008000u;
+}
+inline void Message::clear_region() {
+  region_ = false;
+  clear_has_region();
+}
+inline bool Message::region() const {
+  // @@protoc_insertion_point(field_get:motion.Message.region)
+  return region_;
+}
+inline void Message::set_region(bool value) {
+  set_has_region();
+  region_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.region)
+}
+
+// optional .motion.Message.SocketType sotype = 19;
+inline bool Message::has_sotype() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void Message::set_has_sotype() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void Message::clear_has_sotype() {
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline void Message::clear_sotype() {
   sotype_ = 10;
