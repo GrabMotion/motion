@@ -14,19 +14,19 @@
 #include "../protobuffer/motion.pb.h"
 #include "../b64/base64.h"
 
-inline int detectMotion(const cv::Mat & motion,
-                        cv::Mat & result, cv::Mat & result_cropped,
+/*inline int detectMotion(const cv::Mat & motionmat,
+                        cv::Mat & result,
+                        cv::Mat & result_cropped,
                         int x_start, int x_stop, int y_start, int y_stop,
                         int max_deviation,
                         cv::Scalar & color);
 
-inline int detectMotionRegion(const cv::Mat & motion,
+inline int detectMotionRegion(const cv::Mat & motionmat,
                               cv::Mat & result,
                               cv::Mat & result_cropped,
                               std::vector<cv::Point2f> & region,
                               int max_deviation,
-                              cv::Scalar & color);
-
+                              cv::Scalar & color);*/
 
 //Observer Recogition
 extern bool is_recognizing;

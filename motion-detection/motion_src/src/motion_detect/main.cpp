@@ -66,10 +66,11 @@ void * watch_amount (void * t);
 // Threading
 pthread_mutex_t tcpMutex, streamingMutex;
 pthread_t thread_broadcast, thread_echo, thread_socket,
-thread_message, thread_recognition, thread_wait_echo, thread_observer;
+thread_message, thread_recognition, thread_wait_echo,
+thread_observer, thread_send_echo;
 
 //Threads
-int runt, runb, runs, runr, runl, runm, runw, runss, runo;
+int runt, runb, runs, runr, runl, runm, runw, runss, runo, ruse;
 
 /// TCP Streaming
 int         clientSock;
@@ -95,6 +96,8 @@ std::string msg;
 int div_ceil(int numerator, int denominator);
 std::string IntToString ( int number );
 std::string fixedLength(int value, int digits);
+//Send
+void * sendEcho(motion::Message m);
 
 //Protobuffer
 motion::Message PROTO;
@@ -107,6 +110,10 @@ bool stop_capture;
 bool is_recognizing;
 cv::Mat picture;
 bool stop_recognizing;
+int number_of_changes;
+
+//Observer
+bool observer_running = false;
 
 //UDP
 int udpsend(motion::Message m);
@@ -173,8 +180,6 @@ char *getTimeRasp()
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     return time_rasp;
 }
-
-
 
 #define BUFLEN 2048
 #define MSGS 5	/* number of messages to send */
@@ -252,8 +257,8 @@ motion::Message takePictureToProto(motion::Message m)
 
     }
     
-    int w = 640; //640; //1280; //320;
-    int h = 480;  //480; //720;  //240;
+    int w = 1280; //640; //1280; //320;
+    int h = 720;  //480; //720;  //240;
     
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
@@ -277,7 +282,6 @@ motion::Message takePictureToProto(motion::Message m)
     m.set_type(motion::Message::TAKE_PICTURE);
     m.set_serverip(PROTO.serverip());
     m.set_time(getTimeRasp());
-    m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
     
     // We will need to also serialize the width, height, type and size of the matrix
     int width_s     = mat.cols;
@@ -319,36 +323,119 @@ motion::Message takePictureToProto(motion::Message m)
     return m;
 }
 
+void * sendProto (void * arg)
+{
+    
+    struct arg_struct *args = (struct arg_struct *) arg;
+    motion::Message me      = args->message;
+    string servAddress      = T_PROTO.serverip();
+
+    google::protobuf::uint32 pport = motion::Message::TCP_ECHO_PORT;
+    google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 24;
+    
+    cout << "serverIp: " << servAddress << endl;
+    cout << "serverPort: " << pport << endl;
+    
+    int echoServPort = pport;
+    char echoBuffer[buffersize];
+    
+    //string data;
+    me.set_time(getTimeRasp());
+   
+    //Initialize objects to serialize.
+    int size = me.ByteSize();
+    char datasend[size];
+    string datastr;
+    me.SerializeToArray(&datasend, size);
+    google::protobuf::ShutdownProtobufLibrary();
+    
+    std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(datasend),sizeof(datasend));
+    
+    cout << "encoded_proto: " << encoded_proto << endl;
+    
+    char * message = new char[encoded_proto.size() + 1];
+    std::copy(encoded_proto.begin(), encoded_proto.end(), message);
+    message[encoded_proto.size()] = '\0'; // don't forget the terminating 0
+    
+    try
+    {
+        // Establish connection with the echo server
+        TCPSocket sock(servAddress, echoServPort);
+        
+        // Send the string to the echo server
+        sock.send(message, sizeof(message));
+        
+    } catch(SocketException &e)
+    {
+        cerr << e.what() << endl;
+    }
+    
+}
+
+void * sendEcho(motion::Message m)
+{
+    
+    struct arg_struct arguments;
+    arguments.message = m;
+    
+    ruse = pthread_create(&thread_send_echo, NULL, sendProto, (void*) &arguments);
+    
+    if ( ruse  != 0)
+    {
+        cerr << "Unable to create thread" << endl;
+        cout << "startRecognition pthread_create failed." << endl;
+    }
+}
+
 void * startObserver(void * arg)
 {
     
+    cout << "startObserver" << endl;
+    
+    bool proto_notified = false;
+    
     while (1)
     {
-        if (R_PROTO.recognizing())
+        
+        if (R_PROTO.engaged())
         {
+        
+            if (R_PROTO.recognizing())
+            {
             
-           //sendMessage(R_PROTO, motion::Message::SOCKET_PROTO_TOARRAY);
+                if (resutl_watch_detected>5)
+                {
+                    cout << "R_PROTO resutl_watch_detected " << endl;
+                    motion::Message mc;
+                    mc.set_type(motion::Message::REC_HAS_CHANGES);
+                    mc.set_numberofchanges(number_of_changes);
+                    sendEcho(mc);
+                    google::protobuf::ShutdownProtobufLibrary();
+                    sleep(100);
+                }
             
+            }
             
-        } else
-        {
-            break;
+        //cout << "R_PROTO." << endl;
+        //if (R_PROTO.engaged() && !proto_notified)
+        //{
+        //    cout << "R_PROTO engaged" << endl;
+        //    sendEcho(R_PROTO);
+        //    proto_notified= true;
+        //}
+            
+        
+            }
         }
-    }
 
 }
 
 std::string IntToString ( int number )
 {
     std::ostringstream oss;
-    
-    // Works just like cout
     oss<< number;
-    
-    // Return the underlying string
     return oss.str();
 }
-
 
 int div_ceil(int numerator, int denominator)
 {
@@ -370,22 +457,47 @@ motion::Message runCommand(motion::Message m)
             
             cout << "motion::Message::ENGAGE" << endl;
             
-            m.set_time(T_PROTO.time());
+            R_PROTO.set_engaged(true);
+            
+            m = R_PROTO;
+            
+            m.set_time(getTimeRasp());
             m.set_type(motion::Message::ENGAGE);
             m.set_starttime(T_PROTO.starttime());
-            m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
             
-            struct arg_struct arguments;
-           
-            arguments.message = PROTO;
-            
-            runo = pthread_create(&thread_observer, NULL, startObserver, (void*) &arguments);
+            runo = pthread_create(&thread_observer, NULL, startObserver, NULL);
             if ( runo  != 0) {
                 cerr << "Unable to create thread" << endl;
                 cout << "start observer pthread_create failed." << endl;
             }
+            //pthread_join( thread_recognition, (void**) &runr);
             
-            pthread_join( thread_recognition, (void**) &runr);
+            
+        }
+        break;
+        case motion::Message::DISSCONNECT:
+        {
+            R_PROTO.set_engaged(false);
+            
+        }
+        break;
+        case motion::Message::REC_START:
+        {
+            
+            //std::string  coords = PROTO.regioncoords();
+            //std::string coords_decoded = base64_decode(coords);
+            //cout << "coords_decoded     : " << coords_decoded << endl;
+            //struct arg_struct args;
+            //args.message = PROTO;
+            
+            runr = pthread_create(&thread_recognition, NULL, startRecognition, NULL); //(void*) &args);
+            if ( runr  != 0) {
+                cerr << "Unable to create thread" << endl;
+                cout << "startRecognition pthread_create failed." << endl;
+            }
+            //pthread_join( thread_recognition, (void**) &runr);
+            
+            
         }
         break;
         case motion::Message::TAKE_PICTURE:
@@ -398,8 +510,6 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::STRM_START:
         {
             netcvc();
-            m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
-            
         }
         break;
         case motion::Message::STRM_STOP:
@@ -413,8 +523,6 @@ motion::Message runCommand(motion::Message m)
             m.set_type(motion::Message::GET_TIME);
             m.set_serverip(PROTO.serverip());
             m.set_time(getTimeRasp());
-            m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
-            //sendMessage(m, motion::Message::SOCKET_PROTO_TOARRAY);
         }
         break;
         case motion::Message::SET_TIME:
@@ -465,34 +573,7 @@ motion::Message runCommand(motion::Message m)
             m.set_type(motion::Message::TIME_SET);
             m.set_serverip(PROTO.serverip());
             m.set_time(getTimeRasp());
-            m.set_sotype(motion::Message::SOCKET_PROTO_TOARRAY);
-            
-            //sendMessage(m, motion::Message::SOCKET_PROTO_TOARRAY);
-    
-        }
-        break;
-        case motion::Message::REC_START:
-        {
-            
-            //std::string  coords = PROTO.regioncoords();
-            //std::string coords_decoded = base64_decode(coords);
-            //cout << "coords_decoded     : " << coords_decoded << endl;
-            //struct arg_struct args;
-            //args.message = PROTO;
-        
-            runr = pthread_create(&thread_recognition, NULL, startRecognition, NULL); //(void*) &args);
-            if ( runr  != 0) {
-                cerr << "Unable to create thread" << endl;
-                cout << "startRecognition pthread_create failed." << endl;
-            }
-            
-            //pthread_join( thread_recognition, (void**) &runr);
-            
-            //while (!R_PROTO.recognizing())
-            //{
-            //    cout << "WAITING FOR RECOGNITION" << endl;
-            //}
-            
+
         }
         break;
         case motion::Message::REC_STOP:
@@ -641,43 +722,11 @@ try
       char dataresponse[size];
       string datastr;
 
-      cout << "Sotype       : " << m.sotype() << endl;
-
-      switch (m.sotype())
-      {
-              
-        case motion::Message::SOCKET_PROTO_TOARRAY:
-            try
-            {
-                cout << "SerializeToArray." << endl;
-                m.SerializeToArray(&dataresponse, size);
-            }
-            catch (google::protobuf::FatalException fe)
-            {
-                std::cout << "PbToZmq " << fe.message() << std::endl;
-            }
-            break;
-              
-          case motion::Message::SOCKET_PROTO_TOSTRING:
-            try
-            {
-                //m.SerializeToString(dataresponse);
-                //char bts[datastr.length()];
-                //strcpy(bts, datastr.c_str());
-                //sock.send(bts, sizeof(bts));
-            }
-            catch (google::protobuf::FatalException fe)
-            {
-                std::cout << "PbToZmq " << fe.message() << std::endl;
-            }
-            break;
-              
-      }
-
-        cout << "Encoding." << endl;
+      m.SerializeToArray(&dataresponse, size);
+     
+      cout << "Encoding." << endl;
         
-      
-    std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
+      std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
         
         cout << "ENCODED PROTO_:::::::::::::::: " << encoded_proto.size() << endl;
         
@@ -943,7 +992,6 @@ int main (int argc, char * const argv[])
         cout << "cam:" << cams.at(i) << endl;
     }
     
-    motion::Message T_PROTO;
     T_PROTO.set_starttime(getTimeRasp());
 
     pthread_mutex_init(&tcpMutex, 0);

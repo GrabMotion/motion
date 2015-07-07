@@ -225,7 +225,7 @@ inline string saveImg(
     std::copy(n_str_file.begin(), n_str_file.end(), n_file);
     n_file[n_str_file.size()] = '\0';
     
-    std::cout << "n_file: " << n_file << std::endl;
+    //std::cout << "n_file: " << n_file << std::endl;
     
     // Create name for the image
     strftime (TIME,80,FILE_FORMAT,timeinfo);    
@@ -277,27 +277,27 @@ inline bool createDirectoryTree(
 
 // Check if there is motion in the result matrix
 // count the number of changes and return.
-inline int detectMotion(const cv::Mat & motionmat, cv::Mat & result, cv::Mat & result_cropped,
+inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
                         int x_start, int x_stop, int y_start, int y_stop,
                         int max_deviation,
-                        cv::Scalar & color)
+                        Scalar & color)
 {
     // calculate the standard deviation
     Scalar mean, stddev;
-    meanStdDev(motionmat, mean, stddev);
+    meanStdDev(motion, mean, stddev);
     // if not to much changes then the motion is real (neglect agressive snow, temporary sunlight)
     if(stddev[0] < max_deviation)
     {
         int number_of_changes = 0;
-        int min_x = motionmat.cols, max_x = 0;
-        int min_y = motionmat.rows, max_y = 0;
+        int min_x = motion.cols, max_x = 0;
+        int min_y = motion.rows, max_y = 0;
         // loop over image and detect changes
         for(int j = y_start; j < y_stop; j+=2){ // height
             for(int i = x_start; i < x_stop; i+=2){ // width
                 // check if at pixel (j,i) intensity is equal to 255
                 // this means that the pixel is different in the sequence
                 // of images (prev_frame, current_frame, next_frame)
-                if(static_cast<int>(motionmat.at<uchar>(j,i)) == 255)
+                if(static_cast<int>(motion.at<uchar>(j,i)) == 255)
                 {
                     number_of_changes++;
                     if(min_x>i) min_x = i;
@@ -317,14 +317,15 @@ inline int detectMotion(const cv::Mat & motionmat, cv::Mat & result, cv::Mat & r
             Point x(min_x,min_y);
             Point y(max_x,max_y);
             Rect rect(x,y);
-            Mat cropped = result(rect);
-            cropped.copyTo(result_cropped);
+            //Mat cropped = result(rect);
+            //cropped.copyTo(result_cropped);
             rectangle(result,rect,color,1);
         }
         return number_of_changes;
     }
     return 0;
 }
+
 
 // Check if there is motion in the result matrix
 // count the number of changes and return.
@@ -366,19 +367,14 @@ inline int detectMotionRegion(const cv::Mat & motionmat,
             if(min_y-10 > 0) min_y -= 10;
             if(max_x+10 < result.cols-1) max_x += 10;
             if(max_y+10 < result.rows-1) max_y += 10;
-            
             // draw rectangle round the changed pixel
             Point x(min_x,min_y);
             Point y(max_x,max_y);
             Rect rect(x,y);
-            
             //Mat cropped = result(rect);
-            //cropped.copyTo(result_cropped);   //JOSE Cropp removed.
+            //cropped.copyTo(result_cropped);
             rectangle(result,rect,color,1);
-
-            
         }
-        //std::cout << "number_of_changes = " << number_of_changes << std::endl;
         
         return number_of_changes;
     }
@@ -410,7 +406,7 @@ void * startRecognition(void * arg)
     //Region
     bool has_region;
     std::vector<cv::Point2f> region;
-    if (R_PROTO.has_region())
+    if (R_PROTO.region())
     {
         cout << "Has region." << endl;
         if (R_PROTO.has_regioncoords())
@@ -427,6 +423,10 @@ void * startRecognition(void * arg)
             else
                 has_region = false;
         }
+    }
+    else
+    {
+        has_region = false;
     }
     
     std::string instancecode;
@@ -491,8 +491,8 @@ void * startRecognition(void * arg)
     
     // Set up camera
     CvCapture * camera = cvCaptureFromCAM(CV_CAP_ANY);
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 640); //640); //1280); // width of viewport of camera
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 480); //480); //720); // height of ...
+    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 1280); //640); //1280); // width of viewport of camera
+    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 720); //480); //720); // height of ...
     
     // Take images and convert them to gray
     Mat result, result_cropped;
@@ -525,9 +525,6 @@ void * startRecognition(void * arg)
     
     // Erode kernel
     Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2)); 
-    
-    // time opencv
-    //double t = (double)getTickCount(); 
     
     //count instance time     
     string start_instance_time, total_elapsed_time; 
@@ -566,15 +563,13 @@ void * startRecognition(void * arg)
         threshold(motionmat, motionmat, 35, 255, CV_THRESH_BINARY);
         erode(motionmat, motionmat, kernel_ero);
         
-        //number_of_changes = detectMotion(motion, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
+        pthread_mutex_lock(&detectMutex);
         
-        
-            pthread_mutex_lock(&detectMutex);
-        
-        cout << "region size: " << region.size() << endl;
                 if (!has_region)
                 {
+                    //number_of_changes = detectMotion(motionmat, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
                     number_of_changes = detectMotion(motionmat, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
+                    
                 }
                 else
                 {
@@ -584,9 +579,7 @@ void * startRecognition(void * arg)
         
                 std::cout << "number_of_changes = " << number_of_changes << std::endl;
         
-            pthread_mutex_unlock(&detectMutex);
-            
-            
+        pthread_mutex_unlock(&detectMutex);
         
         // If a lot of changes happened, we assume something changed.
         if(number_of_changes>=there_is_motion)
@@ -661,6 +654,7 @@ void * startRecognition(void * arg)
                 }
                                 
             }
+            
             number_of_sequence++;
         }
         else
@@ -705,7 +699,7 @@ void * startRecognition(void * arg)
                 
                 motion::Message::Instance * inst = R_PROTO.add_instance();
                 inst->set_idinstance(0);
-                inst->set_amount("amount");
+                inst->set_instanceamount(number_of_changes);
                 inst->set_filepath("hola");
                 
                 
