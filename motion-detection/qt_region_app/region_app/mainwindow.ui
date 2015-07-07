@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>930</width>
+    <width>960</width>
     <height>611</height>
    </rect>
   </property>
@@ -23,7 +23,7 @@
       <height>41</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,3,0,0,0,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,3,0,0,0,0,0,0,0">
      <item>
       <widget class="QLineEdit" name="network_ip">
        <property name="maximumSize">
@@ -71,6 +71,13 @@
       <widget class="QPushButton" name="engage_button">
        <property name="text">
         <string>Engage</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="mapdrive">
+       <property name="text">
+        <string>Map Drive</string>
        </property>
       </widget>
      </item>
@@ -141,7 +148,7 @@ color: rgb(255, 252, 253);</string>
       <x>679</x>
       <y>39</y>
       <width>241</width>
-      <height>141</height>
+      <height>204</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,1">
@@ -270,11 +277,11 @@ color: rgb(255, 252, 253);</string>
      <rect>
       <x>11</x>
       <y>526</y>
-      <width>861</width>
+      <width>934</width>
       <height>33</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,0,0,0,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,0,0,0,0,0,0,0,0">
      <property name="spacing">
       <number>10</number>
      </property>
@@ -375,7 +382,30 @@ color: rgb(255, 252, 253);</string>
       <widget class="QLineEdit" name="code">
        <property name="maximumSize">
         <size>
-         <width>100</width>
+         <width>70</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="delay_label">
+       <property name="maximumSize">
+        <size>
+         <width>40</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Delay:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="delay">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
          <height>16777215</height>
         </size>
        </property>
@@ -550,10 +580,10 @@ color: rgb(255, 252, 253);</string>
    <widget class="QLabel" name="remote_capture">
     <property name="geometry">
      <rect>
-      <x>679</x>
-      <y>190</y>
-      <width>241</width>
-      <height>161</height>
+      <x>810</x>
+      <y>260</y>
+      <width>111</width>
+      <height>81</height>
      </rect>
     </property>
     <property name="text">
@@ -576,13 +606,26 @@ color: rgb(255, 252, 253);</string>
      <string/>
     </property>
    </widget>
+   <widget class="QLabel" name="amount">
+    <property name="geometry">
+     <rect>
+      <x>680</x>
+      <y>260</y>
+      <width>121</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>930</width>
+     <width>960</width>
      <height>22</height>
     </rect>
    </property>

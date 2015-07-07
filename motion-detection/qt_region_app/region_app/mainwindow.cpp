@@ -120,6 +120,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->mat_progress->setValue(0);
 
+    ui->delay->addItem(tr("1"));
+    ui->delay->addItem(tr("2"));
+    ui->delay->addItem(tr("3"));
+    ui->delay->addItem(tr("4"));
+    ui->delay->addItem(tr("5"));
+
     //ui->ips_combo->addItem("192.168.1.47"); //208.70.188.15");
     //ui->connect_button->setEnabled(true);
 
@@ -538,9 +544,12 @@ void MainWindow::on_start_recognition_toggled(bool checked)
         motion::Message m;
         m.set_type(motion::Message::ActionType::Message_ActionType_REC_START);
         m.set_region(region);
-        std::string res = region_resutl;
-        std::string resencoded = base64_encode(reinterpret_cast<const unsigned char*>(res.c_str()), res.length());
-        m.set_regioncoords(resencoded.c_str());
+        if (region)
+        {
+            std::string res = region_resutl;
+            std::string resencoded = base64_encode(reinterpret_cast<const unsigned char*>(res.c_str()), res.length());
+            m.set_regioncoords(resencoded.c_str());
+        }
         QString c = ui->code->text();
         std::string code = c.toUtf8().constData();
         m.set_codename(code);
@@ -879,6 +888,8 @@ void MainWindow::enableDisableButtons(bool set)
     ui->code->setEnabled(set);
     ui->code->setText("Prueba");
     ui->code_label->setEnabled(set);
+    ui->delay->setEnabled(set);
+    ui->delay_label->setEnabled(set);
     ui->start_recognition->setEnabled(set);
     ui->save_region->setEnabled(set);
     ui->has_images->setEnabled(set);
@@ -906,7 +917,7 @@ void MainWindow::enableDisableButtons(bool set)
 
     ui->output->setStyleSheet("border: 1px solid grey");
     ui->remote_capture->setStyleSheet("border: 1px solid grey");
-
+    ui->amount->setStyleSheet("border: 1px solid grey");
 }
 
 void MainWindow::sendSocket(string svradress, string command)
@@ -997,6 +1008,24 @@ void MainWindow::remoteProto(motion::Message m)
     }
 }
 
+
+void MainWindow::receivedEcho(motion::Message m)
+{
+
+    int action = m.type();
+    switch (action)
+    {
+        case motion::Message::REC_HAS_CHANGES:
+        {
+            google::protobuf::uint32 amount = m.amount();
+            QString aq = QString::number(amount);
+            aq  += '\n';
+            ui->amount->setText(aq);
+        }
+        break;
+     }
+     google::protobuf::ShutdownProtobufLibrary();
+}
 
 void MainWindow::resutlEcho(string str)
 {

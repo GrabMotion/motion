@@ -87,6 +87,7 @@ public:
     std::string getTime();
     void remoteProto(motion::Message payload);
     void resutlEcho(string resutl);
+    void receivedEcho(motion::Message m);
 
 private:
     Ui::MainWindow *ui;

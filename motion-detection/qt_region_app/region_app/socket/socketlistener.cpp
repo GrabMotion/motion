@@ -3,11 +3,11 @@
 
 using namespace std;
 
-MainWindow *mainwindow;
+MainWindow *snwindow;
 
 SocketListener::SocketListener(QObject *parent): QObject(parent)
 {
-    mainwindow = qobject_cast<MainWindow*>(parent);
+    snwindow = qobject_cast<MainWindow*>(parent);
 }
 
 std::string SocketListener::ExtractString( std::string source, std::string start, std::string end )
@@ -79,142 +79,24 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
     char echoBuffer[motion::Message::SOCKET_BUFFER_MEDIUM_SIZE];
     int recvMsgSize;
 
-    cout << "Ready to receive!" << endl;
+    recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_MEDIUM_SIZE);
+    cout << "Bytes Received :::::: " << recvMsgSize << endl;
 
-    bool finished=false;
+    stringstream ss;
+    ss << echoBuffer;
+    string str = ss.str();
 
-    while (!complete)
-    {
-        cout << "Receiving # : " << pcount << " at: " << mainwindow->getTime() << endl;
+    std::string strdecoded = base64_decode(str);
 
-        recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_MEDIUM_SIZE);
-        cout << "Bytes Received :::::: " << recvMsgSize << endl;
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    motion::Message mm;
 
-         stringstream ss;
-         ss << echoBuffer;
-         string str = ss.str();
+    mm.ParseFromArray(strdecoded.c_str(), strdecoded.size());
 
-         std::string strdecoded;
+    //snwindow = qobject_cast<MainWindow*>(parent);
 
-         strdecoded.clear();
+    snwindow->receivedEcho(mm);
 
-         std::string del_1  = "PROTO_START_DELIMETER";
-         std::string del_2  = "PROTO_STOP_DELIMETER";
-
-         int total_size = str.size();
-         std::size_t found = str.find(del_1);
-
-         if (found!=std::string::npos)
-         {
-            std::string lpay = SocketListener::ExtractString(str, del_1, del_2);
-            vector<string> vpay = SocketListener::split(lpay, ':');
-            type = atoi(vpay.at(0).c_str());
-            mode = atoi(vpay.at(1).c_str());
-            int del_pos = str.find(del_2);
-
-            if (type==motion::Message::SINGLE_MESSAGE)
-            {
-                std:string splsp = str.substr((del_pos+del_2.size()),(str.size()-del_2.size()));
-                int payload_size = splsp.size();
-                strdecoded = base64_decode(splsp);
-                complete=true;
-                cout << "SINGLE_MESSAGE" << endl;
-            }
-            else if (type==motion::Message::SPLITTED_MESSAGE)
-            {
-                msg_split_vector_size = atoi(vpay.at(2).c_str());
-                realsize = atoi(vpay.at(3).c_str());
-                string splsi = str.substr((del_pos+del_2.size()),(str.size()-del_2.size()));
-                int payload_size = splsi.size();
-                payload_holder.push_back(splsi);
-                pcount++;
-                cout << "SPLITTED_MESSAGE" << endl;
-                cout << "Size: " << splsi.size() << endl;
-            }
-         }
-
-         if (pcount>1)
-         {
-             payload_holder.push_back(str);
-             pcount++;
-             cout << "SPLITTED::" << pcount << endl;
-             cout << "Size: " << str.size() << endl;
-             if (payload_holder.size()==msg_split_vector_size)
-             {
-                 cout << "COMPLETE!!" << endl;
-                 for (int j=0; j<payload_holder.size(); j++)
-                 {
-                     payload += payload_holder.at(j);
-                 }
-                 strdecoded = base64_decode(payload);
-                 pcount=0;
-                 finished=true;
-             }
-         }
-
-
-         if (finished)
-         {
-
-             GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-             motion::Message mm;
-             mm.ParseFromArray(strdecoded.c_str(), strdecoded.size());
-
-             /*switch (mode)
-             {
-                 case motion::Message::SOCKET_PROTO_TOARRAY:
-                     mm.ParseFromArray(strdecoded.c_str(), strdecoded.size());
-                     break;
-
-                 case motion::Message::SOCKET_PROTO_TOSTRING:
-                     mm.ParseFromString(strdecoded);
-                     break;
-             }*/
-
-             //Set response to the mainwindow.
-             mainwindow->remoteProto(mm);
-
-             google::protobuf::ShutdownProtobufLibrary();
-
-         }
-         else
-         {
-             cout << "something went wrong" << endl;
-         }
-
-         motion::Message mr;
-
-         string dataconnect;
-         int echoStringLen;
-         if (type==motion::Message::SINGLE_MESSAGE)
-         {
-             mr.set_type(motion::Message::ActionType::Message_ActionType_RESPONSE_OK);
-         }
-         else if (type==motion::Message::SPLITTED_MESSAGE)
-         {
-             if (!complete)
-             {
-                mr.set_type(motion::Message::ActionType::Message_ActionType_RESPONSE_NEXT);
-             }
-             else
-             {
-                mr.set_type(motion::Message::ActionType::Message_ActionType_RESPONSE_END);
-             }
-        }
-         mr.set_serverip(mainwindow->getIpAddress());
-         mr.set_time(mainwindow->getTime());
-         mr.SerializeToString(&dataconnect);
-         char bts[dataconnect.length()];
-         strcpy(bts, dataconnect.c_str());
-         echoStringLen = sizeof(bts);
-
-         //Respond socket.
-         sock->send(bts, sizeof(bts));
-         if (finished)
-                 complete=false;
-    }
-    cout << "EOT" << endl;
 }
 
 struct message_thread_args
