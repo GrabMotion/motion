@@ -16,6 +16,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <signal.h>
 
 #include <cstdlib>           
 #include <unistd.h>    
@@ -64,7 +65,6 @@ void RunUICommand(int result, string from_ip);
 void * watch_amount (void * t);
 
 // Threading
-pthread_mutex_t tcpMutex, streamingMutex;
 pthread_t thread_broadcast, thread_echo, thread_socket,
 thread_message, thread_recognition, thread_wait_echo,
 thread_observer, thread_send_echo;
@@ -80,7 +80,7 @@ int       	server_camera;
 
 //Threads
 pthread_cond_t echo_response;
-pthread_mutex_t echo_mutex;
+pthread_mutex_t protoMutex;
 bool echo_received;
 motion::Message::ActionType resutl_echo;
 std::string result_message;
@@ -96,6 +96,7 @@ std::string msg;
 int div_ceil(int numerator, int denominator);
 std::string IntToString ( int number );
 std::string fixedLength(int value, int digits);
+
 //Send
 void * sendEcho(motion::Message m);
 
@@ -111,9 +112,9 @@ bool is_recognizing;
 cv::Mat picture;
 bool stop_recognizing;
 int number_of_changes;
-
-//Observer
-bool observer_running = false;
+bool engaged;
+int resutl_watch_detected;
+std::string startrecognitiontime;
 
 //UDP
 int udpsend(motion::Message m);
@@ -127,9 +128,6 @@ std::string getGlobalIntToString(int id);
 
 int getGlobalStringToInt(std::string id);
 char * setMessageValueBody(int value, std::string body);
-
-int resutl_watch_detected;
-std::string image_file_recognized;
 
 struct arg_struct
 {
@@ -180,6 +178,18 @@ char *getTimeRasp()
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     return time_rasp;
 }
+
+char *getShortTimeRasp()
+{
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%H:%M:%S", ptmr);
+    return time_rasp;
+}
+
 
 #define BUFLEN 2048
 #define MSGS 5	/* number of messages to send */
@@ -306,9 +316,16 @@ motion::Message takePictureToProto(motion::Message m)
     
     //Store into proto
     m.set_data(oriencoded.c_str());
+    
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    
+    R_PROTO.set_matfile(IntToString(ms));
+    m.set_matfile(IntToString(ms));
 
     //Write base64 to file for checking.
-    std::string basefile = "base64oish.txt";    
+    std::string basefile = IntToString(ms);
     std::ofstream out;
     out.open (basefile.c_str());
     out << m.data() << "\n";
@@ -329,7 +346,7 @@ void * sendProto (void * arg)
     struct arg_struct *args = (struct arg_struct *) arg;
     motion::Message me      = args->message;
     string servAddress      = T_PROTO.serverip();
-
+    
     google::protobuf::uint32 pport = motion::Message::TCP_ECHO_PORT;
     google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 24;
     
@@ -338,7 +355,7 @@ void * sendProto (void * arg)
     
     int echoServPort = pport;
     char echoBuffer[buffersize];
-    
+
     //string data;
     me.set_time(getTimeRasp());
    
@@ -359,17 +376,13 @@ void * sendProto (void * arg)
     
     try
     {
-        // Establish connection with the echo server
         TCPSocket sock(servAddress, echoServPort);
-        
-        // Send the string to the echo server
         sock.send(message, sizeof(message));
         
     } catch(SocketException &e)
     {
         cerr << e.what() << endl;
     }
-    
 }
 
 void * sendEcho(motion::Message m)
@@ -392,42 +405,31 @@ void * startObserver(void * arg)
     
     cout << "startObserver" << endl;
     
-    bool proto_notified = false;
-    
-    while (1)
+    while (true)
     {
-        
-        if (R_PROTO.engaged())
+        if (engaged)
         {
-        
-            if (R_PROTO.recognizing())
+            if (is_recognizing)
             {
-            
-                if (resutl_watch_detected>5)
-                {
-                    cout << "R_PROTO resutl_watch_detected " << endl;
-                    motion::Message mc;
-                    mc.set_type(motion::Message::REC_HAS_CHANGES);
-                    mc.set_numberofchanges(number_of_changes);
-                    sendEcho(mc);
-                    google::protobuf::ShutdownProtobufLibrary();
-                    sleep(100);
+                    /*std::cout << "number_of_changes = " << resutl_watch_detected << std::endl;
+                    if (resutl_watch_detected>5)
+                    {
+                        cout << "R_PROTO resutl_watch_detected " << endl;
+                        motion::Message mc;
+                        mc.set_type(motion::Message::REC_HAS_CHANGES);
+                        mc.set_numberofchanges(number_of_changes);
+                        cout << "::1::" <<  endl;
+                        mc.set_startrecognition(startrecognitiontime.c_str());
+                                                cout << "::2::" <<  endl;
+                        sendEcho(mc);
+                        google::protobuf::ShutdownProtobufLibrary();
+                    }*/
                 }
-            
-            }
-            
-        //cout << "R_PROTO." << endl;
-        //if (R_PROTO.engaged() && !proto_notified)
-        //{
-        //    cout << "R_PROTO engaged" << endl;
-        //    sendEcho(R_PROTO);
-        //    proto_notified= true;
-        //}
-            
-        
-            }
         }
-
+        sleep(1);
+    }
+    cout << "stopObserver" << endl;
+    
 }
 
 std::string IntToString ( int number )
@@ -446,58 +448,33 @@ int div_ceil(int numerator, int denominator)
 motion::Message runCommand(motion::Message m)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-    
     cout << "runCommand:: " << m.type() << endl;
-    
     switch (m.type())
     {
-            
         case motion::Message::ENGAGE:
         {
-            
             cout << "motion::Message::ENGAGE" << endl;
-            
-            R_PROTO.set_engaged(true);
-            
+            engaged=true;
+            pthread_mutex_lock(&protoMutex);
             m = R_PROTO;
-            
+            m.set_cameras(T_PROTO.cameras());
+            pthread_mutex_unlock(&protoMutex);
             m.set_time(getTimeRasp());
             m.set_type(motion::Message::ENGAGE);
             m.set_starttime(T_PROTO.starttime());
-            
-            runo = pthread_create(&thread_observer, NULL, startObserver, NULL);
-            if ( runo  != 0) {
-                cerr << "Unable to create thread" << endl;
-                cout << "start observer pthread_create failed." << endl;
-            }
-            //pthread_join( thread_recognition, (void**) &runr);
-            
-            
         }
         break;
         case motion::Message::DISSCONNECT:
         {
-            R_PROTO.set_engaged(false);
-            
+            engaged=false;
         }
         break;
         case motion::Message::REC_START:
         {
-            
-            //std::string  coords = PROTO.regioncoords();
-            //std::string coords_decoded = base64_decode(coords);
-            //cout << "coords_decoded     : " << coords_decoded << endl;
-            //struct arg_struct args;
-            //args.message = PROTO;
-            
-            runr = pthread_create(&thread_recognition, NULL, startRecognition, NULL); //(void*) &args);
+            runr = pthread_create(&thread_recognition, NULL, startRecognition, NULL);
             if ( runr  != 0) {
                 cerr << "Unable to create thread" << endl;
-                cout << "startRecognition pthread_create failed." << endl;
             }
-            //pthread_join( thread_recognition, (void**) &runr);
-            
-            
         }
         break;
         case motion::Message::TAKE_PICTURE:
@@ -579,7 +556,6 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::REC_STOP:
         {
             stop_recognizing = true;
-            
         }
         break;
     }
@@ -609,26 +585,8 @@ std::string fixedLength(int value, int digits)
 motion::Message::ActionType HandleTCPClient(TCPSocket *sock)
 {
     
-  motion::Message::ActionType value;
-  /*cout << "Handling client ";
-  string from;
-  try {
-     from = sock->getForeignAddress();
-    cout << from << ":";
-  } catch (SocketException &e) {
-    cerr << "Unable to get foreign address" << endl;
-  }
-  
-  from_ip = from;
-    
-  try {
-    cout << sock->getForeignPort();
-  } catch (SocketException &e) {
-    cerr << "Unable to get foreign port" << endl;
-  }
-  cout << " with thread " << pthread_self() << endl;*/
-
-  int bytesReceived = 0;              // Bytes read on each recv()
+    motion::Message::ActionType value;
+    int bytesReceived = 0;              // Bytes read on each recv()
     int totalBytesReceived = 0;         // Total bytes read
   
 try
@@ -645,8 +603,6 @@ try
 
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
       echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
-      
-      //const string & data = echoBuffer;
         
       GOOGLE_PROTOBUF_VERIFY_VERSION;
         
@@ -660,26 +616,12 @@ try
       
       motion::Message ms;
       ms.ParseFromArray(strdecoded.c_str(), strdecoded.size());
-      //ms.ParseFromString(data);
         
       PROTO.Clear();
       PROTO = ms;
-      
-      cout <<  "Type Received  : " << ms.type() << endl;
-      
       value = ms.type();
-      
-      if (ms.has_time())
-      {
-            cout << "Time           : " << ms.time() << endl;
-      }
-        
-      cout << "............................." << endl;
-      
       T_PROTO.set_serverip(ms.serverip());
       
-      //cout <<       "From Ip        : " << T_PROTO.serverip() << endl;
-    
       if ( ms.type()==motion::Message::RESPONSE_OK || ms.type()==motion::Message::RESPONSE_END )
       {
           cout << "RESPONSE :" <<  ms.type() << endl;
@@ -697,10 +639,6 @@ try
 
           sock->send(msg.c_str(), msg.size());
           
-          //cout << "SENDING PACKAGE: " << count_sent_split << " of: " << msg_split_vector.size() << endl;
-          //cout << "Pay Size       :" << msg_split_vector.at(count_sent_split).size() << endl;
-          //cout << "msg            : " << msg.substr (0,30) << "......" << endl;
-        
           count_sent_split++;
           
           return ms.type();
@@ -728,8 +666,6 @@ try
         
       std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
         
-        cout << "ENCODED PROTO_:::::::::::::::: " << encoded_proto.size() << endl;
-        
       if ( size > motion::Message::SOCKET_BUFFER_NANO_SIZE )
       {
           google::protobuf::uint32 chunck_size = motion::Message::SOCKET_BUFFER_NANO_SIZE;
@@ -739,8 +675,6 @@ try
               msg_split_vector.push_back(encoded_proto.substr(i, chunck_size));
           }
           
-          //msg_split_vector = splitStringBySize(encoded_proto, motion::Message::SOCKET_BUFFER_NANO_SIZE);
-        
           string header =
           "PROSTA" +
             fixedLength(msg_split_vector.size(),4)  + "::" +
@@ -753,11 +687,6 @@ try
           out.open (basefile.c_str());
           out << encoded_proto << "\n";
           out.close();
-          
-          //cout << "SENDING PACKAGE: " << count_sent_split << " of: " << msg_split_vector.size() << endl;
-          //cout << "Pay Size       : " << msg_split_vector.at(count_sent_split).size() << endl;
-          
-          //cout << "msg            : " << msg.substr (0,30) << "......" << endl;
           
           count_sent_split++;
           
@@ -777,22 +706,16 @@ try
       }
       
         ms.Clear();
-      google::protobuf::ShutdownProtobufLibrary();
+        google::protobuf::ShutdownProtobufLibrary();
     
-      cout << "Socket Sent!" << endl;
-        
-        
-      
-      sock->send(msg.c_str(), msg.size());
-        
+        cout << "Socket Sent!" << endl;
+
+        sock->send(msg.c_str(), msg.size());
         cout << "............................." << endl;
     
-         return ms.type();
+        return ms.type();
         
     }
-
-    
-    
 }
 catch(SocketException &e)
 {
@@ -800,87 +723,46 @@ catch(SocketException &e)
         cerr << e.what() << endl;
 }
   return value;
-    
 }
 
 void * ThreadMain(void *clntSock)
 {
-    
-    //cout << "ThreadMain:: " << endl;
-
-  // Guarantees that thread resources are deallocated upon return
-  pthread_detach(pthread_self());
-    
-    pthread_mutex_lock(&echo_mutex);
-    
-        resutl_echo = HandleTCPClient((TCPSocket *) clntSock);
-        //pthread_cond_signal(&echo_response);
-        //cout << "RESULT IN THREAD:: " << resutl_echo << " from_ip: " << from_ip << endl;
-    
-    pthread_mutex_unlock(&echo_mutex);
-
-    //cout << "DELETING:: " << endl;
-    
+    // Guarantees that thread resources are deallocated upon return
+    pthread_detach(pthread_self());
+    resutl_echo = HandleTCPClient((TCPSocket *) clntSock);
     delete (TCPSocket *) clntSock;
-    //pthread_exit((void *) resutl);
     pthread_exit(NULL);
     return (void *) resutl_echo;
 }
 
 void * socketThread (void * args)
 {
-    
     // TCP
     unsigned short tcp_port = motion::Message::TCP_ECHO_PORT;
     void *status;
-    
-    pthread_mutex_init(&echo_mutex, NULL);
     pthread_cond_init(&echo_response, NULL);
-    
-    /*runl = pthread_create (&thread_wait_echo, NULL, watch_echo, NULL);
-    if ( runl  != 0)
+    try
     {
-        cerr << "Unable to create ThreadMain thread" << endl;
-        cout << "ThreadM:::.in pthread_create failed." << endl;
-        exit(1);
-    }*/
-    
-    try {
-        TCPServerSocket servSock(tcp_port);   // Socket descriptor for server
-        
-        for (;;) {      // Run forever
-            
-            //cout << "new socket: " << runt << endl;
-            // Create separate memory for client argument
+        TCPServerSocket servSock(tcp_port);
+        for (;;)
+        {
             TCPSocket *clntSock = servSock.accept();
-            
-            //runt
             runt =  pthread_create(&thread_echo, NULL, ThreadMain, (void *) clntSock);
             if ( runt  != 0)
             {
                 cerr << "Unable to create ThreadMain thread" << endl;
-                cout << "ThreadM:::.in pthread_create failed." << endl;
                 exit(1);
             }
-            //cout << "ThreadMain pthread_create created!!!!!." << endl;
             pthread_join(    thread_echo,               (void**) &runt);
-            //cout << "-------------------------------" << endl;
-            //cout << "NEW TCP THREAD!!!." << endl;
-            //runCommand(resutl_echo);
-            
-            //cout << "STATUS!!! = " << runt << endl;
-            //return (void *) runt;
         }
-        
     } catch (SocketException &e) {
         cerr << e.what() << endl;
         exit(1);
     }
-
 }
 
-std::string getIpAddress () {
-    
+std::string getIpAddress ()
+{
     int fd;
     struct ifreq ifr;
     fd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -890,13 +772,9 @@ std::string getIpAddress () {
     strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);
     ioctl(fd, SIOCGIFADDR, &ifr);
     close(fd);
-    
     char * ipaddrs = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
-    
     std::string ip_txt(ipaddrs);
-    
     std::cout << " IP TERMINAL :: " << ip_txt << '\n';
-       
     return ip_txt;
 }
 
@@ -904,7 +782,6 @@ void split(const string& s, char c, vector<string>& v)
 {
    string::size_type i = 0;
    string::size_type j = s.find(c);
-
    while (j != string::npos)
    {
       v.push_back(s.substr(i, j-i));
@@ -921,12 +798,9 @@ void * broadcastsender ( void * args )
     
    std::string sech = getIpAddress();
    cout  <<  "IP: " << sech << endl;
-   
    local_ip = sech;
-
    vector<string> ip_vector;
    split(local_ip, '.', ip_vector);
-   
    for (int i=0; i<ip_vector.size(); i++)
    {
         if ( i==0 | i==1)
@@ -938,25 +812,20 @@ void * broadcastsender ( void * args )
              NETWORK_IP +=  ip_vector[i];
         } 
    }
-   
    std::string destAddress = NETWORK_IP + ".255";
    unsigned short destPort = motion::Message::UDP_PORT;
    char *sendString = new char[sech.length() + 1];
    std::strcpy(sendString, sech.c_str());
    char recvString[MAXRCVSTRING + 1];
-  
     try 
     {
     UDPSocket sock;
-    cout  <<  "Sent Broadcast to: " << destAddress << " port: " << destPort << " sent: " << sendString << endl;
     int countud;
     for (;;) {
-      pthread_mutex_lock(&tcpMutex);
-            sock.sendTo(sendString, strlen(sendString), destAddress, destPort);
-            cout << "UPD Send: " << countud << endl;
-            countud++;
-      pthread_mutex_unlock(&tcpMutex);
-      sleep(3);
+        sock.sendTo(sendString, strlen(sendString), destAddress, destPort);
+        cout << "UPD Send: " << countud << " " << getShortTimeRasp() << endl;
+        countud++;
+        sleep(3);
     }
     delete [] sendString;
   
@@ -985,54 +854,51 @@ std::vector<int> getCameras()
 
 int main (int argc, char * const argv[])
 {
-
-    std::vector<int> cams = getCameras();
-    for (int i=0; i<cams.size(); i++)
-    {
-        cout << "cam:" << cams.at(i) << endl;
-    }
     
+    cout <<  "time: " << getShortTimeRasp() << endl;
+    
+    //Rasp Variables.
+    std::vector<int> cams = getCameras();
+    stringstream ss;
+    copy( cams.begin(), cams.end(), ostream_iterator<int>(ss, " "));
+    std::string cameras = ss.str();
+    cameras = cameras.substr(0, cameras.length()-1);
+    
+    T_PROTO.set_cameras(cameras);
     T_PROTO.set_starttime(getTimeRasp());
 
-    pthread_mutex_init(&tcpMutex, 0);
-
+    pthread_mutex_init(&protoMutex, 0);
+    
     // UDP
    runb = pthread_create(&thread_broadcast, NULL, broadcastsender, NULL);
    if ( runb  != 0) {
        cerr << "Unable to create thread" << endl;
-       cout << "BroadcastSender pthread_create failed." << endl;
    }
    
     //Socket
     runs = pthread_create(&thread_socket, NULL, socketThread, NULL);
     if ( runs  != 0) {
         cerr << "Unable to create thread" << endl;
-        cout << "BroadcastSender pthread_create failed." << endl;
     }
     
-   cout << "join thread_broadcast" << endl;
-   //pthread_join(    thread_broadcast,          (void**) &runb);
-   cout << "join thread_echo" << endl;
-   
+    runo = pthread_create(&thread_observer, NULL, startObserver, NULL);
+    if ( runo  != 0) {
+        cerr << "Unable to create thread" << endl;
+    }
+    
     //Stream Socket Server.
-   StreamListener * stream_listener = new StreamListener();
-   stream_listener->startListening();
+    //StreamListener * stream_listener = new StreamListener();
+    //stream_listener->startListening();
 
-    pthread_join(    thread_socket,               (void**) &runs);
+    pthread_join(    thread_broadcast,  (void**) &runb);
+    pthread_join(    thread_socket,     (void**) &runs);
+    pthread_join(    thread_observer,   (void**) &runr);
     
-   cout << "LAST!!! = " << runs << endl;
-    
-   pthread_mutex_destroy(&tcpMutex);
-   
-   cout << "return 0" << endl;
-   
-   
-   
-   return 0;
-  
-    
+    cout << "THREAD TERMINATED!!!!!!!!!!!!!!!!!!!!! = " << runs << endl;
+    return 0;
 }
 
             
         
+
 

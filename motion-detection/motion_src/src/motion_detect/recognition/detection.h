@@ -14,38 +14,25 @@
 #include "../protobuffer/motion.pb.h"
 #include "../b64/base64.h"
 
-/*inline int detectMotion(const cv::Mat & motionmat,
-                        cv::Mat & result,
-                        cv::Mat & result_cropped,
-                        int x_start, int x_stop, int y_start, int y_stop,
-                        int max_deviation,
-                        cv::Scalar & color);
-
-inline int detectMotionRegion(const cv::Mat & motionmat,
-                              cv::Mat & result,
-                              cv::Mat & result_cropped,
-                              std::vector<cv::Point2f> & region,
-                              int max_deviation,
-                              cv::Scalar & color);*/
-
 //Observer Recogition
 extern bool is_recognizing;
 extern bool stop_recognizing;
-extern int resutl_watch;
 extern int resutl_watch_detected;
-extern std::string image_file_recognized;
+extern std::string startrecognitiontime;
+
 extern std::string getGlobalIntToString(int id);
 extern cv::Mat picture;
+extern motion::Message PROTO, R_PROTO;
+extern pthread_mutex_t protoMutex;;
 
-extern motion::Message R_PROTO;
-extern motion::Message PROTO;
+extern char *getTimeRasp();
+char *getShortTimeRasp();
 
 void * startRecognition(void * args);
 
 //XML Region
 std::vector<cv::Point2f> stringToVectorPoint2f(std::string storedcoord);
 std::vector<cv::Point2f> processRegionString(std::string coordstring);
-
 
 #endif	/* DETECTION_H */
 

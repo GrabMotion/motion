@@ -33,6 +33,8 @@ arpa/inet.h
 -
 pthread.h
 -
+signal.h
+-
 cstdlib
 -
 unistd.h

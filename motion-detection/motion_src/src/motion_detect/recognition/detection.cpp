@@ -235,7 +235,7 @@ inline string saveImg(
     string image_file = ss.str().c_str();
     imwrite(image_file, image);
     
-    std::cout << "image_file: " << image_file << std::endl;
+    //std::cout << "image_file: " << image_file << std::endl;
     
     return image_file;
 }
@@ -326,7 +326,6 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
     return 0;
 }
 
-
 // Check if there is motion in the result matrix
 // count the number of changes and return.
 inline int detectMotionRegion(const cv::Mat & motionmat,
@@ -392,8 +391,7 @@ void * startRecognition(void * arg)
     
     cout << "START RECOGNITION." << endl;
     
-    pthread_mutex_t detectMutex;
-    pthread_mutex_init(&detectMutex, 0);
+    pthread_detach(pthread_self());
     
     //struct arg_struct *args = (struct arg_struct *) arg;
     //cout << "Passing obj: " << args->message.type() << endl;
@@ -438,6 +436,13 @@ void * startRecognition(void * arg)
     if (instancecode.empty())
         instancecode = "Prueba";
     
+    double delay;
+    if (R_PROTO.has_delay())
+    {
+        delay = R_PROTO.delay();
+    }
+    time_t delaymark;
+    
     bool writeImages = R_PROTO.storeimage();
     bool writeCroop  = R_PROTO.storecrop();
     bool send_number_detected = true;
@@ -463,16 +468,6 @@ void * startRecognition(void * arg)
     // floating point seconds elapsed since start
     double sec;
     
-    // Create region directory if not exist.
-    //directoryExistsOrCreate(REGION.c_str());
-    //{
-        // Detect motion in a region in steadof window
-    
-       //string file_region = REGION + "region" + EXT_DATA;
-       //parseRegionXML(file_region, region);
-    
-    //}
-    
     // Create log directory if not exist. 
     directoryExistsOrCreate(LOG.c_str());   
     if(!std::ifstream(LOGCLEAR.c_str()))
@@ -488,6 +483,7 @@ void * startRecognition(void * arg)
     string FILE_FORMAT;//          = DIR_FORMAT + "/" + "%d%h%Y_%H%M%S"; // 1Jan1970/1Jan1970_12153
     string CROPPED_FILE_FORMAT;//   = DIR_FORMAT + "/cropped/" + "%d%h%Y_%H%M%S"; // 1Jan1970/cropped/1Jan1970_121539
     string XML_FILE             =  "<import>session";
+    std::string image_file_recognized;
     
     // Set up camera
     CvCapture * camera = cvCaptureFromCAM(CV_CAP_ANY);
@@ -538,14 +534,29 @@ void * startRecognition(void * arg)
     int countWhile;
     
     init_time = clock();
+    bool started=false;
     
     // All settings have been set, now go in endless loop and
     // take as many pictures you want..
     while (true)
     {
         
+        if (started)
+        {
+            startrecognitiontime = getShortTimeRasp();
+            R_PROTO.set_startrecognition(getTimeRasp());
+            started=true;
+        }
         
+        //Killme
+        if (stop_recognizing)
+            break;
+        
+        is_recognizing = true;
+        
+        pthread_mutex_lock(&protoMutex);
         R_PROTO.set_recognizing(true);
+        pthread_mutex_unlock(&protoMutex);
         countWhile++;
         
        // Take a new image
@@ -563,29 +574,22 @@ void * startRecognition(void * arg)
         threshold(motionmat, motionmat, 35, 255, CV_THRESH_BINARY);
         erode(motionmat, motionmat, kernel_ero);
         
-        pthread_mutex_lock(&detectMutex);
-        
-                if (!has_region)
-                {
-                    //number_of_changes = detectMotion(motionmat, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
-                    number_of_changes = detectMotion(motionmat, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
-                    
-                }
-                else
-                {
-                    number_of_changes = detectMotionRegion(motionmat, result, result_cropped, region, max_deviation, color);
-                }
-                resutl_watch_detected = number_of_changes;
-        
-                std::cout << "number_of_changes = " << number_of_changes << std::endl;
-        
-        pthread_mutex_unlock(&detectMutex);
+        if (!has_region)
+        {
+            number_of_changes = detectMotion(motionmat, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
+        }
+        else
+        {
+            number_of_changes = detectMotionRegion(motionmat, result, result_cropped, region, max_deviation, color);
+        }
+        resutl_watch_detected = number_of_changes;
         
         // If a lot of changes happened, we assume something changed.
         if(number_of_changes>=there_is_motion)
         {
             
-            if(number_of_sequence>0){            
+            if(number_of_sequence>0)
+            {
                 
                 init_motion = true;
                 
@@ -605,8 +609,6 @@ void * startRecognition(void * arg)
                         FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "%d%h%Y_%H%M%S";
                         CROPPED_FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "/cropped/" + "%d%h%Y_%H%M%S";
                         
-                        pthread_mutex_lock(&detectMutex);
-                        
                         createDirectoryTree (
                             DIR, 
                             EXT, 
@@ -614,17 +616,11 @@ void * startRecognition(void * arg)
                             FILE_FORMAT.c_str(), 
                             instance );
                         
-                        pthread_mutex_unlock(&detectMutex);
-                        
                         has_instance_directory = true;
                     }    
-                }    
-                
-                if (writeImages) {
-                    
-                
-                    pthread_mutex_lock(&detectMutex);
-                    
+                }
+                if (writeImages)
+                {
                     image_file_recognized = saveImg (
                         result, 
                         DIR, 
@@ -633,14 +629,9 @@ void * startRecognition(void * arg)
                         FILE_FORMAT.c_str(),
                         number_of_changes
                     );
-                
-                    pthread_mutex_unlock(&detectMutex);
-                
                 }
                 if (writeCroop)
                 {
-                    pthread_mutex_lock(&detectMutex);
-                
                     string cropped_image_file = saveImg (
                             result_cropped,
                             DIR,
@@ -649,26 +640,27 @@ void * startRecognition(void * arg)
                             CROPPED_FILE_FORMAT.c_str(),
                             number_of_changes
                     );
-                    
-                    pthread_mutex_unlock(&detectMutex);
                 }
                                 
             }
-            
+            delaymark = time(0);
             number_of_sequence++;
         }
         else
         {            
             
-            number_of_sequence = 0;              
+            number_of_sequence = 0;
             
-            if ( count_sequence_cero == 20 & init_motion ) {                                  
+            double seconds_since_start = difftime( time(0), delaymark);
+            
+            if ( seconds_since_start > delay & init_motion )
+            {
                 
                 has_instance_directory = false;                  
                 
-                std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
-                std::cout << ":::::::::::: DUMP INSTANCE :::::::::::::" << std::endl;
-                std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
+                //std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
+                //std::cout << ":::::::::::: DUMP INSTANCE :::::::::::::" << std::endl;
+                //std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
                 
                 end = clock();               
                 
@@ -678,6 +670,7 @@ void * startRecognition(void * arg)
                 char TIME[80];
                 time (&seconds);   
                 timeinfo = localtime (&seconds);     
+                
                 // Create name for the date directory
                 const char * dir = DIR_FORMAT.c_str();
                 strftime (TIME,80,dir,timeinfo);    
@@ -693,17 +686,15 @@ void * startRecognition(void * arg)
                 std::ostringstream end;
                 end << (end_time - init_time) / CLOCKS_PER_SEC;
            
-                pthread_mutex_lock(&detectMutex);
-                
                 writeXMLInstance(XMLFILE.c_str(), begin.str(), end.str(), instance);
                 
+                pthread_mutex_lock(&protoMutex);
                 motion::Message::Instance * inst = R_PROTO.add_instance();
-                inst->set_idinstance(0);
+                inst->set_idinstance(instance);
                 inst->set_instanceamount(number_of_changes);
                 inst->set_filepath("hola");
+                pthread_mutex_unlock(&protoMutex);
                 
-                
-                pthread_mutex_unlock(&detectMutex);
             }       
             
             // XML Instance
@@ -717,10 +708,9 @@ void * startRecognition(void * arg)
             // Delay, wait a 1/2 second.
             cvWaitKey (DELAY);
         }
-        
     }
-
-    R_PROTO.set_recognizing(false);
     
+    R_PROTO.set_recognizing(false);
+    return 0;
 }
 
