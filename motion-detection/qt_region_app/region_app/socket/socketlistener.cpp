@@ -95,7 +95,10 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
 
     //snwindow = qobject_cast<MainWindow*>(parent);
 
-    snwindow->receivedEcho(mm);
+    //nwindow->receivedEcho(mm);
+
+    qRegisterMetaType<motion::Message>("motion::Message");
+    QMetaObject::invokeMethod(parent, "listenerProto", Q_ARG(motion::Message, mm));
 
 }
 

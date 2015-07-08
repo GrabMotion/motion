@@ -125,6 +125,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->delay->addItem(tr("3"));
     ui->delay->addItem(tr("4"));
     ui->delay->addItem(tr("5"));
+    ui->delay->addItem(tr("6"));
+    ui->delay->setCurrentText("3");
+
+    ui->mapdrive->setEnabled(false);
 
     //ui->ips_combo->addItem("192.168.1.47"); //208.70.188.15");
     //ui->connect_button->setEnabled(true);
@@ -202,6 +206,8 @@ void MainWindow::BroadcastReceived(QString ip)
     m_spinner->stop();
     ui->ips_combo->addItem(ip);
     ui->engage_button->setEnabled(true);
+    ui->mapdrive->setEnabled(true);
+    ui->mapdrive->setChecked(true);
 }
 
 void MainWindow::broadcastTimeoutSocketException()
@@ -213,6 +219,7 @@ void MainWindow::broadcastTimeoutSocketException()
     msgBox->setWindowFlags(Qt::WindowStaysOnTopHint);
     msgBox->show();
     ui->engage_button->setEnabled(false);
+    ui->mapdrive->setChecked(false);
 }
 
 std::string MainWindow::getActiveTerminalIPString()
@@ -241,8 +248,6 @@ void MainWindow::setMessageBodyAndSend(motion::Message m)
     //string data;
     m.set_serverip(getIpAddress());
     m.set_time(getTime());
-    //m.SerializeToString(&data);
-
 
     //Initialize objects to serialize.
     int size = m.ByteSize();
@@ -251,14 +256,8 @@ void MainWindow::setMessageBodyAndSend(motion::Message m)
     m.SerializeToArray(&dataresponse, size);
 
     std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
-
-    //char bts[data.length()];
-    //strcpy(bts, data.c_str());
-
     sendSocket(c_str_ip, encoded_proto);
-
     google::protobuf::ShutdownProtobufLibrary();
-
 }
 
 void MainWindow::refresh_results()
@@ -319,26 +318,6 @@ void MainWindow::SharedMounted(QString folder)
 
     QByteArray xml_region = region_file.toLatin1();
     const char *xmlfile = xml_region.data();
-
-    //xml = xmlfile;
-    //QFile * xmlFile = new QFile(region_file);
-    /*if (QFile(region_file).exists())
-    {
-        QString path = region;
-        QDir dir(path);
-        dir.setNameFilters(QStringList() << "*.*");
-        dir.setFilter(QDir::Files);
-        foreach(QString dirFile, dir.entryList())
-        {
-            dir.remove(dirFile);
-        }
-
-    }*/
-
-    //if( ! xmlFile->open(QIODevice::WriteOnly) )
-    //{
-    //  QMessageBox::warning(NULL, "Test", "Unable to open: " + region_file , "OK");
-    //}
 
     spinner_folders->stop();
 }
@@ -418,7 +397,6 @@ void MainWindow::on_picture_clicked()
     m.set_type(motion::Message::ActionType::Message_ActionType_TAKE_PICTURE);
     setMessageBodyAndSend(m);
     google::protobuf::ShutdownProtobufLibrary();
-
 }
 
 void MainWindow::on_save_region_clicked()
@@ -550,10 +528,13 @@ void MainWindow::on_start_recognition_toggled(bool checked)
             std::string resencoded = base64_encode(reinterpret_cast<const unsigned char*>(res.c_str()), res.length());
             m.set_regioncoords(resencoded.c_str());
         }
-        QString c = ui->code->text();
+        QString c = ui->codename->text();
         std::string code = c.toUtf8().constData();
         m.set_codename(code);
-        m.set_storecrop(ui->has_crops->isChecked());
+        double delay = ui->delay->currentText().toDouble();
+        m.set_delay(delay);
+        bool crop = ui->has_crops->isChecked();
+        m.set_storecrop(crop);
         m.set_storeimage(ui->has_images->isChecked());
         ui->start_recognition->setChecked(true);
         setMessageBodyAndSend(m);
@@ -588,15 +569,6 @@ void MainWindow::SocketErrorMessage(QString &e)
     msgBox->setText(e);
     msgBox->setWindowFlags(Qt::WindowStaysOnTopHint);
     msgBox->show();
-
-    /*if (msgBox == QMessageBox::Yes)
-  {
-    qDebug() << "Yes was clicked";
-    QApplication::quit();
-  } else {
-    qDebug() << "Yes was *not* clicked";
-  }*/
-
 }
 
 std::string MainWindow::get_file_contents(std::string filename)
@@ -738,16 +710,75 @@ std::string MainWindow::getTime()
     return time_string;
 }
 
-void MainWindow::loadMat(string encodedmat)
+char * MainWindow::getTerminalFolder()
 {
 
-    std::string basefile = "/jose/repos/encoded_mat.txt";
+    QProcess process_mount;
+    QString command;
+
+    QDir rootDir = QDir::currentPath();
+    rootDir.cdUp();
+    rootDir.cdUp();
+    rootDir.cdUp();
+    QString roStr = rootDir.absolutePath();
+    QString roo = roStr + "/" + "mats";
+
+    QByteArray ba = roo.toLatin1();
+    char *shrs = ba.data();
+    if (!QDir(shrs).exists())
+    {
+        QDir().mkdir(shrs);
+    }
+
+    QString qt_ip = ui->ips_combo->currentText();
+
+    QString rip = roo + "/" + qt_ip;
+    QByteArray baip = rip.toLatin1();
+    char *ipfile = baip.data();
+
+    if (!QDir(ipfile).exists())
+    {
+        QDir().mkdir(ipfile);
+    }
+
+    return ipfile;
+}
+
+void MainWindow::saveMat(string encodedmat, std::string file)
+{
+
+    QString qt_ip = ui->ips_combo->currentText();
+    QByteArray ba_ip = qt_ip.toLatin1();
+    std::string qt_ip_str = qt_ip.toUtf8().constData();
+    char * matfile = getTerminalFolder();
+
+    stringstream ss;
+    ss << matfile;
+
+    std::string basefile = ss.str()  + '/' + file;
     std::ofstream out;
     out.open (basefile.c_str());
     out << encodedmat << "\n";
     out.close();
 
-    std::string oridecoded = base64_decode(encodedmat);
+ }
+
+void MainWindow::loadMat(std::string file)
+{
+
+    QString qt_ip = ui->ips_combo->currentText();
+    QByteArray ba_ip = qt_ip.toLatin1();
+    std::string qt_ip_str = qt_ip.toUtf8().constData();
+    char * matfile = getTerminalFolder();
+
+    stringstream ss;
+    ss << matfile;
+
+    std::string basefile = ss.str()  + '/' + file;
+
+    string loadedmat = MainWindow::get_file_contents(basefile);
+
+    std::string oridecoded = base64_decode(loadedmat);
 
     stringstream decoded;
     //std::stringstream decoded;
@@ -781,10 +812,6 @@ void MainWindow::loadMat(string encodedmat)
     // Delete our buffer
     delete[]data_d;
 
-    //std::string basefile = "/jose/repos/motion/region.txt";
-    //string storedcoord = get_file_contents(basefile);
-    //vector<Point2f> coordinates = stringToVectorPoint2f(storedcoord);
-    //ui->qt_drawing_output->drawLinesSlot(coordinates);
 }
 
 vector<Point2f> MainWindow::stringToVectorPoint2f(std::string storedcoord)
@@ -885,8 +912,8 @@ void MainWindow::enableDisableButtons(bool set)
     ui->engage_button->setEnabled(set);
     ui->list_folders->setEnabled(set);
     ui->list_files->setEnabled(set);
-    ui->code->setEnabled(set);
-    ui->code->setText("Prueba");
+    ui->codename->setEnabled(set);
+    ui->codename->setText("Prueba");
     ui->code_label->setEnabled(set);
     ui->delay->setEnabled(set);
     ui->delay_label->setEnabled(set);
@@ -917,7 +944,7 @@ void MainWindow::enableDisableButtons(bool set)
 
     ui->output->setStyleSheet("border: 1px solid grey");
     ui->remote_capture->setStyleSheet("border: 1px solid grey");
-    ui->amount->setStyleSheet("border: 1px solid grey");
+    ui->amount_detected->setStyleSheet("border: 1px solid grey");
 }
 
 void MainWindow::sendSocket(string svradress, string command)
@@ -984,10 +1011,54 @@ void MainWindow::remoteProto(motion::Message m)
       {
         case motion::Message::ENGAGE:
         {
+
             enableDisableButtons(true);
+            ui->remote_terminal_time->setText(m.time().c_str());
+            ui->codename->setText(m.codename().c_str());
+            
+            if (m.recognizing())
+            {
+                ui->status->setText("WORKING");
+                ui->start_recognition->setChecked(true);
+
+                if (m.storeimage())
+                {
+                    ui->has_images->setChecked(true);
+                } else
+                {
+                    ui->has_images->setChecked(false);
+                }
+
+                if (m.storecrop())
+                {
+                    ui->has_crops->setChecked(true);
+                } else
+                {
+                    ui->has_crops->setChecked(false);
+                }
+
+                ui->delay->setCurrentIndex(ui->delay->findData(m.delay()));
+
+                std::string coords = m.regioncoords();
+                vector<Point2f> scorrd = MainWindow::stringToVectorPoint2f(coords);
+                ui->qt_drawing_output->drawLinesSlot(scorrd);
+
+                std::string matfile = m.matfile();
+
+                loadMat(matfile);
+
+            } else
+            {
+                ui->status->setText("IDDLE");
+                ui->start_recognition->setChecked(false);
+            }
+                        
             ui->engage_button->setDisabled(true);
-            mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
-            mount_thread->terminate();
+            if (ui->mapdrive->isChecked())
+            {
+                mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
+                mount_thread->terminate();
+            }
             break;
         }
         case motion::Message::GET_TIME:
@@ -1003,7 +1074,8 @@ void MainWindow::remoteProto(motion::Message m)
           break;
         }
         case motion::Message::TAKE_PICTURE:
-            loadMat(m.data());
+            saveMat(m.data(), m.matfile());
+            loadMat(m.matfile());
           break;
     }
 }
@@ -1017,15 +1089,17 @@ void MainWindow::receivedEcho(motion::Message m)
     {
         case motion::Message::REC_HAS_CHANGES:
         {
-            google::protobuf::uint32 amount = m.amount();
-            QString aq = QString::number(amount);
-            aq  += '\n';
-            ui->amount->setText(aq);
+            google::protobuf::uint32 nchanges = m.numberofchanges();
+            QString nc = QString::number(nchanges);
+            ui->amount_detected->setText(nc);
+            std:string startrecognition = m.startrecognition();
+            ui->time_detected->setText(m.time().c_str());
         }
         break;
      }
      google::protobuf::ShutdownProtobufLibrary();
 }
+
 
 void MainWindow::resutlEcho(string str)
 {

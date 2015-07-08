@@ -110,6 +110,7 @@ private:
     QString ipPath;
     QString getSharedFolder();
     void getLocalNetwork();
+    char * getTerminalFolder();
 
     void setRemoteProto(motion::Message payload);
 
@@ -130,23 +131,15 @@ private:
     void testBase();
     std::string get_file_contents(std::string filename);
     int pcount = 0;
-    //int msg_split_vector_size;
-    //int realsize;
-    //int packegesize;
-    //google::protobuf::uint32 packagesize;
     vector<string> payload_holder;
-    //string payload;
-    //bool complete;
-    //google::protobuf::uint32 packagetype;
-    //google::protobuf::uint32 mode;
     std::vector<std::string> splitProto(const std::string &s, char delim);
     vector<string> splitString(string input, string delimiter);
     std::string ExtractString( std::string source, std::string start, std::string end );
 
     bool finished=false;
-    //int payload_size;
 
-    void loadMat(string mat);
+    void saveMat(string encodedmat, std::string file);
+    void loadMat(std::string file);
 
     vector<Point2f> stringToVectorPoint2f(std::string storedcoord);
 
@@ -166,6 +159,11 @@ public:
     {
         remoteMat(mat);
     }
+    Q_SLOT void listenerProto(motion::Message payload)
+    {
+        receivedEcho(payload);
+    }
+
 
 private slots:
 

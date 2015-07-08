@@ -521,10 +521,17 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_regioncoords();
   inline void set_allocated_regioncoords(::std::string* regioncoords);
 
-  // optional string starttime = 17;
+  // optional double delay = 17;
+  inline bool has_delay() const;
+  inline void clear_delay();
+  static const int kDelayFieldNumber = 17;
+  inline double delay() const;
+  inline void set_delay(double value);
+
+  // optional string starttime = 18;
   inline bool has_starttime() const;
   inline void clear_starttime();
-  static const int kStarttimeFieldNumber = 17;
+  static const int kStarttimeFieldNumber = 18;
   inline const ::std::string& starttime() const;
   inline void set_starttime(const ::std::string& value);
   inline void set_starttime(const char* value);
@@ -533,26 +540,31 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_starttime();
   inline void set_allocated_starttime(::std::string* starttime);
 
-  // optional bool region = 18;
+  // optional string startrecognition = 19;
+  inline bool has_startrecognition() const;
+  inline void clear_startrecognition();
+  static const int kStartrecognitionFieldNumber = 19;
+  inline const ::std::string& startrecognition() const;
+  inline void set_startrecognition(const ::std::string& value);
+  inline void set_startrecognition(const char* value);
+  inline void set_startrecognition(const char* value, size_t size);
+  inline ::std::string* mutable_startrecognition();
+  inline ::std::string* release_startrecognition();
+  inline void set_allocated_startrecognition(::std::string* startrecognition);
+
+  // optional bool region = 20;
   inline bool has_region() const;
   inline void clear_region();
-  static const int kRegionFieldNumber = 18;
+  static const int kRegionFieldNumber = 20;
   inline bool region() const;
   inline void set_region(bool value);
 
-  // optional int32 numberofchanges = 20;
+  // optional int32 numberofchanges = 21;
   inline bool has_numberofchanges() const;
   inline void clear_numberofchanges();
-  static const int kNumberofchangesFieldNumber = 20;
+  static const int kNumberofchangesFieldNumber = 21;
   inline ::google::protobuf::int32 numberofchanges() const;
   inline void set_numberofchanges(::google::protobuf::int32 value);
-
-  // optional bool engaged = 21;
-  inline bool has_engaged() const;
-  inline void clear_engaged();
-  static const int kEngagedFieldNumber = 21;
-  inline bool engaged() const;
-  inline void set_engaged(bool value);
 
   // optional int32 amount = 22;
   inline bool has_amount() const;
@@ -560,6 +572,30 @@ class Message : public ::google::protobuf::Message {
   static const int kAmountFieldNumber = 22;
   inline ::google::protobuf::int32 amount() const;
   inline void set_amount(::google::protobuf::int32 value);
+
+  // optional string matfile = 23;
+  inline bool has_matfile() const;
+  inline void clear_matfile();
+  static const int kMatfileFieldNumber = 23;
+  inline const ::std::string& matfile() const;
+  inline void set_matfile(const ::std::string& value);
+  inline void set_matfile(const char* value);
+  inline void set_matfile(const char* value, size_t size);
+  inline ::std::string* mutable_matfile();
+  inline ::std::string* release_matfile();
+  inline void set_allocated_matfile(::std::string* matfile);
+
+  // optional string cameras = 24;
+  inline bool has_cameras() const;
+  inline void clear_cameras();
+  static const int kCamerasFieldNumber = 24;
+  inline const ::std::string& cameras() const;
+  inline void set_cameras(const ::std::string& value);
+  inline void set_cameras(const char* value);
+  inline void set_cameras(const char* value, size_t size);
+  inline ::std::string* mutable_cameras();
+  inline ::std::string* release_cameras();
+  inline void set_allocated_cameras(::std::string* cameras);
 
   // @@protoc_insertion_point(class_scope:motion.Message)
  private:
@@ -589,16 +625,22 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_codename();
   inline void set_has_regioncoords();
   inline void clear_has_regioncoords();
+  inline void set_has_delay();
+  inline void clear_has_delay();
   inline void set_has_starttime();
   inline void clear_has_starttime();
+  inline void set_has_startrecognition();
+  inline void clear_has_startrecognition();
   inline void set_has_region();
   inline void clear_has_region();
   inline void set_has_numberofchanges();
   inline void clear_has_numberofchanges();
-  inline void set_has_engaged();
-  inline void clear_has_engaged();
   inline void set_has_amount();
   inline void clear_has_amount();
+  inline void set_has_matfile();
+  inline void clear_has_matfile();
+  inline void set_has_cameras();
+  inline void clear_has_cameras();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -619,10 +661,13 @@ class Message : public ::google::protobuf::Message {
   bool region_;
   ::std::string* codename_;
   ::std::string* regioncoords_;
+  double delay_;
   ::std::string* starttime_;
+  ::std::string* startrecognition_;
   ::google::protobuf::int32 numberofchanges_;
-  bool engaged_;
   ::google::protobuf::int32 amount_;
+  ::std::string* matfile_;
+  ::std::string* cameras_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -1700,15 +1745,39 @@ inline void Message::set_allocated_regioncoords(::std::string* regioncoords) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.regioncoords)
 }
 
-// optional string starttime = 17;
-inline bool Message::has_starttime() const {
+// optional double delay = 17;
+inline bool Message::has_delay() const {
   return (_has_bits_[0] & 0x00004000u) != 0;
 }
-inline void Message::set_has_starttime() {
+inline void Message::set_has_delay() {
   _has_bits_[0] |= 0x00004000u;
 }
-inline void Message::clear_has_starttime() {
+inline void Message::clear_has_delay() {
   _has_bits_[0] &= ~0x00004000u;
+}
+inline void Message::clear_delay() {
+  delay_ = 0;
+  clear_has_delay();
+}
+inline double Message::delay() const {
+  // @@protoc_insertion_point(field_get:motion.Message.delay)
+  return delay_;
+}
+inline void Message::set_delay(double value) {
+  set_has_delay();
+  delay_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.delay)
+}
+
+// optional string starttime = 18;
+inline bool Message::has_starttime() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void Message::set_has_starttime() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void Message::clear_has_starttime() {
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline void Message::clear_starttime() {
   if (starttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -1776,15 +1845,91 @@ inline void Message::set_allocated_starttime(::std::string* starttime) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.starttime)
 }
 
-// optional bool region = 18;
+// optional string startrecognition = 19;
+inline bool Message::has_startrecognition() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void Message::set_has_startrecognition() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void Message::clear_has_startrecognition() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void Message::clear_startrecognition() {
+  if (startrecognition_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    startrecognition_->clear();
+  }
+  clear_has_startrecognition();
+}
+inline const ::std::string& Message::startrecognition() const {
+  // @@protoc_insertion_point(field_get:motion.Message.startrecognition)
+  return *startrecognition_;
+}
+inline void Message::set_startrecognition(const ::std::string& value) {
+  set_has_startrecognition();
+  if (startrecognition_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    startrecognition_ = new ::std::string;
+  }
+  startrecognition_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.startrecognition)
+}
+inline void Message::set_startrecognition(const char* value) {
+  set_has_startrecognition();
+  if (startrecognition_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    startrecognition_ = new ::std::string;
+  }
+  startrecognition_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.startrecognition)
+}
+inline void Message::set_startrecognition(const char* value, size_t size) {
+  set_has_startrecognition();
+  if (startrecognition_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    startrecognition_ = new ::std::string;
+  }
+  startrecognition_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.startrecognition)
+}
+inline ::std::string* Message::mutable_startrecognition() {
+  set_has_startrecognition();
+  if (startrecognition_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    startrecognition_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.startrecognition)
+  return startrecognition_;
+}
+inline ::std::string* Message::release_startrecognition() {
+  clear_has_startrecognition();
+  if (startrecognition_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = startrecognition_;
+    startrecognition_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message::set_allocated_startrecognition(::std::string* startrecognition) {
+  if (startrecognition_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete startrecognition_;
+  }
+  if (startrecognition) {
+    set_has_startrecognition();
+    startrecognition_ = startrecognition;
+  } else {
+    clear_has_startrecognition();
+    startrecognition_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.startrecognition)
+}
+
+// optional bool region = 20;
 inline bool Message::has_region() const {
-  return (_has_bits_[0] & 0x00008000u) != 0;
+  return (_has_bits_[0] & 0x00020000u) != 0;
 }
 inline void Message::set_has_region() {
-  _has_bits_[0] |= 0x00008000u;
+  _has_bits_[0] |= 0x00020000u;
 }
 inline void Message::clear_has_region() {
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline void Message::clear_region() {
   region_ = false;
@@ -1800,15 +1945,15 @@ inline void Message::set_region(bool value) {
   // @@protoc_insertion_point(field_set:motion.Message.region)
 }
 
-// optional int32 numberofchanges = 20;
+// optional int32 numberofchanges = 21;
 inline bool Message::has_numberofchanges() const {
-  return (_has_bits_[0] & 0x00010000u) != 0;
+  return (_has_bits_[0] & 0x00040000u) != 0;
 }
 inline void Message::set_has_numberofchanges() {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00040000u;
 }
 inline void Message::clear_has_numberofchanges() {
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline void Message::clear_numberofchanges() {
   numberofchanges_ = 0;
@@ -1824,39 +1969,15 @@ inline void Message::set_numberofchanges(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.numberofchanges)
 }
 
-// optional bool engaged = 21;
-inline bool Message::has_engaged() const {
-  return (_has_bits_[0] & 0x00020000u) != 0;
-}
-inline void Message::set_has_engaged() {
-  _has_bits_[0] |= 0x00020000u;
-}
-inline void Message::clear_has_engaged() {
-  _has_bits_[0] &= ~0x00020000u;
-}
-inline void Message::clear_engaged() {
-  engaged_ = false;
-  clear_has_engaged();
-}
-inline bool Message::engaged() const {
-  // @@protoc_insertion_point(field_get:motion.Message.engaged)
-  return engaged_;
-}
-inline void Message::set_engaged(bool value) {
-  set_has_engaged();
-  engaged_ = value;
-  // @@protoc_insertion_point(field_set:motion.Message.engaged)
-}
-
 // optional int32 amount = 22;
 inline bool Message::has_amount() const {
-  return (_has_bits_[0] & 0x00040000u) != 0;
+  return (_has_bits_[0] & 0x00080000u) != 0;
 }
 inline void Message::set_has_amount() {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00080000u;
 }
 inline void Message::clear_has_amount() {
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline void Message::clear_amount() {
   amount_ = 0;
@@ -1870,6 +1991,158 @@ inline void Message::set_amount(::google::protobuf::int32 value) {
   set_has_amount();
   amount_ = value;
   // @@protoc_insertion_point(field_set:motion.Message.amount)
+}
+
+// optional string matfile = 23;
+inline bool Message::has_matfile() const {
+  return (_has_bits_[0] & 0x00100000u) != 0;
+}
+inline void Message::set_has_matfile() {
+  _has_bits_[0] |= 0x00100000u;
+}
+inline void Message::clear_has_matfile() {
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline void Message::clear_matfile() {
+  if (matfile_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    matfile_->clear();
+  }
+  clear_has_matfile();
+}
+inline const ::std::string& Message::matfile() const {
+  // @@protoc_insertion_point(field_get:motion.Message.matfile)
+  return *matfile_;
+}
+inline void Message::set_matfile(const ::std::string& value) {
+  set_has_matfile();
+  if (matfile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    matfile_ = new ::std::string;
+  }
+  matfile_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.matfile)
+}
+inline void Message::set_matfile(const char* value) {
+  set_has_matfile();
+  if (matfile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    matfile_ = new ::std::string;
+  }
+  matfile_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.matfile)
+}
+inline void Message::set_matfile(const char* value, size_t size) {
+  set_has_matfile();
+  if (matfile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    matfile_ = new ::std::string;
+  }
+  matfile_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.matfile)
+}
+inline ::std::string* Message::mutable_matfile() {
+  set_has_matfile();
+  if (matfile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    matfile_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.matfile)
+  return matfile_;
+}
+inline ::std::string* Message::release_matfile() {
+  clear_has_matfile();
+  if (matfile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = matfile_;
+    matfile_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message::set_allocated_matfile(::std::string* matfile) {
+  if (matfile_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete matfile_;
+  }
+  if (matfile) {
+    set_has_matfile();
+    matfile_ = matfile;
+  } else {
+    clear_has_matfile();
+    matfile_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.matfile)
+}
+
+// optional string cameras = 24;
+inline bool Message::has_cameras() const {
+  return (_has_bits_[0] & 0x00200000u) != 0;
+}
+inline void Message::set_has_cameras() {
+  _has_bits_[0] |= 0x00200000u;
+}
+inline void Message::clear_has_cameras() {
+  _has_bits_[0] &= ~0x00200000u;
+}
+inline void Message::clear_cameras() {
+  if (cameras_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    cameras_->clear();
+  }
+  clear_has_cameras();
+}
+inline const ::std::string& Message::cameras() const {
+  // @@protoc_insertion_point(field_get:motion.Message.cameras)
+  return *cameras_;
+}
+inline void Message::set_cameras(const ::std::string& value) {
+  set_has_cameras();
+  if (cameras_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    cameras_ = new ::std::string;
+  }
+  cameras_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.cameras)
+}
+inline void Message::set_cameras(const char* value) {
+  set_has_cameras();
+  if (cameras_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    cameras_ = new ::std::string;
+  }
+  cameras_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.cameras)
+}
+inline void Message::set_cameras(const char* value, size_t size) {
+  set_has_cameras();
+  if (cameras_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    cameras_ = new ::std::string;
+  }
+  cameras_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.cameras)
+}
+inline ::std::string* Message::mutable_cameras() {
+  set_has_cameras();
+  if (cameras_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    cameras_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.cameras)
+  return cameras_;
+}
+inline ::std::string* Message::release_cameras() {
+  clear_has_cameras();
+  if (cameras_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = cameras_;
+    cameras_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message::set_allocated_cameras(::std::string* cameras) {
+  if (cameras_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete cameras_;
+  }
+  if (cameras) {
+    set_has_cameras();
+    cameras_ = cameras;
+  } else {
+    clear_has_cameras();
+    cameras_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.cameras)
 }
 
 
