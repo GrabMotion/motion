@@ -92,7 +92,7 @@ public:
 private:
     Ui::MainWindow *ui;
     QtWaitingSpinner *m_spinner;
-    QtWaitingSpinner *spinner_folders;
+    //QtWaitingSpinner *spinner_folders;
     QImage last_stored_frame;
     std::string getActiveTerminalIPString();
 
@@ -104,8 +104,8 @@ private:
     void split(const string& s, char c, vector<string>& v);
     std::string local_ip;
 
-    void RefreshTreViewModel(QString roo, QString rip);
-    void refresh_results();
+    //void RefreshTreViewModel(QString roo, QString rip);
+    //void refresh_results();
     QString treeViewPath;
     QString ipPath;
     QString getSharedFolder();
@@ -193,8 +193,8 @@ private slots:
     void ShareUmounted();
 
     //Files
-    void on_list_files_clicked(const QModelIndex &index);
-    void on_list_folders_clicked(const QModelIndex &index);
+    //void on_list_files_clicked(const QModelIndex &index);
+    //void on_list_folders_clicked(const QModelIndex &index);
 
     //Region
         void savedRegionResutl(QString re);

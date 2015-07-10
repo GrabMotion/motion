@@ -1068,9 +1068,7 @@ void MainWindow::remoteProto(motion::Message m)
             {
                 ui->status->setText("WORKING");
                 ui->start_recognition->setChecked(true);
-                
-
-                
+               
                 if (m.has_startrecognitiontime())
                 {
                     ui->startedat->setText(m.startrecognitiontime().c_str());
