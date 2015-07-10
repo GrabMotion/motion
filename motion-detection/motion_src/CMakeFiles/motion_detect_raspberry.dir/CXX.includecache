@@ -57,6 +57,10 @@ functional
 -
 fstream
 -
+dirent.h
+-
+sys/stat.h
+-
 opencv2/opencv.hpp
 /home/pi/motion/motion-detection/motion_src/src/motion_detect/opencv2/opencv.hpp
 opencv2/highgui/highgui.hpp

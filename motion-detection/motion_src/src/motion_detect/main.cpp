@@ -29,6 +29,8 @@
 #include <vector>
 #include <functional>
 #include <fstream>
+#include <dirent.h>
+#include <sys/stat.h>
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -80,7 +82,7 @@ int       	server_camera;
 
 //Threads
 pthread_cond_t echo_response;
-pthread_mutex_t protoMutex;
+pthread_mutex_t protoMutex, fileMutex;
 bool echo_received;
 motion::Message::ActionType resutl_echo;
 std::string result_message;
@@ -105,6 +107,7 @@ motion::Message PROTO;
 motion::Message R_PROTO;
 motion::Message T_PROTO;
 motion::Message takePictureToProto(motion::Message);
+std::string starttime;
 
 //Recognition
 bool stop_capture;
@@ -112,9 +115,9 @@ bool is_recognizing;
 cv::Mat picture;
 bool stop_recognizing;
 int number_of_changes;
-bool engaged;
 int resutl_watch_detected;
 std::string startrecognitiontime;
+string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
 
 //UDP
 int udpsend(motion::Message m);
@@ -128,6 +131,17 @@ std::string getGlobalIntToString(int id);
 
 int getGlobalStringToInt(std::string id);
 char * setMessageValueBody(int value, std::string body);
+
+inline bool file_exist (const std::string& name) {
+    ifstream f(name.c_str());
+    if (f.good()) {
+        f.close();
+        return true;
+    } else {
+        f.close();
+        return false;
+    }
+}
 
 struct arg_struct
 {
@@ -147,6 +161,23 @@ std::string getGlobalIntToString(int id)
     return strm.str();
 }
 std::string getIpAddress();
+
+std::string get_file_contents(std::string filename)
+{
+    std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
+    if (in)
+    {
+        std::string contents;
+        in.seekg(0, std::ios::end);
+        contents.resize(in.tellg());
+        in.seekg(0, std::ios::beg);
+        in.read(&contents[0], contents.size());
+        in.close();
+        return(contents);
+    }
+    throw(errno);
+}
+
 
 char * setMessageValueBody(int value, std::string body)
 {
@@ -273,14 +304,15 @@ motion::Message takePictureToProto(motion::Message m)
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
     
-    IplImage* img=0;
-    img = cvQueryFrame( capture );
-    cvSaveImage("IplImage.JPG",img);
+    //IplImage* img=0;
+    //img = cvQueryFrame( capture );
+    //cvSaveImage("IplImage.JPG",img);
     
     Mat mat(h, w, CV_8U); //CV_8U); // CV_8UC3);
     mat = cvQueryFrame(capture);
     cvtColor(mat, mat, CV_RGB2GRAY);
-    imwrite("MAT.jpg", mat);
+    
+    //imwrite("MAT.jpg", mat);
     
     //Shared mat
     picture = mat;
@@ -321,11 +353,11 @@ motion::Message takePictureToProto(motion::Message m)
     gettimeofday(&tp, NULL);
     int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
     
-    R_PROTO.set_matfile(IntToString(ms));
+    T_PROTO.set_matfile(IntToString(ms));
     m.set_matfile(IntToString(ms));
 
     //Write base64 to file for checking.
-    std::string basefile = IntToString(ms);
+    std::string basefile = "data/mat/" + IntToString(ms);
     std::ofstream out;
     out.open (basefile.c_str());
     out << m.data() << "\n";
@@ -387,7 +419,6 @@ void * sendProto (void * arg)
 
 void * sendEcho(motion::Message m)
 {
-    
     struct arg_struct arguments;
     arguments.message = m;
     
@@ -407,25 +438,56 @@ void * startObserver(void * arg)
     
     while (true)
     {
-        if (engaged)
-        {
             if (is_recognizing)
             {
-                    /*std::cout << "number_of_changes = " << resutl_watch_detected << std::endl;
-                    if (resutl_watch_detected>5)
+                
+                    std::cout << "number_of_changes = " << resutl_watch_detected << std::endl;
+                
+                    if (resutl_watch_detected>0)
                     {
-                        cout << "R_PROTO resutl_watch_detected " << endl;
-                        motion::Message mc;
-                        mc.set_type(motion::Message::REC_HAS_CHANGES);
-                        mc.set_numberofchanges(number_of_changes);
-                        cout << "::1::" <<  endl;
-                        mc.set_startrecognition(startrecognitiontime.c_str());
-                                                cout << "::2::" <<  endl;
-                        sendEcho(mc);
-                        google::protobuf::ShutdownProtobufLibrary();
-                    }*/
+                        //cout << "R_PROTO resutl_watch_detected " << endl;
+                        //motion::Message mc;
+                        //mc.set_type(motion::Message::REC_HAS_CHANGES);
+                        //mc.set_numberofchanges(number_of_changes);
+                        //cout << "::1::" <<  endl;
+                        //mc.set_startrecognition(startrecognitiontime.c_str());
+                        //sendEcho(mc);
+                        //google::protobuf::ShutdownProtobufLibrary();
+                        
+                        cout << "Serializing proto response." << endl;
+                        
+                        motion::Message m;
+                        m.set_recognizing(true);
+                        pthread_mutex_lock(&protoMutex);
+                        m = R_PROTO;
+                        pthread_mutex_unlock(&protoMutex);
+                        
+                        cout << "Serializing proto response." << endl;
+                        
+                        //Initialize objects to serialize.
+                        int size = m.ByteSize();
+                        
+                        cout << "Proto size   : " << size << endl;
+                        
+                        char dataresponse[size];
+                        string datastr;
+                        
+                        m.SerializeToArray(&dataresponse, size);
+                        
+                        std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
+
+                        //Write base64 to backup with mutex.
+                        std::string basefile = "data/data/backup.txt";
+                        std::ofstream out;
+                        pthread_mutex_lock(&fileMutex);
+                        out.open (basefile.c_str());
+                        out << encoded_proto << "\n";
+                        out.close();
+                        pthread_mutex_unlock(&fileMutex);
+                        
+                        sleep(1);
+                    }
                 }
-        }
         sleep(1);
     }
     cout << "stopObserver" << endl;
@@ -454,23 +516,49 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::ENGAGE:
         {
             cout << "motion::Message::ENGAGE" << endl;
-            engaged=true;
-            pthread_mutex_lock(&protoMutex);
-            m = R_PROTO;
-            m.set_cameras(T_PROTO.cameras());
-            pthread_mutex_unlock(&protoMutex);
-            m.set_time(getTimeRasp());
+            
+            //pthread_mutex_lock(&protoMutex);
+            //m = R_PROTO;
+            //pthread_mutex_unlock(&protoMutex);
+            
+            std::string protofile = "data/data/back.txt";
+            if (file_exist(protofile))
+            {
+                m.Clear();
+                std::string backfile = protofile;
+                pthread_mutex_lock(&fileMutex);
+                string loaded = get_file_contents(backfile);
+                pthread_mutex_unlock(&fileMutex);
+        
+                std::string oridecoded = base64_decode(loaded);
+                m.ParseFromArray(oridecoded.c_str(), oridecoded.size());
+            }
             m.set_type(motion::Message::ENGAGE);
+            m.set_cameras(T_PROTO.cameras());
+            m.set_time(getTimeRasp());
             m.set_starttime(T_PROTO.starttime());
+            if (!m.has_matfile())
+            {
+                m.set_matfile(T_PROTO.matfile());
+            }
+            
         }
         break;
         case motion::Message::DISSCONNECT:
         {
-            engaged=false;
+            
         }
         break;
         case motion::Message::REC_START:
         {
+            if (R_PROTO.has_xmlfilename())
+            {
+                cout << "R_PROTO xmlfile : " <<  R_PROTO.xmlfilename() << endl;
+            }else
+            {
+                cout << "R_PROTO xmlfile not PRESENT: " <<  endl;
+            }
+            
             runr = pthread_create(&thread_recognition, NULL, startRecognition, NULL);
             if ( runr  != 0) {
                 cerr << "Unable to create thread" << endl;
@@ -682,11 +770,11 @@ try
           "PROSTO";
           msg = header + msg_split_vector.at(count_sent_split);
         
-          std::string basefile = "encoded_proto.txt";
-          std::ofstream out;
-          out.open (basefile.c_str());
-          out << encoded_proto << "\n";
-          out.close();
+          //std::string basefile = "encoded_proto.txt";
+          //std::ofstream out;
+          //out.open (basefile.c_str());
+          //out << encoded_proto << "\n";
+          //out.close();
           
           count_sent_split++;
           
@@ -823,7 +911,7 @@ void * broadcastsender ( void * args )
     int countud;
     for (;;) {
         sock.sendTo(sendString, strlen(sendString), destAddress, destPort);
-        cout << "UPD Send: " << countud << " " << getShortTimeRasp() << endl;
+        //cout << "UPD Send: " << countud << " " << getShortTimeRasp() << endl;
         countud++;
         sleep(3);
     }
@@ -852,11 +940,33 @@ std::vector<int> getCameras()
     return camsv;
 }
 
+// Check if the directory exists, if not create it
+// This function will create a new directory if the image is the first
+// image taken for a specific day
+void directoryExistsOrCreate(const char* pzPath)
+{
+    DIR *pDir;
+    // directory doesn't exists -> create it
+    if ( pzPath == NULL || (pDir = opendir (pzPath)) == NULL)
+        mkdir(pzPath, 0777);
+    // if directory exists we opened it and we
+    // have to close the directory again.
+    else if(pDir != NULL)
+        (void) closedir (pDir);
+}
+
+
 int main (int argc, char * const argv[])
 {
     
-    cout <<  "time: " << getShortTimeRasp() << endl;
-    
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    cout <<  ":::start time:::: " << time_rasp << endl;
+
     //Rasp Variables.
     std::vector<int> cams = getCameras();
     stringstream ss;
@@ -865,9 +975,20 @@ int main (int argc, char * const argv[])
     cameras = cameras.substr(0, cameras.length()-1);
     
     T_PROTO.set_cameras(cameras);
-    T_PROTO.set_starttime(getTimeRasp());
+    T_PROTO.set_starttime(time_rasp);
+    starttime = time_rasp;
+    
+    std::string basedatafile = "data";
+    directoryExistsOrCreate(basedatafile.c_str());
+    std::string secdatafile = "data/data";
+    directoryExistsOrCreate(secdatafile.c_str());
+    std::string matdatafile = "data/mat";
+    directoryExistsOrCreate(matdatafile.c_str());
+    
+    cout << "Start Time:: " << starttime << endl;
 
     pthread_mutex_init(&protoMutex, 0);
+    pthread_mutex_init(&fileMutex, 0);
     
     // UDP
    runb = pthread_create(&thread_broadcast, NULL, broadcastsender, NULL);

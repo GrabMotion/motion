@@ -23,10 +23,9 @@ extern std::string startrecognitiontime;
 extern std::string getGlobalIntToString(int id);
 extern cv::Mat picture;
 extern motion::Message PROTO, R_PROTO;
-extern pthread_mutex_t protoMutex;;
+extern pthread_mutex_t protoMutex;
 
-extern char *getTimeRasp();
-char *getShortTimeRasp();
+extern std::string DIR_FORMAT;
 
 void * startRecognition(void * args);
 
@@ -35,4 +34,3 @@ std::vector<cv::Point2f> stringToVectorPoint2f(std::string storedcoord);
 std::vector<cv::Point2f> processRegionString(std::string coordstring);
 
 #endif	/* DETECTION_H */
-

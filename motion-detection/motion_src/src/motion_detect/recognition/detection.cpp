@@ -35,8 +35,14 @@
 #include <unistd.h>
 #include <cstring>
 
+#include <sys/time.h>
+
 using namespace std;
 using namespace cv;
+
+motion::Message::MotionMonth * pmonth;
+motion::Message::MotionDay * pday;
+motion::Message::Instance * pinstance;
 
 std::vector<cv::Point2f> stringToVectorPoint2f(std::string storedcoord)
 {
@@ -206,7 +212,8 @@ inline string saveImg(
         const string EXTENSION, 
         const char * DIR_FORMAT, 
         const char * FILE_FORMAT,
-        int n_o_changes
+        int n_o_changes,
+        string img
 )
 {   
     stringstream ss;
@@ -236,7 +243,21 @@ inline string saveImg(
     imwrite(image_file, image);
     
     //std::cout << "image_file: " << image_file << std::endl;
-    
+    stringstream ff;
+    ff << n_file << EXTENSION;
+    if (img.empty())
+    {
+        motion::Message::Image * pimage = pinstance->add_image();
+        pimage->set_path(image_file);
+        pimage->set_name(ff.str().c_str());
+        pimage->set_imagechanges(n_o_changes);
+    } else
+    {
+        motion::Message::Crop * pcrop = pinstance->add_crop();
+        pcrop->set_path(image_file);
+        pcrop->set_name(ff.str());
+        pcrop->set_imagefather(img);
+    }
     return image_file;
 }
 
@@ -248,10 +269,10 @@ inline bool createDirectoryTree(
         const string EXTENSION, 
         const char * DIR_FORMAT, 
         const char * FILE_FORMAT,
-        string instance
+        std::string instance
 )
 {
-    stringstream ss, zz;
+    std::stringstream ss, zz;
     time_t seconds;
     struct tm * timeinfo;
     char TIME[80];
@@ -265,7 +286,7 @@ inline bool createDirectoryTree(
     ss << DIRECTORY << TIME;        
     directoryExistsOrCreate(ss.str().c_str());    
     ss << "/xml";
-     directoryExistsOrCreate(ss.str().c_str());   
+    directoryExistsOrCreate(ss.str().c_str());
     zz.str("");
     zz << DIRECTORY << TIME << "/" + instance;         
     directoryExistsOrCreate(zz.str().c_str());
@@ -430,7 +451,7 @@ void * startRecognition(void * arg)
     std::string instancecode;
     if (R_PROTO.has_codename())
     {
-        cout << "Has code." << endl;
+        cout << "Has codename." << endl;
         std::string instancecode = R_PROTO.codename();
     }
     if (instancecode.empty())
@@ -442,6 +463,99 @@ void * startRecognition(void * arg)
         delay = R_PROTO.delay();
     }
     time_t delaymark;
+    
+    string XML_FILE;
+    if (R_PROTO.has_xmlfilename())
+    {
+        cout << "has_xmlfile." << endl;
+        XML_FILE = R_PROTO.xmlfilename();
+    }
+    else
+    {
+        XML_FILE  =  "<import>session";
+        R_PROTO.set_xmlfilename(XML_FILE);
+    }
+    
+    cout << "MONTH" << endl;
+    
+    //Get Month abr.
+    struct timeval tm;
+    struct tm* ptm;
+    char month_rasp[3];
+    gettimeofday (&tm, NULL);
+    ptm = localtime (&tm.tv_sec);
+    strftime (month_rasp, sizeof (month_rasp), "%h", ptm);
+    
+    //Month.
+    string str_month;
+    if (R_PROTO.has_currmonth())
+    {
+        str_month = R_PROTO.currmonth();
+    }
+    cout << "str_month: " << str_month << endl;
+    
+    //Check if exist month on proto or else add it.
+    int sizem = R_PROTO.motionmonth_size();
+    cout << "sizem: " << sizem << endl;
+    bool monthexist = false;
+    for (int i = 0; i < sizem; i++)
+    {
+        cout << "entra" << endl;
+        motion::Message::MotionMonth * mmonth = R_PROTO.mutable_motionmonth(i);
+        if (mmonth->has_monthlabel())
+        {
+            cout << "has label" << endl;
+            std::string mlabel = mmonth->monthlabel();
+            if (str_month.find(mlabel))
+            {
+                cout << "has month" << endl;
+                pmonth = R_PROTO.mutable_motionmonth(i);
+                monthexist=true;
+            }
+        }
+        else
+        {
+            cout << "has NO month" << endl;
+        }
+    }
+    if(!monthexist)
+    {
+        cout << "!monthexist" << endl;
+        //Add proto month.
+        pmonth = R_PROTO.add_motionmonth();
+        pmonth->set_monthlabel(str_month);
+        cout << "sigo" << endl;
+    }
+    
+    //Day.
+    string str_day;
+    if (R_PROTO.has_currday())
+    {
+        str_day = R_PROTO.currday();
+    }
+    cout << "str_day: " << str_day << endl;
+
+    //Check if day exist or else add it.
+    bool dayexist=false;
+    cout << "pmonth->motionday_size(): " << pmonth->motionday_size() << endl;
+    for (int j = 0; j < pmonth->motionday_size(); j++)
+    {
+        std::string dlabel = pmonth->motionday(j).daylabel();
+        cout << "dlabel: " << str_day << endl;
+        if (str_day.find(dlabel))
+        {
+            pday = pmonth->mutable_motionday(j);
+            dayexist = true;
+        }
+    }
+    if (!dayexist)
+    {
+        cout << "!dayexist" << endl;
+        //Add proto day.
+        pday = pmonth->add_motionday();
+        pday->set_daylabel(str_day);
+        cout << "sigo" << endl;
+    }
     
     bool writeImages = R_PROTO.storeimage();
     bool writeCroop  = R_PROTO.storecrop();
@@ -479,10 +593,10 @@ void * startRecognition(void * arg)
     }
     
     // Format of directory
-    string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
+    //string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
     string FILE_FORMAT;//          = DIR_FORMAT + "/" + "%d%h%Y_%H%M%S"; // 1Jan1970/1Jan1970_12153
     string CROPPED_FILE_FORMAT;//   = DIR_FORMAT + "/cropped/" + "%d%h%Y_%H%M%S"; // 1Jan1970/cropped/1Jan1970_121539
-    string XML_FILE             =  "<import>session";
+    //string XML_FILE             =  "<import>session";
     std::string image_file_recognized;
     
     // Set up camera
@@ -531,33 +645,31 @@ void * startRecognition(void * arg)
     // Instance counter
     int instance_counter = 0; 
     string instance;
-    int countWhile;
     
     init_time = clock();
-    bool started=false;
+    
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+
+    R_PROTO.set_startrecognitiontime(time_rasp);
+    startrecognitiontime = time_rasp;
+    
+    cout << "TIME STARTED: " << time_rasp << endl;
     
     // All settings have been set, now go in endless loop and
     // take as many pictures you want..
     while (true)
     {
         
-        if (started)
-        {
-            startrecognitiontime = getShortTimeRasp();
-            R_PROTO.set_startrecognition(getTimeRasp());
-            started=true;
-        }
-        
         //Killme
         if (stop_recognizing)
             break;
         
         is_recognizing = true;
-        
-        pthread_mutex_lock(&protoMutex);
-        R_PROTO.set_recognizing(true);
-        pthread_mutex_unlock(&protoMutex);
-        countWhile++;
         
        // Take a new image
         prev_frame = current_frame;
@@ -601,10 +713,15 @@ void * startRecognition(void * arg)
                     
                     if (!has_instance_directory){
                         
+                        //New Instance
                         instance_counter++;
                         stringstream id;
                         id << instance_counter;
                         instance = id.str(); 
+                        
+                        //Add proto instance.
+                        pinstance = pday->add_instance();
+                        pinstance->set_idinstance(std::atoi(instance.c_str()));
                         
                         FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "%d%h%Y_%H%M%S";
                         CROPPED_FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "/cropped/" + "%d%h%Y_%H%M%S";
@@ -617,17 +734,24 @@ void * startRecognition(void * arg)
                             instance );
                         
                         has_instance_directory = true;
+                        
+                        pinstance->set_fileformat(FILE_FORMAT);
+                        pinstance->set_croppedformat(FILE_FORMAT);
+                        R_PROTO.set_instancecount(instance_counter);
+                        
                     }    
                 }
                 if (writeImages)
                 {
+                    std::string emptystr = string();
                     image_file_recognized = saveImg (
                         result, 
                         DIR, 
                         EXT, 
                         DIR_FORMAT.c_str(), 
                         FILE_FORMAT.c_str(),
-                        number_of_changes
+                        number_of_changes,
+                        emptystr
                     );
                 }
                 if (writeCroop)
@@ -638,7 +762,8 @@ void * startRecognition(void * arg)
                             EXT,
                             DIR_FORMAT.c_str(),
                             CROPPED_FILE_FORMAT.c_str(),
-                            number_of_changes
+                            number_of_changes,
+                            image_file_recognized
                     );
                 }
                                 
@@ -685,14 +810,12 @@ void * startRecognition(void * arg)
                 
                 std::ostringstream end;
                 end << (end_time - init_time) / CLOCKS_PER_SEC;
-           
+                
                 writeXMLInstance(XMLFILE.c_str(), begin.str(), end.str(), instance);
                 
                 pthread_mutex_lock(&protoMutex);
-                motion::Message::Instance * inst = R_PROTO.add_instance();
-                inst->set_idinstance(instance);
-                inst->set_instanceamount(number_of_changes);
-                inst->set_filepath("hola");
+                pinstance->set_instancestart(begin.str());
+                pinstance->set_instanceend(end.str());
                 pthread_mutex_unlock(&protoMutex);
                 
             }       
