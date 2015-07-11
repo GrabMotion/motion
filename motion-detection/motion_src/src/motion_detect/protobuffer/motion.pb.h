@@ -54,6 +54,8 @@ enum Message_ActionType {
   Message_ActionType_STRM_STOP = 1010,
   Message_ActionType_TAKE_PICTURE = 1011,
   Message_ActionType_DISSCONNECT = 1012,
+  Message_ActionType_REFRESH = 1013,
+  Message_ActionType_GET_XML = 1014,
   Message_ActionType_RESPONSE_OK = 200,
   Message_ActionType_RESPONSE_NEXT = 201,
   Message_ActionType_RESPONSE_END = 202,
@@ -62,7 +64,7 @@ enum Message_ActionType {
 };
 bool Message_ActionType_IsValid(int value);
 const Message_ActionType Message_ActionType_ActionType_MIN = Message_ActionType_RESPONSE_OK;
-const Message_ActionType Message_ActionType_ActionType_MAX = Message_ActionType_DISSCONNECT;
+const Message_ActionType Message_ActionType_ActionType_MAX = Message_ActionType_GET_XML;
 const int Message_ActionType_ActionType_ARRAYSIZE = Message_ActionType_ActionType_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Message_ActionType_descriptor();
@@ -760,6 +762,8 @@ class Message : public ::google::protobuf::Message {
   static const ActionType STRM_STOP = Message_ActionType_STRM_STOP;
   static const ActionType TAKE_PICTURE = Message_ActionType_TAKE_PICTURE;
   static const ActionType DISSCONNECT = Message_ActionType_DISSCONNECT;
+  static const ActionType REFRESH = Message_ActionType_REFRESH;
+  static const ActionType GET_XML = Message_ActionType_GET_XML;
   static const ActionType RESPONSE_OK = Message_ActionType_RESPONSE_OK;
   static const ActionType RESPONSE_NEXT = Message_ActionType_RESPONSE_NEXT;
   static const ActionType RESPONSE_END = Message_ActionType_RESPONSE_END;
@@ -1014,22 +1018,29 @@ class Message : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 amount() const;
   inline void set_amount(::google::protobuf::int32 value);
 
-  // optional string matfile = 23;
-  inline bool has_matfile() const;
+  // repeated int32 matfile = 23;
+  inline int matfile_size() const;
   inline void clear_matfile();
   static const int kMatfileFieldNumber = 23;
-  inline const ::std::string& matfile() const;
-  inline void set_matfile(const ::std::string& value);
-  inline void set_matfile(const char* value);
-  inline void set_matfile(const char* value, size_t size);
-  inline ::std::string* mutable_matfile();
-  inline ::std::string* release_matfile();
-  inline void set_allocated_matfile(::std::string* matfile);
+  inline ::google::protobuf::int32 matfile(int index) const;
+  inline void set_matfile(int index, ::google::protobuf::int32 value);
+  inline void add_matfile(::google::protobuf::int32 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
+      matfile() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
+      mutable_matfile();
 
-  // optional string cameras = 24;
+  // optional int32 activemat = 24;
+  inline bool has_activemat() const;
+  inline void clear_activemat();
+  static const int kActivematFieldNumber = 24;
+  inline ::google::protobuf::int32 activemat() const;
+  inline void set_activemat(::google::protobuf::int32 value);
+
+  // optional string cameras = 25;
   inline bool has_cameras() const;
   inline void clear_cameras();
-  static const int kCamerasFieldNumber = 24;
+  static const int kCamerasFieldNumber = 25;
   inline const ::std::string& cameras() const;
   inline void set_cameras(const ::std::string& value);
   inline void set_cameras(const char* value);
@@ -1038,10 +1049,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_cameras();
   inline void set_allocated_cameras(::std::string* cameras);
 
-  // optional string xmlfilename = 25;
+  // optional string xmlfilename = 26;
   inline bool has_xmlfilename() const;
   inline void clear_xmlfilename();
-  static const int kXmlfilenameFieldNumber = 25;
+  static const int kXmlfilenameFieldNumber = 26;
   inline const ::std::string& xmlfilename() const;
   inline void set_xmlfilename(const ::std::string& value);
   inline void set_xmlfilename(const char* value);
@@ -1050,10 +1061,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_xmlfilename();
   inline void set_allocated_xmlfilename(::std::string* xmlfilename);
 
-  // optional string xmlfilepath = 26;
+  // optional string xmlfilepath = 27;
   inline bool has_xmlfilepath() const;
   inline void clear_xmlfilepath();
-  static const int kXmlfilepathFieldNumber = 26;
+  static const int kXmlfilepathFieldNumber = 27;
   inline const ::std::string& xmlfilepath() const;
   inline void set_xmlfilepath(const ::std::string& value);
   inline void set_xmlfilepath(const char* value);
@@ -1062,17 +1073,17 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_xmlfilepath();
   inline void set_allocated_xmlfilepath(::std::string* xmlfilepath);
 
-  // optional int32 instancecount = 27;
+  // optional int32 instancecount = 28;
   inline bool has_instancecount() const;
   inline void clear_instancecount();
-  static const int kInstancecountFieldNumber = 27;
+  static const int kInstancecountFieldNumber = 28;
   inline ::google::protobuf::int32 instancecount() const;
   inline void set_instancecount(::google::protobuf::int32 value);
 
-  // optional string currmonth = 28;
+  // optional string currmonth = 29;
   inline bool has_currmonth() const;
   inline void clear_currmonth();
-  static const int kCurrmonthFieldNumber = 28;
+  static const int kCurrmonthFieldNumber = 29;
   inline const ::std::string& currmonth() const;
   inline void set_currmonth(const ::std::string& value);
   inline void set_currmonth(const char* value);
@@ -1081,10 +1092,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_currmonth();
   inline void set_allocated_currmonth(::std::string* currmonth);
 
-  // optional string currday = 29;
+  // optional string currday = 30;
   inline bool has_currday() const;
   inline void clear_currday();
-  static const int kCurrdayFieldNumber = 29;
+  static const int kCurrdayFieldNumber = 30;
   inline const ::std::string& currday() const;
   inline void set_currday(const ::std::string& value);
   inline void set_currday(const char* value);
@@ -1133,8 +1144,8 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_numberofchanges();
   inline void set_has_amount();
   inline void clear_has_amount();
-  inline void set_has_matfile();
-  inline void clear_has_matfile();
+  inline void set_has_activemat();
+  inline void clear_has_activemat();
   inline void set_has_cameras();
   inline void clear_has_cameras();
   inline void set_has_xmlfilename();
@@ -1172,13 +1183,14 @@ class Message : public ::google::protobuf::Message {
   ::std::string* startrecognitiontime_;
   ::google::protobuf::int32 numberofchanges_;
   ::google::protobuf::int32 amount_;
-  ::std::string* matfile_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::int32 > matfile_;
   ::std::string* cameras_;
   ::std::string* xmlfilename_;
+  ::google::protobuf::int32 activemat_;
+  ::google::protobuf::int32 instancecount_;
   ::std::string* xmlfilepath_;
   ::std::string* currmonth_;
   ::std::string* currday_;
-  ::google::protobuf::int32 instancecount_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -3172,91 +3184,69 @@ inline void Message::set_amount(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.amount)
 }
 
-// optional string matfile = 23;
-inline bool Message::has_matfile() const {
-  return (_has_bits_[0] & 0x00100000u) != 0;
-}
-inline void Message::set_has_matfile() {
-  _has_bits_[0] |= 0x00100000u;
-}
-inline void Message::clear_has_matfile() {
-  _has_bits_[0] &= ~0x00100000u;
+// repeated int32 matfile = 23;
+inline int Message::matfile_size() const {
+  return matfile_.size();
 }
 inline void Message::clear_matfile() {
-  if (matfile_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    matfile_->clear();
-  }
-  clear_has_matfile();
+  matfile_.Clear();
 }
-inline const ::std::string& Message::matfile() const {
+inline ::google::protobuf::int32 Message::matfile(int index) const {
   // @@protoc_insertion_point(field_get:motion.Message.matfile)
-  return *matfile_;
+  return matfile_.Get(index);
 }
-inline void Message::set_matfile(const ::std::string& value) {
-  set_has_matfile();
-  if (matfile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    matfile_ = new ::std::string;
-  }
-  matfile_->assign(value);
+inline void Message::set_matfile(int index, ::google::protobuf::int32 value) {
+  matfile_.Set(index, value);
   // @@protoc_insertion_point(field_set:motion.Message.matfile)
 }
-inline void Message::set_matfile(const char* value) {
-  set_has_matfile();
-  if (matfile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    matfile_ = new ::std::string;
-  }
-  matfile_->assign(value);
-  // @@protoc_insertion_point(field_set_char:motion.Message.matfile)
+inline void Message::add_matfile(::google::protobuf::int32 value) {
+  matfile_.Add(value);
+  // @@protoc_insertion_point(field_add:motion.Message.matfile)
 }
-inline void Message::set_matfile(const char* value, size_t size) {
-  set_has_matfile();
-  if (matfile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    matfile_ = new ::std::string;
-  }
-  matfile_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:motion.Message.matfile)
-}
-inline ::std::string* Message::mutable_matfile() {
-  set_has_matfile();
-  if (matfile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    matfile_ = new ::std::string;
-  }
-  // @@protoc_insertion_point(field_mutable:motion.Message.matfile)
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
+Message::matfile() const {
+  // @@protoc_insertion_point(field_list:motion.Message.matfile)
   return matfile_;
 }
-inline ::std::string* Message::release_matfile() {
-  clear_has_matfile();
-  if (matfile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = matfile_;
-    matfile_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
-}
-inline void Message::set_allocated_matfile(::std::string* matfile) {
-  if (matfile_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete matfile_;
-  }
-  if (matfile) {
-    set_has_matfile();
-    matfile_ = matfile;
-  } else {
-    clear_has_matfile();
-    matfile_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  }
-  // @@protoc_insertion_point(field_set_allocated:motion.Message.matfile)
+inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
+Message::mutable_matfile() {
+  // @@protoc_insertion_point(field_mutable_list:motion.Message.matfile)
+  return &matfile_;
 }
 
-// optional string cameras = 24;
-inline bool Message::has_cameras() const {
+// optional int32 activemat = 24;
+inline bool Message::has_activemat() const {
   return (_has_bits_[0] & 0x00200000u) != 0;
 }
-inline void Message::set_has_cameras() {
+inline void Message::set_has_activemat() {
   _has_bits_[0] |= 0x00200000u;
 }
-inline void Message::clear_has_cameras() {
+inline void Message::clear_has_activemat() {
   _has_bits_[0] &= ~0x00200000u;
+}
+inline void Message::clear_activemat() {
+  activemat_ = 0;
+  clear_has_activemat();
+}
+inline ::google::protobuf::int32 Message::activemat() const {
+  // @@protoc_insertion_point(field_get:motion.Message.activemat)
+  return activemat_;
+}
+inline void Message::set_activemat(::google::protobuf::int32 value) {
+  set_has_activemat();
+  activemat_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.activemat)
+}
+
+// optional string cameras = 25;
+inline bool Message::has_cameras() const {
+  return (_has_bits_[0] & 0x00400000u) != 0;
+}
+inline void Message::set_has_cameras() {
+  _has_bits_[0] |= 0x00400000u;
+}
+inline void Message::clear_has_cameras() {
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline void Message::clear_cameras() {
   if (cameras_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3324,15 +3314,15 @@ inline void Message::set_allocated_cameras(::std::string* cameras) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.cameras)
 }
 
-// optional string xmlfilename = 25;
+// optional string xmlfilename = 26;
 inline bool Message::has_xmlfilename() const {
-  return (_has_bits_[0] & 0x00400000u) != 0;
+  return (_has_bits_[0] & 0x00800000u) != 0;
 }
 inline void Message::set_has_xmlfilename() {
-  _has_bits_[0] |= 0x00400000u;
+  _has_bits_[0] |= 0x00800000u;
 }
 inline void Message::clear_has_xmlfilename() {
-  _has_bits_[0] &= ~0x00400000u;
+  _has_bits_[0] &= ~0x00800000u;
 }
 inline void Message::clear_xmlfilename() {
   if (xmlfilename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3400,15 +3390,15 @@ inline void Message::set_allocated_xmlfilename(::std::string* xmlfilename) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.xmlfilename)
 }
 
-// optional string xmlfilepath = 26;
+// optional string xmlfilepath = 27;
 inline bool Message::has_xmlfilepath() const {
-  return (_has_bits_[0] & 0x00800000u) != 0;
+  return (_has_bits_[0] & 0x01000000u) != 0;
 }
 inline void Message::set_has_xmlfilepath() {
-  _has_bits_[0] |= 0x00800000u;
+  _has_bits_[0] |= 0x01000000u;
 }
 inline void Message::clear_has_xmlfilepath() {
-  _has_bits_[0] &= ~0x00800000u;
+  _has_bits_[0] &= ~0x01000000u;
 }
 inline void Message::clear_xmlfilepath() {
   if (xmlfilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3476,15 +3466,15 @@ inline void Message::set_allocated_xmlfilepath(::std::string* xmlfilepath) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.xmlfilepath)
 }
 
-// optional int32 instancecount = 27;
+// optional int32 instancecount = 28;
 inline bool Message::has_instancecount() const {
-  return (_has_bits_[0] & 0x01000000u) != 0;
+  return (_has_bits_[0] & 0x02000000u) != 0;
 }
 inline void Message::set_has_instancecount() {
-  _has_bits_[0] |= 0x01000000u;
+  _has_bits_[0] |= 0x02000000u;
 }
 inline void Message::clear_has_instancecount() {
-  _has_bits_[0] &= ~0x01000000u;
+  _has_bits_[0] &= ~0x02000000u;
 }
 inline void Message::clear_instancecount() {
   instancecount_ = 0;
@@ -3500,15 +3490,15 @@ inline void Message::set_instancecount(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.instancecount)
 }
 
-// optional string currmonth = 28;
+// optional string currmonth = 29;
 inline bool Message::has_currmonth() const {
-  return (_has_bits_[0] & 0x02000000u) != 0;
+  return (_has_bits_[0] & 0x04000000u) != 0;
 }
 inline void Message::set_has_currmonth() {
-  _has_bits_[0] |= 0x02000000u;
+  _has_bits_[0] |= 0x04000000u;
 }
 inline void Message::clear_has_currmonth() {
-  _has_bits_[0] &= ~0x02000000u;
+  _has_bits_[0] &= ~0x04000000u;
 }
 inline void Message::clear_currmonth() {
   if (currmonth_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3576,15 +3566,15 @@ inline void Message::set_allocated_currmonth(::std::string* currmonth) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.currmonth)
 }
 
-// optional string currday = 29;
+// optional string currday = 30;
 inline bool Message::has_currday() const {
-  return (_has_bits_[0] & 0x04000000u) != 0;
+  return (_has_bits_[0] & 0x08000000u) != 0;
 }
 inline void Message::set_has_currday() {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x08000000u;
 }
 inline void Message::clear_has_currday() {
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline void Message::clear_currday() {
   if (currday_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {

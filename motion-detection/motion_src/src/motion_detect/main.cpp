@@ -108,6 +108,7 @@ motion::Message R_PROTO;
 motion::Message T_PROTO;
 motion::Message takePictureToProto(motion::Message);
 std::string starttime;
+motion::Message getLocalPtoro(motion::Message m);
 
 //Recognition
 bool stop_capture;
@@ -353,8 +354,13 @@ motion::Message takePictureToProto(motion::Message m)
     gettimeofday(&tp, NULL);
     int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
     
-    T_PROTO.set_matfile(IntToString(ms));
-    m.set_matfile(IntToString(ms));
+    cout << "activemat::::: " << ms << endl;
+    
+    T_PROTO.add_matfile(ms);
+    T_PROTO.set_activemat(ms);
+    
+    m.add_matfile(ms);
+    m.set_activemat(ms);
 
     //Write base64 to file for checking.
     std::string basefile = "data/mat/" + IntToString(ms);
@@ -445,16 +451,6 @@ void * startObserver(void * arg)
                 
                     if (resutl_watch_detected>0)
                     {
-                        //cout << "R_PROTO resutl_watch_detected " << endl;
-                        //motion::Message mc;
-                        //mc.set_type(motion::Message::REC_HAS_CHANGES);
-                        //mc.set_numberofchanges(number_of_changes);
-                        //cout << "::1::" <<  endl;
-                        //mc.set_startrecognition(startrecognitiontime.c_str());
-                        //sendEcho(mc);
-                        //google::protobuf::ShutdownProtobufLibrary();
-                        
-                        cout << "Serializing proto response." << endl;
                         
                         motion::Message m;
                         m.set_recognizing(true);
@@ -462,12 +458,10 @@ void * startObserver(void * arg)
                         m = R_PROTO;
                         pthread_mutex_unlock(&protoMutex);
                         
-                        cout << "Serializing proto response." << endl;
-                        
                         //Initialize objects to serialize.
                         int size = m.ByteSize();
                         
-                        cout << "Proto size   : " << size << endl;
+                        //cout << "Proto size   : " << size << endl;
                         
                         char dataresponse[size];
                         string datastr;
@@ -477,7 +471,7 @@ void * startObserver(void * arg)
                         std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
 
                         //Write base64 to backup with mutex.
-                        std::string basefile = "data/data/backup.txt";
+                        std::string basefile = "data/data/localproto.txt";
                         std::ofstream out;
                         pthread_mutex_lock(&fileMutex);
                         out.open (basefile.c_str());
@@ -507,6 +501,26 @@ int div_ceil(int numerator, int denominator)
     return res.rem ? (res.quot + 1) : res.quot;
 }
 
+motion::Message getLocalPtoro(motion::Message m )
+{
+    std::string protofile = "data/data/localproto.txt";
+    
+    if (file_exist(protofile))
+    {
+        
+        m.Clear();
+        std::string backfile = protofile;
+        pthread_mutex_lock(&fileMutex);
+        string loaded = get_file_contents(backfile);
+        pthread_mutex_unlock(&fileMutex);
+        std::string oridecoded = base64_decode(loaded);
+        m.ParseFromArray(oridecoded.c_str(), oridecoded.size());
+        m.set_time(getTimeRasp());
+    }
+    return m;
+
+}
+
 motion::Message runCommand(motion::Message m)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -516,32 +530,32 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::ENGAGE:
         {
             cout << "motion::Message::ENGAGE" << endl;
-            
-            //pthread_mutex_lock(&protoMutex);
-            //m = R_PROTO;
-            //pthread_mutex_unlock(&protoMutex);
-            
-            std::string protofile = "data/data/back.txt";
-            if (file_exist(protofile))
-            {
-                m.Clear();
-                std::string backfile = protofile;
-                pthread_mutex_lock(&fileMutex);
-                string loaded = get_file_contents(backfile);
-                pthread_mutex_unlock(&fileMutex);
-        
-                std::string oridecoded = base64_decode(loaded);
-                m.ParseFromArray(oridecoded.c_str(), oridecoded.size());
-            }
+            m = getLocalPtoro(m);
             m.set_type(motion::Message::ENGAGE);
             m.set_cameras(T_PROTO.cameras());
-            m.set_time(getTimeRasp());
             m.set_starttime(T_PROTO.starttime());
-            if (!m.has_matfile())
-            {
-                m.set_matfile(T_PROTO.matfile());
-            }
+            m.set_activemat(T_PROTO.activemat());
             
+        }
+        break;
+        case motion::Message::REFRESH:
+        {
+            cout << "motion::Message::ENGAGE" << endl;
+            m = getLocalPtoro(m);
+            m.set_type(motion::Message::REFRESH);
+
+        }
+        break;
+        case motion::Message::GET_XML:
+        {
+            std::string xml_file = PROTO.xmlfilepath();
+            string DIR        = "../../src/motion_web/pics/";
+            std::string XML_FILE  =  "<import>session.xml";
+            std::string xml_path = DIR + "/" + XML_FILE
+            string xml_loaded = get_file_contents(xml_path);
+            std:string encoded_xml = base64_encode(reinterpret_cast<const unsigned char*>(xml_loaded),sizeof(xml_loaded));
+            m.set_type(motion::Message::GET_XML);
+            m.set_data(encoded_xml.c_str());
         }
         break;
         case motion::Message::DISSCONNECT:
@@ -567,8 +581,10 @@ motion::Message runCommand(motion::Message m)
         break;
         case motion::Message::TAKE_PICTURE:
         {
+            
             cout << "motion::Message::TAKE_PICTURE" << endl;
             m = takePictureToProto(m);
+            cout << "activemat:  " << m.activemat() << endl;
             
         }
         break;
