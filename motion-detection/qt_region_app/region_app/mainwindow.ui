@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1134</width>
+    <width>1067</width>
     <height>611</height>
    </rect>
   </property>
@@ -676,9 +676,9 @@ color: rgb(255, 252, 253);</string>
     <property name="geometry">
      <rect>
       <x>666</x>
-      <y>473</y>
+      <y>460</y>
       <width>251</width>
-      <height>51</height>
+      <height>61</height>
      </rect>
     </property>
     <property name="maximumSize">
@@ -710,20 +710,29 @@ color: rgb(255, 252, 253);</string>
     <property name="geometry">
      <rect>
       <x>660</x>
-      <y>150</y>
-      <width>274</width>
-      <height>281</height>
+      <y>154</y>
+      <width>314</width>
+      <height>301</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="1">
-      <widget class="QLabel" name="instances_amount">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>11</height>
+        </size>
+       </property>
        <property name="text">
-        <string/>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;INSTANCES&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="1" column="3">
       <widget class="QPushButton" name="pushButton">
        <property name="maximumSize">
         <size>
@@ -736,32 +745,59 @@ color: rgb(255, 252, 253);</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="0" colspan="3">
-      <widget class="QTreeWidget" name="remote_directory">
-       <column>
-        <property name="text">
-         <string notr="true">1</string>
-        </property>
-       </column>
+     <item row="2" column="0" colspan="4">
+      <widget class="QTreeWidget" name="remote_directory"/>
+     </item>
+     <item row="3" column="0">
+      <widget class="QPushButton" name="pushButton_6">
+       <property name="text">
+        <string>XML</string>
+       </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="3" column="3">
       <widget class="QPushButton" name="pushButton_2">
        <property name="maximumSize">
         <size>
-         <width>70</width>
+         <width>50</width>
          <height>16777215</height>
         </size>
        </property>
        <property name="text">
-        <string>Expand</string>
+        <string>Exp</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <layout class="QHBoxLayout" name="top_spinner_3">
+     <item row="1" column="1" colspan="2">
+      <widget class="QComboBox" name="motionday"/>
+     </item>
+     <item row="3" column="2">
+      <widget class="QPushButton" name="pushButton_3">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Coll</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QComboBox" name="motionmonth"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="instances_amount">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <layout class="QHBoxLayout" name="instance_spinner">
        <item>
-        <spacer name="spinnerLeftSpacer_2">
+        <spacer name="spinnerLeftSpacer_3">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -774,7 +810,7 @@ color: rgb(255, 252, 253);</string>
         </spacer>
        </item>
        <item>
-        <spacer name="spinnerRightSpacer_2">
+        <spacer name="spinnerRightSpacer_3">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -788,83 +824,6 @@ color: rgb(255, 252, 253);</string>
        </item>
       </layout>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;INSTANCES&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="2">
-      <widget class="QPushButton" name="pushButton_3">
-       <property name="maximumSize">
-        <size>
-         <width>90</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Coollapse</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1" colspan="2">
-      <widget class="QComboBox" name="motionday"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QComboBox" name="motionmonth"/>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="gridLayoutWidget_4">
-    <property name="geometry">
-     <rect>
-      <x>660</x>
-      <y>436</y>
-      <width>261</width>
-      <height>33</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout_4">
-     <item row="0" column="3">
-      <widget class="QPushButton" name="pushButton_5">
-       <property name="maximumSize">
-        <size>
-         <width>90</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Download</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="label_8">
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;XML&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLineEdit" name="xmlfilename"/>
-     </item>
-     <item row="0" column="0">
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Minimum</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>10</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
     </layout>
    </widget>
   </widget>
@@ -873,7 +832,7 @@ color: rgb(255, 252, 253);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1134</width>
+     <width>1067</width>
      <height>22</height>
     </rect>
    </property>
@@ -923,12 +882,7 @@ color: rgb(255, 252, 253);</string>
   <tabstop>network_ip</tabstop>
   <tabstop>set_time</tabstop>
   <tabstop>remote_directory</tabstop>
-  <tabstop>pushButton</tabstop>
-  <tabstop>pushButton_2</tabstop>
-  <tabstop>pushButton_3</tabstop>
   <tabstop>pushButton_4</tabstop>
-  <tabstop>xmlfilename</tabstop>
-  <tabstop>pushButton_5</tabstop>
  </tabstops>
  <resources/>
  <connections/>

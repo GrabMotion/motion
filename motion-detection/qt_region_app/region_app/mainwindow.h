@@ -92,6 +92,7 @@ public:
 private:
     Ui::MainWindow *ui;
     QtWaitingSpinner *m_spinner;
+    QtWaitingSpinner *i_spinner;
     //QtWaitingSpinner *spinner_folders;
     QImage last_stored_frame;
     std::string getActiveTerminalIPString();
@@ -110,7 +111,8 @@ private:
     QString ipPath;
     QString getSharedFolder();
     void getLocalNetwork();
-    char * getTerminalFolder();
+    vector<string> getTerminalFolder();
+    void saveProto(string encodedproto, std::string file);
 
     void setRemoteProto(motion::Message payload);
 
@@ -138,8 +140,8 @@ private:
 
     bool finished=false;
 
-    void saveMat(string encodedmat, std::string file);
-    void loadMat(std::string file);
+    void saveMat(std::string encodedmat, google::protobuf::uint32 file);
+    void loadMat(google::protobuf::uint32 file);
 
     vector<Point2f> stringToVectorPoint2f(std::string storedcoord);
 
@@ -147,6 +149,11 @@ private:
     bool region;
 
     void setMessageBodyAndSend(motion::Message m);
+
+    void saveLocalProto(QString qproto, motion::Message remote);
+    motion::Message mergeRemoteToLocalProto(motion::Message remote);
+    void loadInstances(motion::Message m);
+    motion::Message PROTO;
 
     std::string IntToString ( int number );
 
@@ -163,7 +170,6 @@ public:
     {
         receivedEcho(payload);
     }
-
 
 private slots:
 
@@ -200,6 +206,10 @@ private slots:
         void savedRegionResutl(QString re);
 
 
+
+        void on_pushButton_clicked();
+
+        void on_pushButton_6_clicked();
 
 signals:
     void drawLinesSignal(std::vector<cv::Point2f> lines);

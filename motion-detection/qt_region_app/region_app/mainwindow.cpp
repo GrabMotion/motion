@@ -89,17 +89,29 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(ui->qt_drawing_output, SIGNAL(Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&)), this, SLOT(Mouse_Pressed_Right_Click(std::vector<cv::Point2f>&)));
     //connect(ui->qt_drawing_output, SIGNAL(Mouse_Left()), this, SLOT(Mouse_left()));
 
-    //Spinner
+    //Top Spinner
     m_spinner = new QtWaitingSpinner(this);
-    QVBoxLayout *spinnerLayout = new QVBoxLayout;
-    spinnerLayout->insertWidget(0, m_spinner);
-    spinnerLayout->insertStretch(0);
-    spinnerLayout->addStretch();
+    QVBoxLayout *spinnerTopLayout = new QVBoxLayout;
+    spinnerTopLayout->insertWidget(0, m_spinner);
+    spinnerTopLayout->insertStretch(0);
+    spinnerTopLayout->addStretch();
     m_spinner->setNumberOfLines(13);
     m_spinner->setLineLength(6);
     m_spinner->setLineWidth(1);
     m_spinner->setInnerRadius(4);
-    ui->top_spinner->insertLayout(1, spinnerLayout);
+    ui->top_spinner->insertLayout(1, spinnerTopLayout);
+
+    //Instance Spinner
+    i_spinner = new QtWaitingSpinner(this);
+    QVBoxLayout *spinnerInstanceLayout = new QVBoxLayout;
+    spinnerInstanceLayout->insertWidget(0, i_spinner);
+    spinnerInstanceLayout->insertStretch(0);
+    spinnerInstanceLayout->addStretch();
+    i_spinner->setNumberOfLines(13);
+    i_spinner->setLineLength(6);
+    i_spinner->setLineWidth(1);
+    i_spinner->setInnerRadius(4);
+    ui->instance_spinner->insertLayout(1, spinnerInstanceLayout);
 
     /*spinner_folders = new QtWaitingSpinner(this);
     QVBoxLayout *spinnerLayoutFolder = new QVBoxLayout;
@@ -132,14 +144,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->mapdrive->setEnabled(false);
 
-    ui->xmlfilename->setText("<import>session");
     ui->codename->setText("prueba");
 
     //ui->ips_combo->addItem("192.168.1.47"); //208.70.188.15");
     //ui->connect_button->setEnabled(true);
 
     //Tests
-    testBase();
+    //testBase();
 
     //std::string mat = "/jose/repos/motion/mat.txt";
     //string loaded = MainWindow::get_file_contents(mat);
@@ -241,6 +252,38 @@ void MainWindow::on_engage_button_clicked()
    setMessageBodyAndSend(m);
    google::protobuf::ShutdownProtobufLibrary();
 }
+
+void MainWindow::on_pushButton_clicked()
+{
+    motion::Message m;
+    m.set_type(motion::Message::ActionType::Message_ActionType_REFRESH);
+    setMessageBodyAndSend(m);
+    google::protobuf::ShutdownProtobufLibrary();
+}
+
+
+void MainWindow::on_pushButton_6_clicked()
+{
+    motion::Message m;
+
+    // Sacar dia del Combo!!!
+
+    struct timeval td;
+    struct tm* ptd;
+    char day_rasp[9];
+    gettimeofday (&td, NULL);
+    ptd = localtime (&td.tv_sec);
+    const char * dir = "%d%h%Y";
+    strftime (day_rasp, sizeof (day_rasp), dir, ptd);
+    std::string _day(day_rasp, 9);
+
+    m.set_xmlfilename(day_rasp);
+    m.set_type(motion::Message::ActionType::Message_ActionType_GET_XML);
+    setMessageBodyAndSend(m);
+    google::protobuf::ShutdownProtobufLibrary();
+
+}
+
 
 void MainWindow::setMessageBodyAndSend(motion::Message m)
 {
@@ -697,54 +740,24 @@ void MainWindow::testBase()
             string path = crop.path();
         }
 
-    }*/
+    }
+    google::protobuf::ShutdownProtobufLibrary();*/
 
-    google::protobuf::ShutdownProtobufLibrary();
 
-    // The data we need to deserialize
-    int width_d = 0;
-    int height_d = 0;
-    int type_d = 0;
-    size_t size_d = 0;
+    std::string basefile = "/jose/repos/motion/encoded_remote_proto.txt";
+    string loaded = get_file_contents(basefile);
 
-    //std::string basefile = "/jose/repos/mat.txt";
-    //string loaded = get_file_contents(basefile);
+    std::string oridecoded = base64_decode(loaded);
 
-    //std::string local_mat = base64_decode(testmm.data());
+    motion::Message m;
+    m.ParseFromArray(oridecoded.c_str(), oridecoded.size());
 
-    stringstream decoded;
-    //std::stringstream decoded;
-    //decoded << local_mat;
-
-    // Read the width, height, type and size of the buffer
-    decoded.read((char*)(&width_d), sizeof(int));
-    decoded.read((char*)(&height_d), sizeof(int));
-    decoded.read((char*)(&type_d), sizeof(int));
-    decoded.read((char*)(&size_d), sizeof(int));
-
-    // Allocate a buffer for the pixels
-    char* data_d = new char[size_d];
-    // Read the pixels from the stringstream
-    decoded.read(data_d, size_d);
-
-    // Construct the image (clone it so that it won't need our buffer anymore)
-    Mat deserialized = Mat(height_d, width_d, type_d, data_d).clone();
-    cout  << "::::::::::::::::::::::::::::::::::" << endl;
-    cout  << "width: " << width_d << endl;
-    cout  << "height: " << height_d << endl;
-    cout  << "type: " << type_d << endl;
-    cout  << "size: " << size_d << endl;
-
-    // Delete our buffer
-    delete[]data_d;
-
-    google::protobuf::ShutdownProtobufLibrary();
-
-    //Save image converted
-    imwrite("/jose/repos/image__decoded__10000.jpg", deserialized);
-
-    QImage frame = Mat2QImage(deserialized);
-    ui->output->setPixmap(QPixmap::fromImage(frame));
+    if (m.has_activemat())
+    {
+        google::protobuf::uint32 matint =  m.activemat();
+        if (matint>0)
+            loadMat(matint);
+    }
 
 }
 
@@ -759,78 +772,102 @@ std::string MainWindow::getTime()
     return time_string;
 }
 
-char * MainWindow::getTerminalFolder()
+vector<string> MainWindow::getTerminalFolder()
 {
 
-    QProcess process_mount;
-    QString command;
-
+    vector<string> paths;
+    QString qt_ip = ui->ips_combo->currentText();
     QDir rootDir = QDir::currentPath();
     rootDir.cdUp();
     rootDir.cdUp();
     rootDir.cdUp();
-    QString roStr = rootDir.absolutePath();
-    QString roo = roStr + "/" + "mats";
+    QString basedir = rootDir.absolutePath();
 
-    QByteArray ba = roo.toLatin1();
-    char *shrs = ba.data();
-    if (!QDir(shrs).exists())
+    //data
+    QString data = basedir + "/" + "data";
+    QByteArray da = data.toLatin1();
+    char *dashrs = da.data();
+    if (!QDir(dashrs).exists())
     {
-        QDir().mkdir(shrs);
+        QDir().mkdir(dashrs);
     }
 
-    QString qt_ip = ui->ips_combo->currentText();
-
-    QString rip = roo + "/" + qt_ip;
-    QByteArray baip = rip.toLatin1();
-    char *ipfile = baip.data();
-
-    if (!QDir(ipfile).exists())
+    //data/data
+    QString datadata = QString(dashrs) + "/" + "data";
+    QByteArray ddada = datadata.toLatin1();
+    char *dadashrs = ddada.data();
+    if (!QDir(dadashrs).exists())
     {
-        QDir().mkdir(ipfile);
+        QDir().mkdir(dadashrs);
+    }
+    //data/data/ip
+    QString datadata_ip = QString(dadashrs) + '/' + qt_ip;
+    QByteArray datadataip = datadata_ip.toLatin1();
+    char *datadata_ipfile = datadataip.data();
+    if (!QDir(datadata_ipfile).exists())
+    {
+        QDir().mkdir(datadata_ipfile);
     }
 
-    return ipfile;
+    stringstream ss;
+    ss << datadata_ipfile;
+    paths.push_back(ss.str());
+
+    //data/mats
+    QString mats = QString(data) + "/" + "mats";
+    QByteArray ma = mats.toLatin1();
+    char *matshrs = ma.data();
+    if (!QDir(matshrs).exists())
+    {
+        QDir().mkdir(matshrs);
+    }
+    //data/mats/ip
+    QString mat_ip = QString(matshrs) + '/' + qt_ip;
+    QByteArray matip = mat_ip.toLatin1();
+    char *mat_ipfile = matip.data();
+    if (!QDir(mat_ipfile).exists())
+    {
+        QDir().mkdir(mat_ipfile);
+    }
+
+    stringstream sm;
+    sm << mat_ipfile;
+    paths.push_back(sm.str());
+
+    return paths;
 }
 
-void MainWindow::saveMat(string encodedmat, std::string file)
+void MainWindow::saveMat(std::string encodedmat, google::protobuf::uint32 file)
 {
 
     QString qt_ip = ui->ips_combo->currentText();
     QByteArray ba_ip = qt_ip.toLatin1();
     std::string qt_ip_str = qt_ip.toUtf8().constData();
-    char * matfile = getTerminalFolder();
+    std::string matfolder = getTerminalFolder().at(1);
 
-    stringstream ss;
-    ss << matfile;
-
-    std::string basefile = ss.str()  + '/' + file;
+    std::string basefile = matfolder  + "/" + std::to_string(file) + ".mat";
     std::ofstream out;
     out.open (basefile.c_str());
     out << encodedmat << "\n";
     out.close();
 
- }
+}
 
-void MainWindow::loadMat(std::string file)
+void MainWindow::loadMat(google::protobuf::uint32 file)
 {
 
     QString qt_ip = ui->ips_combo->currentText();
     QByteArray ba_ip = qt_ip.toLatin1();
     std::string qt_ip_str = qt_ip.toUtf8().constData();
-    char * matfile = getTerminalFolder();
+    std::string matfolder = getTerminalFolder().at(1);
 
-    stringstream ss;
-    ss << matfile;
-
-    std::string basefile = ss.str()  + '/' + file;
+    std::string basefile = matfolder  + '/' + std::to_string(file) + ".mat";
 
     string loadedmat = MainWindow::get_file_contents(basefile);
 
     std::string oridecoded = base64_decode(loadedmat);
 
     stringstream decoded;
-    //std::stringstream decoded;
     decoded << oridecoded;
 
     // The data we need to deserialize.
@@ -850,7 +887,6 @@ void MainWindow::loadMat(std::string file)
     // Read the pixels from the stringstream
     decoded.read(data_d, size_d);
 
-    // Construct the image (clone it so that it won't need our buffer anymore)
     main_mat = cv::Mat(height_d, width_d, type_d, data_d).clone();
 
     //Render image.
@@ -862,6 +898,23 @@ void MainWindow::loadMat(std::string file)
     delete[]data_d;
 
 }
+
+void MainWindow::saveProto(string encodedproto, std::string file)
+{
+
+    QString qt_ip = ui->ips_combo->currentText();
+    QByteArray ba_ip = qt_ip.toLatin1();
+    std::string qt_ip_str = qt_ip.toUtf8().constData();
+    std::string protofolder = getTerminalFolder().at(0);
+
+    std::string basefile = protofolder  + '/' + file + '/' + '.mat';
+    std::ofstream out;
+    out.open (basefile.c_str());
+    out << encodedproto << "\n";
+    out.close();
+
+ }
+
 
 vector<Point2f> MainWindow::stringToVectorPoint2f(std::string storedcoord)
 {
@@ -998,7 +1051,6 @@ void MainWindow::enableDisableButtons(bool set)
 
 void MainWindow::sendSocket(string svradress, string command)
 {
-    //TCP Socket
     tcpsend_thread = new TCPEchoThread(this);
     tcpsend_thread->SendEcho(svradress, command);
 }
@@ -1045,141 +1097,215 @@ std::vector<std::string> MainWindow::splitProto(const std::string &s, char delim
 std::string MainWindow::IntToString ( int number )
 {
     std::ostringstream oss;
-
-    // Works just like cout
     oss<< number;
-
-    // Return the underlying string
     return oss.str();
 }
 
-void MainWindow::remoteProto(motion::Message m)
+void MainWindow::saveLocalProto(QString qproto, motion::Message remote)
 {
-      int action = m.type();
+    //First time.
+    int size = remote.ByteSize();
+    char dataresponse[size];
+    string datastr;
+    remote.SerializeToArray(&dataresponse, size);
+    std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
+
+    std::ofstream out;
+    out.open (qproto.toUtf8().constData());
+    out << encoded_proto << "\n";
+    out.close();
+
+}
+
+motion::Message MainWindow::mergeRemoteToLocalProto(motion::Message remote)
+{
+
+    motion::Message m;
+
+    //Check local proto exist.
+    std::string pfile = getTerminalFolder().at(0);
+    QString qproto = QString(pfile.c_str()) + QString("/buffer.txt");
+    QFile protofile(qproto);
+    if (protofile.exists())
+    {
+        //Loading local.
+        string local = get_file_contents(qproto.toStdString());
+        std::string localdecoded = base64_decode(local);
+        m.ParseFromArray(localdecoded.c_str(), localdecoded.size());
+
+    } else
+    {
+        //First time save, some defaults values.
+        remote.set_storeimage(true);
+        remote.set_delay(3);
+        remote.set_codename("changeme");
+        saveLocalProto(qproto, remote);
+    }
+
+    //Merging.
+    m.MergeFrom(remote);
+
+    PROTO = m;
+
+    //Save local meged.
+    saveLocalProto(qproto, m);
+
+    return m;
+
+}
+
+void MainWindow::loadInstances(motion::Message m)
+{
+
+    QTreeWidget *treeWidget = ui->remote_directory;
+    ui->remote_directory->setColumnCount(1);
+
+    int sizem = m.motionmonth_size();
+
+    for (int i = 0; i < sizem; i++)
+    {
+         const motion::Message::MotionMonth & mmonth = m.motionmonth(i);
+
+         std::string mlabel = mmonth.monthlabel();
+         int indexm = ui->motionmonth->findText(mlabel.c_str());
+         if (indexm==-1)
+            ui->motionmonth->addItem(mlabel.c_str());
+
+         for (int j = 0; j < mmonth.motionday_size(); j++)
+         {
+
+             const motion::Message::MotionDay & mday = mmonth.motionday(j);
+
+             std::string dlabel = mday.daylabel();
+             int indexd = ui->motionday->findText(mlabel.c_str());
+             if (indexd==-1)
+                ui->motionday->addItem(mlabel.c_str());
+
+             for (int k = 0; k < mday.instance_size(); k++)
+             {
+
+                const motion::Message::Instance & ins = mday.instance(k);
+
+                QTreeWidgetItem *parentTreeItem = new QTreeWidgetItem(treeWidget);
+                QString instancenumber = QString::number(ins.idinstance());
+                parentTreeItem->setText(0, instancenumber);
+
+                 cout << "amount: " << ins.idinstance() << endl;
+                 cout << "id: " << ins.idinstance() << endl;
+
+                 for (int j = 0; j < ins.image_size(); j++)
+                 {
+                     const motion::Message::Image & img = ins.image(j);
+                     string path = img.path();
+                     QTreeWidgetItem *imageItem = new QTreeWidgetItem();
+                     imageItem->setText(0, img.name().c_str());
+                     parentTreeItem->addChild(imageItem);
+                 }
+
+                 for (int t = 0; t < ins.crop_size(); t++)
+                 {
+                     const motion::Message::Crop & crop = ins.crop(t);
+                     string path = crop.path();
+                 }
+             }
+         }
+    }
+}
+
+void MainWindow::remoteProto(motion::Message remote)
+{
+      motion::Message m;
+      int action = remote.type();
       switch (action)
       {
+        case motion::Message::REFRESH:
+        {
+            m = mergeRemoteToLocalProto(remote);
+            int sizem = m.motionmonth_size();
+            if (sizem>0)
+                loadInstances(m);
+        }
+        break;
         case motion::Message::ENGAGE:
         {
 
+            m = mergeRemoteToLocalProto(remote);
+
             enableDisableButtons(true);
+
             ui->remote_terminal_time->setText(m.time().c_str());
-            
+                
+            if (m.has_startrecognitiontime())
+            {
+                ui->startedat->setText(m.startrecognitiontime().c_str());
+            }else
+            {
+                ui->startedat->setText("N/A");
+            }
+
+            if (m.has_storeimage())
+            {
+                ui->has_images->setChecked(true);
+            } else
+            {
+                ui->has_images->setChecked(false);
+            }
+
+            if (m.has_storecrop())
+            {
+                ui->has_crops->setChecked(true);
+            } else
+            {
+                ui->has_crops->setChecked(false);
+            }
+
+            if (m.has_instancecount())
+            {
+                ui->instances_amount->setText(QString::number(m.instancecount()));
+            } else
+            {
+                ui->instances_amount->setText("N/A");
+            }
+
+            if (m.has_codename())
+            {
+                ui->codename->setText(m.codename().c_str());
+            }
+            else
+            {
+                ui->codename->setText("HARDCODED");
+            }
+
+            ui->delay->setCurrentIndex(ui->delay->findData(m.delay()));
+
+
+            if (m.has_activemat())
+            {
+                google::protobuf::uint32 matint =  m.activemat();
+                if (matint>0)
+                    loadMat(matint);
+            }
+
+            std::string coords = m.regioncoords();
+            vector<Point2f> scorrd = MainWindow::stringToVectorPoint2f(coords);
+            ui->qt_drawing_output->drawLinesSlot(scorrd);
+
+            //Load Instances to QTreeWidget.
+            int sizem = m.motionmonth_size();
+            if (sizem>0)
+                loadInstances(m);
+
             if (m.recognizing())
             {
                 ui->status->setText("WORKING");
                 ui->start_recognition->setChecked(true);
+                ui->start_recognition->setText("STOP RECOGNITION");
                 
-
-                
-                if (m.has_startrecognitiontime())
-                {
-                    ui->startedat->setText(m.startrecognitiontime().c_str());
-                }else
-                {
-                    ui->startedat->setText("N/A");
-                }
-
-                if (m.has_storeimage())
-                {
-                    ui->has_images->setChecked(true);
-                } else
-                {
-                    ui->has_images->setChecked(false);
-                }
-
-                if (m.has_storecrop())
-                {
-                    ui->has_crops->setChecked(true);
-                } else
-                {
-                    ui->has_crops->setChecked(false);
-                }
-                
-                if (m.has_instancecount())
-                {
-                    ui->instances_amount->setText(QString::number(m.instancecount()));
-                } else
-                {
-                    ui->instances_amount->setText("N/A");
-                }
-                
-                if (m.has_codename())
-                {
-                    ui->codename->setText(m.codename().c_str());
-                }
-                else
-                {
-                    ui->codename->setText("HARDCODED");
-                }
-
-                ui->delay->setCurrentIndex(ui->delay->findData(m.delay()));
-
-                std::string matfile = m.matfile();
-                loadMat(matfile);
-
-                std::string coords = m.regioncoords();
-                vector<Point2f> scorrd = MainWindow::stringToVectorPoint2f(coords);
-                ui->qt_drawing_output->drawLinesSlot(scorrd);
-
-                QTreeWidget *treeWidget = ui->remote_directory;
-                ui->remote_directory->setColumnCount(1);
-
-                int sizem = m.motionmonth_size();
-
-                for (int i = 0; i < sizem; i++)
-                {
-                     const motion::Message::MotionMonth & mmonth = m.motionmonth(i);
-
-                     std::string mlabel = mmonth.monthlabel();
-                     int indexm = ui->motionmonth->findText(mlabel.c_str());
-                     if (indexm==-1)
-                        ui->motionmonth->addItem(mlabel.c_str());
-                    
-                     for (int j = 0; j < mmonth.motionday_size(); j++)
-                     {
-
-                         const motion::Message::MotionDay & mday = mmonth.motionday(j);
-
-                         std::string dlabel = mday.daylabel();
-                         int indexd = ui->motionday->findText(mlabel.c_str());
-                         if (indexd==-1)
-                            ui->motionday->addItem(mlabel.c_str());
-
-                         for (int k = 0; k < mday.instance_size(); k++)
-                         {
-
-                            const motion::Message::Instance & ins = mday.instance(k);
-
-                            QTreeWidgetItem *parentTreeItem = new QTreeWidgetItem(treeWidget);
-                            QString instancenumber = QString::number(ins.idinstance());
-                            parentTreeItem->setText(0, instancenumber);
-
-                             cout << "amount: " << ins.idinstance() << endl;
-                             cout << "id: " << ins.idinstance() << endl;
-
-                             for (int j = 0; j < ins.image_size(); j++)
-                             {
-                                 const motion::Message::Image & img = ins.image(j);
-                                 string path = img.path();
-                                 QTreeWidgetItem *imageItem = new QTreeWidgetItem();
-                                 imageItem->setText(0, img.name().c_str());
-                                 parentTreeItem->addChild(imageItem);
-                             }
-
-                             for (int t = 0; t < ins.crop_size(); t++)
-                             {
-                                 const motion::Message::Crop & crop = ins.crop(t);
-                                 string path = crop.path();
-                             }
-                         }
-                     }
-                }
-
-
             } else
             {
                 ui->status->setText("IDDLE");
                 ui->start_recognition->setChecked(false);
+                ui->start_recognition->setText("START RECOGNITION");
             }
             
             if (m.has_cameras())
@@ -1198,24 +1324,29 @@ void MainWindow::remoteProto(motion::Message m)
                 mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
                 mount_thread->terminate();
             }
-            break;
+
+            google::protobuf::ShutdownProtobufLibrary();    
         }
+        break;
         case motion::Message::GET_TIME:
         {
           QString gt = QString::fromUtf8(m.time().c_str());
           ui->remote_terminal_time->setText(gt);
-          break;
         }
+        break;
         case motion::Message::TIME_SET:
         {
           QString ts = QString::fromUtf8(m.time().c_str());
-          ui->remote_terminal_time->setText(ts);
-          break;
+          ui->remote_terminal_time->setText(ts);  
         }
+        break;
         case motion::Message::TAKE_PICTURE:
-            saveMat(m.data(), m.matfile());
-            loadMat(m.matfile());
-          break;
+        {
+            google::protobuf::uint32 matfile = remote.activemat();
+            saveMat(remote.data(), matfile);
+            loadMat(matfile);
+        }
+        break;
     }
 }
 
@@ -1272,11 +1403,6 @@ void MainWindow::resutlEcho(string str)
        const string & ppayload = str.substr((del_pos+del_2.size()), until);
 
        payload_holder.push_back(ppayload);
-
-       //cout << "Rerecving PACKAGE: " << current_package << " of: " << total__packages << endl;
-       //cout << "Pay Size       :" << ppayload.size() << endl;
-       //cout << "msg            : " << ppayload.substr (0,30) << "......" << endl;
-       //cout << "............................................" << endl;
 
        if (current_package==0)
        {
@@ -1344,3 +1470,5 @@ void MainWindow::resutlEcho(string str)
     }
 
 }
+
+
