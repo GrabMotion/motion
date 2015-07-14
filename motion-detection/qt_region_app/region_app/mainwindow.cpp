@@ -70,6 +70,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->qt_drawing_output, SIGNAL(Mouse_Pos()), this, SLOT(Mouse_current_pos()));
     connect(ui->qt_drawing_output, SIGNAL(savedRegionResutl(QString)), this, SLOT(savedRegionResutl(QString)));
 
+    //Combos.
+    connect(ui->motionday,SIGNAL(currentIndexChanged(const QString&)), this, SLOT(dayComboChange(const QString &)));
+
     enableDisableButtons(false);
 
     //Stream Listener Class -- Cannot connect received
@@ -102,7 +105,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->top_spinner->insertLayout(1, spinnerTopLayout);
 
     //Instance Spinner
-    i_spinner = new QtWaitingSpinner(this);
+    /*i_spinner = new QtWaitingSpinner(this);
     QVBoxLayout *spinnerInstanceLayout = new QVBoxLayout;
     spinnerInstanceLayout->insertWidget(0, i_spinner);
     spinnerInstanceLayout->insertStretch(0);
@@ -111,7 +114,7 @@ MainWindow::MainWindow(QWidget *parent) :
     i_spinner->setLineLength(6);
     i_spinner->setLineWidth(1);
     i_spinner->setInnerRadius(4);
-    ui->instance_spinner->insertLayout(1, spinnerInstanceLayout);
+    ui->instance_spinner->insertLayout(1, spinnerInstanceLayout);*/
 
     /*spinner_folders = new QtWaitingSpinner(this);
     QVBoxLayout *spinnerLayoutFolder = new QVBoxLayout;
@@ -133,6 +136,7 @@ MainWindow::MainWindow(QWidget *parent) :
     MainWindow::getLocalNetwork();
 
     ui->mat_progress->setValue(0);
+    ui->xml_progress->setValue(0);
 
     ui->delay->addItem(tr("1"));
     ui->delay->addItem(tr("2"));
@@ -143,8 +147,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->delay->setCurrentText("3");
 
     ui->mapdrive->setEnabled(false);
-
     ui->codename->setText("prueba");
+
 
     //ui->ips_combo->addItem("192.168.1.47"); //208.70.188.15");
     //ui->connect_button->setEnabled(true);
@@ -253,7 +257,7 @@ void MainWindow::on_engage_button_clicked()
    google::protobuf::ShutdownProtobufLibrary();
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_refresh_clicked()
 {
     motion::Message m;
     m.set_type(motion::Message::ActionType::Message_ActionType_REFRESH);
@@ -261,13 +265,8 @@ void MainWindow::on_pushButton_clicked()
     google::protobuf::ShutdownProtobufLibrary();
 }
 
-
-void MainWindow::on_pushButton_6_clicked()
+std::string MainWindow::getCurrentDayLabel()
 {
-    motion::Message m;
-
-    // Sacar dia del Combo!!!
-
     struct timeval td;
     struct tm* ptd;
     char day_rasp[9];
@@ -276,8 +275,30 @@ void MainWindow::on_pushButton_6_clicked()
     const char * dir = "%d%h%Y";
     strftime (day_rasp, sizeof (day_rasp), dir, ptd);
     std::string _day(day_rasp, 9);
+    return _day;
+}
 
-    m.set_xmlfilename(day_rasp);
+std::string MainWindow::getCurrentMonthLabel()
+{
+    struct timeval tm;
+    struct tm* ptm;
+    char month_rasp[3];
+    gettimeofday (&tm, NULL);
+    ptm = localtime (&tm.tv_sec);
+    strftime (month_rasp, sizeof (month_rasp), "%h", ptm);
+    std::string _month(month_rasp, 3);
+    return _month;
+}
+
+void MainWindow::on_getxml_clicked()
+{
+    motion::Message m;
+
+    // Sacar dia del Combo!!!
+
+   std::string _day = MainWindow::getCurrentDayLabel();
+
+    m.set_xmlfilename(_day.c_str());
     m.set_type(motion::Message::ActionType::Message_ActionType_GET_XML);
     setMessageBodyAndSend(m);
     google::protobuf::ShutdownProtobufLibrary();
@@ -585,23 +606,10 @@ void MainWindow::on_start_recognition_toggled(bool checked)
         m.set_storeimage(ui->has_images->isChecked());
         ui->start_recognition->setChecked(true);
 
-        struct timeval tm;
-        struct tm* ptm;
-        char month_rasp[3];
-        gettimeofday (&tm, NULL);
-        ptm = localtime (&tm.tv_sec);
-        strftime (month_rasp, sizeof (month_rasp), "%h", ptm);
-        std::string _month(month_rasp, 3);
+        std::string _month = getCurrentMonthLabel();
         m.set_currmonth(_month);
 
-        struct timeval td;
-        struct tm* ptd;
-        char day_rasp[9];
-        gettimeofday (&td, NULL);
-        ptd = localtime (&td.tv_sec);
-        const char * dir = "%d%h%Y";
-        strftime (day_rasp, sizeof (day_rasp), dir, ptd);
-        std::string _day(day_rasp, 9);
+        std::string _day = getCurrentDayLabel();
         m.set_currday(_day);
 
         setMessageBodyAndSend(m);
@@ -833,6 +841,48 @@ vector<string> MainWindow::getTerminalFolder()
     stringstream sm;
     sm << mat_ipfile;
     paths.push_back(sm.str());
+
+    //data/xml
+    QString xmls = QString(data) + "/" + "xml";
+    QByteArray xm = xmls.toLatin1();
+    char *xmlshrs = xm.data();
+    if (!QDir(xmlshrs).exists())
+    {
+        QDir().mkdir(xmlshrs);
+    }
+    //data/xml/ip
+    QString xml_ip = QString(xmlshrs) + '/' + qt_ip;
+    QByteArray xmltip = xml_ip.toLatin1();
+    char *xml_ipfile = xmltip.data();
+    if (!QDir(xml_ipfile).exists())
+    {
+        QDir().mkdir(xml_ipfile);
+    }
+
+    stringstream sx;
+    sx << xml_ipfile;
+    paths.push_back(sx.str());
+
+    //data/image
+    QString images = QString(data) + "/" + "images";
+    QByteArray img = images.toLatin1();
+    char *imgshrs = img.data();
+    if (!QDir(imgshrs).exists())
+    {
+        QDir().mkdir(imgshrs);
+    }
+    //data/xml/ip
+    QString img_ip = QString(xmlshrs) + '/' + qt_ip;
+    QByteArray imgtip = img_ip.toLatin1();
+    char *img_ipfile = imgtip.data();
+    if (!QDir(img_ipfile).exists())
+    {
+        QDir().mkdir(img_ipfile);
+    }
+
+    stringstream si;
+    si << img_ipfile;
+    paths.push_back(si.str());
 
     return paths;
 }
@@ -1137,20 +1187,63 @@ motion::Message MainWindow::mergeRemoteToLocalProto(motion::Message remote)
     {
         //First time save, some defaults values.
         remote.set_storeimage(true);
-        remote.set_delay(3);
+        remote.set_delay(2);
         remote.set_codename("changeme");
         saveLocalProto(qproto, remote);
     }
 
     //Merging.
-    m.MergeFrom(remote);
+    //m.MergeFrom(remote);
 
-    PROTO = m;
+    PROTO = remote;
 
     //Save local meged.
-    saveLocalProto(qproto, m);
+    saveLocalProto(qproto, remote);
 
-    return m;
+    return remote;
+
+}
+
+void MainWindow::loadInstancesByDay(QTreeWidget * treeWidget, const motion::Message::MotionDay & mday)
+{
+
+    for (int k = 0; k < mday.instance_size(); k++)
+    {
+
+       const motion::Message::Instance & ins = mday.instance(k);
+
+       QTreeWidgetItem *parentTreeItem = new QTreeWidgetItem(treeWidget);
+       QString instancenumber = QString::number(ins.idinstance());
+
+       parentTreeItem->setText(0, instancenumber);
+       QString start = QString::fromStdString(ins.instancestart());
+       parentTreeItem->setText(1, start);
+
+       QString end = QString::fromStdString(ins.instanceend());
+       parentTreeItem->setText(2, end);
+
+        cout << "amount: " << ins.idinstance() << endl;
+        cout << "id: " << ins.idinstance() << endl;
+
+        for (int j = 0; j < ins.image_size(); j++)
+        {
+            const motion::Message::Image & img = ins.image(j);
+            string path = img.path();
+            vector<string> paths = MainWindow::splitProto(path, '/');
+            QTreeWidgetItem *imageItem = new QTreeWidgetItem();
+            imageItem->setTextAlignment ( 0, Qt::AlignLeft);
+            imageItem->setText(0, paths.at(paths.size()-1).c_str());
+            imageItem->setText(3, QString::fromStdString(path));
+            parentTreeItem->addChild(imageItem);
+            imageItem->setFirstColumnSpanned(true);
+        }
+
+        for (int t = 0; t < ins.crop_size(); t++)
+        {
+            const motion::Message::Crop & crop = ins.crop(t);
+            string path = crop.path();
+        }
+    }
 
 }
 
@@ -1158,7 +1251,8 @@ void MainWindow::loadInstances(motion::Message m)
 {
 
     QTreeWidget *treeWidget = ui->remote_directory;
-    ui->remote_directory->setColumnCount(1);
+    ui->remote_directory->setColumnCount(3);
+    treeWidget->clear();
 
     int sizem = m.motionmonth_size();
 
@@ -1171,46 +1265,56 @@ void MainWindow::loadInstances(motion::Message m)
          if (indexm==-1)
             ui->motionmonth->addItem(mlabel.c_str());
 
-         for (int j = 0; j < mmonth.motionday_size(); j++)
+         int sized = mmonth.motionday_size();
+
+         for (int j = 0; j < sized; j++)
          {
 
              const motion::Message::MotionDay & mday = mmonth.motionday(j);
 
              std::string dlabel = mday.daylabel();
-             int indexd = ui->motionday->findText(mlabel.c_str());
+             int indexd = ui->motionday->findText(dlabel.c_str());
              if (indexd==-1)
-                ui->motionday->addItem(mlabel.c_str());
+                ui->motionday->addItem(dlabel.c_str());
 
-             for (int k = 0; k < mday.instance_size(); k++)
+             std::string day = getCurrentDayLabel();
+             if(day.find(dlabel) != std::string::npos)
              {
-
-                const motion::Message::Instance & ins = mday.instance(k);
-
-                QTreeWidgetItem *parentTreeItem = new QTreeWidgetItem(treeWidget);
-                QString instancenumber = QString::number(ins.idinstance());
-                parentTreeItem->setText(0, instancenumber);
-
-                 cout << "amount: " << ins.idinstance() << endl;
-                 cout << "id: " << ins.idinstance() << endl;
-
-                 for (int j = 0; j < ins.image_size(); j++)
-                 {
-                     const motion::Message::Image & img = ins.image(j);
-                     string path = img.path();
-                     QTreeWidgetItem *imageItem = new QTreeWidgetItem();
-                     imageItem->setText(0, img.name().c_str());
-                     parentTreeItem->addChild(imageItem);
-                 }
-
-                 for (int t = 0; t < ins.crop_size(); t++)
-                 {
-                     const motion::Message::Crop & crop = ins.crop(t);
-                     string path = crop.path();
-                 }
+                 MainWindow::loadInstancesByDay(treeWidget, mday);
              }
          }
     }
 }
+
+void MainWindow::dayComboChange(const QString &arg)
+{
+    QTreeWidget *treeWidget = ui->remote_directory;
+
+    int sizem = PROTO.motionmonth_size();
+
+    for (int i = 0; i < sizem; i++)
+    {
+
+        const motion::Message::MotionMonth & mmonth = PROTO.motionmonth(i);
+
+        int sized = mmonth.motionday_size();
+
+        for (int j = 0; j < sized; j++)
+        {
+
+            const motion::Message::MotionDay & mday = mmonth.motionday(j);
+
+            std::string dlabel = mday.daylabel();
+            std::string dcombo = ui->motionday->currentText().toStdString();
+
+            if (dlabel.find(dcombo))
+            {
+                loadInstancesByDay(ui->remote_directory, mday);
+            }
+        }
+    }
+}
+
 
 void MainWindow::remoteProto(motion::Message remote)
 {
@@ -1259,13 +1363,13 @@ void MainWindow::remoteProto(motion::Message remote)
                 ui->has_crops->setChecked(false);
             }
 
-            if (m.has_instancecount())
+            /*if (m.has_instancecount())
             {
                 ui->instances_amount->setText(QString::number(m.instancecount()));
             } else
             {
                 ui->instances_amount->setText("N/A");
-            }
+            }*/
 
             if (m.has_codename())
             {
@@ -1276,8 +1380,13 @@ void MainWindow::remoteProto(motion::Message remote)
                 ui->codename->setText("HARDCODED");
             }
 
-            ui->delay->setCurrentIndex(ui->delay->findData(m.delay()));
-
+            if (m.has_delay())
+            {
+                ui->delay->setCurrentIndex(m.delay()-1);
+            }else
+            {
+                ui->delay->setCurrentIndex(1);
+            }
 
             if (m.has_activemat())
             {
@@ -1347,6 +1456,28 @@ void MainWindow::remoteProto(motion::Message remote)
             loadMat(matfile);
         }
         break;
+        case motion::Message::GET_XML:
+        {
+
+            std::string encoded_content = remote.data();
+            std::string strdecoded = base64_decode(encoded_content);
+            std::string xmlfolder = getTerminalFolder().at(2);
+            std::string xmlfile = xmlfolder  + "/<import>session.xml";
+
+            std::ofstream out;
+            out.open (xmlfile.c_str());
+            out << strdecoded << "\n";
+            out.close();
+
+            QString qxmlfolder = QString::fromStdString(xmlfolder);
+            QStringList scriptArgs;
+            scriptArgs << QLatin1String("-e")
+                       << QString::fromLatin1("tell application \"Finder\" to reveal POSIX file \"%1\"")
+                                            .arg(qxmlfolder);
+            QProcess::execute(QLatin1String("/usr/bin/osascript"), scriptArgs);
+
+        }
+        break;
     }
 }
 
@@ -1384,33 +1515,63 @@ void MainWindow::resutlEcho(string str)
     std::string strdecoded;
     int total__packages;
     int current_package;
+    int current_type;
 
     int total_size = str.size();
     std::size_t found = str.find(del_1);
 
     if (found!=std::string::npos)
     {
-       std::string lpay = MainWindow::ExtractString(str, del_1, del_2);
+        std::string lpay = MainWindow::ExtractString(str, del_1, del_2);
 
-       vector<string> vpay = MainWindow::splitProto(lpay, '::');
+      vector<string> vpay = MainWindow::splitProto(lpay, '::');
 
-       total__packages = atoi(vpay.at(0).c_str());
-       current_package = atoi(vpay.at(2).c_str());
+      total__packages = atoi(vpay.at(0).c_str());
+      current_package = atoi(vpay.at(2).c_str());
+      current_type    = atoi(vpay.at(4).c_str());
 
-       int del_pos = str.find(del_2);
-       int until = str.size() - 24;
+      int del_pos = str.find(del_2);
+      int until = str.size() - 28;
 
-       const string & ppayload = str.substr((del_pos+del_2.size()), until);
+      const string & ppayload = str.substr((del_pos+del_2.size()), until);
 
-       payload_holder.push_back(ppayload);
+      payload_holder.push_back(ppayload);
 
-       if (current_package==0)
-       {
-           ui->mat_progress->setMinimum(0);
-           ui->mat_progress->setMaximum(total__packages);
+      switch (current_type)
+      {
+           case motion::Message::TAKE_PICTURE:
+           {
+              if (current_package==0)
+              {
+                  ui->mat_progress->setMinimum(0);
+                  ui->mat_progress->setMaximum(total__packages);
+              }
+              ui->mat_progress->setValue(current_package);
+              QApplication::processEvents();
+           }
+           break;
+           case motion::Message::ENGAGE:
+           case motion::Message::REFRESH:
+           case motion::Message::GET_XML:
+           {
+             if (current_package==0)
+             {
+                 ui->xml_progress->setMinimum(0);
+                 ui->xml_progress->setMaximum(total__packages);
+             }
+             ui->xml_progress->setValue(current_package);
+             QApplication::processEvents();
+           }
+           break;
        }
-       ui->mat_progress->setValue(current_package);
-       QApplication::processEvents();
+
+       cout << "current: " << current_package << endl;
+       cout << "tota   : " << total__packages << endl;
+
+       if ((total__packages-2)==current_package)
+       {
+           cout << "ver : " << endl;
+       }
 
        if (total__packages==(current_package+1))
        {
@@ -1422,18 +1583,22 @@ void MainWindow::resutlEcho(string str)
     {
 
         motion::Message::ActionType reply;
-        if (!finished)
-        {
+        //if (!finished)
+        //{
            reply =  motion::Message::ActionType::Message_ActionType_RESPONSE_NEXT;
-        }
-        else
-        {
-           reply = motion::Message::ActionType::Message_ActionType_RESPONSE_END;
-        }
+        //}
+        //else
+        //{
+        //   reply = motion::Message::ActionType::Message_ActionType_RESPONSE_END;
+        //}
+
+        cout << "action : " << reply << endl;
+        cout << "................................." << endl;
         motion::Message m;
         m.set_type(reply);
         setMessageBodyAndSend(m);
         google::protobuf::ShutdownProtobufLibrary();
+
     }
     else
     {
@@ -1460,14 +1625,40 @@ void MainWindow::resutlEcho(string str)
 
         remoteProto(mm);
 
-        ui->mat_progress->setValue(0);
-        QApplication::processEvents();
+        switch (current_type)
+        {
+             case motion::Message::TAKE_PICTURE:
+             {
+                ui->mat_progress->setValue(0);
+                QApplication::processEvents();
+             }
+             break;
+             case motion::Message::ENGAGE:
+             case motion::Message::REFRESH:
+             case motion::Message::GET_XML:
+             {
+                ui->xml_progress->setValue(0);
+                QApplication::processEvents();
+             }
+             break;
+        }
         ui->picture->setChecked(false);
-
         finished=false;
-
         google::protobuf::ShutdownProtobufLibrary();
     }
+}
+
+void MainWindow::on_remote_directory_itemClicked(QTreeWidgetItem *item, int column)
+{
+    QString data = item->text(3);
+
+    motion::Message m;
+
+    m.set_imagefilepath(data.toStdString());
+
+    m.set_type(motion::Message::ActionType::Message_ActionType_GET_IMAGE);
+    setMessageBodyAndSend(m);
+    google::protobuf::ShutdownProtobufLibrary();
 
 }
 

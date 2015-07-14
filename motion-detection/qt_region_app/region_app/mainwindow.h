@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTreeWidgetItem>
 
 #include "threads/broadcastthread.h"
 #include "threads/streamingthread.h"
@@ -92,7 +93,7 @@ public:
 private:
     Ui::MainWindow *ui;
     QtWaitingSpinner *m_spinner;
-    QtWaitingSpinner *i_spinner;
+    //QtWaitingSpinner *i_spinner;
     //QtWaitingSpinner *spinner_folders;
     QImage last_stored_frame;
     std::string getActiveTerminalIPString();
@@ -153,9 +154,14 @@ private:
     void saveLocalProto(QString qproto, motion::Message remote);
     motion::Message mergeRemoteToLocalProto(motion::Message remote);
     void loadInstances(motion::Message m);
+    void loadInstancesByDay(QTreeWidget * treeWidget, const motion::Message::MotionDay & mday);
     motion::Message PROTO;
 
     std::string IntToString ( int number );
+
+    std::string getCurrentDayLabel();
+    std::string getCurrentMonthLabel();
+
 
 public:
     Q_SLOT void setremoteProto(motion::Message payload)
@@ -184,6 +190,8 @@ private slots:
     void on_stream_clicked();
     void on_clear_region_clicked();
     void on_start_recognition_toggled(bool checked);
+    void on_refresh_clicked();
+    void on_getxml_clicked();
 
     //mouse
     void Mouse_current_pos();
@@ -203,13 +211,11 @@ private slots:
     //void on_list_folders_clicked(const QModelIndex &index);
 
     //Region
-        void savedRegionResutl(QString re);
+    void savedRegionResutl(QString re);
 
-
-
-        void on_pushButton_clicked();
-
-        void on_pushButton_6_clicked();
+    //Instances.
+    void on_remote_directory_itemClicked(QTreeWidgetItem *item, int column);
+    void dayComboChange(const QString &arg);
 
 signals:
     void drawLinesSignal(std::vector<cv::Point2f> lines);

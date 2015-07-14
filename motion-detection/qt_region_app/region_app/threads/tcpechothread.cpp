@@ -32,7 +32,7 @@ void TCPEchoThread::send (string svradress, char * message)
 
   google::protobuf::uint32 pport = motion::Message::TCP_ECHO_PORT;
 
-  google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 24;
+  google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 28;
   int echoServPort = pport;
 
   char echoBuffer[buffersize];
@@ -71,24 +71,27 @@ void TCPEchoThread::send (string svradress, char * message)
     //cout << "Received: " << endl;                 // Setup to print the echoed string
 
 
-    while (totalBytesReceived < echoStringLen) {
+    //while (totalBytesReceived < echoStringLen)
+    //{
       // Receive up to the buffer size bytes from the sender
-      if ((bytesReceived = (sock.recv(echoBuffer, buffersize))) <= 0) {
+      if ((bytesReceived = (sock.recv(echoBuffer, buffersize))) <= 0)
+      {
         cerr << "Unable to read";
         exit(1);
       }
 
       totalBytesReceived += bytesReceived;     // Keep tally of total bytes
       echoBuffer[bytesReceived] = '\0';        // Terminate the string!
-      cout << "Received message: " << echoBuffer;                      // Print the echo buffer
-    }
+      cout << "msg: " << echoBuffer << endl;                      // Print the echo buffer
+
+    //}
 
     stringstream ss;
     ss << echoBuffer;
 
     string str = ss.str();
 
-    std::cout << "Maximum size of a string is " << str.max_size() << "\n";
+    //std::cout << "Maximum size of a string is " << str.max_size() << "\n";
 
     mnwindow->resutlEcho(str);
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1067</width>
+    <width>941</width>
     <height>611</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>38</x>
       <y>2</y>
-      <width>881</width>
+      <width>891</width>
       <height>41</height>
      </rect>
     </property>
@@ -245,7 +245,7 @@ color: rgb(255, 252, 253);</string>
      <rect>
       <x>11</x>
       <y>526</y>
-      <width>911</width>
+      <width>921</width>
       <height>33</height>
      </rect>
     </property>
@@ -508,7 +508,7 @@ color: rgb(255, 252, 253);</string>
      <rect>
       <x>661</x>
       <y>85</y>
-      <width>261</width>
+      <width>271</width>
       <height>66</height>
      </rect>
     </property>
@@ -572,7 +572,7 @@ color: rgb(255, 252, 253);</string>
      <rect>
       <x>661</x>
       <y>43</y>
-      <width>261</width>
+      <width>271</width>
       <height>41</height>
      </rect>
     </property>
@@ -676,8 +676,8 @@ color: rgb(255, 252, 253);</string>
     <property name="geometry">
      <rect>
       <x>666</x>
-      <y>460</y>
-      <width>251</width>
+      <y>464</y>
+      <width>261</width>
       <height>61</height>
      </rect>
     </property>
@@ -706,37 +706,69 @@ color: rgb(255, 252, 253);</string>
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QWidget" name="gridLayoutWidget_3">
+   <widget class="QWidget" name="gridLayoutWidget_4">
     <property name="geometry">
      <rect>
       <x>660</x>
-      <y>154</y>
-      <width>314</width>
-      <height>301</height>
+      <y>153</y>
+      <width>271</width>
+      <height>311</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_6">
+    <layout class="QGridLayout" name="gridLayout_4">
+     <item row="3" column="1">
+      <widget class="QProgressBar" name="xml_progress">
        <property name="maximumSize">
         <size>
-         <width>200</width>
-         <height>11</height>
+         <width>50</width>
+         <height>16777215</height>
         </size>
        </property>
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;INSTANCES&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       <property name="value">
+        <number>24</number>
        </property>
       </widget>
      </item>
-     <item row="1" column="3">
-      <widget class="QPushButton" name="pushButton">
+     <item row="2" column="0" colspan="3">
+      <widget class="QTreeWidget" name="remote_directory">
+       <column>
+        <property name="text">
+         <string>Instance</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>End</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QPushButton" name="getxml">
        <property name="maximumSize">
         <size>
-         <width>90</width>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>XML</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" colspan="2">
+      <widget class="QComboBox" name="motionday"/>
+     </item>
+     <item row="3" column="2">
+      <widget class="QPushButton" name="refresh">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
          <height>16777215</height>
         </size>
        </property>
@@ -745,94 +777,32 @@ color: rgb(255, 252, 253);</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="0" colspan="4">
-      <widget class="QTreeWidget" name="remote_directory"/>
-     </item>
-     <item row="3" column="0">
-      <widget class="QPushButton" name="pushButton_6">
-       <property name="text">
-        <string>XML</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="3">
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Exp</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1" colspan="2">
-      <widget class="QComboBox" name="motionday"/>
-     </item>
-     <item row="3" column="2">
-      <widget class="QPushButton" name="pushButton_3">
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Coll</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="0">
       <widget class="QComboBox" name="motionmonth"/>
      </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="instances_amount">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <layout class="QHBoxLayout" name="instance_spinner">
-       <item>
-        <spacer name="spinnerLeftSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <spacer name="spinnerRightSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </item>
     </layout>
    </widget>
+   <zorder>layoutWidget</zorder>
+   <zorder>layoutWidget_2</zorder>
+   <zorder>output</zorder>
+   <zorder>qt_drawing_output</zorder>
+   <zorder>layoutWidget</zorder>
+   <zorder>label_xy</zorder>
+   <zorder>remote_time</zorder>
+   <zorder>amount_detected</zorder>
+   <zorder>label_mat_piture</zorder>
+   <zorder>gridLayoutWidget</zorder>
+   <zorder>gridLayoutWidget_2</zorder>
+   <zorder>start_recognition</zorder>
+   <zorder>gridLayoutWidget_4</zorder>
+   <zorder>remote_directory</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1067</width>
+     <width>941</width>
      <height>22</height>
     </rect>
    </property>
@@ -881,7 +851,6 @@ color: rgb(255, 252, 253);</string>
   <tabstop>has_crops</tabstop>
   <tabstop>network_ip</tabstop>
   <tabstop>set_time</tabstop>
-  <tabstop>remote_directory</tabstop>
   <tabstop>pushButton_4</tabstop>
  </tabstops>
  <resources/>
