@@ -98,6 +98,7 @@ std::string msg;
 int div_ceil(int numerator, int denominator);
 std::string IntToString ( int number );
 std::string fixedLength(int value, int digits);
+int inttype;
 
 //Send
 void * sendEcho(motion::Message m);
@@ -286,6 +287,51 @@ int udpsend(motion::Message m)
     return 0;
 }
 
+motion::Message getImageToProto(motion::Message m)
+{
+    
+    cout << "+++++++++++LOADING IMAGE TO PROTO++++++++++++++" << endl;
+    
+    Mat mat = imread(m.imagefilepath());
+    
+    //Shared mat
+    picture = mat;
+
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    
+    m.set_type(motion::Message::TAKE_PICTURE);
+    m.set_serverip(PROTO.serverip());
+    m.set_time(getTimeRasp());
+    
+    // We will need to also serialize the width, height, type and size of the matrix
+    int width_s     = mat.cols;
+    int height_s    = mat.rows;
+    int type_s      = mat.type();
+    int size_s      = mat.total() * mat.elemSize();
+    
+    // Initialize a stringstream and write the data
+    int size_init = m.ByteSize();
+    
+    // Write the whole image data
+    std::stringstream ss;
+    ss.write((char*)    (&width_s),     sizeof(int));
+    ss.write((char*)    (&height_s),    sizeof(int));
+    ss.write((char*)    (&type_s),      sizeof(int));
+    ss.write((char*)    (&size_s),      sizeof(int));
+    ss.write((char*)     mat.data,      size_s);
+    
+    std::string ssstring = ss.str();
+    
+    std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(ssstring.c_str()), ssstring.length());
+    
+    //Store into proto
+    m.set_data(oriencoded.c_str());
+    
+    google::protobuf::ShutdownProtobufLibrary();
+    
+    return m;
+}
+
 
 motion::Message takePictureToProto(motion::Message m)
 {
@@ -386,7 +432,7 @@ void * sendProto (void * arg)
     string servAddress      = T_PROTO.serverip();
     
     google::protobuf::uint32 pport = motion::Message::TCP_ECHO_PORT;
-    google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 24;
+    google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 28;
     
     cout << "serverIp: " << servAddress << endl;
     cout << "serverPort: " << pport << endl;
@@ -447,41 +493,42 @@ void * startObserver(void * arg)
             if (is_recognizing)
             {
                 
-                    std::cout << "number_of_changes = " << resutl_watch_detected << std::endl;
+                std::cout << "number_of_changes = " << resutl_watch_detected << std::endl;
                 
-                    if (resutl_watch_detected>0)
-                    {
-                        
-                        motion::Message m;
-                        m.set_recognizing(true);
-                        pthread_mutex_lock(&protoMutex);
-                        m = R_PROTO;
-                        pthread_mutex_unlock(&protoMutex);
-                        
-                        //Initialize objects to serialize.
-                        int size = m.ByteSize();
-                        
-                        //cout << "Proto size   : " << size << endl;
-                        
-                        char dataresponse[size];
-                        string datastr;
-                        
-                        m.SerializeToArray(&dataresponse, size);
-                        
-                        std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
-
-                        //Write base64 to backup with mutex.
-                        std::string basefile = "data/data/localproto.txt";
-                        std::ofstream out;
-                        pthread_mutex_lock(&fileMutex);
-                        out.open (basefile.c_str());
-                        out << encoded_proto << "\n";
-                        out.close();
-                        pthread_mutex_unlock(&fileMutex);
-                        
-                        sleep(1);
-                    }
+                if (resutl_watch_detected>0)
+                {
+                    
+                    motion::Message m;
+                    m.set_recognizing(true);
+                    pthread_mutex_lock(&protoMutex);
+                    m = R_PROTO;
+                    pthread_mutex_unlock(&protoMutex);
+                    
+                    //Initialize objects to serialize.
+                    int size = m.ByteSize();
+                    
+                    //cout << "Proto size   : " << size << endl;
+                    
+                    char dataresponse[size];
+                    string datastr;
+                    
+                    m.SerializeToArray(&dataresponse, size);
+                    
+                    std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
+                    
+                    //Write base64 to backup with mutex.
+                    std::string basefile = "data/data/localproto.txt";
+                    std::ofstream out;
+                    pthread_mutex_lock(&fileMutex);
+                    out.open (basefile.c_str());
+                    out << encoded_proto << "\n";
+                    out.close();
+                    pthread_mutex_unlock(&fileMutex);
+                    
+                    sleep(1);
                 }
+            }
+        
         sleep(1);
     }
     cout << "stopObserver" << endl;
@@ -540,7 +587,7 @@ motion::Message runCommand(motion::Message m)
         break;
         case motion::Message::REFRESH:
         {
-            cout << "motion::Message::ENGAGE" << endl;
+            cout << "motion::Message::REFRESH" << endl;
             m = getLocalPtoro(m);
             m.set_type(motion::Message::REFRESH);
 
@@ -548,23 +595,43 @@ motion::Message runCommand(motion::Message m)
         break;
         case motion::Message::GET_XML:
         {
-            std::string xml_file = PROTO.xmlfilepath();
-            string DIR        = "../../src/motion_web/pics/";
-            std::string XML_FILE  =  "<import>session.xml";
-            std::string xml_path = DIR + "/" + XML_FILE
+            cout << "motion::Message::GET_XML" << endl;
+            std::string xml_file;
+            if (m.has_xmlfilename())
+            {
+               xml_file  = m.xmlfilename();
+            }
+            cout << "xml_file : " << xml_file << endl;
+            string DIR        = "../../src/motion_web/pics";
+            std::string XML_FILE  =  "xml/<import>session.xml";
+            std::string xml_path = DIR + "/" + xml_file + "/" + XML_FILE;
+            cout << "xml_path : " << xml_path << endl;
             string xml_loaded = get_file_contents(xml_path);
-            std:string encoded_xml = base64_encode(reinterpret_cast<const unsigned char*>(xml_loaded),sizeof(xml_loaded));
+            cout << "xml_loaded: " << xml_loaded << endl;
+            std:string encoded_xml = base64_encode(reinterpret_cast<const unsigned char*>(xml_loaded.c_str()),xml_loaded.length());
+            cout << "encoded_xml: " << encoded_xml << endl;
             m.set_type(motion::Message::GET_XML);
             m.set_data(encoded_xml.c_str());
         }
         break;
+        case motion::Message::GET_IMAGE:
+        {
+            cout << "motion::Message::GET_IMAGE" << endl;
+            m = getImageToProto(m);
+            m.set_type(motion::Message::GET_IMAGE);
+            
+        }
+        break;
         case motion::Message::DISSCONNECT:
         {
+            cout << "motion::Message::DISSCONNECT" << endl;
             
         }
         break;
         case motion::Message::REC_START:
         {
+            cout << "motion::Message::REC_START" << endl;
+            
             if (R_PROTO.has_xmlfilename())
             {
                 cout << "R_PROTO xmlfile : " <<  R_PROTO.xmlfilename() << endl;
@@ -579,6 +646,12 @@ motion::Message runCommand(motion::Message m)
             }
         }
         break;
+        case motion::Message::REC_STOP:
+        {
+            cout << "motion::Message::REC_STOP" << endl;
+            stop_recognizing = true;
+        }
+        break;
         case motion::Message::TAKE_PICTURE:
         {
             
@@ -590,17 +663,20 @@ motion::Message runCommand(motion::Message m)
         break;
         case motion::Message::STRM_START:
         {
+            cout << "motion::Message::STRM_START" << endl;
             netcvc();
         }
         break;
         case motion::Message::STRM_STOP:
         {
+            cout << "motion::Message::STRM_STOP" << endl;
             stop_capture = true;
             
         }
         break;
         case motion::Message::GET_TIME:
         {
+            cout << "motion::Message::GET_TIME" << endl;
             m.set_type(motion::Message::GET_TIME);
             m.set_serverip(PROTO.serverip());
             m.set_time(getTimeRasp());
@@ -608,6 +684,7 @@ motion::Message runCommand(motion::Message m)
         break;
         case motion::Message::SET_TIME:
         {
+            cout << "motion::Message::SET_TIME" << endl;
             struct tm tmremote;
             char *bufr;
             
@@ -657,11 +734,6 @@ motion::Message runCommand(motion::Message m)
 
         }
         break;
-        case motion::Message::REC_STOP:
-        {
-            stop_recognizing = true;
-        }
-        break;
     }
 
     return m;
@@ -697,12 +769,12 @@ try
 {
     
   // Send received string and receive again until the end of transmission
-  char echoBuffer[motion::Message::SOCKET_BUFFER_NANO_SIZE + 24];
+  char echoBuffer[motion::Message::SOCKET_BUFFER_NANO_SIZE + 28];
   int recvMsgSize;
   std::string message;
     
 
-    while ((recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_NANO_SIZE + 24)) > 0)
+    while ((recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_NANO_SIZE + 28)) > 0)
     {
 
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
@@ -725,7 +797,7 @@ try
       PROTO = ms;
       value = ms.type();
       T_PROTO.set_serverip(ms.serverip());
-      
+    
       if ( ms.type()==motion::Message::RESPONSE_OK || ms.type()==motion::Message::RESPONSE_END )
       {
           cout << "RESPONSE :" <<  ms.type() << endl;
@@ -734,13 +806,19 @@ try
       }
       else if (ms.type()==motion::Message::RESPONSE_NEXT)
       {
+          
           string header =
           "PROSTA" +
             fixedLength(msg_split_vector.size(),4)  + "::" +
             fixedLength(count_sent_split,4)         + "::" +
+            IntToString(inttype)                  +
           "PROSTO";
           msg = header + msg_split_vector.at(count_sent_split);
 
+          cout << "header: " << header << endl;
+          cout << "count_sent_split: " << count_sent_split << endl;
+          cout << "msg: " << msg << endl;
+          
           sock->send(msg.c_str(), msg.size());
           
           count_sent_split++;
@@ -770,6 +848,9 @@ try
         
       std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
         
+        string header;
+        inttype = ms.type();
+        
       if ( size > motion::Message::SOCKET_BUFFER_NANO_SIZE )
       {
           google::protobuf::uint32 chunck_size = motion::Message::SOCKET_BUFFER_NANO_SIZE;
@@ -779,10 +860,11 @@ try
               msg_split_vector.push_back(encoded_proto.substr(i, chunck_size));
           }
           
-          string header =
+          header =
           "PROSTA" +
             fixedLength(msg_split_vector.size(),4)  + "::" +
             fixedLength(count_sent_split,4)         + "::" +
+            IntToString(inttype)                  +
           "PROSTO";
           msg = header + msg_split_vector.at(count_sent_split);
         
@@ -797,22 +879,28 @@ try
       }
       else
       {
-          string header =
+          header =
           
           "PROSTA"
           "0001"
           "::"
           "0000"
-          "::"
-          "PROSTO";
+          "::";
+          
+          header += IntToString(inttype);
+          header += "PROSTO";
           
           msg = header + encoded_proto;
+          
+          count_sent_split=0;
       }
       
         ms.Clear();
         google::protobuf::ShutdownProtobufLibrary();
+        
+        cout << "header : " << header << endl;
     
-        cout << "Socket Sent!" << endl;
+        //cout << "Socket Sent!" << endl;
 
         sock->send(msg.c_str(), msg.size());
         cout << "............................." << endl;

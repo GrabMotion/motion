@@ -232,7 +232,7 @@ inline string saveImg(
     std::copy(n_str_file.begin(), n_str_file.end(), n_file);
     n_file[n_str_file.size()] = '\0';
     
-    //std::cout << "n_file: " << n_file << std::endl;
+    std::cout << "n_file: " << n_file << std::endl;
     
     // Create name for the image
     strftime (TIME,80,FILE_FORMAT,timeinfo);    
@@ -242,20 +242,19 @@ inline string saveImg(
     string image_file = ss.str().c_str();
     imwrite(image_file, image);
     
-    //std::cout << "image_file: " << image_file << std::endl;
-    stringstream ff;
-    ff << n_file << EXTENSION;
+    std::cout << "image_file: " << image_file << std::endl;
+    
     if (img.empty())
     {
         motion::Message::Image * pimage = pinstance->add_image();
-        pimage->set_path(image_file);
-        pimage->set_name(ff.str().c_str());
+        pimage->set_path(image_file.c_str());
+        pimage->set_name(n_file);
         pimage->set_imagechanges(n_o_changes);
     } else
     {
         motion::Message::Crop * pcrop = pinstance->add_crop();
-        pcrop->set_path(image_file);
-        pcrop->set_name(ff.str());
+        pcrop->set_path(image_file.c_str());
+        pcrop->set_name(n_file);
         pcrop->set_imagefather(img);
     }
     return image_file;

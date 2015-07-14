@@ -56,15 +56,17 @@ enum Message_ActionType {
   Message_ActionType_DISSCONNECT = 1012,
   Message_ActionType_REFRESH = 1013,
   Message_ActionType_GET_XML = 1014,
-  Message_ActionType_RESPONSE_OK = 200,
-  Message_ActionType_RESPONSE_NEXT = 201,
-  Message_ActionType_RESPONSE_END = 202,
-  Message_ActionType_REC_HAS_CHANGES = 203,
-  Message_ActionType_REC_HAS_INSTANCE = 204
+  Message_ActionType_GET_IMAGE = 1015,
+  Message_ActionType_RESPONSE_OK = 2000,
+  Message_ActionType_RESPONSE_NEXT = 2010,
+  Message_ActionType_RESPONSE_END = 2020,
+  Message_ActionType_RESPONSE_FINISH = 2030,
+  Message_ActionType_REC_HAS_CHANGES = 2040,
+  Message_ActionType_REC_HAS_INSTANCE = 2050
 };
 bool Message_ActionType_IsValid(int value);
-const Message_ActionType Message_ActionType_ActionType_MIN = Message_ActionType_RESPONSE_OK;
-const Message_ActionType Message_ActionType_ActionType_MAX = Message_ActionType_GET_XML;
+const Message_ActionType Message_ActionType_ActionType_MIN = Message_ActionType_ENGAGE;
+const Message_ActionType Message_ActionType_ActionType_MAX = Message_ActionType_REC_HAS_INSTANCE;
 const int Message_ActionType_ActionType_ARRAYSIZE = Message_ActionType_ActionType_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Message_ActionType_descriptor();
@@ -764,9 +766,11 @@ class Message : public ::google::protobuf::Message {
   static const ActionType DISSCONNECT = Message_ActionType_DISSCONNECT;
   static const ActionType REFRESH = Message_ActionType_REFRESH;
   static const ActionType GET_XML = Message_ActionType_GET_XML;
+  static const ActionType GET_IMAGE = Message_ActionType_GET_IMAGE;
   static const ActionType RESPONSE_OK = Message_ActionType_RESPONSE_OK;
   static const ActionType RESPONSE_NEXT = Message_ActionType_RESPONSE_NEXT;
   static const ActionType RESPONSE_END = Message_ActionType_RESPONSE_END;
+  static const ActionType RESPONSE_FINISH = Message_ActionType_RESPONSE_FINISH;
   static const ActionType REC_HAS_CHANGES = Message_ActionType_REC_HAS_CHANGES;
   static const ActionType REC_HAS_INSTANCE = Message_ActionType_REC_HAS_INSTANCE;
   static inline bool ActionType_IsValid(int value) {
@@ -1080,10 +1084,22 @@ class Message : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 instancecount() const;
   inline void set_instancecount(::google::protobuf::int32 value);
 
-  // optional string currmonth = 29;
+  // optional string imagefilepath = 29;
+  inline bool has_imagefilepath() const;
+  inline void clear_imagefilepath();
+  static const int kImagefilepathFieldNumber = 29;
+  inline const ::std::string& imagefilepath() const;
+  inline void set_imagefilepath(const ::std::string& value);
+  inline void set_imagefilepath(const char* value);
+  inline void set_imagefilepath(const char* value, size_t size);
+  inline ::std::string* mutable_imagefilepath();
+  inline ::std::string* release_imagefilepath();
+  inline void set_allocated_imagefilepath(::std::string* imagefilepath);
+
+  // optional string currmonth = 30;
   inline bool has_currmonth() const;
   inline void clear_currmonth();
-  static const int kCurrmonthFieldNumber = 29;
+  static const int kCurrmonthFieldNumber = 30;
   inline const ::std::string& currmonth() const;
   inline void set_currmonth(const ::std::string& value);
   inline void set_currmonth(const char* value);
@@ -1092,10 +1108,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_currmonth();
   inline void set_allocated_currmonth(::std::string* currmonth);
 
-  // optional string currday = 30;
+  // optional string currday = 31;
   inline bool has_currday() const;
   inline void clear_currday();
-  static const int kCurrdayFieldNumber = 30;
+  static const int kCurrdayFieldNumber = 31;
   inline const ::std::string& currday() const;
   inline void set_currday(const ::std::string& value);
   inline void set_currday(const char* value);
@@ -1154,6 +1170,8 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_xmlfilepath();
   inline void set_has_instancecount();
   inline void clear_has_instancecount();
+  inline void set_has_imagefilepath();
+  inline void clear_has_imagefilepath();
   inline void set_has_currmonth();
   inline void clear_has_currmonth();
   inline void set_has_currday();
@@ -1189,6 +1207,7 @@ class Message : public ::google::protobuf::Message {
   ::google::protobuf::int32 activemat_;
   ::google::protobuf::int32 instancecount_;
   ::std::string* xmlfilepath_;
+  ::std::string* imagefilepath_;
   ::std::string* currmonth_;
   ::std::string* currday_;
   friend void  protobuf_AddDesc_motion_2eproto();
@@ -3490,15 +3509,91 @@ inline void Message::set_instancecount(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.instancecount)
 }
 
-// optional string currmonth = 29;
-inline bool Message::has_currmonth() const {
+// optional string imagefilepath = 29;
+inline bool Message::has_imagefilepath() const {
   return (_has_bits_[0] & 0x04000000u) != 0;
 }
-inline void Message::set_has_currmonth() {
+inline void Message::set_has_imagefilepath() {
   _has_bits_[0] |= 0x04000000u;
 }
-inline void Message::clear_has_currmonth() {
+inline void Message::clear_has_imagefilepath() {
   _has_bits_[0] &= ~0x04000000u;
+}
+inline void Message::clear_imagefilepath() {
+  if (imagefilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    imagefilepath_->clear();
+  }
+  clear_has_imagefilepath();
+}
+inline const ::std::string& Message::imagefilepath() const {
+  // @@protoc_insertion_point(field_get:motion.Message.imagefilepath)
+  return *imagefilepath_;
+}
+inline void Message::set_imagefilepath(const ::std::string& value) {
+  set_has_imagefilepath();
+  if (imagefilepath_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    imagefilepath_ = new ::std::string;
+  }
+  imagefilepath_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.imagefilepath)
+}
+inline void Message::set_imagefilepath(const char* value) {
+  set_has_imagefilepath();
+  if (imagefilepath_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    imagefilepath_ = new ::std::string;
+  }
+  imagefilepath_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.imagefilepath)
+}
+inline void Message::set_imagefilepath(const char* value, size_t size) {
+  set_has_imagefilepath();
+  if (imagefilepath_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    imagefilepath_ = new ::std::string;
+  }
+  imagefilepath_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.imagefilepath)
+}
+inline ::std::string* Message::mutable_imagefilepath() {
+  set_has_imagefilepath();
+  if (imagefilepath_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    imagefilepath_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.imagefilepath)
+  return imagefilepath_;
+}
+inline ::std::string* Message::release_imagefilepath() {
+  clear_has_imagefilepath();
+  if (imagefilepath_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = imagefilepath_;
+    imagefilepath_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message::set_allocated_imagefilepath(::std::string* imagefilepath) {
+  if (imagefilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete imagefilepath_;
+  }
+  if (imagefilepath) {
+    set_has_imagefilepath();
+    imagefilepath_ = imagefilepath;
+  } else {
+    clear_has_imagefilepath();
+    imagefilepath_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.imagefilepath)
+}
+
+// optional string currmonth = 30;
+inline bool Message::has_currmonth() const {
+  return (_has_bits_[0] & 0x08000000u) != 0;
+}
+inline void Message::set_has_currmonth() {
+  _has_bits_[0] |= 0x08000000u;
+}
+inline void Message::clear_has_currmonth() {
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline void Message::clear_currmonth() {
   if (currmonth_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3566,15 +3661,15 @@ inline void Message::set_allocated_currmonth(::std::string* currmonth) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.currmonth)
 }
 
-// optional string currday = 30;
+// optional string currday = 31;
 inline bool Message::has_currday() const {
-  return (_has_bits_[0] & 0x08000000u) != 0;
+  return (_has_bits_[0] & 0x10000000u) != 0;
 }
 inline void Message::set_has_currday() {
-  _has_bits_[0] |= 0x08000000u;
+  _has_bits_[0] |= 0x10000000u;
 }
 inline void Message::clear_has_currday() {
-  _has_bits_[0] &= ~0x08000000u;
+  _has_bits_[0] &= ~0x10000000u;
 }
 inline void Message::clear_currday() {
   if (currday_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
