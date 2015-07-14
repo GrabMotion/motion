@@ -93,7 +93,8 @@ std::string local_ip;
 string NETWORK_IP;
 vector<std::string> msg_split_vector;
 motion::Message::ActionType value_response;
-int count_sent_split=0;
+int count_sent__split=0;
+int count_vector_size=0;
 std::string msg;
 int div_ceil(int numerator, int denominator);
 std::string IntToString ( int number );
@@ -571,7 +572,9 @@ motion::Message getLocalPtoro(motion::Message m )
 motion::Message runCommand(motion::Message m)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
+    
     cout << "runCommand:: " << m.type() << endl;
+    
     switch (m.type())
     {
         case motion::Message::ENGAGE:
@@ -605,11 +608,8 @@ motion::Message runCommand(motion::Message m)
             string DIR        = "../../src/motion_web/pics";
             std::string XML_FILE  =  "xml/<import>session.xml";
             std::string xml_path = DIR + "/" + xml_file + "/" + XML_FILE;
-            cout << "xml_path : " << xml_path << endl;
             string xml_loaded = get_file_contents(xml_path);
-            cout << "xml_loaded: " << xml_loaded << endl;
             std:string encoded_xml = base64_encode(reinterpret_cast<const unsigned char*>(xml_loaded.c_str()),xml_loaded.length());
-            cout << "encoded_xml: " << encoded_xml << endl;
             m.set_type(motion::Message::GET_XML);
             m.set_data(encoded_xml.c_str());
         }
@@ -631,15 +631,6 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::REC_START:
         {
             cout << "motion::Message::REC_START" << endl;
-            
-            if (R_PROTO.has_xmlfilename())
-            {
-                cout << "R_PROTO xmlfile : " <<  R_PROTO.xmlfilename() << endl;
-            }else
-            {
-                cout << "R_PROTO xmlfile not PRESENT: " <<  endl;
-            }
-            
             runr = pthread_create(&thread_recognition, NULL, startRecognition, NULL);
             if ( runr  != 0) {
                 cerr << "Unable to create thread" << endl;
@@ -757,6 +748,19 @@ std::string fixedLength(int value, int digits)
     return result;
 }
 
+void totalsSocket()
+{
+    //cout << "count_vector_size : " << count_vector_size << " count_sent__split : " << count_sent__split << endl;
+    if ( count_sent__split < (count_vector_size -1))
+    {
+        count_sent__split++;
+    } else
+    {
+        count_sent__split = 0;
+    }
+    //cout << " count_sent__split : " << count_sent__split << endl;
+}
+
 // TCP client handling function
 motion::Message::ActionType HandleTCPClient(TCPSocket *sock)
 {
@@ -800,8 +804,8 @@ try
     
       if ( ms.type()==motion::Message::RESPONSE_OK || ms.type()==motion::Message::RESPONSE_END )
       {
-          cout << "RESPONSE :" <<  ms.type() << endl;
-          count_sent_split=0;
+          cout << "response : " <<  ms.type() << endl;
+          count_sent__split = 0;
           return ms.type();
       }
       else if (ms.type()==motion::Message::RESPONSE_NEXT)
@@ -809,20 +813,19 @@ try
           
           string header =
           "PROSTA" +
-            fixedLength(msg_split_vector.size(),4)  + "::" +
-            fixedLength(count_sent_split,4)         + "::" +
-            IntToString(inttype)                  +
+            fixedLength(count_vector_size,4)  + "::" +
+            fixedLength(count_sent__split,4)  + "::" +
+            IntToString(inttype)              +
           "PROSTO";
-          msg = header + msg_split_vector.at(count_sent_split);
+          
+          msg = header + msg_split_vector.at(count_sent__split);
 
-          cout << "header: " << header << endl;
-          cout << "count_sent_split: " << count_sent_split << endl;
-          cout << "msg: " << msg << endl;
+          cout << "header 2 : " << header << endl;
+          
+          totalsSocket();
           
           sock->send(msg.c_str(), msg.size());
-          
-          count_sent_split++;
-          
+        
           return ms.type();
       }
       
@@ -860,51 +863,46 @@ try
               msg_split_vector.push_back(encoded_proto.substr(i, chunck_size));
           }
           
+          count_vector_size = msg_split_vector.size();
+          
           header =
           "PROSTA" +
-            fixedLength(msg_split_vector.size(),4)  + "::" +
-            fixedLength(count_sent_split,4)         + "::" +
-            IntToString(inttype)                  +
+            fixedLength(count_vector_size, 4)  + "::" +
+            fixedLength(count_sent__split, 4)  + "::" +
+            IntToString(inttype)               +
           "PROSTO";
-          msg = header + msg_split_vector.at(count_sent_split);
-        
-          //std::string basefile = "encoded_proto.txt";
-          //std::ofstream out;
-          //out.open (basefile.c_str());
-          //out << encoded_proto << "\n";
-          //out.close();
-          
-          count_sent_split++;
+          msg = header + msg_split_vector.at(count_sent__split);
+
+          cout << "header 1 : " << header << endl;
           
       }
       else
       {
-          header =
           
+          header =
           "PROSTA"
           "0001"
           "::"
           "0000"
           "::";
-          
           header += IntToString(inttype);
           header += "PROSTO";
           
           msg = header + encoded_proto;
           
-          count_sent_split=0;
+          count_vector_size = 0;
+          
+          cout << "header 0 : " << header << endl;
+          
       }
       
         ms.Clear();
         google::protobuf::ShutdownProtobufLibrary();
+    
+        totalsSocket();
         
-        cout << "header : " << header << endl;
-    
-        //cout << "Socket Sent!" << endl;
-
         sock->send(msg.c_str(), msg.size());
-        cout << "............................." << endl;
-    
+        
         return ms.type();
         
     }
