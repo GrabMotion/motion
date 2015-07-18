@@ -13,40 +13,122 @@ message Message
 	optional string serverip 		= 6;
 	optional string clientip 		= 7;
 	
-	optional string payload			= 8;
-	
-	optional bool recognizing       = 11;
+	optional bool recognizing       = 8;
 
-	repeated Instance instance      = 12; 
-	optional bool storeimage 		= 13;
-	optional bool storecrop 		= 14;
-	optional string code            = 15;
-	optional bytes 	regiondata		= 16;
+	repeated MotionMonth motionmonth  = 9;
+	
+	optional bool storeimage 		= 10;
+	optional bool storecrop 		= 11;
+	optional string codename        = 12;
+	optional bytes regioncoords		= 13;
+	optional double delay			= 14;
+	
+	optional string starttime       		= 15;
+	
+	optional string startrecognitiontime 	= 16;
+	
+	optional bool region       		= 17;
+	optional int32 numberofchanges  = 18;
+	optional int32 	amount 	        = 19;
+	
+	repeated int32 matfile 			= 20;
+	optional int32 activemat		= 21;
+	
+	optional string cameras 		= 22;
+	
+	optional string xmlfilename		= 23;
+	optional string xmlfilepath		= 24;
+	optional int32 instancecount    = 25;
+	
+	optional string imagefilepath   = 26;
+
+	optional string 	currmonth 	= 27;
+	optional string 	currday	 	= 28;
+	
+	optional int32 packagesize 		= 29;	
 	
 	enum ActionType 
 	{
 		 ENGAGE                   = 1000;
-		 START_RECOGNITION        = 1002;
-		 STOP_RECOGNITION         = 1003;
-		 DISSCONNECT              = 1004;
-		 GET_TIME                 = 1005;
-		 SET_TIME                 = 1006;
-		 TIME_SET                 = 1007;
-		 START_STREAMING	      = 1008;
-		 STOP_STREAMING			  = 1009;
-		 TCP_ECHO_PORT            = 5010;
-		 TCP_STREAMING_PORT       = 5020;
-		 UDP_PORT                 = 5030;
+		 REC_START			      = 1002;
+		 REC_RUNNING			  = 1003;
+		 REC_STOP	        	  = 1004;
+		 UNENGAGE                 = 1005;
+		 GET_TIME                 = 1006;
+		 SET_TIME                 = 1007;
+		 TIME_SET                 = 1008;
+		 STRM_START	      		  = 1009;
+		 STRM_STOP				  = 1010;
+		 TAKE_PICTURE 			  = 1011;
+		 DISSCONNECT		      = 1012;
+		 REFRESH				  = 1013;
+		 GET_XML				  = 1014;
+		 GET_IMAGE				  = 1015;
+		 RESPONSE_OK			  = 2000;
+		 RESPONSE_NEXT			  = 2010;
+		 RESPONSE_END			  = 2020;
+		 RESPONSE_FINISH		  = 2030;
+		 REC_HAS_CHANGES		  = 2040;
+		 REC_HAS_INSTANCE		  = 2050;
+		 PROTO_HAS_FILE 		  = 3030;
+		 PROTO_NO_FILE 		  	  = 3031;
+	}
+	
+	enum SocketType
+	{
+		SOCKET_PROTO_TOSTRING		= 10;
+		SOCKET_PROTO_TOARRAY		= 11;
+		SOCKET_PLAIN_TEXT			= 12;
+		SPLITTED_MESSAGE			= 13;
+		SINGLE_MESSAGE				= 14;
+		SOCKET_BUFFER_NANO_SIZE     = 1024;
+		SOCKET_BUFFER_MINI_SIZE     = 2048;
+		SOCKET_BUFFER_MICRO_SIZE    = 4096;
+		SOCKET_BUFFER_SMALL_SIZE    = 8196;
+		SOCKET_BUFFER_REGULAR_SIZE  = 16392;
+		SOCKET_BUFFER_MEDIUM_SIZE   = 32784;
+		SOCKET_BUFFER_BIG_SIZE      = 65568;
+		TCP_ECHO_PORT            	= 5010;
+		TCP_STREAMING_PORT       	= 5020;
+		UDP_PORT                 	= 5030;
+		TCP_MSG_PORT            	= 5040;
+	}
+	
+	message MotionMonth
+	{
+		repeated MotionDay motionday 		= 1;
+		optional string monthlabel			= 2;
+	}
+
+	message MotionDay
+	{
+		optional string daylabel			= 1;
+		repeated Instance instance      	= 2; 
 	}
 	
 	message Instance
 	{
 		required int32 		idinstance 		= 1;
-		optional string 	amount 			= 4;
-		optional string 	filepath	 	= 5;
-		optional string instancestart		= 6;	
-		optional string instanceend			= 7;
-		optional string regionfilename		= 9;
+		optional string 	instancestart   = 2;	
+		optional string 	instanceend	    = 3;
+		optional string 	fileformat		= 4;
+		optional string 	croppedformat	= 5;
+		repeated Image 		image      	    = 6;
+		repeated Crop 		crop      	    = 7;		
+	}
+	
+	message Image
+	{
+		optional string path 				= 1;
+		optional string name				= 2;
+		optional int32 	imagechanges 	    = 3;
+	}
+	
+	message Crop
+	{
+		optional string path 				= 1;
+		optional string name				= 2;
+		optional string imagefather			= 3;
 	}
 }  
 
