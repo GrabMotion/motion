@@ -99,7 +99,7 @@ std::string msg;
 int div_ceil(int numerator, int denominator);
 std::string IntToString ( int number );
 std::string fixedLength(int value, int digits);
-int inttype;
+int inttype, protofile;
 
 //Send
 void * sendEcho(motion::Message m);
@@ -110,13 +110,14 @@ motion::Message R_PROTO;
 motion::Message T_PROTO;
 motion::Message takePictureToProto(motion::Message);
 std::string starttime;
-motion::Message getLocalPtoro(motion::Message m);
+motion::Message getLocalPtoro();
 
 //Recognition
+CvCapture * camera;
 bool stop_capture;
 bool is_recognizing;
 cv::Mat picture;
-bool stop_recognizing;
+//bool stop_recognizing;
 int number_of_changes;
 int resutl_watch_detected;
 std::string startrecognitiontime;
@@ -288,21 +289,23 @@ int udpsend(motion::Message m)
     return 0;
 }
 
-motion::Message getImageToProto(motion::Message m)
+motion::Message getImageToProto(std::string imagefilepath)
 {
     
     cout << "+++++++++++LOADING IMAGE TO PROTO++++++++++++++" << endl;
     
-    Mat mat = imread(m.imagefilepath());
+    motion::Message localm;
+    localm.Clear();
     
-    //Shared mat
-    picture = mat;
-
+    cout << "imagefilepath : " << imagefilepath << endl;
+    
+    Mat mat = imread(imagefilepath);
+    
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     
-    m.set_type(motion::Message::TAKE_PICTURE);
-    m.set_serverip(PROTO.serverip());
-    m.set_time(getTimeRasp());
+    localm.set_type(motion::Message::TAKE_PICTURE);
+    localm.set_serverip(PROTO.serverip());
+    localm.set_time(getTimeRasp());
     
     // We will need to also serialize the width, height, type and size of the matrix
     int width_s     = mat.cols;
@@ -310,8 +313,16 @@ motion::Message getImageToProto(motion::Message m)
     int type_s      = mat.type();
     int size_s      = mat.total() * mat.elemSize();
     
+    cout << "width_s: " << width_s << endl;
+        cout << "height_s: " << height_s << endl;
+        cout << "type_s: " << type_s << endl;
+        cout << "size_s: " << size_s << endl;
+    
+    
     // Initialize a stringstream and write the data
-    int size_init = m.ByteSize();
+    int size_init = localm.ByteSize();
+    
+    cout << "m.ByteSize: " << localm.ByteSize() << endl;
     
     // Write the whole image data
     std::stringstream ss;
@@ -325,21 +336,27 @@ motion::Message getImageToProto(motion::Message m)
     
     std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(ssstring.c_str()), ssstring.length());
     
+    cout << " oriencoded size : " << oriencoded.size() << endl;
+    
     //Store into proto
-    m.set_data(oriencoded.c_str());
-    
-    google::protobuf::ShutdownProtobufLibrary();
-    
-    return m;
+    localm.set_data(oriencoded.c_str());
+
+    return localm;
 }
 
+
+uint64_t GetTimeStamp() {
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    return tv.tv_sec*(uint64_t)1000000+tv.tv_usec;
+}
 
 motion::Message takePictureToProto(motion::Message m)
 {
     
     cout << "CAPTURING !!!!!!!!!!!!!" << endl;
     
-    CvCapture* capture = cvCreateCameraCapture(0);
+    CvCapture* capture = cvCreateCameraCapture(CV_CAP_ANY);
     if (capture == NULL)
     {
         std::cout << "No cam found." << std::endl;
@@ -356,9 +373,9 @@ motion::Message takePictureToProto(motion::Message m)
     //img = cvQueryFrame( capture );
     //cvSaveImage("IplImage.JPG",img);
     
-    Mat mat(h, w, CV_8U); //CV_8U); // CV_8UC3);
+    Mat mat; //(h, w, CV_8U); //CV_8U); // CV_8UC3);
     mat = cvQueryFrame(capture);
-    cvtColor(mat, mat, CV_RGB2GRAY);
+    //cvtColor(mat, mat, CV_RGB2GRAY);
     
     //imwrite("MAT.jpg", mat);
     
@@ -379,6 +396,12 @@ motion::Message takePictureToProto(motion::Message m)
     int type_s      = mat.type();
     int size_s      = mat.total() * mat.elemSize();
     
+    cout << "width_s: " << width_s << endl;
+    cout << "height_s: " << height_s << endl;
+    cout << "type_s: " << type_s << endl;
+    cout << "size_s: " << size_s << endl;
+
+    
     // Initialize a stringstream and write the data
     int size_init = m.ByteSize();
     
@@ -397,20 +420,23 @@ motion::Message takePictureToProto(motion::Message m)
     //Store into proto
     m.set_data(oriencoded.c_str());
     
-    struct timeval tp;
-    gettimeofday(&tp, NULL);
-    int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    uint64_t active = GetTimeStamp();
+
+    int activemat = abs(active);
     
-    cout << "activemat::::: " << ms << endl;
+    cout << "activemat::::: " << activemat << endl;
+
     
-    T_PROTO.add_matfile(ms);
-    T_PROTO.set_activemat(ms);
+    T_PROTO.add_matfile(activemat);
+    T_PROTO.set_activemat(activemat);
     
-    m.add_matfile(ms);
-    m.set_activemat(ms);
+    m.add_matfile(activemat);
+    m.set_activemat(activemat);
 
     //Write base64 to file for checking.
-    std::string basefile = "data/mat/" + IntToString(ms);
+    //std::string basefile = "data/mat/" + IntToString(activemat);
+    
+    std::string basefile = "MAT.txt";
     std::ofstream out;
     out.open (basefile.c_str());
     out << m.data() << "\n";
@@ -420,7 +446,7 @@ motion::Message takePictureToProto(motion::Message m)
     
     cvReleaseCapture(&capture);
     
-    google::protobuf::ShutdownProtobufLibrary();
+    //google::protobuf::ShutdownProtobufLibrary();
     
     return m;
 }
@@ -433,7 +459,7 @@ void * sendProto (void * arg)
     string servAddress      = T_PROTO.serverip();
     
     google::protobuf::uint32 pport = motion::Message::TCP_ECHO_PORT;
-    google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 28;
+    google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 40;
     
     cout << "serverIp: " << servAddress << endl;
     cout << "serverPort: " << pport << endl;
@@ -499,21 +525,22 @@ void * startObserver(void * arg)
                 if (resutl_watch_detected>0)
                 {
                     
-                    motion::Message m;
-                    m.set_recognizing(true);
+                    motion::Message mrefresh;
+                    mrefresh.Clear();
+                    
+                    mrefresh.set_recognizing(true);
                     pthread_mutex_lock(&protoMutex);
-                    m = R_PROTO;
+                    mrefresh = R_PROTO;
                     pthread_mutex_unlock(&protoMutex);
                     
                     //Initialize objects to serialize.
-                    int size = m.ByteSize();
+                    int size = mrefresh.ByteSize();
                     
                     //cout << "Proto size   : " << size << endl;
                     
                     char dataresponse[size];
-                    string datastr;
                     
-                    m.SerializeToArray(&dataresponse, size);
+                    mrefresh.SerializeToArray(&dataresponse, size);
                     
                     std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
                     
@@ -525,6 +552,8 @@ void * startObserver(void * arg)
                     out << encoded_proto << "\n";
                     out.close();
                     pthread_mutex_unlock(&fileMutex);
+                    
+                    google::protobuf::ShutdownProtobufLibrary();
                     
                     sleep(1);
                 }
@@ -549,23 +578,24 @@ int div_ceil(int numerator, int denominator)
     return res.rem ? (res.quot + 1) : res.quot;
 }
 
-motion::Message getLocalPtoro(motion::Message m )
+motion::Message getLocalPtoro()
 {
+    motion::Message mlocal;
     std::string protofile = "data/data/localproto.txt";
     
     if (file_exist(protofile))
     {
         
-        m.Clear();
+        mlocal.Clear();
         std::string backfile = protofile;
         pthread_mutex_lock(&fileMutex);
         string loaded = get_file_contents(backfile);
         pthread_mutex_unlock(&fileMutex);
         std::string oridecoded = base64_decode(loaded);
-        m.ParseFromArray(oridecoded.c_str(), oridecoded.size());
-        m.set_time(getTimeRasp());
+        mlocal.ParseFromArray(oridecoded.c_str(), oridecoded.size());
+        mlocal.set_time(getTimeRasp());
     }
-    return m;
+    return mlocal;
 
 }
 
@@ -580,7 +610,7 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::ENGAGE:
         {
             cout << "motion::Message::ENGAGE" << endl;
-            m = getLocalPtoro(m);
+            m = getLocalPtoro();
             m.set_type(motion::Message::ENGAGE);
             m.set_cameras(T_PROTO.cameras());
             m.set_starttime(T_PROTO.starttime());
@@ -591,7 +621,7 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::REFRESH:
         {
             cout << "motion::Message::REFRESH" << endl;
-            m = getLocalPtoro(m);
+            m = getLocalPtoro();
             m.set_type(motion::Message::REFRESH);
 
         }
@@ -617,7 +647,7 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::GET_IMAGE:
         {
             cout << "motion::Message::GET_IMAGE" << endl;
-            m = getImageToProto(m);
+            m = getImageToProto(m.imagefilepath());
             m.set_type(motion::Message::GET_IMAGE);
             
         }
@@ -640,7 +670,10 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::REC_STOP:
         {
             cout << "motion::Message::REC_STOP" << endl;
-            stop_recognizing = true;
+            is_recognizing = false;
+            pthread_cancel(thread_recognition);
+            cvReleaseCapture(&camera);
+            R_PROTO.set_recognizing(false);
         }
         break;
         case motion::Message::TAKE_PICTURE:
@@ -676,6 +709,9 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::SET_TIME:
         {
             cout << "motion::Message::SET_TIME" << endl;
+
+            result_message = m.time();
+            
             struct tm tmremote;
             char *bufr;
             
@@ -718,7 +754,6 @@ motion::Message runCommand(motion::Message m)
             
             printf("The system time is set to %s\n", text_time);
             
-            motion::Message m;
             m.set_type(motion::Message::TIME_SET);
             m.set_serverip(PROTO.serverip());
             m.set_time(getTimeRasp());
@@ -757,6 +792,7 @@ void totalsSocket()
     } else
     {
         count_sent__split = 0;
+        msg_split_vector.clear();
     }
     //cout << " count_sent__split : " << count_sent__split << endl;
 }
@@ -773,12 +809,12 @@ try
 {
     
   // Send received string and receive again until the end of transmission
-  char echoBuffer[motion::Message::SOCKET_BUFFER_NANO_SIZE + 28];
+  char echoBuffer[motion::Message::SOCKET_BUFFER_NANO_SIZE + 40];
   int recvMsgSize;
   std::string message;
     
 
-    while ((recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_NANO_SIZE + 28)) > 0)
+    while ((recvMsgSize = sock->recv(echoBuffer, motion::Message::SOCKET_BUFFER_NANO_SIZE)) > 0)
     {
 
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
@@ -799,6 +835,7 @@ try
         
       PROTO.Clear();
       PROTO = ms;
+        
       value = ms.type();
       T_PROTO.set_serverip(ms.serverip());
     
@@ -806,25 +843,49 @@ try
       {
           cout << "response : " <<  ms.type() << endl;
           count_sent__split = 0;
+          
+          google::protobuf::ShutdownProtobufLibrary();
+          
           return ms.type();
       }
       else if (ms.type()==motion::Message::RESPONSE_NEXT)
       {
           
+          std:string payspl = msg_split_vector.at(count_sent__split);
+          
           string header =
           "PROSTA" +
-            fixedLength(count_vector_size,4)  + "::" +
-            fixedLength(count_sent__split,4)  + "::" +
-            IntToString(inttype)              +
+            fixedLength(payspl.size() +40,  4)  + "::" +
+            fixedLength(count_vector_size,  4)  + "::" +
+            fixedLength(count_sent__split,  4)  + "::" +
+            IntToString(inttype)                + "::" +
+            IntToString(protofile)              +
           "PROSTO";
           
-          msg = header + msg_split_vector.at(count_sent__split);
+          msg = header + payspl;
 
           cout << "header 2 : " << header << endl;
+          cout << "size: " << msg.size() << endl;
+          cout << "..........................................." << endl;
+          cout << msg << endl;
+          cout << "..........................................." << endl;
           
           totalsSocket();
           
+          //if (PROTO.type()==motion::Message::TAKE_PICTURE)
+          //{
+              //std::string basefile = "data/data/MAT_";
+              //stringstream rr;
+              //rr << basefile << count_sent__split << ".txt";
+              //std::ofstream out;
+              //out.open (rr.str().c_str());
+              //out << msg << "\n";
+              //out.close();
+          //}
+          
           sock->send(msg.c_str(), msg.size());
+          
+          google::protobuf::ShutdownProtobufLibrary();
         
           return ms.type();
       }
@@ -837,69 +898,135 @@ try
         
       cout << "Serializing proto response." << endl;
       
+      //Split file outside proto.
+      std::string datafile;
+      if (m.has_data())
+      {
+          
+          datafile = "PROFILE" + m.data();
+          cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
+          cout << "m size 1: " << m.ByteSize() << endl;
+          m.clear_data();
+          cout << "m size 2: " << m.ByteSize() << endl;
+          cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
+          protofile = motion::Message::PROTO_HAS_FILE;
+          
+      } else
+      {
+          protofile = motion::Message::PROTO_NO_FILE;
+      }
+        
       //Initialize objects to serialize.
       int size = m.ByteSize();
+        
+      char dataresponse[size];
     
       cout << "Proto size   : " << size << endl;
-    
-      char dataresponse[size];
-      string datastr;
 
       m.SerializeToArray(&dataresponse, size);
      
       cout << "Encoding." << endl;
         
-      std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
+        std::string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
         
-        string header;
-        inttype = ms.type();
+      std::stringstream ssenc;
         
-      if ( size > motion::Message::SOCKET_BUFFER_NANO_SIZE )
+      if (protofile == motion::Message::PROTO_HAS_FILE)
       {
-          google::protobuf::uint32 chunck_size = motion::Message::SOCKET_BUFFER_NANO_SIZE;
+          cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
+          ssenc << encoded_proto;
+          cout << "encoded_proto size ::1::  " << ssenc.str().size() << endl;
+          ssenc << datafile;
+          cout << "encoded_proto size ::2::  " << ssenc.str().size() << endl;
+          cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
+      }
+      else
+      {
+          ssenc << encoded_proto;
+      }
+        
+      string header;
+      inttype = ms.type();
+        
+      std::string all_encoded = ssenc.str();
+      int final_size = all_encoded.size();
+        
+      if ( final_size > PROTO.packagesize() )
+      {
           
-          for (unsigned i = 0; i < encoded_proto.length(); i += chunck_size)
+          google::protobuf::uint32 chunck_size = PROTO.packagesize();
+          
+          for (unsigned i = 0; i < all_encoded.length(); i += chunck_size)
           {
-              msg_split_vector.push_back(encoded_proto.substr(i, chunck_size));
+              msg_split_vector.push_back(all_encoded.substr(i, chunck_size));
           }
           
           count_vector_size = msg_split_vector.size();
+          std::string payspl = msg_split_vector.at(count_sent__split);
           
           header =
           "PROSTA" +
-            fixedLength(count_vector_size, 4)  + "::" +
-            fixedLength(count_sent__split, 4)  + "::" +
-            IntToString(inttype)               +
+            fixedLength(payspl.size()+40,   4)  + "::" +
+            fixedLength(count_vector_size,  4)  + "::" +
+            fixedLength(count_sent__split,  4)  + "::" +
+            IntToString(inttype)                + "::" +
+            IntToString(protofile)              +
           "PROSTO";
-          msg = header + msg_split_vector.at(count_sent__split);
+          msg = header + payspl;
 
           cout << "header 1 : " << header << endl;
-          
+          cout << "size: " << msg.size() << endl;
+          cout << "..........................................." << endl;
+          cout << msg << endl;
+          cout << "..........................................." << endl;
+
       }
       else
       {
           
           header =
-          "PROSTA"
+          "PROSTA";
+          header += fixedLength(all_encoded.size()+40,4);
+          header +=
+          "::"
           "0001"
           "::"
           "0000"
           "::";
           header += IntToString(inttype);
+          header += "::";
+          header += IntToString(protofile);
           header += "PROSTO";
-          
-          msg = header + encoded_proto;
+          msg = header + all_encoded;
           
           count_vector_size = 0;
           
           cout << "header 0 : " << header << endl;
+          cout << "size: " << msg.size() << endl;
+          cout << "..........................................." << endl;
+          cout << msg << endl;
+          cout << "..........................................." << endl;
           
       }
       
+        //if (PROTO.type()==motion::Message::TAKE_PICTURE)
+        //{
+            //std::string basefile = "data/data/MAT_";
+            //stringstream rr;
+            //rr << basefile << count_sent__split << ".txt";
+            //std::ofstream out;
+            //out.open (rr.str().c_str());
+            //out << msg << "\n";
+            //out.close();
+        //}
+
+        
         ms.Clear();
         google::protobuf::ShutdownProtobufLibrary();
     
         totalsSocket();
+        
+        cout << "socket size: " << msg.size() << endl;
         
         sock->send(msg.c_str(), msg.size());
         

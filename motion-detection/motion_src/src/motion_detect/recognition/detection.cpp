@@ -412,10 +412,7 @@ void * startRecognition(void * arg)
     cout << "START RECOGNITION." << endl;
     
     pthread_detach(pthread_self());
-    
-    //struct arg_struct *args = (struct arg_struct *) arg;
-    //cout << "Passing obj: " << args->message.type() << endl;
-    
+
     is_recognizing = false;
     
     R_PROTO.Clear();
@@ -599,7 +596,7 @@ void * startRecognition(void * arg)
     std::string image_file_recognized;
     
     // Set up camera
-    CvCapture * camera = cvCaptureFromCAM(CV_CAP_ANY);
+    camera = cvCaptureFromCAM(CV_CAP_ANY);
     cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 1280); //640); //1280); // width of viewport of camera
     cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 720); //480); //720); // height of ...
     
@@ -663,10 +660,6 @@ void * startRecognition(void * arg)
     // take as many pictures you want..
     while (true)
     {
-        
-        //Killme
-        if (stop_recognizing)
-            break;
         
         is_recognizing = true;
         
@@ -832,7 +825,6 @@ void * startRecognition(void * arg)
         }
     }
     
-    R_PROTO.set_recognizing(false);
     return 0;
 }
 

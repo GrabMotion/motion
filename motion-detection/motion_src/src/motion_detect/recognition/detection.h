@@ -14,9 +14,11 @@
 #include "../protobuffer/motion.pb.h"
 #include "../b64/base64.h"
 
+extern CvCapture * camera;
+
 //Observer Recogition
 extern bool is_recognizing;
-extern bool stop_recognizing;
+//extern bool stop_recognizing;
 extern int resutl_watch_detected;
 extern std::string startrecognitiontime;
 
