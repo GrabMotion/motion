@@ -11,6 +11,8 @@
 //  Copyright (c) 2014 Cedric Verstraeten. All rights reserved.
 //
 
+#include "../recognition/detection.h"
+
 #include <iostream>
 #include <fstream>
 #include <time.h>
@@ -20,8 +22,10 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
+
 #include "../tinyxml/tinyxml.h"
 #include "../tinyxml/tinystr.h"
 #include <string>
@@ -29,31 +33,76 @@
 #include <functional>
 #include <ctime>
 #include <unistd.h>
-#include "detection.h"
+#include <cstring>
+
+#include <sys/time.h>
 
 using namespace std;
 using namespace cv;
 
-void parseRegionXML(string file_region, vector<Point2f> &region){
-    TiXmlDocument doc(file_region.c_str());
-    if(doc.LoadFile()) // ok file loaded correctly
+motion::Message::MotionMonth * pmonth;
+motion::Message::MotionDay * pday;
+motion::Message::Instance * pinstance;
+
+std::vector<cv::Point2f> stringToVectorPoint2f(std::string storedcoord)
+{
+    vector<Point2f> coordinates;
+    std::stringstream ss(storedcoord);
+    string d;
+    int c=0, x=0, y=0, t=0;
+    while (ss >> d)
     {
-        TiXmlElement * point = doc.FirstChildElement("point");
-        int x, y;
-        while (point)
+        d = d.erase( d.size() - 1 );
+        bool fi = d.find("[");
+        if (!fi)
         {
-            point->Attribute("x",&x);
-            point->Attribute("y",&y);
-            Point2f p(x,y);
-            region.push_back(p);
-            point = point->NextSiblingElement("point");
+            d = d.erase(0 , 1);
+        }
+        
+        float cor =  atof (d.c_str());
+        if (c==0)
+        {
+            x = cor;
+            c++;
+        } else
+        {
+            y = cor;
+            cv::Point2f p(x, y);
+            coordinates.push_back(p);
+            c=0;x=0;y=0;
+        }
+        t++;
+    }
+    return coordinates;
+}
+
+vector<Point2f> processRegionString(std::string coordstring)
+{
+    vector<Point2f> cvectro = stringToVectorPoint2f(coordstring);
+    vector<Point2f> insideContour;
+    for(int j = 0; j < picture.rows; j++)
+    {
+        for(int i = 0; i < picture.cols; i++)
+        {
+            Point2f p(i,j);
+            if(pointPolygonTest(cvectro,p,false) >= 0) // yes inside
+                insideContour.push_back(p);
         }
     }
-    else
-    {
-        exit(1);
-    }
-    std::cout << "XML Reguion loaded." << std::endl;
+    cout << "# points inside contour: " << insideContour.size() << endl;
+    return insideContour;
+}
+
+char * CharArrayPlusChar( const char *array, char c )
+{
+    size_t sz = std::strlen( array );
+    char *s = new char[sz + 2];
+    
+    std::strcpy( s, array );
+    s[sz] = c;
+    s[sz + 1] = '\0';
+    
+    return ( s );
 }
 
 // Create initial XML file
@@ -63,15 +112,21 @@ void build_xml(const char * xmlPath)
     struct tm  tstruct;
     char       secs[80];
     tstruct = *localtime(&now);   
-    strftime(secs, sizeof(secs), "%Y-%m-%d.%X", &tstruct);  
-   
+    //strftime(secs, sizeof(secs), "%Y:%m:%d %X", &tstruct);
+    strftime(secs, sizeof(secs), "%Y-%m-%d %H:%M:%S %z", &tstruct);
+    
+    char result[100];   // array to hold the result.
+    
+    strcpy(result, secs); // copy string one into the result.
+    
     TiXmlDocument doc;
     TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "utf-8", "");
     TiXmlElement * file = new TiXmlElement( "file" );    
     TiXmlElement * session_info = new TiXmlElement( "SESSION_INFO" );    
     TiXmlElement * start_time = new TiXmlElement( "start_time" );    
-    TiXmlText * text_start_time = new TiXmlText( secs );        
-    TiXmlElement * all_instances = new TiXmlElement( "ALL_INSTANCES" );       
+    TiXmlText * text_start_time = new TiXmlText( result );
+    TiXmlElement * all_instances = new TiXmlElement( "ALL_INSTANCES" );
+    
     start_time->LinkEndChild( text_start_time );    
     session_info->LinkEndChild(start_time);        
     file->LinkEndChild(session_info); 
@@ -156,7 +211,9 @@ inline string saveImg(
         const string DIRECTORY,         
         const string EXTENSION, 
         const char * DIR_FORMAT, 
-        const char * FILE_FORMAT
+        const char * FILE_FORMAT,
+        int n_o_changes,
+        string img
 )
 {   
     stringstream ss;
@@ -167,14 +224,39 @@ inline string saveImg(
     // Get the current time
     timeinfo = localtime (&seconds);
     
+    std::string amount_str = getGlobalIntToString(n_o_changes);
+    
+    std::string n_str_file = "_" + amount_str;
+    
+    char * n_file = new char[n_str_file.size() + 1];
+    std::copy(n_str_file.begin(), n_str_file.end(), n_file);
+    n_file[n_str_file.size()] = '\0';
+    
+    std::cout << "n_file: " << n_file << std::endl;
+    
     // Create name for the image
     strftime (TIME,80,FILE_FORMAT,timeinfo);    
     if(incr < 100) incr++; // quick fix for when delay < 1s && > 10ms, (when delay <= 10ms, images are overwritten)
     else incr = 0;
-    ss << DIRECTORY << TIME << static_cast<int>(incr) << EXTENSION;        
+    ss << DIRECTORY << TIME << static_cast<int>(incr) << n_file << EXTENSION;
     string image_file = ss.str().c_str();
     imwrite(image_file, image);
     
+    std::cout << "image_file: " << image_file << std::endl;
+    
+    if (img.empty())
+    {
+        motion::Message::Image * pimage = pinstance->add_image();
+        pimage->set_path(image_file.c_str());
+        pimage->set_name(n_file);
+        pimage->set_imagechanges(n_o_changes);
+    } else
+    {
+        motion::Message::Crop * pcrop = pinstance->add_crop();
+        pcrop->set_path(image_file.c_str());
+        pcrop->set_name(n_file);
+        pcrop->set_imagefather(img);
+    }
     return image_file;
 }
 
@@ -186,10 +268,10 @@ inline bool createDirectoryTree(
         const string EXTENSION, 
         const char * DIR_FORMAT, 
         const char * FILE_FORMAT,
-        string instance
+        std::string instance
 )
 {
-    stringstream ss, zz;
+    std::stringstream ss, zz;
     time_t seconds;
     struct tm * timeinfo;
     char TIME[80];
@@ -203,7 +285,7 @@ inline bool createDirectoryTree(
     ss << DIRECTORY << TIME;        
     directoryExistsOrCreate(ss.str().c_str());    
     ss << "/xml";
-     directoryExistsOrCreate(ss.str().c_str());   
+    directoryExistsOrCreate(ss.str().c_str());
     zz.str("");
     zz << DIRECTORY << TIME << "/" + instance;         
     directoryExistsOrCreate(zz.str().c_str());
@@ -213,19 +295,16 @@ inline bool createDirectoryTree(
     return true;
 }
 
-
 // Check if there is motion in the result matrix
 // count the number of changes and return.
 inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
-                        vector<Point2f> & region,
+                        int x_start, int x_stop, int y_start, int y_stop,
                         int max_deviation,
                         Scalar & color)
 {
-    
     // calculate the standard deviation
     Scalar mean, stddev;
     meanStdDev(motion, mean, stddev);
-    
     // if not to much changes then the motion is real (neglect agressive snow, temporary sunlight)
     if(stddev[0] < max_deviation)
     {
@@ -233,12 +312,66 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
         int min_x = motion.cols, max_x = 0;
         int min_y = motion.rows, max_y = 0;
         // loop over image and detect changes
+        for(int j = y_start; j < y_stop; j+=2){ // height
+            for(int i = x_start; i < x_stop; i+=2){ // width
+                // check if at pixel (j,i) intensity is equal to 255
+                // this means that the pixel is different in the sequence
+                // of images (prev_frame, current_frame, next_frame)
+                if(static_cast<int>(motion.at<uchar>(j,i)) == 255)
+                {
+                    number_of_changes++;
+                    if(min_x>i) min_x = i;
+                    if(max_x<i) max_x = i;
+                    if(min_y>j) min_y = j;
+                    if(max_y<j) max_y = j;
+                }
+            }
+        }
+        if(number_of_changes){
+            //check if not out of bounds
+            if(min_x-10 > 0) min_x -= 10;
+            if(min_y-10 > 0) min_y -= 10;
+            if(max_x+10 < result.cols-1) max_x += 10;
+            if(max_y+10 < result.rows-1) max_y += 10;
+            // draw rectangle round the changed pixel
+            Point x(min_x,min_y);
+            Point y(max_x,max_y);
+            Rect rect(x,y);
+            //Mat cropped = result(rect);
+            //cropped.copyTo(result_cropped);
+            rectangle(result,rect,color,1);
+        }
+        return number_of_changes;
+    }
+    return 0;
+}
+
+// Check if there is motion in the result matrix
+// count the number of changes and return.
+inline int detectMotionRegion(const cv::Mat & motionmat,
+                        cv::Mat & result,
+                        cv::Mat & result_cropped,
+                        std::vector<cv::Point2f> & region,
+                        int max_deviation,
+                        cv::Scalar & color)
+{
+    
+    // calculate the standard deviation
+    Scalar mean, stddev;
+    meanStdDev(motionmat, mean, stddev);
+    
+    // if not to much changes then the motion is real (neglect agressive snow, temporary sunlight)
+    if(stddev[0] < max_deviation)
+    {
+        int number_of_changes = 0;
+        int min_x = motionmat.cols, max_x = 0;
+        int min_y = motionmat.rows, max_y = 0;
+        // loop over image and detect changes
         int x, y, size = region.size();
-        
         for(int i = 0; i < size; i++){ // loop over region
             x = region[i].x;
             y = region[i].y;
-            if(static_cast<int>(motion.at<uchar>(y,x)) == 255)
+            if(static_cast<int>(motionmat.at<uchar>(y,x)) == 255)
             {
                 number_of_changes++;
                 if(min_x>x) min_x = x;
@@ -253,44 +386,189 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
             if(min_y-10 > 0) min_y -= 10;
             if(max_x+10 < result.cols-1) max_x += 10;
             if(max_y+10 < result.rows-1) max_y += 10;
-            
             // draw rectangle round the changed pixel
             Point x(min_x,min_y);
             Point y(max_x,max_y);
             Rect rect(x,y);
-            
             //Mat cropped = result(rect);
-            //cropped.copyTo(result_cropped);   //JOSE Cropp removed.
+            //cropped.copyTo(result_cropped);
             rectangle(result,rect,color,1);
-
-            
         }
-        std::cout << "number_of_changes = " << number_of_changes << std::endl;
         
         return number_of_changes;
     }
     return 0;
 }
 
+struct arg_struct
+{
+    motion::Message message;
+};
+
+
 void * startRecognition(void * arg)
 {
     
-    bool writeImages = true, writeCroop = false;
+    cout << "START RECOGNITION." << endl;
     
-    pthread_mutex_t detectMutex;
-    pthread_mutex_init(&detectMutex, 0); 
+    pthread_detach(pthread_self());
+
+    is_recognizing = false;
     
-    struct recognition_thread_args *args = (struct recognition_thread_args *) arg;
+    R_PROTO.Clear();
+    R_PROTO = PROTO;
     
-    const string DIR        = "../../src/motion_web/pics/";     // directory where the images will be stored
-    const string REGION     = "../../src/motion_web/pics/region/";   // directory where the regios are stored
+    //Region
+    bool has_region;
+    std::vector<cv::Point2f> region;
+    if (R_PROTO.region())
+    {
+        cout << "Has region." << endl;
+        if (R_PROTO.has_regioncoords())
+        {
+            cout << "Has regioncoords." << endl;
+            std::string rc = R_PROTO.regioncoords();
+            cout << "rc." << rc << endl;
+            std::string rcoords = base64_decode(rc);
+            cout << "rcoords." << rcoords << endl;
+            region = processRegionString(rcoords);
+            cout << "REGION SIZE :: " << region.size() << endl;
+            if (region.size()>0)
+                has_region = true;
+            else
+                has_region = false;
+        }
+    }
+    else
+    {
+        has_region = false;
+    }
+    
+    std::string instancecode;
+    if (R_PROTO.has_codename())
+    {
+        cout << "Has codename." << endl;
+        std::string instancecode = R_PROTO.codename();
+    }
+    if (instancecode.empty())
+        instancecode = "Prueba";
+    
+    double delay;
+    if (R_PROTO.has_delay())
+    {
+        delay = R_PROTO.delay();
+    }
+    time_t delaymark;
+    
+    string XML_FILE;
+    if (R_PROTO.has_xmlfilename())
+    {
+        cout << "has_xmlfile." << endl;
+        XML_FILE = R_PROTO.xmlfilename();
+    }
+    else
+    {
+        XML_FILE  =  "<import>session";
+        R_PROTO.set_xmlfilename(XML_FILE);
+    }
+    
+    cout << "MONTH" << endl;
+    
+    //Get Month abr.
+    struct timeval tm;
+    struct tm* ptm;
+    char month_rasp[3];
+    gettimeofday (&tm, NULL);
+    ptm = localtime (&tm.tv_sec);
+    strftime (month_rasp, sizeof (month_rasp), "%h", ptm);
+    
+    //Month.
+    string str_month;
+    if (R_PROTO.has_currmonth())
+    {
+        str_month = R_PROTO.currmonth();
+    }
+    cout << "str_month: " << str_month << endl;
+    
+    //Check if exist month on proto or else add it.
+    int sizem = R_PROTO.motionmonth_size();
+    cout << "sizem: " << sizem << endl;
+    bool monthexist = false;
+    for (int i = 0; i < sizem; i++)
+    {
+        cout << "entra" << endl;
+        motion::Message::MotionMonth * mmonth = R_PROTO.mutable_motionmonth(i);
+        if (mmonth->has_monthlabel())
+        {
+            cout << "has label" << endl;
+            std::string mlabel = mmonth->monthlabel();
+            if (str_month.find(mlabel))
+            {
+                cout << "has month" << endl;
+                pmonth = R_PROTO.mutable_motionmonth(i);
+                monthexist=true;
+            }
+        }
+        else
+        {
+            cout << "has NO month" << endl;
+        }
+    }
+    if(!monthexist)
+    {
+        cout << "!monthexist" << endl;
+        //Add proto month.
+        pmonth = R_PROTO.add_motionmonth();
+        pmonth->set_monthlabel(str_month);
+        cout << "sigo" << endl;
+    }
+    
+    //Day.
+    string str_day;
+    if (R_PROTO.has_currday())
+    {
+        str_day = R_PROTO.currday();
+    }
+    cout << "str_day: " << str_day << endl;
+
+    //Check if day exist or else add it.
+    bool dayexist=false;
+    cout << "pmonth->motionday_size(): " << pmonth->motionday_size() << endl;
+    for (int j = 0; j < pmonth->motionday_size(); j++)
+    {
+        std::string dlabel = pmonth->motionday(j).daylabel();
+        cout << "dlabel: " << str_day << endl;
+        if (str_day.find(dlabel))
+        {
+            pday = pmonth->mutable_motionday(j);
+            dayexist = true;
+        }
+    }
+    if (!dayexist)
+    {
+        cout << "!dayexist" << endl;
+        //Add proto day.
+        pday = pmonth->add_motionday();
+        pday->set_daylabel(str_day);
+        cout << "sigo" << endl;
+    }
+    
+    bool writeImages = R_PROTO.storeimage();
+    bool writeCroop  = R_PROTO.storecrop();
+    bool send_number_detected = true;
+    
+    std::cout << "writeImages: " << writeImages << endl;
+    std::cout << "writeCroop: " << writeCroop << endl;
+    
+    const string DIR        = "../../src/motion_web/pics/";          // directory where the images will be stored
+    //const string REGION     = "../../src/motion_web/pics/region/";   // directory where the regios are stored
     const string EXT        = ".jpg";                           // extension of the images
     const string EXT_DATA   = ".xml";                           // extension of the data
     const int DELAY         = 500;                              // in mseconds, take a picture every 1/2 second
     const string LOG    = "../../src/motion_web/log";           // log for the export
     const string LOGCLEAR = LOG + "/log_remove";    
-    vector<Point2f> region;                                     // region vector storing xml region
-       
+                                        // region vector storing xml region
+    
     // fps calculated using number of frames / seconds
     double fps; 
     // start and end times
@@ -299,17 +577,6 @@ void * startRecognition(void * arg)
     int counter = 0; 
     // floating point seconds elapsed since start
     double sec;
-    
-    // Create pics directory if not exist. 
-    //directoryExistsOrCreate(DIR.c_str());
-    
-    // Create region directory if not exist. 
-    //directoryExistsOrCreate(REGION.c_str());
-    //{
-        // Detect motion in a region in steadof window
-       string file_region = REGION + "region" + EXT_DATA;
-       parseRegionXML(file_region, region);
-    //}
     
     // Create log directory if not exist. 
     directoryExistsOrCreate(LOG.c_str());   
@@ -321,18 +588,17 @@ void * startRecognition(void * arg)
         logfile.close();
     }
     
-    std::cout << "llega" << std::endl;
-    
     // Format of directory
-    string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
+    //string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
     string FILE_FORMAT;//          = DIR_FORMAT + "/" + "%d%h%Y_%H%M%S"; // 1Jan1970/1Jan1970_12153
     string CROPPED_FILE_FORMAT;//   = DIR_FORMAT + "/cropped/" + "%d%h%Y_%H%M%S"; // 1Jan1970/cropped/1Jan1970_121539
-    string XML_FILE             =  "<import>session";
+    //string XML_FILE             =  "<import>session";
+    std::string image_file_recognized;
     
     // Set up camera
-    CvCapture * camera = cvCaptureFromCAM(CV_CAP_ANY);
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 640); //1280); // width of viewport of camera
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 480); //720); // height of ...
+    camera = cvCaptureFromCAM(CV_CAP_ANY);
+    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 1280); //640); //1280); // width of viewport of camera
+    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 720); //480); //720); // height of ...
     
     // Take images and convert them to gray
     Mat result, result_cropped;
@@ -348,7 +614,7 @@ void * startRecognition(void * arg)
     // result, the result of and operation, calculated on d1 and d2
     // number_of_changes, the amount of changes in the result matrix.
     // color, the color for drawing the rectangle when something has changed.
-    Mat d1, d2, motion;
+    Mat d1, d2, motionmat;
     int number_of_changes, number_of_sequence = 0, count_sequence_cero = 0, count_save_image = 0;
     Scalar mean_, color(0,255,255); // yellow 
     
@@ -366,9 +632,6 @@ void * startRecognition(void * arg)
     // Erode kernel
     Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2)); 
     
-    // time opencv
-    //double t = (double)getTickCount(); 
-    
     //count instance time     
     string start_instance_time, total_elapsed_time; 
     bool motion_detected = false, init_motion = false, has_instance_directory = false;
@@ -378,15 +641,27 @@ void * startRecognition(void * arg)
     // Instance counter
     int instance_counter = 0; 
     string instance;
-    int countWhile;
     
     init_time = clock();
     
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+
+    R_PROTO.set_startrecognitiontime(time_rasp);
+    startrecognitiontime = time_rasp;
+    
+    cout << "TIME STARTED: " << time_rasp << endl;
+    
     // All settings have been set, now go in endless loop and
     // take as many pictures you want..
-    while (true){   
+    while (true)
+    {
         
-        countWhile++;
+        is_recognizing = true;
         
        // Take a new image
         prev_frame = current_frame;
@@ -399,25 +674,26 @@ void * startRecognition(void * arg)
         // threshold image, low differences are ignored (ex. contrast change due to sunlight)
         absdiff(prev_frame, next_frame, d1);
         absdiff(next_frame, current_frame, d2);
-        bitwise_and(d1, d2, motion);
-        threshold(motion, motion, 35, 255, CV_THRESH_BINARY);
-        erode(motion, motion, kernel_ero);
+        bitwise_and(d1, d2, motionmat);
+        threshold(motionmat, motionmat, 35, 255, CV_THRESH_BINARY);
+        erode(motionmat, motionmat, kernel_ero);
         
-        pthread_mutex_lock(&detectMutex);
-        
-        
-        //number_of_changes = detectMotion(motion, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
-        number_of_changes = detectMotion(motion, result, result_cropped, region, max_deviation, color);
-        
-        //scene_changes_amount = detectMotion;
-        
-        pthread_mutex_unlock(&detectMutex);
+        if (!has_region)
+        {
+            number_of_changes = detectMotion(motionmat, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
+        }
+        else
+        {
+            number_of_changes = detectMotionRegion(motionmat, result, result_cropped, region, max_deviation, color);
+        }
+        resutl_watch_detected = number_of_changes;
         
         // If a lot of changes happened, we assume something changed.
         if(number_of_changes>=there_is_motion)
         {
             
-            if(number_of_sequence>0){            
+            if(number_of_sequence>0)
+            {
                 
                 init_motion = true;
                 
@@ -429,15 +705,18 @@ void * startRecognition(void * arg)
                     
                     if (!has_instance_directory){
                         
+                        //New Instance
                         instance_counter++;
                         stringstream id;
                         id << instance_counter;
                         instance = id.str(); 
                         
+                        //Add proto instance.
+                        pinstance = pday->add_instance();
+                        pinstance->set_idinstance(std::atoi(instance.c_str()));
+                        
                         FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "%d%h%Y_%H%M%S";
                         CROPPED_FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "/cropped/" + "%d%h%Y_%H%M%S";
-                        
-                        pthread_mutex_lock(&detectMutex);
                         
                         createDirectoryTree (
                             DIR, 
@@ -446,63 +725,59 @@ void * startRecognition(void * arg)
                             FILE_FORMAT.c_str(), 
                             instance );
                         
-                        pthread_mutex_unlock(&detectMutex);
-                        
                         has_instance_directory = true;
+                        
+                        pinstance->set_fileformat(FILE_FORMAT);
+                        pinstance->set_croppedformat(FILE_FORMAT);
+                        R_PROTO.set_instancecount(instance_counter);
+                        
                     }    
-                }    
-                
-                if (writeImages) {
-                    
-                
-                    pthread_mutex_lock(&detectMutex);
-                    
-                    string image_file = saveImg (
+                }
+                if (writeImages)
+                {
+                    std::string emptystr = string();
+                    image_file_recognized = saveImg (
                         result, 
                         DIR, 
                         EXT, 
                         DIR_FORMAT.c_str(), 
-                        FILE_FORMAT.c_str()                       
+                        FILE_FORMAT.c_str(),
+                        number_of_changes,
+                        emptystr
                     );
-                
-                    pthread_mutex_unlock(&detectMutex);
-                
                 }
                 if (writeCroop)
                 {
-                    pthread_mutex_lock(&detectMutex);
-                
                     string cropped_image_file = saveImg (
                             result_cropped,
                             DIR,
                             EXT,
                             DIR_FORMAT.c_str(),
-                            CROPPED_FILE_FORMAT.c_str()                            
+                            CROPPED_FILE_FORMAT.c_str(),
+                            number_of_changes,
+                            image_file_recognized
                     );
-                    
-                    pthread_mutex_unlock(&detectMutex);
                 }
-                
-                //std::cout << " count_sequence_cero: " << count_sequence_cero << std::endl;
-                            
-                //https://sublimated.wordpress.com/2011/02/17/benchmarking-frames-per-second-when-using-opencvs-cvcapturefromcam/
-                
                                 
             }
+            delaymark = time(0);
             number_of_sequence++;
         }
         else
         {            
             
-            number_of_sequence = 0;              
+            number_of_sequence = 0;
             
-            if ( count_sequence_cero == 20 & init_motion ) {                                  
+            double seconds_since_start = difftime( time(0), delaymark);
+            
+            if ( seconds_since_start > delay & init_motion )
+            {
                 
                 has_instance_directory = false;                  
                 
-                std::cout << "\033[1 :::::::::::::::::::::::::::::::::::::::: m" << std::endl;
-                std::cout << "\033[1 :::::::::::: DUMP INSTANCE ::::::::::::: m" << std::endl;
-                std::cout << "\033[1 :::::::::::::::::::::::::::::::::::::::: m" << std::endl;
+                //std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
+                //std::cout << ":::::::::::: DUMP INSTANCE :::::::::::::" << std::endl;
+                //std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
                 
                 end = clock();               
                 
@@ -512,6 +787,7 @@ void * startRecognition(void * arg)
                 char TIME[80];
                 time (&seconds);   
                 timeinfo = localtime (&seconds);     
+                
                 // Create name for the date directory
                 const char * dir = DIR_FORMAT.c_str();
                 strftime (TIME,80,dir,timeinfo);    
@@ -526,12 +802,14 @@ void * startRecognition(void * arg)
                 
                 std::ostringstream end;
                 end << (end_time - init_time) / CLOCKS_PER_SEC;
-           
-                pthread_mutex_lock(&detectMutex);
                 
-                writeXMLInstance(XMLFILE.c_str(), begin.str(), end.str(), instance);     
+                writeXMLInstance(XMLFILE.c_str(), begin.str(), end.str(), instance);
                 
-                pthread_mutex_unlock(&detectMutex);
+                pthread_mutex_lock(&protoMutex);
+                pinstance->set_instancestart(begin.str());
+                pinstance->set_instanceend(end.str());
+                pthread_mutex_unlock(&protoMutex);
+                
             }       
             
             // XML Instance
@@ -541,15 +819,12 @@ void * startRecognition(void * arg)
             if (count_sequence_cero==1){
                 end_time = clock();
             }
-                
-            //std::cout << " number_of_sequence: 0  "  << "count_sequence_cero: " << count_sequence_cero << " count_save_image: " << std::endl;
             
             // Delay, wait a 1/2 second.
             cvWaitKey (DELAY);
         }
     }
     
-    //return 0;   
-    
+    return 0;
 }
 

@@ -13,6 +13,11 @@
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
                    projectFiles="true">
+      <itemPath>ntp/ndp_client.cpp</itemPath>
+      <itemPath>remotecam.cpp</itemPath>
+      <itemPath>remotecam.hpp</itemPath>
+      <itemPath>send_data.cpp</itemPath>
+      <itemPath>send_data.hpp</itemPath>
       <itemPath>tinyxml/tinystr.cpp</itemPath>
       <itemPath>tinyxml/tinyxml.cpp</itemPath>
       <itemPath>tinyxml/tinyxmlerror.cpp</itemPath>
@@ -64,6 +69,8 @@
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="ntp/ndp_client.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="practical/PracticalSocket.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="practical/PracticalSocket.h" ex="false" tool="3" flavor2="0">
@@ -71,6 +78,14 @@
       <item path="recognition/detection.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="recognition/detection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="remotecam.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="remotecam.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="send_data.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="send_data.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tinyxml/tinystr.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -109,6 +124,8 @@
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="ntp/ndp_client.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="practical/PracticalSocket.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="practical/PracticalSocket.h" ex="false" tool="3" flavor2="0">
@@ -116,6 +133,14 @@
       <item path="recognition/detection.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="recognition/detection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="remotecam.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="remotecam.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="send_data.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="send_data.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tinyxml/tinystr.cpp" ex="false" tool="1" flavor2="0">
       </item>
