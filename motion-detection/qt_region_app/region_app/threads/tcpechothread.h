@@ -30,13 +30,12 @@ class TCPEchoThread : public QThread
     Q_OBJECT
 public:
    explicit TCPEchoThread(QObject *parent =0);
-    void SendEcho (string svradress, char * message);
-    void SendEcho (string svradress, string command);
-    void send(string svradress, char * message);
+    void SendEcho (int packagesize, QObject *parent, string svradress, char * message);
+    void SendEcho (int packagesize, QObject *parent, string svradress, string command);
+    void send(int packagesize, QObject *parent, string svradress, char * message);
 
 private:
     const unsigned int TCP_ECHO_PORT    = 5010;
-
 
 
 signals:

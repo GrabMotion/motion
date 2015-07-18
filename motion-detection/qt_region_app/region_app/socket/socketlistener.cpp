@@ -55,7 +55,7 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
 {
 
     int value;
-    cout << "Handling client ";
+    /*cout << "Handling client ";
     string from;
     try
     {
@@ -70,7 +70,7 @@ void * SocketListener::HandleTCPClient(TCPSocket *sock, QObject *parent)
     } catch (SocketException &e) {
         cerr << "Unable to get foreign port" << endl;
     }
-    cout << " with thread " << pthread_self() << endl;
+    cout << " with thread " << pthread_self() << endl;*/
 
     int bytesReceived = 0;              // Bytes read on each recv()
     int totalBytesReceived = 0;         // Total bytes read

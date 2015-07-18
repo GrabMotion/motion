@@ -42,6 +42,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
+
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 
@@ -71,14 +72,14 @@ public:
 
     //Threads
     BroadcastThread     *broadcast_thread;
-    StreamingThread     *streaming_thread;
+    //StreamingThread     *streaming_thread;
     TCPEchoThread       *tcpsend_thread;
     MountThread         *mount_thread;
-    SocketListener      *socket_listener;
-    StreamListener      *stream_listener;
-    StreamSender        *stream_sender;
-    UDPServer           *udp_server;
-    MatListener         *mat_listener;
+    //SocketListener      *socket_listener;
+    //StreamListener      *stream_listener;
+    //StreamSender        *stream_sender;
+    //UDPServer           *udp_server;
+    //MatListener         *mat_listener;
 
     std::string NETWORK_IP;
     QString share;
@@ -90,6 +91,9 @@ public:
     void resutlEcho(string resutl);
     void receivedEcho(motion::Message m);
 
+    std::string ExtractString( std::string source, std::string start, std::string end );
+    std::vector<std::string> splitProto(const std::string &s, char delim);
+
 private:
     Ui::MainWindow *ui;
     QtWaitingSpinner *m_spinner;
@@ -100,6 +104,8 @@ private:
 
     QFileSystemModel *dirModel;
     QFileSystemModel *fileModel;
+
+    std::string ip_address;
 
     void closeEvent (QCloseEvent *event);
 
@@ -121,7 +127,7 @@ private:
     QString q_response;
 
     void SocketErrorMessage(QString &e);
-    void sendSocket(string svradress, string command);
+    void sendSocket(int packagesize, string svradress, string command);
 
     void enableDisableButtons(bool set);
 
@@ -135,9 +141,8 @@ private:
     std::string get_file_contents(std::string filename);
     int pcount = 0;
     vector<string> payload_holder;
-    std::vector<std::string> splitProto(const std::string &s, char delim);
     vector<string> splitString(string input, string delimiter);
-    std::string ExtractString( std::string source, std::string start, std::string end );
+
 
     bool finished=false;
 
@@ -163,6 +168,11 @@ private:
     std::string getCurrentMonthLabel();
 
 
+    string reply_next_proto;
+    int packagesize;
+    char *c_str_ip;
+
+
 public:
     Q_SLOT void setremoteProto(motion::Message payload)
     {
@@ -176,7 +186,10 @@ public:
     {
         receivedEcho(payload);
     }
-
+    Q_SLOT void socketMessage(std::string msg)
+    {
+        resutlEcho(msg);
+    }
 private slots:
 
     //buttons

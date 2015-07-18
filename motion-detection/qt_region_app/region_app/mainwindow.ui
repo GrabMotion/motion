@@ -23,7 +23,7 @@
       <height>41</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,3,0,0,0,0,0,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,3,0,0,0,0,0,0,0,0,0">
      <item>
       <widget class="QLineEdit" name="network_ip">
        <property name="maximumSize">
@@ -107,19 +107,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_4">
-       <property name="maximumSize">
-        <size>
-         <width>70</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Reboot</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -134,6 +121,26 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Speed</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="speedcombo">
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="label">
@@ -782,20 +789,6 @@ color: rgb(255, 252, 253);</string>
      </item>
     </layout>
    </widget>
-   <zorder>layoutWidget</zorder>
-   <zorder>layoutWidget_2</zorder>
-   <zorder>output</zorder>
-   <zorder>qt_drawing_output</zorder>
-   <zorder>layoutWidget</zorder>
-   <zorder>label_xy</zorder>
-   <zorder>remote_time</zorder>
-   <zorder>amount_detected</zorder>
-   <zorder>label_mat_piture</zorder>
-   <zorder>gridLayoutWidget</zorder>
-   <zorder>gridLayoutWidget_2</zorder>
-   <zorder>start_recognition</zorder>
-   <zorder>gridLayoutWidget_4</zorder>
-   <zorder>remote_directory</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -851,7 +844,6 @@ color: rgb(255, 252, 253);</string>
   <tabstop>has_crops</tabstop>
   <tabstop>network_ip</tabstop>
   <tabstop>set_time</tabstop>
-  <tabstop>pushButton_4</tabstop>
  </tabstops>
  <resources/>
  <connections/>

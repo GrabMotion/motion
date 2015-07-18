@@ -54,12 +54,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(broadcast_thread, SIGNAL(BroadcastTimeoutSocketException()), this, SLOT(broadcastTimeoutSocketException()));
 
     //Socket Listener Class
-    socket_listener = new SocketListener(this);
-    socket_listener->startListening(this);
+    //socket_listener = new SocketListener(this);
+    //socket_listener->startListening(this);
 
     //Video Streamig
-    mat_listener = new MatListener(this);
-    mat_listener->startListening(this);
+    //mat_listener = new MatListener(this);
+    //mat_listener->startListening(this);
 
     //Mount Shares
     mount_thread = new MountThread(this);
@@ -149,24 +149,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mapdrive->setEnabled(false);
     ui->codename->setText("prueba");
 
-
-    //ui->ips_combo->addItem("192.168.1.47"); //208.70.188.15");
-    //ui->connect_button->setEnabled(true);
-
-    //Tests
-    //testBase();
-
-    //std::string mat = "/jose/repos/motion/mat.txt";
-    //string loaded = MainWindow::get_file_contents(mat);
-    //std::string oridecoded = base64_decode(loaded);
-    //loadMat(oridecoded);
+    ip_address = getIpAddress();
+    ui->speedcombo->addItem(QString::number(motion::Message::SOCKET_BUFFER_MICRO_SIZE));
+    ui->speedcombo->addItem(QString::number(motion::Message::SOCKET_BUFFER_SMALL_SIZE));
+    ui->speedcombo->addItem(QString::number(motion::Message::SOCKET_BUFFER_REGULAR_SIZE));
+    ui->speedcombo->addItem(QString::number(motion::Message::SOCKET_BUFFER_MEDIUM_SIZE));
+    ui->speedcombo->setCurrentText(QString::number(motion::Message::SOCKET_BUFFER_REGULAR_SIZE));
 
 }
-
-//void MainWindow::getMouseCoordinates(mouse_coordinates mouse)
-//{
-//    m_coordinates = new mouse_coordinates();
-//}
 
 void MainWindow::getLocalNetwork()
 {
@@ -251,6 +241,33 @@ std::string MainWindow::getActiveTerminalIPString()
 
 void MainWindow::on_engage_button_clicked()
 {
+
+    //Serialize proto NEXT response.
+    motion::Message::ActionType reply;
+   motion::Message mreply;
+   reply =  motion::Message::ActionType::Message_ActionType_RESPONSE_NEXT;
+   mreply.set_type(reply);
+   QString qt_ip = ui->ips_combo->currentText();
+   QByteArray ba_ip = qt_ip.toLatin1();
+   std::string qt_ip_str = qt_ip.toUtf8().constData();
+   char *c_str_ip = ba_ip.data();
+   //string data;
+   mreply.set_serverip(ip_address);
+   mreply.set_time(getTime());
+   //Initialize objects to serialize.
+   int size = mreply.ByteSize();
+   char dataresponse[size];
+   string datastr;
+   mreply.SerializeToArray(&dataresponse, size);
+   reply_next_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
+
+   //Speed
+   QString qt_packagesize = ui->speedcombo->currentText();
+   packagesize = qt_packagesize.toInt();
+
+
+    google::protobuf::ShutdownProtobufLibrary();
+
    motion::Message m;
    m.set_type(motion::Message::ActionType::Message_ActionType_ENGAGE);
    setMessageBodyAndSend(m);
@@ -312,10 +329,15 @@ void MainWindow::setMessageBodyAndSend(motion::Message m)
     QString qt_ip = ui->ips_combo->currentText();
     QByteArray ba_ip = qt_ip.toLatin1();
     std::string qt_ip_str = qt_ip.toUtf8().constData();
-    char *c_str_ip = ba_ip.data();
+    c_str_ip = ba_ip.data();
+
+    //Speed
+    QString qt_packagesize = ui->speedcombo->currentText();
+    int pz = qt_packagesize.toInt();
+    m.set_packagesize(pz);
 
     //string data;
-    m.set_serverip(getIpAddress());
+    m.set_serverip(ip_address);
     m.set_time(getTime());
 
     //Initialize objects to serialize.
@@ -325,7 +347,7 @@ void MainWindow::setMessageBodyAndSend(motion::Message m)
     m.SerializeToArray(&dataresponse, size);
 
     std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
-    sendSocket(c_str_ip, encoded_proto);
+    sendSocket(packagesize, c_str_ip, encoded_proto);
     google::protobuf::ShutdownProtobufLibrary();
 }
 
@@ -532,7 +554,7 @@ std::string MainWindow::getIpAddress ()
             tmpAddrPtr=&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
             char addressBuffer[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-            printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
+            //printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
 
             strm << addressBuffer;
             address = strm.str();
@@ -542,7 +564,7 @@ std::string MainWindow::getIpAddress ()
             tmpAddrPtr=&((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
             char addressBuffer[INET6_ADDRSTRLEN];
             inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
-            printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
+            //printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
 
             strm6 << addressBuffer;
             address = strm.str();
@@ -880,9 +902,19 @@ vector<string> MainWindow::getTerminalFolder()
         QDir().mkdir(img_ipfile);
     }
 
-    stringstream si;
-    si << img_ipfile;
-    paths.push_back(si.str());
+    //data/xml/ip/day
+    QString day  = ui->motionday->currentText();
+    QString img_dayt_ip = QString(img_ipfile) + '/' + day;
+    QByteArray imgdtip = img_dayt_ip.toLatin1();
+    char *img_day_ipfile = imgdtip.data();
+    if (!QDir(img_day_ipfile).exists())
+    {
+        QDir().mkdir(img_day_ipfile);
+    }
+
+    stringstream sd;
+    sd << img_day_ipfile;
+    paths.push_back(sd.str());
 
     return paths;
 }
@@ -1076,7 +1108,7 @@ void MainWindow::enableDisableButtons(bool set)
     ui->has_images->setChecked(true);
     ui->has_crops->setEnabled(set);
     ui->stream->setEnabled(set);
-    ui->picture->setEnabled(set);
+    //ui->picture->setEnabled(set);
     ui->clear_region->setEnabled(set);
     ui->set_time->setEnabled(set);
     ui->disconnect->setEnabled(set);
@@ -1099,10 +1131,10 @@ void MainWindow::enableDisableButtons(bool set)
     ui->amount_detected->setStyleSheet("border: 1px solid grey");
 }
 
-void MainWindow::sendSocket(string svradress, string command)
+void MainWindow::sendSocket(int packagesize, string svradress, string command)
 {
     tcpsend_thread = new TCPEchoThread(this);
-    tcpsend_thread->SendEcho(svradress, command);
+    tcpsend_thread->SendEcho(packagesize, this,svradress,command);
 }
 
 std::string MainWindow::ExtractString( std::string source, std::string start, std::string end )
@@ -1332,69 +1364,36 @@ void MainWindow::remoteProto(motion::Message remote)
         break;
         case motion::Message::ENGAGE:
         {
-
             m = mergeRemoteToLocalProto(remote);
-
             enableDisableButtons(true);
-
             ui->remote_terminal_time->setText(m.time().c_str());
-                
             if (m.has_startrecognitiontime())
-            {
                 ui->startedat->setText(m.startrecognitiontime().c_str());
-            }else
-            {
+            else
                 ui->startedat->setText("N/A");
-            }
-
             if (m.has_storeimage())
-            {
                 ui->has_images->setChecked(true);
-            } else
-            {
+            else
                 ui->has_images->setChecked(false);
-            }
 
             if (m.has_storecrop())
-            {
                 ui->has_crops->setChecked(true);
-            } else
-            {
-                ui->has_crops->setChecked(false);
-            }
-
-            /*if (m.has_instancecount())
-            {
-                ui->instances_amount->setText(QString::number(m.instancecount()));
-            } else
-            {
-                ui->instances_amount->setText("N/A");
-            }*/
-
-            if (m.has_codename())
-            {
-                ui->codename->setText(m.codename().c_str());
-            }
             else
-            {
+                ui->has_crops->setChecked(false);
+            if (m.has_codename())
+                ui->codename->setText(m.codename().c_str());
+            else
                 ui->codename->setText("HARDCODED");
-            }
-
             if (m.has_delay())
-            {
                 ui->delay->setCurrentIndex(m.delay()-1);
-            }else
-            {
+            else
                 ui->delay->setCurrentIndex(1);
-            }
-
             if (m.has_activemat())
             {
                 google::protobuf::uint32 matint =  m.activemat();
                 if (matint>0)
                     loadMat(matint);
             }
-
             std::string coords = m.regioncoords();
             vector<Point2f> scorrd = MainWindow::stringToVectorPoint2f(coords);
             ui->qt_drawing_output->drawLinesSlot(scorrd);
@@ -1418,16 +1417,12 @@ void MainWindow::remoteProto(motion::Message remote)
             }
             
             if (m.has_cameras())
-            {
                 ui->camera->setText(m.cameras().c_str());
-            }
             else
-            {
                 ui->camera->setText("N/A");
-            }
 
             ui->engage_button->setDisabled(true);
-            
+
             if (ui->mapdrive->isChecked())
             {
                 mount_thread->MountNetWorkDrive(ui->ips_combo->currentText());
@@ -1449,6 +1444,7 @@ void MainWindow::remoteProto(motion::Message remote)
           ui->remote_terminal_time->setText(ts);  
         }
         break;
+        case motion::Message::GET_IMAGE:
         case motion::Message::TAKE_PICTURE:
         {
             google::protobuf::uint32 matfile = remote.activemat();
@@ -1458,7 +1454,6 @@ void MainWindow::remoteProto(motion::Message remote)
         break;
         case motion::Message::GET_XML:
         {
-
             std::string encoded_content = remote.data();
             std::string strdecoded = base64_decode(encoded_content);
             std::string xmlfolder = getTerminalFolder().at(2);
@@ -1507,15 +1502,19 @@ void MainWindow::resutlEcho(string str)
 
     tcpsend_thread->terminate();
 
+    cout << str << endl;
+
     string decoded_proto;
 
     std::string del_1  = "PROSTA";
     std::string del_2  = "PROSTO";
 
     std::string strdecoded;
-    int total__packages;
-    int current_package;
-    int current_type;
+    int total__packages = 0;
+    int current_package = 0;
+    int current____type = 0;
+    int proto_has_files = 0;
+    int package____size = 0;
 
     int total_size = str.size();
     std::size_t found = str.find(del_1);
@@ -1524,20 +1523,33 @@ void MainWindow::resutlEcho(string str)
     {
         std::string lpay = MainWindow::ExtractString(str, del_1, del_2);
 
+        //cout << "header: " << lpay << endl;
+
       vector<string> vpay = MainWindow::splitProto(lpay, '::');
 
-      total__packages = atoi(vpay.at(0).c_str());
-      current_package = atoi(vpay.at(2).c_str());
-      current_type    = atoi(vpay.at(4).c_str());
+      package____size = atoi(vpay.at(0).c_str());
+      total__packages = atoi(vpay.at(2).c_str());
+      current_package = atoi(vpay.at(4).c_str());
+      current____type = atoi(vpay.at(6).c_str());
+      proto_has_files = atoi(vpay.at(8).c_str());
 
       int del_pos = str.find(del_2);
-      int until = str.size() - 28;
+      int until = str.size() - 40;
 
       const string & ppayload = str.substr((del_pos+del_2.size()), until);
 
+      //cout << "ppayload: " << ppayload << endl;
+
       payload_holder.push_back(ppayload);
 
-      switch (current_type)
+      int payloadsize = ppayload.size();
+
+      //cout << "__________________________" << endl;
+      //cout << "__________________________" << endl;
+      //cout << "__________________________" << endl;
+      //cout << "payload: " << ppayload << endl;
+
+      switch (current____type)
       {
            case motion::Message::TAKE_PICTURE:
            {
@@ -1550,6 +1562,7 @@ void MainWindow::resutlEcho(string str)
               QApplication::processEvents();
            }
            break;
+           case motion::Message::GET_IMAGE:
            case motion::Message::ENGAGE:
            case motion::Message::REFRESH:
            case motion::Message::GET_XML:
@@ -1565,14 +1578,6 @@ void MainWindow::resutlEcho(string str)
            break;
        }
 
-       cout << "current: " << current_package << endl;
-       cout << "tota   : " << total__packages << endl;
-
-       if ((total__packages-2)==current_package)
-       {
-           cout << "ver : " << endl;
-       }
-
        if (total__packages==(current_package+1))
        {
            finished = true;
@@ -1581,24 +1586,7 @@ void MainWindow::resutlEcho(string str)
 
     if (!finished)
     {
-
-        motion::Message::ActionType reply;
-        //if (!finished)
-        //{
-           reply =  motion::Message::ActionType::Message_ActionType_RESPONSE_NEXT;
-        //}
-        //else
-        //{
-        //   reply = motion::Message::ActionType::Message_ActionType_RESPONSE_END;
-        //}
-
-        cout << "action : " << reply << endl;
-        cout << "................................." << endl;
-        motion::Message m;
-        m.set_type(reply);
-        setMessageBodyAndSend(m);
-        google::protobuf::ShutdownProtobufLibrary();
-
+        sendSocket(packagesize, c_str_ip, reply_next_proto);
     }
     else
     {
@@ -1610,10 +1598,25 @@ void MainWindow::resutlEcho(string str)
         }
         payload_holder.clear();
 
-        std::string basefile = "/jose/repos/motion/encoded_remote_proto.txt";
+        //cout << "__________________________" << endl;
+        //cout << "payload: " << payload << endl;
+
+        std::string del_3 = "PROFILE";
+        std::string filestr;
+        if (proto_has_files==motion::Message::PROTO_HAS_FILE)
+        {
+            int file_pos = payload.find(del_3);
+            const string & protostr = payload.substr(0, file_pos);
+            int untilfile = payload.size() - (protostr.size() + 40);
+            const string & fstr = payload.substr((file_pos+del_3.size()), untilfile);
+            payload = protostr;
+            filestr = fstr;
+        }
+
+        std::string basefile = "/jose/repos/motion/MATT.txt";
         std::ofstream out;
         out.open (basefile.c_str());
-        out << payload << "\n";
+        out << filestr << "\n";
         out.close();
 
         std::string strdecoded = base64_decode(payload);
@@ -1623,20 +1626,28 @@ void MainWindow::resutlEcho(string str)
 
         mm.ParseFromArray(strdecoded.c_str(), strdecoded.size());
 
+        if (proto_has_files==motion::Message::PROTO_HAS_FILE)
+        {
+            mm.set_data(filestr.c_str());
+        }
+
         remoteProto(mm);
 
-        switch (current_type)
+        switch (current____type)
         {
              case motion::Message::TAKE_PICTURE:
              {
+                current_package=0;
                 ui->mat_progress->setValue(0);
                 QApplication::processEvents();
              }
              break;
+             case motion::Message::GET_IMAGE:
              case motion::Message::ENGAGE:
              case motion::Message::REFRESH:
              case motion::Message::GET_XML:
              {
+                current_package=0;
                 ui->xml_progress->setValue(0);
                 QApplication::processEvents();
              }

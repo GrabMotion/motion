@@ -3,27 +3,30 @@
 
 MainWindow *mnwindow;
 
+const int RCVBUFSIZE = 100000;
+
 TCPEchoThread::TCPEchoThread(QObject *parent): QThread(parent)
 {
+   //parent = parent;
    mnwindow = qobject_cast<MainWindow*>(parent);
 }
 
 using namespace std;
 
-void TCPEchoThread::SendEcho (string svradress, string command)
+void TCPEchoThread::SendEcho (int packagesize, QObject *parent, string svradress, string command)
 {
     char * message = new char[command.size() + 1];
     std::copy(command.begin(), command.end(), message);
     message[command.size()] = '\0'; // don't forget the terminating 0
-    send(svradress, message);
+    send(packagesize, parent, svradress, message);
 }
 
-void TCPEchoThread::SendEcho (string svradress, char * message)
+void TCPEchoThread::SendEcho (int packagesize, QObject *parent, string svradress, char * message)
 {
-    send(svradress, message);
+    send(packagesize, parent, svradress, message);
 }
 
-void TCPEchoThread::send (string svradress, char * message)
+void TCPEchoThread::send (int packagesize, QObject *parent, string svradress, char * message)
 {
 
   string servAddress = svradress;
@@ -32,7 +35,7 @@ void TCPEchoThread::send (string svradress, char * message)
 
   google::protobuf::uint32 pport = motion::Message::TCP_ECHO_PORT;
 
-  google::protobuf::uint32 buffersize = motion::Message::SOCKET_BUFFER_NANO_SIZE + 28;
+  google::protobuf::uint32 buffersize = packagesize + 40; //motion::Message::SOCKET_BUFFER_MICRO_SIZE + 40;
   int echoServPort = pport;
 
   char echoBuffer[buffersize];
@@ -46,54 +49,107 @@ void TCPEchoThread::send (string svradress, char * message)
     // Send the string to the echo server
     sock.send(echoString, echoStringLen);
 
-    cout << "Handling client ";
-      string from;
-      try {
-         from = sock.getForeignAddress();
-        cout << from << ":";
-      } catch (SocketException &e) {
-        cerr << "Unable to get foreign address" << endl;
-      }
+    delete echoString;
 
-      try
-      {
-        cout << sock.getForeignPort();
-      } catch (SocketException &e) {
-        cerr << "Unable to get foreign port" << endl;
-      }
-      cout << " with thread " << pthread_self() << endl;
-
-
-        // Buffer for echo string + \0
+    // Buffer for echo string + \0
     int bytesReceived = 0;              // Bytes read on each recv()
     int totalBytesReceived = 0;         // Total bytes read
     // Receive the same string back from the server
     //cout << "Received: " << endl;                 // Setup to print the echoed string
 
+    stringstream se;
+    se.clear();
 
-    //while (totalBytesReceived < echoStringLen)
-    //{
-      // Receive up to the buffer size bytes from the sender
-      if ((bytesReceived = (sock.recv(echoBuffer, buffersize))) <= 0)
-      {
-        cerr << "Unable to read";
-        exit(1);
-      }
+    std::string del_1  = "PROSTA";
+    std::string del_2  = "PROSTO";
 
-      totalBytesReceived += bytesReceived;     // Keep tally of total bytes
-      echoBuffer[bytesReceived] = '\0';        // Terminate the string!
-      cout << "msg: " << echoBuffer << endl;                      // Print the echo buffer
+    std::string strdecoded;
+    int package____size = 1;
+    int total__packages = 0;
+    int current_package = 0;
 
-    //}
+    bool limitfound = false;
 
-    stringstream ss;
-    ss << echoBuffer;
+    string strbuffer;
+    strbuffer.clear();
 
-    string str = ss.str();
+    int counttotal = 0;
+    int countwhile = 0;
 
-    //std::cout << "Maximum size of a string is " << str.max_size() << "\n";
+    int strbuffersize = 0;
 
-    mnwindow->resutlEcho(str);
+    while (1)
+    {
+
+        // Receive up to the buffer size bytes from the sender
+        if ((bytesReceived = (sock.recv(echoBuffer, buffersize))) <= 0)
+        {
+           break;
+        }
+
+        totalBytesReceived += bytesReceived;     // Keep tally of total bytes
+        echoBuffer[bytesReceived] = '\0';        // Terminate the string!
+
+        stringstream zz;
+        zz << echoBuffer;
+        std::size_t found = zz.str().find(del_1);
+
+        if (found!=std::string::npos)
+        {
+
+          std::string lpay = mnwindow->ExtractString(zz.str(), del_1, del_2);
+          vector<string> vpay = mnwindow->splitProto(lpay, '::');
+
+          package____size = atoi(vpay.at(0).c_str());
+          total__packages = atoi(vpay.at(2).c_str());
+          current_package = atoi(vpay.at(4).c_str());
+
+          strbuffer.clear();
+          strbuffersize=0;
+
+        }
+
+        stringstream ss;
+        ss << echoBuffer;
+
+        strbuffer += ss.str();
+
+        strbuffersize = strbuffer.size();
+
+        /*if ( strbuffersize < buffersize )
+        {
+            if (total__packages==(current_package+1))
+            {
+                string last;
+                vector<string> vpay = mnwindow->splitProto(ss.str(), '==');
+                if (vpay.size()>0)
+                {
+                    last= vpay.at(0) + "==";
+                    strbuffer = last;
+                }
+            }
+            string last30 = strbuffer.substr(strbuffer.size()-30, strbuffer.size());
+            continue;
+        } else
+        {
+            string extra;
+            if (strbuffersize > buffersize)
+            {
+                extra = strbuffer.substr(buffersize, strbuffer.size());
+                string last = strbuffer.substr(strbuffer.size()-30, strbuffer.size());
+                strbuffer = strbuffer.substr(0, buffersize);
+            }
+
+
+             cout << endl;
+            cout << strbuffer << endl;
+            cout << "....................................." << endl;
+
+        }*/
+
+    }
+
+    QMetaObject::invokeMethod(parent, "socketMessage", Q_ARG(std::string, strbuffer));
 
 
   } catch(SocketException &e)
