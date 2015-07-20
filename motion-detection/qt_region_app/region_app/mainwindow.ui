@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>941</width>
+    <width>983</width>
     <height>611</height>
    </rect>
   </property>
@@ -19,11 +19,11 @@
      <rect>
       <x>38</x>
       <y>2</y>
-      <width>891</width>
+      <width>931</width>
       <height>41</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,3,0,0,0,0,0,0,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,3,0,0,0,0,0,0,0,0,0,0">
      <item>
       <widget class="QLineEdit" name="network_ip">
        <property name="maximumSize">
@@ -38,7 +38,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="label_255">
        <property name="maximumSize">
         <size>
          <width>30</width>
@@ -89,20 +89,59 @@
      <item>
       <widget class="QCheckBox" name="mapdrive">
        <property name="text">
-        <string>MapDrive</string>
+        <string>Drive</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="disconnect">
+      <widget class="QLabel" name="label_camera">
        <property name="maximumSize">
         <size>
-         <width>100</width>
+         <width>55</width>
          <height>16777215</height>
         </size>
        </property>
        <property name="text">
-        <string>Dissconnect</string>
+        <string>Cameras</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cameracombo">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_speed">
+       <property name="maximumSize">
+        <size>
+         <width>40</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Speed</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="speedcombo">
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -123,27 +162,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Speed</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="speedcombo">
-       <property name="maximumSize">
-        <size>
-         <width>80</width>
-         <height>16777215</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="label_up_since">
        <property name="layoutDirection">
         <enum>Qt::LeftToRight</enum>
        </property>
@@ -151,7 +170,7 @@
         <enum>QFrame::NoFrame</enum>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Up Since:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Up Since:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::AutoText</enum>
@@ -252,7 +271,7 @@ color: rgb(255, 252, 253);</string>
      <rect>
       <x>11</x>
       <y>526</y>
-      <width>921</width>
+      <width>951</width>
       <height>33</height>
      </rect>
     </property>
@@ -510,133 +529,54 @@ color: rgb(255, 252, 253);</string>
      <string/>
     </property>
    </widget>
-   <widget class="QWidget" name="gridLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>661</x>
-      <y>85</y>
-      <width>271</width>
-      <height>66</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetMinimumSize</enum>
-     </property>
-     <property name="leftMargin">
-      <number>0</number>
-     </property>
-     <property name="verticalSpacing">
-      <number>-1</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QPushButton" name="get_time">
-       <property name="maximumSize">
-        <size>
-         <width>60</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Time</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="remote_terminal_time">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="set_time">
-       <property name="maximumSize">
-        <size>
-         <width>60</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Set</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLabel" name="remote_time_response">
-       <property name="styleSheet">
-        <string notr="true">color: rgb(42, 150, 46);</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QWidget" name="gridLayoutWidget_2">
     <property name="geometry">
      <rect>
       <x>661</x>
-      <y>43</y>
-      <width>271</width>
-      <height>41</height>
+      <y>46</y>
+      <width>311</width>
+      <height>141</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout_2">
+    <layout class="QGridLayout" name="layout_time">
      <property name="topMargin">
       <number>0</number>
      </property>
      <property name="bottomMargin">
       <number>0</number>
      </property>
-     <item row="0" column="3">
-      <widget class="QLabel" name="camera">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>11</height>
-        </size>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="label_computer_time">
        <property name="maximumSize">
         <size>
-         <width>60</width>
+         <width>130</width>
          <height>11</height>
         </size>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Started:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Computer Time:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="maximumSize">
-        <size>
-         <width>60</width>
-         <height>11</height>
-        </size>
-       </property>
+     <item row="2" column="1" colspan="2">
+      <widget class="QLabel" name="remote_terminal_time">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;STATUS&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <string/>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="status">
+     <item row="4" column="0" colspan="3">
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1" colspan="2">
+      <widget class="QLabel" name="instance_started">
        <property name="maximumSize">
         <size>
          <width>16777215</width>
@@ -648,24 +588,8 @@ color: rgb(255, 252, 253);</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="label_2">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>11</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Camera:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1" colspan="3">
-      <widget class="QLabel" name="startedat">
+     <item row="3" column="1" colspan="2">
+      <widget class="QLabel" name="synched">
        <property name="maximumSize">
         <size>
          <width>16777215</width>
@@ -674,6 +598,103 @@ color: rgb(255, 252, 253);</string>
        </property>
        <property name="text">
         <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_rec_started">
+       <property name="maximumSize">
+        <size>
+         <width>130</width>
+         <height>11</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Rec Started:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1" colspan="2">
+      <widget class="QLabel" name="instance_started_2">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>11</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QPushButton" name="set_time">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>130</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Sync Time</string>
+       </property>
+       <property name="autoRepeatDelay">
+        <number>302</number>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_terminal_time">
+       <property name="maximumSize">
+        <size>
+         <width>130</width>
+         <height>11</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Terminal Time:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_terminal_status">
+       <property name="maximumSize">
+        <size>
+         <width>130</width>
+         <height>11</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Terminal Status:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" colspan="2">
+      <widget class="QLabel" name="computer_time">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="3">
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
@@ -682,10 +703,10 @@ color: rgb(255, 252, 253);</string>
    <widget class="QPushButton" name="start_recognition">
     <property name="geometry">
      <rect>
-      <x>666</x>
-      <y>464</y>
-      <width>261</width>
-      <height>61</height>
+      <x>711</x>
+      <y>477</y>
+      <width>221</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="maximumSize">
@@ -717,17 +738,33 @@ color: rgb(255, 252, 253);</string>
     <property name="geometry">
      <rect>
       <x>660</x>
-      <y>153</y>
-      <width>271</width>
-      <height>311</height>
+      <y>185</y>
+      <width>311</width>
+      <height>281</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout_4">
+    <layout class="QGridLayout" name="layout_instances">
      <item row="3" column="1">
+      <widget class="QPushButton" name="getxml">
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>XML</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2" colspan="2">
+      <widget class="QComboBox" name="motionday"/>
+     </item>
+     <item row="3" column="2">
       <widget class="QProgressBar" name="xml_progress">
        <property name="maximumSize">
         <size>
-         <width>50</width>
+         <width>80</width>
          <height>16777215</height>
         </size>
        </property>
@@ -736,7 +773,36 @@ color: rgb(255, 252, 253);</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="0" colspan="3">
+     <item row="3" column="3">
+      <widget class="QPushButton" name="refresh">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Refresh</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QPushButton" name="collape_expand">
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Coll</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QComboBox" name="motionmonth"/>
+     </item>
+     <item row="2" column="0" colspan="4">
       <widget class="QTreeWidget" name="remote_directory">
        <column>
         <property name="text">
@@ -755,38 +821,6 @@ color: rgb(255, 252, 253);</string>
        </column>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QPushButton" name="getxml">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>XML</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1" colspan="2">
-      <widget class="QComboBox" name="motionday"/>
-     </item>
-     <item row="3" column="2">
-      <widget class="QPushButton" name="refresh">
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Refresh</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QComboBox" name="motionmonth"/>
-     </item>
     </layout>
    </widget>
   </widget>
@@ -795,7 +829,7 @@ color: rgb(255, 252, 253);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>941</width>
+     <width>983</width>
      <height>22</height>
     </rect>
    </property>
@@ -827,12 +861,10 @@ color: rgb(255, 252, 253);</string>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>get_time</tabstop>
   <tabstop>ips_combo</tabstop>
   <tabstop>search_button</tabstop>
   <tabstop>engage_button</tabstop>
   <tabstop>mapdrive</tabstop>
-  <tabstop>disconnect</tabstop>
   <tabstop>stream</tabstop>
   <tabstop>picture</tabstop>
   <tabstop>save_region</tabstop>
@@ -843,7 +875,6 @@ color: rgb(255, 252, 253);</string>
   <tabstop>has_images</tabstop>
   <tabstop>has_crops</tabstop>
   <tabstop>network_ip</tabstop>
-  <tabstop>set_time</tabstop>
  </tabstops>
  <resources/>
  <connections/>

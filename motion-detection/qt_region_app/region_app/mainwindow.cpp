@@ -30,6 +30,10 @@
 
 #include <pthread.h>
 
+const int STARTED_NOT_ENGAGED = 5000;
+const int ENGAGED_NO_INSTANCE = 5001;
+const int ENGAGED_INSTANCE    = 5002;
+
 using namespace google::protobuf::io;
 using namespace std;
 using namespace cv;
@@ -73,7 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //Combos.
     connect(ui->motionday,SIGNAL(currentIndexChanged(const QString&)), this, SLOT(dayComboChange(const QString &)));
 
-    enableDisableButtons(false);
+    enableDisableButtons(STARTED_NOT_ENGAGED);
 
     //Stream Listener Class -- Cannot connect received
     //stream_listener = new StreamListener(this);
@@ -128,10 +132,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //ui->f_spinner->insertLayout(1, spinnerLayoutFolder);
 
-    QFont f( "Arial", 11, QFont::Bold);
-    ui->remote_time_response->setFont(f);
-    ui->remote_terminal_time->setFont(f);
-
     //Local Network
     MainWindow::getLocalNetwork();
 
@@ -156,7 +156,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->speedcombo->addItem(QString::number(motion::Message::SOCKET_BUFFER_MEDIUM_SIZE));
     ui->speedcombo->setCurrentText(QString::number(motion::Message::SOCKET_BUFFER_REGULAR_SIZE));
 
+    ui->output->setStyleSheet("border: 1px solid grey");
+
+    MainWindow::enableDisableButtons(STARTED_NOT_ENGAGED);
+
 }
+
 
 void MainWindow::getLocalNetwork()
 {
@@ -242,8 +247,8 @@ std::string MainWindow::getActiveTerminalIPString()
 void MainWindow::on_engage_button_clicked()
 {
 
-    //Serialize proto NEXT response.
-    motion::Message::ActionType reply;
+   //Serialize proto NEXT response.
+   motion::Message::ActionType reply;
    motion::Message mreply;
    reply =  motion::Message::ActionType::Message_ActionType_RESPONSE_NEXT;
    mreply.set_type(reply);
@@ -265,8 +270,7 @@ void MainWindow::on_engage_button_clicked()
    QString qt_packagesize = ui->speedcombo->currentText();
    packagesize = qt_packagesize.toInt();
 
-
-    google::protobuf::ShutdownProtobufLibrary();
+   google::protobuf::ShutdownProtobufLibrary();
 
    motion::Message m;
    m.set_type(motion::Message::ActionType::Message_ActionType_ENGAGE);
@@ -305,6 +309,27 @@ std::string MainWindow::getCurrentMonthLabel()
     strftime (month_rasp, sizeof (month_rasp), "%h", ptm);
     std::string _month(month_rasp, 3);
     return _month;
+}
+
+void MainWindow::on_collape_expand_toggled(bool checked)
+{
+    if (ui->remote_directory->isEnabled())
+    {
+        QTreeWidgetItemIterator it(ui->remote_directory);
+        while(*it)
+        {
+            QTreeWidgetItem* item = *it;
+            if (checked)
+            {
+                item->setExpanded(true);
+                ui->collape_expand->setText("Coll");
+            } else
+            {
+                item->setExpanded(false);
+                ui->collape_expand->setText("Exp");
+            }
+        }
+    }
 }
 
 void MainWindow::on_getxml_clicked()
@@ -349,6 +374,7 @@ void MainWindow::setMessageBodyAndSend(motion::Message m)
     std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
     sendSocket(packagesize, c_str_ip, encoded_proto);
     google::protobuf::ShutdownProtobufLibrary();
+
 }
 
 /*void MainWindow::refresh_results()
@@ -417,38 +443,6 @@ QString MainWindow::getShare()
     return share;
 }
 
-/*void MainWindow::RefreshTreViewModel(QString roo, QString rip)
-{
-    dirModel = new QFileSystemModel(this);
-    dirModel->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs);
-    dirModel->setRootPath(roo);
-
-    ui->list_folders->setModel(dirModel);
-    ui->list_folders->setRootIndex(dirModel->setRootPath(rip));
-    ui->list_folders->hideColumn(1);
-    ui->list_folders->hideColumn(2);
-    ui->list_folders->header()->resizeSection(1, 100);
-    ui->list_folders->setEnabled(true);
-
-    fileModel = new QFileSystemModel(this);
-    fileModel->setFilter(QDir::NoDotAndDotDot | QDir::Files);
-    ui->list_files->setModel(fileModel);
-}*/
-
-
-/*void MainWindow::on_list_folders_clicked(const QModelIndex &index)
-{
-    QString sPath = fileModel->fileInfo(index).absoluteFilePath();
-    ui->list_files->setRootIndex(fileModel->setRootPath(sPath));
-}*7
-
-/*void MainWindow::on_list_files_clicked(const QModelIndex &index)
-{
-    QString sPath = fileModel->fileInfo(index).absoluteFilePath();
-    QPixmap pixmap(sPath);
-    ui->remote_capture->setPixmap(pixmap);
-}*/
-
 void MainWindow::ShareUmounted(){}
 
 void MainWindow::on_stream_clicked()
@@ -481,10 +475,12 @@ void MainWindow::on_picture_clicked()
             dir.remove(dirFile);
         }
     }
-    QString sh = getSharedFolder();
 
+    QString sh = getSharedFolder();
+    QString qt_camera = ui->cameracombo->currentText();
     motion::Message m;
     m.set_type(motion::Message::ActionType::Message_ActionType_TAKE_PICTURE);
+    m.set_activecamera(qt_camera.toInt());
     setMessageBodyAndSend(m);
     google::protobuf::ShutdownProtobufLibrary();
 }
@@ -605,11 +601,17 @@ void MainWindow::on_start_recognition_toggled(bool checked)
         m.set_type(motion::Message::ActionType::Message_ActionType_REC_STOP);
         ui->start_recognition->setChecked(false);
         setMessageBodyAndSend(m);
+
+        ui->start_recognition->setText("START RECOGNITION");
+        ui->start_recognition->setStyleSheet("QPushButton { background-color : #66CC00; color : #FFFFFF; border:6pxsolidwhite; }");
+
     }
     else
     {
         GOOGLE_PROTOBUF_VERIFY_VERSION;
         motion::Message m;
+        QString qt_camera = ui->cameracombo->currentText();
+        m.set_activecamera(qt_camera.toInt());
         m.set_type(motion::Message::ActionType::Message_ActionType_REC_START);
         m.set_region(region);
         if (region)
@@ -631,6 +633,9 @@ void MainWindow::on_start_recognition_toggled(bool checked)
         std::string _month = getCurrentMonthLabel();
         m.set_currmonth(_month);
 
+        ui->start_recognition->setText("STOP RECOGNITION");
+        ui->start_recognition->setStyleSheet("QPushButton { background-color : #FF0000; color : #FFFFFF; border:6pxsolidwhite; }");
+
         std::string _day = getCurrentDayLabel();
         m.set_currday(_day);
 
@@ -647,7 +652,7 @@ void MainWindow::on_set_time_clicked()
 
     gettimeofday (&tv, NULL);
     ptm = localtime (&tv.tv_sec);
-    strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S", ptm);
+    strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S %z", ptm);
 
 
     GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -1072,6 +1077,7 @@ char * MainWindow::getTimeChat()
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     return time_rasp;
 }
+
 std::string MainWindow::getTimeStr()
 {
     struct timeval tv;
@@ -1090,45 +1096,108 @@ char * MainWindow::getTerMinalIpFromCombo()
     char *c_str_ip = ba_ip.data();
 }
 
-void MainWindow::enableDisableButtons(bool set)
+void MainWindow::enable_diable_Uppper_Bar(bool set)
 {
+    //network_ip
+    //label_255
+    //ips_combo
+    //search_button
 
     ui->engage_button->setEnabled(set);
-    //ui->list_folders->setEnabled(set);
-    //ui->list_files->setEnabled(set);
-    ui->codename->setEnabled(set);
-    ui->codename->setText("Prueba");
-    ui->code_label->setEnabled(set);
-    ui->delay->setEnabled(set);
-    ui->delay_label->setEnabled(set);
-    ui->start_recognition->setEnabled(set);
-    ui->save_region->setEnabled(set);
-    ui->has_images->setEnabled(set);
-    ui->has_crops->setChecked(false);
-    ui->has_images->setChecked(true);
-    ui->has_crops->setEnabled(set);
-    ui->stream->setEnabled(set);
-    //ui->picture->setEnabled(set);
-    ui->clear_region->setEnabled(set);
-    ui->set_time->setEnabled(set);
-    ui->disconnect->setEnabled(set);
-    ui->get_time->setEnabled(set);
-    //ui->amount_label->setEnabled(set);
-    //ui->remote_terminal_label->setEnabled(set);
+    ui->mapdrive->setEnabled(set);
+    ui->label_camera->setEnabled(set);
+    ui->cameracombo->setEnabled(set);
+    ui->label_speed->setEnabled(set);
+    ui->speedcombo->setEnabled(set);
+    ui->label_up_since->setEnabled(set);
+    ui->status_label->setEnabled(set);
 
-    //qlabel
-    ui->output->setEnabled(set);
-    ui->qt_drawing_output->setEnabled(set);
+    QFont f( "Arial", 10, QFont::Bold);
 
     if (!set)
-        ui->output->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
-    else
-        ui->status_label->setStyleSheet("background-color: lightgreen;");
-        ui->status_label->setText("Engaged");
+    {
+        ui->status_label->setStyleSheet("{background-color: rgba( 200, 200, 200, 100% )}, {color: #000000}");
+    } else
+    {
+        ui->status_label->setStyleSheet("QLabel { background-color : rgba( 51, 153, 255, 100% ); color : #FFFFFF; }");
+    }
 
-    ui->output->setStyleSheet("border: 1px solid grey");
-    //ui->remote_capture->setStyleSheet("border: 1px solid grey");
-    ui->amount_detected->setStyleSheet("border: 1px solid grey");
+}
+
+void MainWindow::enable_diable_Lateral_Time(bool set)
+{
+    QFont f( "Arial", 11, QFont::Bold);
+    ui->computer_time->setFont(f);
+    ui->remote_terminal_time->setFont(f);
+    ui->instance_started->setFont(f);
+    ui->synched->setFont(f);
+
+    ui->label_computer_time->setEnabled(set);
+    ui->computer_time->setEnabled(set);
+    ui->label_terminal_time->setEnabled(set);
+    ui->remote_terminal_time->setEnabled(set);
+    ui->set_time->setEnabled(set);
+    ui->synched->setEnabled(set);
+    ui->label_terminal_status->setEnabled(set);
+    ui->label_rec_started->setEnabled(set);
+}
+
+void MainWindow::enable_diable_Lateral_Grid(bool set)
+{
+    ui->motionmonth->setEnabled(set);
+    ui->motionday->setEnabled(set);
+    ui->remote_directory->setEnabled(set);
+    ui->collape_expand->setEnabled(set);
+    ui->getxml->setEnabled(set);
+    ui->xml_progress->setEnabled(set);
+}
+
+void MainWindow::enable_diable_Lower_Bar(bool set)
+{
+    ui->stream->setEnabled(set);
+    ui->picture->setEnabled(set);
+    ui->mat_progress->setEnabled(set);
+    ui->save_region->setEnabled(set);
+    ui->clear_region->setEnabled(set);
+    ui->code_label->setEnabled(set);
+    ui->codename->setEnabled(set);
+    ui->delay_label->setEnabled(set);
+    ui->delay->setEnabled(set);
+    ui->has_images->setEnabled(set);
+    ui->has_crops->setEnabled(set);
+}
+
+void MainWindow::enableDisableButtons(int set)
+{
+    switch (set)
+    {
+        case STARTED_NOT_ENGAGED:
+            MainWindow::enable_diable_Uppper_Bar(false);
+            MainWindow::enable_diable_Lateral_Time(false);
+            MainWindow::enable_diable_Lateral_Grid(false);
+            ui->start_recognition->setEnabled(false);
+            ui->refresh->setEnabled(false);
+            MainWindow::enable_diable_Lower_Bar(false);
+        break;
+
+        case ENGAGED_NO_INSTANCE:
+            MainWindow::enable_diable_Uppper_Bar(true);
+            MainWindow::enable_diable_Lateral_Time(true);
+            MainWindow::enable_diable_Lateral_Grid(false);
+            ui->start_recognition->setEnabled(true);
+            ui->refresh->setEnabled(true);
+            MainWindow::enable_diable_Lower_Bar(true);
+        break;
+
+        case ENGAGED_INSTANCE:
+            MainWindow::enable_diable_Uppper_Bar(true);
+            MainWindow::enable_diable_Lateral_Time(true);
+            MainWindow::enable_diable_Lateral_Grid(true);
+            ui->start_recognition->setEnabled(true);
+            ui->refresh->setEnabled(true);
+            MainWindow::enable_diable_Lower_Bar(true);
+        break;
+    }
 }
 
 void MainWindow::sendSocket(int packagesize, string svradress, string command)
@@ -1341,12 +1410,54 @@ void MainWindow::dayComboChange(const QString &arg)
 
             if (dlabel.find(dcombo))
             {
-                loadInstancesByDay(ui->remote_directory, mday);
+                MainWindow::loadInstancesByDay(ui->remote_directory, mday);
             }
         }
     }
 }
 
+void MainWindow::updateTime(motion::Message m)
+{
+
+    ui->remote_terminal_time->setText(m.time().c_str());
+
+    const char *time_details = m.time().c_str();
+    struct tm tm;
+    strptime(time_details, "%Y-%m-%d %H:%M:%S %z", &tm);
+    time_t t1 = mktime(&tm);
+
+    struct timeval tv;
+    struct tm* ptm;
+    char time_string[25];
+
+    gettimeofday (&tv, NULL);
+    ptm = localtime (&tv.tv_sec);
+    strftime (time_string, sizeof (time_string), "%Y-%m-%d %H:%M:%S %z", ptm);
+    time_t t2 = mktime(ptm);
+
+    time_string[25] = '\0';
+
+    ui->computer_time->setText(time_string);
+
+    double diff = difftime(t2, t1);
+    int sec = ((diff + 500) / 1000);
+
+    stringstream ss;
+    ss << diff  << " seconds difference";
+
+    if (sec<0)
+    {
+        sec *= -1;
+    }
+
+    if (sec>3)
+    {
+      ui->synched->setStyleSheet("background-color: rgba( 200, 200, 200, 100% );");
+    }
+
+    ui->synched->setText(ss.str().c_str());
+
+}
 
 void MainWindow::remoteProto(motion::Message remote)
 {
@@ -1356,21 +1467,48 @@ void MainWindow::remoteProto(motion::Message remote)
       {
         case motion::Message::REFRESH:
         {
-            m = mergeRemoteToLocalProto(remote);
-            int sizem = m.motionmonth_size();
-            if (sizem>0)
-                loadInstances(m);
+          int sizem = m.motionmonth_size();
+          if (sizem>0)
+          {
+              MainWindow::enableDisableButtons(ENGAGED_INSTANCE);
+              loadInstances(m);
+          } else
+          {
+              MainWindow::enableDisableButtons(ENGAGED_NO_INSTANCE);
+          }
+          m = mergeRemoteToLocalProto(remote);
+          std::string time = m.time();
+          MainWindow::updateTime(m);
         }
         break;
         case motion::Message::ENGAGE:
         {
             m = mergeRemoteToLocalProto(remote);
-            enableDisableButtons(true);
-            ui->remote_terminal_time->setText(m.time().c_str());
-            if (m.has_startrecognitiontime())
-                ui->startedat->setText(m.startrecognitiontime().c_str());
+
+            //Load Instances to QTreeWidget.
+            int sizem = m.motionmonth_size();
+            if (sizem>0)
+            {
+                MainWindow::enableDisableButtons(ENGAGED_INSTANCE);
+                loadInstances(m);
+            } else
+            {
+                MainWindow::enableDisableButtons(ENGAGED_NO_INSTANCE);
+            }
+
+            MainWindow::updateTime(m);
+
+            std::string starttime = m.starttime();
+            if (m.has_starttime())
+                ui->status_label->setText(starttime.c_str());
             else
-                ui->startedat->setText("N/A");
+                ui->status_label->setText("N/A");
+
+            std::string start = m.startrecognitiontime();
+            if (m.has_startrecognitiontime())
+                ui->instance_started->setText(start.c_str());
+            else
+                ui->instance_started->setText("N/A");
             if (m.has_storeimage())
                 ui->has_images->setChecked(true);
             else
@@ -1398,28 +1536,38 @@ void MainWindow::remoteProto(motion::Message remote)
             vector<Point2f> scorrd = MainWindow::stringToVectorPoint2f(coords);
             ui->qt_drawing_output->drawLinesSlot(scorrd);
 
-            //Load Instances to QTreeWidget.
-            int sizem = m.motionmonth_size();
-            if (sizem>0)
-                loadInstances(m);
-
             if (m.recognizing())
-            {
-                ui->status->setText("WORKING");
+            {  
                 ui->start_recognition->setChecked(true);
                 ui->start_recognition->setText("STOP RECOGNITION");
+                ui->start_recognition->setStyleSheet("QPushButton { background-color : #FF0000; color : #FFFFFF; border:6pxsolidwhite; }");
                 
             } else
             {
-                ui->status->setText("IDDLE");
                 ui->start_recognition->setChecked(false);
                 ui->start_recognition->setText("START RECOGNITION");
+                ui->start_recognition->setStyleSheet("QPushButton { background-color : #66CC00; color : #FFFFFF; border:6pxsolidwhite; }");
             }
             
+            std::string cameras = m.cameras();
             if (m.has_cameras())
-                ui->camera->setText(m.cameras().c_str());
-            else
-                ui->camera->setText("N/A");
+            {
+                if (cameras.find(" "))
+                {
+                   vector<string> camvector = MainWindow::splitString(cameras, " ");
+                   QString cone = QString::fromStdString(camvector.at(0));
+                   QString ctwo = QString::fromStdString(camvector.at(1));
+                   ui->cameracombo->addItem(cone);
+                   ui->cameracombo->addItem(ctwo);
+                } else
+                {
+                    cameras = m.cameras();
+                }
+
+            } else
+            {
+                //ui->camera->setText("N/A");
+            }
 
             ui->engage_button->setDisabled(true);
 
@@ -1440,8 +1588,7 @@ void MainWindow::remoteProto(motion::Message remote)
         break;
         case motion::Message::TIME_SET:
         {
-          QString ts = QString::fromUtf8(m.time().c_str());
-          ui->remote_terminal_time->setText(ts);  
+          MainWindow::on_refresh_clicked();
         }
         break;
         case motion::Message::GET_IMAGE:
@@ -1456,8 +1603,8 @@ void MainWindow::remoteProto(motion::Message remote)
         {
             std::string encoded_content = remote.data();
             std::string strdecoded = base64_decode(encoded_content);
-            std::string xmlfolder = getTerminalFolder().at(2);
-            std::string xmlfile = xmlfolder  + "/<import>session.xml";
+            std::string xmlfolder = MainWindow::getTerminalFolder().at(2);
+            std::string xmlfile = xmlfolder + "/" + MainWindow::getCurrentDayLabel() + "/<import>session.xml";
 
             std::ofstream out;
             out.open (xmlfile.c_str());
@@ -1672,5 +1819,3 @@ void MainWindow::on_remote_directory_itemClicked(QTreeWidgetItem *item, int colu
     google::protobuf::ShutdownProtobufLibrary();
 
 }
-
-

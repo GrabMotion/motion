@@ -129,7 +129,12 @@ private:
     void SocketErrorMessage(QString &e);
     void sendSocket(int packagesize, string svradress, string command);
 
-    void enableDisableButtons(bool set);
+    void enableDisableButtons(int set);
+    void enable_diable_Uppper_Bar(bool set);
+    void enable_diable_Lateral_Time(bool set);
+    void enable_diable_Lateral_Grid(bool set);
+    void enable_diable_Lower_Bar(bool set);
+
 
     std::string getTimeStr();
     char * getTimeChat();
@@ -167,11 +172,11 @@ private:
     std::string getCurrentDayLabel();
     std::string getCurrentMonthLabel();
 
-
     string reply_next_proto;
     int packagesize;
     char *c_str_ip;
 
+    void updateTime(motion::Message m);
 
 public:
     Q_SLOT void setremoteProto(motion::Message payload)
@@ -229,6 +234,8 @@ private slots:
     //Instances.
     void on_remote_directory_itemClicked(QTreeWidgetItem *item, int column);
     void dayComboChange(const QString &arg);
+
+    void on_collape_expand_toggled(bool checked);
 
 signals:
     void drawLinesSignal(std::vector<cv::Point2f> lines);
