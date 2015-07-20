@@ -356,7 +356,9 @@ motion::Message takePictureToProto(motion::Message m)
     
     cout << "CAPTURING !!!!!!!!!!!!!" << endl;
     
-    CvCapture* capture = cvCreateCameraCapture(CV_CAP_ANY);
+    int camera = m.activecamera();
+    
+    CvCapture* capture = cvCreateCameraCapture(camera);
     if (capture == NULL)
     {
         std::cout << "No cam found." << std::endl;
@@ -434,9 +436,8 @@ motion::Message takePictureToProto(motion::Message m)
     m.set_activemat(activemat);
 
     //Write base64 to file for checking.
-    //std::string basefile = "data/mat/" + IntToString(activemat);
+    std::string basefile = "data/mat/" + IntToString(activemat);
     
-    std::string basefile = "MAT.txt";
     std::ofstream out;
     out.open (basefile.c_str());
     out << m.data() << "\n";
@@ -613,6 +614,7 @@ motion::Message runCommand(motion::Message m)
             m = getLocalPtoro();
             m.set_type(motion::Message::ENGAGE);
             m.set_cameras(T_PROTO.cameras());
+            m.set_time(getTimeRasp());
             m.set_starttime(T_PROTO.starttime());
             m.set_activemat(T_PROTO.activemat());
             
@@ -622,6 +624,7 @@ motion::Message runCommand(motion::Message m)
         {
             cout << "motion::Message::REFRESH" << endl;
             m = getLocalPtoro();
+            m.set_time(getTimeRasp());
             m.set_type(motion::Message::REFRESH);
 
         }
@@ -709,19 +712,22 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::SET_TIME:
         {
             cout << "motion::Message::SET_TIME" << endl;
-
+            
             result_message = m.time();
             
+            cout << "coming time: "  << result_message  << endl;
+            
+
             struct tm tmremote;
             char *bufr;
             
             bufr = new char[result_message.length() + 1];
             strcpy(bufr, result_message.c_str());
             
-            cout << "::bufr:: " << bufr << endl;
+            cout << "bufr       : " << bufr << endl;
             
             memset(&tmremote, 0, sizeof(struct tm));
-            strptime(bufr, "%Y-%m-%d %H:%M:%S", &tmremote);
+            strptime(bufr, "%Y-%m-%d %H:%M:%S %z", &tmremote);
             
             std::cout << std::endl;
             std::cout << " Seconds  :"  << tmremote.tm_sec  << std::endl;
@@ -730,33 +736,49 @@ motion::Message runCommand(motion::Message m)
             std::cout << " Day      :"  << tmremote.tm_mday << std::endl;
             std::cout << " Month    :"  << tmremote.tm_mon  << std::endl;
             std::cout << " Year     :"  << tmremote.tm_year << std::endl;
-            std::cout << std::endl;
             
+            std::cout << std::endl;
+        
             struct tm mytime;
-            struct timeval systime;
+            struct timeval tv;
+            time_t epoch_time;
+            struct timezone timez;
+            
             char * text_time;
             
             mytime.tm_sec 	= tmremote.tm_sec  ;
             mytime.tm_min 	= tmremote.tm_min  ;
-            mytime.tm_hour 	= tmremote.tm_hour ;
-            mytime.tm_mday 	= tmremote.tm_mday ;
-            mytime.tm_mon 	= tmremote.tm_mon  ;
-            mytime.tm_year 	= tmremote.tm_year ;
+            mytime.tm_hour  = tmremote.tm_hour ;
+            mytime.tm_mday  = tmremote.tm_mday ;
+            mytime.tm_mon   = tmremote.tm_mon  ;
+            mytime.tm_year  = tmremote.tm_year ;
             
-            systime.tv_sec = mktime(&mytime);
-            systime.tv_usec = 0;
+            epoch_time = mktime(&mytime);
             
-            settimeofday(&systime, NULL);
+            cout << "epoch_time : " << epoch_time << endl;
             
-            gettimeofday(&systime, NULL);
+            /* Now set the clock to this time */
+            tv.tv_sec = epoch_time;
+            tv.tv_usec = 0;
+
+            // Set new system time.
+            if (settimeofday(&tv, NULL) != 0)
+            {
+                cout << "Cannot set system time" << endl;
+            }
             
-            text_time = ctime(&systime.tv_sec);
+            // Get current date & time since Epoch.
+            if (gettimeofday(&tv, NULL) != 0)
+            {
+                printf("Cannot get current date & time since Epoch.");
+            }
+            
+            text_time = ctime(&tv.tv_sec);
             
             printf("The system time is set to %s\n", text_time);
             
             m.set_type(motion::Message::TIME_SET);
             m.set_serverip(PROTO.serverip());
-            m.set_time(getTimeRasp());
 
         }
         break;

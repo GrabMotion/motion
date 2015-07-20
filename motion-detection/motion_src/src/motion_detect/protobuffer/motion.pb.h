@@ -1049,10 +1049,17 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_cameras();
   inline void set_allocated_cameras(::std::string* cameras);
 
-  // optional string xmlfilename = 23;
+  // optional int32 activecamera = 23;
+  inline bool has_activecamera() const;
+  inline void clear_activecamera();
+  static const int kActivecameraFieldNumber = 23;
+  inline ::google::protobuf::int32 activecamera() const;
+  inline void set_activecamera(::google::protobuf::int32 value);
+
+  // optional string xmlfilename = 24;
   inline bool has_xmlfilename() const;
   inline void clear_xmlfilename();
-  static const int kXmlfilenameFieldNumber = 23;
+  static const int kXmlfilenameFieldNumber = 24;
   inline const ::std::string& xmlfilename() const;
   inline void set_xmlfilename(const ::std::string& value);
   inline void set_xmlfilename(const char* value);
@@ -1061,10 +1068,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_xmlfilename();
   inline void set_allocated_xmlfilename(::std::string* xmlfilename);
 
-  // optional string xmlfilepath = 24;
+  // optional string xmlfilepath = 25;
   inline bool has_xmlfilepath() const;
   inline void clear_xmlfilepath();
-  static const int kXmlfilepathFieldNumber = 24;
+  static const int kXmlfilepathFieldNumber = 25;
   inline const ::std::string& xmlfilepath() const;
   inline void set_xmlfilepath(const ::std::string& value);
   inline void set_xmlfilepath(const char* value);
@@ -1073,17 +1080,17 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_xmlfilepath();
   inline void set_allocated_xmlfilepath(::std::string* xmlfilepath);
 
-  // optional int32 instancecount = 25;
+  // optional int32 instancecount = 26;
   inline bool has_instancecount() const;
   inline void clear_instancecount();
-  static const int kInstancecountFieldNumber = 25;
+  static const int kInstancecountFieldNumber = 26;
   inline ::google::protobuf::int32 instancecount() const;
   inline void set_instancecount(::google::protobuf::int32 value);
 
-  // optional string imagefilepath = 26;
+  // optional string imagefilepath = 27;
   inline bool has_imagefilepath() const;
   inline void clear_imagefilepath();
-  static const int kImagefilepathFieldNumber = 26;
+  static const int kImagefilepathFieldNumber = 27;
   inline const ::std::string& imagefilepath() const;
   inline void set_imagefilepath(const ::std::string& value);
   inline void set_imagefilepath(const char* value);
@@ -1092,10 +1099,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_imagefilepath();
   inline void set_allocated_imagefilepath(::std::string* imagefilepath);
 
-  // optional string currmonth = 27;
+  // optional string currmonth = 28;
   inline bool has_currmonth() const;
   inline void clear_currmonth();
-  static const int kCurrmonthFieldNumber = 27;
+  static const int kCurrmonthFieldNumber = 28;
   inline const ::std::string& currmonth() const;
   inline void set_currmonth(const ::std::string& value);
   inline void set_currmonth(const char* value);
@@ -1104,10 +1111,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_currmonth();
   inline void set_allocated_currmonth(::std::string* currmonth);
 
-  // optional string currday = 28;
+  // optional string currday = 29;
   inline bool has_currday() const;
   inline void clear_currday();
-  static const int kCurrdayFieldNumber = 28;
+  static const int kCurrdayFieldNumber = 29;
   inline const ::std::string& currday() const;
   inline void set_currday(const ::std::string& value);
   inline void set_currday(const char* value);
@@ -1116,10 +1123,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_currday();
   inline void set_allocated_currday(::std::string* currday);
 
-  // optional int32 packagesize = 29;
+  // optional int32 packagesize = 30;
   inline bool has_packagesize() const;
   inline void clear_packagesize();
-  static const int kPackagesizeFieldNumber = 29;
+  static const int kPackagesizeFieldNumber = 30;
   inline ::google::protobuf::int32 packagesize() const;
   inline void set_packagesize(::google::protobuf::int32 value);
 
@@ -1165,6 +1172,8 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_activemat();
   inline void set_has_cameras();
   inline void clear_has_cameras();
+  inline void set_has_activecamera();
+  inline void clear_has_activecamera();
   inline void set_has_xmlfilename();
   inline void clear_has_xmlfilename();
   inline void set_has_xmlfilepath();
@@ -1205,14 +1214,15 @@ class Message : public ::google::protobuf::Message {
   ::google::protobuf::int32 amount_;
   ::google::protobuf::RepeatedField< ::google::protobuf::int32 > matfile_;
   ::std::string* cameras_;
-  ::std::string* xmlfilename_;
   ::google::protobuf::int32 activemat_;
-  ::google::protobuf::int32 instancecount_;
+  ::google::protobuf::int32 activecamera_;
+  ::std::string* xmlfilename_;
   ::std::string* xmlfilepath_;
   ::std::string* imagefilepath_;
   ::std::string* currmonth_;
-  ::std::string* currday_;
+  ::google::protobuf::int32 instancecount_;
   ::google::protobuf::int32 packagesize_;
+  ::std::string* currday_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -3260,15 +3270,39 @@ inline void Message::set_allocated_cameras(::std::string* cameras) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.cameras)
 }
 
-// optional string xmlfilename = 23;
-inline bool Message::has_xmlfilename() const {
+// optional int32 activecamera = 23;
+inline bool Message::has_activecamera() const {
   return (_has_bits_[0] & 0x00400000u) != 0;
 }
-inline void Message::set_has_xmlfilename() {
+inline void Message::set_has_activecamera() {
   _has_bits_[0] |= 0x00400000u;
 }
-inline void Message::clear_has_xmlfilename() {
+inline void Message::clear_has_activecamera() {
   _has_bits_[0] &= ~0x00400000u;
+}
+inline void Message::clear_activecamera() {
+  activecamera_ = 0;
+  clear_has_activecamera();
+}
+inline ::google::protobuf::int32 Message::activecamera() const {
+  // @@protoc_insertion_point(field_get:motion.Message.activecamera)
+  return activecamera_;
+}
+inline void Message::set_activecamera(::google::protobuf::int32 value) {
+  set_has_activecamera();
+  activecamera_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.activecamera)
+}
+
+// optional string xmlfilename = 24;
+inline bool Message::has_xmlfilename() const {
+  return (_has_bits_[0] & 0x00800000u) != 0;
+}
+inline void Message::set_has_xmlfilename() {
+  _has_bits_[0] |= 0x00800000u;
+}
+inline void Message::clear_has_xmlfilename() {
+  _has_bits_[0] &= ~0x00800000u;
 }
 inline void Message::clear_xmlfilename() {
   if (xmlfilename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3336,15 +3370,15 @@ inline void Message::set_allocated_xmlfilename(::std::string* xmlfilename) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.xmlfilename)
 }
 
-// optional string xmlfilepath = 24;
+// optional string xmlfilepath = 25;
 inline bool Message::has_xmlfilepath() const {
-  return (_has_bits_[0] & 0x00800000u) != 0;
+  return (_has_bits_[0] & 0x01000000u) != 0;
 }
 inline void Message::set_has_xmlfilepath() {
-  _has_bits_[0] |= 0x00800000u;
+  _has_bits_[0] |= 0x01000000u;
 }
 inline void Message::clear_has_xmlfilepath() {
-  _has_bits_[0] &= ~0x00800000u;
+  _has_bits_[0] &= ~0x01000000u;
 }
 inline void Message::clear_xmlfilepath() {
   if (xmlfilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3412,15 +3446,15 @@ inline void Message::set_allocated_xmlfilepath(::std::string* xmlfilepath) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.xmlfilepath)
 }
 
-// optional int32 instancecount = 25;
+// optional int32 instancecount = 26;
 inline bool Message::has_instancecount() const {
-  return (_has_bits_[0] & 0x01000000u) != 0;
+  return (_has_bits_[0] & 0x02000000u) != 0;
 }
 inline void Message::set_has_instancecount() {
-  _has_bits_[0] |= 0x01000000u;
+  _has_bits_[0] |= 0x02000000u;
 }
 inline void Message::clear_has_instancecount() {
-  _has_bits_[0] &= ~0x01000000u;
+  _has_bits_[0] &= ~0x02000000u;
 }
 inline void Message::clear_instancecount() {
   instancecount_ = 0;
@@ -3436,15 +3470,15 @@ inline void Message::set_instancecount(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.instancecount)
 }
 
-// optional string imagefilepath = 26;
+// optional string imagefilepath = 27;
 inline bool Message::has_imagefilepath() const {
-  return (_has_bits_[0] & 0x02000000u) != 0;
+  return (_has_bits_[0] & 0x04000000u) != 0;
 }
 inline void Message::set_has_imagefilepath() {
-  _has_bits_[0] |= 0x02000000u;
+  _has_bits_[0] |= 0x04000000u;
 }
 inline void Message::clear_has_imagefilepath() {
-  _has_bits_[0] &= ~0x02000000u;
+  _has_bits_[0] &= ~0x04000000u;
 }
 inline void Message::clear_imagefilepath() {
   if (imagefilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3512,15 +3546,15 @@ inline void Message::set_allocated_imagefilepath(::std::string* imagefilepath) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.imagefilepath)
 }
 
-// optional string currmonth = 27;
+// optional string currmonth = 28;
 inline bool Message::has_currmonth() const {
-  return (_has_bits_[0] & 0x04000000u) != 0;
+  return (_has_bits_[0] & 0x08000000u) != 0;
 }
 inline void Message::set_has_currmonth() {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x08000000u;
 }
 inline void Message::clear_has_currmonth() {
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline void Message::clear_currmonth() {
   if (currmonth_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3588,15 +3622,15 @@ inline void Message::set_allocated_currmonth(::std::string* currmonth) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.currmonth)
 }
 
-// optional string currday = 28;
+// optional string currday = 29;
 inline bool Message::has_currday() const {
-  return (_has_bits_[0] & 0x08000000u) != 0;
+  return (_has_bits_[0] & 0x10000000u) != 0;
 }
 inline void Message::set_has_currday() {
-  _has_bits_[0] |= 0x08000000u;
+  _has_bits_[0] |= 0x10000000u;
 }
 inline void Message::clear_has_currday() {
-  _has_bits_[0] &= ~0x08000000u;
+  _has_bits_[0] &= ~0x10000000u;
 }
 inline void Message::clear_currday() {
   if (currday_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3664,15 +3698,15 @@ inline void Message::set_allocated_currday(::std::string* currday) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.currday)
 }
 
-// optional int32 packagesize = 29;
+// optional int32 packagesize = 30;
 inline bool Message::has_packagesize() const {
-  return (_has_bits_[0] & 0x10000000u) != 0;
+  return (_has_bits_[0] & 0x20000000u) != 0;
 }
 inline void Message::set_has_packagesize() {
-  _has_bits_[0] |= 0x10000000u;
+  _has_bits_[0] |= 0x20000000u;
 }
 inline void Message::clear_has_packagesize() {
-  _has_bits_[0] &= ~0x10000000u;
+  _has_bits_[0] &= ~0x20000000u;
 }
 inline void Message::clear_packagesize() {
   packagesize_ = 0;

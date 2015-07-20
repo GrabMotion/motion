@@ -596,7 +596,8 @@ void * startRecognition(void * arg)
     std::string image_file_recognized;
     
     // Set up camera
-    camera = cvCaptureFromCAM(CV_CAP_ANY);
+    int cam = R_PROTO.activecamera();
+    camera = cvCaptureFromCAM(cam); //CV_CAP_ANY);
     cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 1280); //640); //1280); // width of viewport of camera
     cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 720); //480); //720); // height of ...
     
