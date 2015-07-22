@@ -198,7 +198,8 @@ std::string getGlobalIntToString(int id)
     return strm.str();
 }
 
-int getGlobalStringToInt(std::string id){
+int getGlobalStringToInt(std::string id)
+{
    return atoi( id.c_str() );
 }
 
@@ -1368,22 +1369,41 @@ void MainWindow::loadInstances(motion::Message m)
 
          int sized = mmonth.motionday_size();
 
-         for (int j = 0; j < sized; j++)
+         int current = sized - 1;
+         bool hastoday = false;
+
+         if (sized>0)
          {
 
-             const motion::Message::MotionDay & mday = mmonth.motionday(j);
-
-             std::string dlabel = mday.daylabel();
-             int indexd = ui->motionday->findText(dlabel.c_str());
-             if (indexd==-1)
-                ui->motionday->addItem(dlabel.c_str());
-
-             std::string day = getCurrentDayLabel();
-             if(day.find(dlabel) != std::string::npos)
+             for (int j = 0; j < sized; j++)
              {
-                 MainWindow::loadInstancesByDay(treeWidget, mday);
+
+                 const motion::Message::MotionDay & mday = mmonth.motionday(j);
+
+                 std::string dlabel = mday.daylabel();
+                 int indexd = ui->motionday->findText(dlabel.c_str());
+                 if (indexd==-1)
+                    ui->motionday->addItem(dlabel.c_str());
+
+                 std::string day = getCurrentDayLabel();
+                 if(day.find(dlabel) != std::string::npos)
+                 {
+                        hastoday = true;
+                        current = j;
+                 }
+
              }
+
+             if (hastoday)
+             {
+                 MainWindow::loadInstancesByDay(treeWidget, mmonth.motionday(current));
+             } else
+             {
+                MainWindow::loadInstancesByDay(treeWidget, mmonth.motionday(sized-1));
+             }
+
          }
+
     }
 }
 
@@ -1467,6 +1487,7 @@ void MainWindow::remoteProto(motion::Message remote)
       {
         case motion::Message::REFRESH:
         {
+          m = mergeRemoteToLocalProto(remote);
           int sizem = m.motionmonth_size();
           if (sizem>0)
           {
@@ -1476,7 +1497,6 @@ void MainWindow::remoteProto(motion::Message remote)
           {
               MainWindow::enableDisableButtons(ENGAGED_NO_INSTANCE);
           }
-          m = mergeRemoteToLocalProto(remote);
           std::string time = m.time();
           MainWindow::updateTime(m);
         }
@@ -1484,8 +1504,6 @@ void MainWindow::remoteProto(motion::Message remote)
         case motion::Message::ENGAGE:
         {
             m = mergeRemoteToLocalProto(remote);
-
-            //Load Instances to QTreeWidget.
             int sizem = m.motionmonth_size();
             if (sizem>0)
             {
