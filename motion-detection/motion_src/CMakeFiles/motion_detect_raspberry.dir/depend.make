@@ -12,7 +12,9 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/ntp/hwclock.o: src/moti
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o: src/motion_detect/b64/../b64/base64.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o: src/motion_detect/b64/base64.cpp
 
+
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/b64/base64.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/database/database.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/main.cpp
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/practical/PracticalSocket.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/protobuffer/motion.pb.h

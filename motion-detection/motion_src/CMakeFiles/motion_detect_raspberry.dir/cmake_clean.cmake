@@ -13,6 +13,7 @@ FILE(REMOVE_RECURSE
   "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/cencode.o"
   "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o"
   "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o"
+  "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o"
   "src/motion_detect/motion_detect_raspberry.pdb"
   "src/motion_detect/motion_detect_raspberry"
 )

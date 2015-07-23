@@ -12,6 +12,7 @@ SET(CMAKE_DEPENDS_CHECK_C
 SET(CMAKE_C_COMPILER_ID "GNU")
 SET(CMAKE_DEPENDS_CHECK_CXX
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/base64.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.cc" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o"
@@ -41,6 +42,7 @@ SET(CMAKE_C_TARGET_INCLUDE_PATH
   "/src/motion_detect/ntp"
   "/src/motion_detect/b64"
   "/src/motion_detect/socket"
+  "/src/motion_detect/database"
   )
 SET(CMAKE_CXX_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})
 SET(CMAKE_Fortran_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})

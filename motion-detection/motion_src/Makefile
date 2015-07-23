@@ -160,6 +160,21 @@ src/motion_detect/b64/cencode.s:
 .PHONY : src/motion_detect/b64/cencode.s
 
 # target to build an object file
+src/motion_detect/database/database.o:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o
+.PHONY : src/motion_detect/database/database.o
+
+# target to preprocess a source file
+src/motion_detect/database/database.i:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.i
+.PHONY : src/motion_detect/database/database.i
+
+# target to generate assembly for a file
+src/motion_detect/database/database.s:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.s
+.PHONY : src/motion_detect/database/database.s
+
+# target to build an object file
 src/motion_detect/main.o:
 	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o
 .PHONY : src/motion_detect/main.o
@@ -342,6 +357,9 @@ help:
 	@echo "... src/motion_detect/b64/cencode.o"
 	@echo "... src/motion_detect/b64/cencode.i"
 	@echo "... src/motion_detect/b64/cencode.s"
+	@echo "... src/motion_detect/database/database.o"
+	@echo "... src/motion_detect/database/database.i"
+	@echo "... src/motion_detect/database/database.s"
 	@echo "... src/motion_detect/main.o"
 	@echo "... src/motion_detect/main.i"
 	@echo "... src/motion_detect/main.s"

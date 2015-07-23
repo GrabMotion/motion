@@ -15,6 +15,7 @@ INCLUDE_DIRECTORIES(
 	${NTP_DIRECTORY}        /src/motion_detect/ntp
 	${BASE64_DIRECTORY}     /src/motion_detect/b64
 	${SOCKET_DIRECTORY}  /src/motion_detect/socket
+	${DATABASE_DIRECTORY}  /src/motion_detect/database
 )
 
 FIND_PACKAGE(Protobuf REQUIRED)
@@ -57,9 +58,11 @@ ADD_EXECUTABLE(motion_detect_raspberry
 	src/motion_detect/socket/streamlistener.h
 	src/motion_detect/socket/netcvc.cpp
         src/motion_detect/socket/netcvc.h
+	src/motion_detect/database/database.h
+	src/motion_detect/database/database.cpp
 )
 
-TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm ${PROTOBUF_LIBRARIES})
+TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm ${PROTOBUF_LIBRARIES} -lsqlite3 -lusb)
 
 SET(CMAKE_BUILD_TYPE Release)
 

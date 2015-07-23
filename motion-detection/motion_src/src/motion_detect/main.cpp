@@ -41,6 +41,8 @@
 #include "protobuffer/motion.pb.h"
 #include "socket/streamlistener.h"
 #include "socket/netcvc.h"
+#include "database/database.h"
+
 //#include "socket/udp-send.c"
 
 #include "b64/base64.h"
@@ -55,6 +57,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <netdb.h>
+
+#include <usb.h>
 
 using namespace google::protobuf::io;
 
@@ -131,10 +135,48 @@ int udpsend(motion::Message m);
 //const unsigned int RCVBUFSIZE = 100000; //4096; //32;     // Size of receive buffer
 const int MAXRCVSTRING = 4096;          // Longest string to receive
 
+//Operations
+vector<string> splitString(string input, string delimiter);
 std::string getGlobalIntToString(int id);
 
 int getGlobalStringToInt(std::string id);
 char * setMessageValueBody(int value, std::string body);
+bool checkFile(const std::string &file);
+
+bool checkFile(const std::string &file)
+{
+    FILE *fin = fopen((file).c_str(), "r");
+    if (fin)
+    {
+        fclose(fin);
+        return false;
+    }
+    return true;
+}
+
+void set_file_permission(std::string file, std::string permission)
+{
+    std::stringstream perm;
+    perm << "chmod " <<  permission << " " << file;
+    std::string pstring = perm.str();
+    system(pstring.c_str());
+}
+
+vector<string> splitString(string input, string delimiter)
+{
+    vector<string> output;
+    char *pch;
+    char *str = strdup(input.c_str());
+    pch = strtok (str, delimiter.c_str());
+    while (pch != NULL)
+    {
+        output.push_back(pch);
+        pch = strtok (NULL,  delimiter.c_str());
+    }
+    free(str);
+    return output;
+}
+
 
 inline bool file_exist (const std::string& name) {
     ifstream f(name.c_str());
@@ -528,11 +570,12 @@ void * startObserver(void * arg)
                     
                     motion::Message mrefresh;
                     mrefresh.Clear();
-                    
-                    mrefresh.set_recognizing(true);
+                
                     pthread_mutex_lock(&protoMutex);
                     mrefresh = R_PROTO;
                     pthread_mutex_unlock(&protoMutex);
+                    
+                    mrefresh.set_recognizing(true);
                     
                     //Initialize objects to serialize.
                     int size = mrefresh.ByteSize();
@@ -1210,6 +1253,24 @@ void directoryExistsOrCreate(const char* pzPath)
 int main (int argc, char * const argv[])
 {
     
+    db_cpuinfo();
+
+    string camera_query = "SELECT id, number, name from cameras;";
+
+    vector<vector<string> > camera_array = db_select(camera_query.c_str(), 3);
+    
+    for (int i=0; i< camera_array.size(); i++)
+    {
+        vector<string> row;
+        row = camera_array.at(i);
+        for (int j=0; j<row.size(); j++)
+        {
+            cout << "row: " << row.at(j) << endl;
+        }
+        
+    }
+    
+    
     struct timeval tr;
     struct tm* ptmr;
     char time_rasp[40];
@@ -1224,17 +1285,19 @@ int main (int argc, char * const argv[])
     copy( cams.begin(), cams.end(), ostream_iterator<int>(ss, " "));
     std::string cameras = ss.str();
     cameras = cameras.substr(0, cameras.length()-1);
+    //Store into database.
+    db_cams(cams);
     
     T_PROTO.set_cameras(cameras);
     T_PROTO.set_starttime(time_rasp);
     starttime = time_rasp;
-    
+
     std::string basedatafile = "data";
     directoryExistsOrCreate(basedatafile.c_str());
-    std::string secdatafile = "data/data";
-    directoryExistsOrCreate(secdatafile.c_str());
-    std::string matdatafile = "data/mat";
-    directoryExistsOrCreate(matdatafile.c_str());
+    //std::string secdatafile = "data/data";
+    //directoryExistsOrCreate(secdatafile.c_str());
+    //std::string matdatafile = "data/mat";
+    //directoryExistsOrCreate(matdatafile.c_str());
     
     cout << "Start Time:: " << starttime << endl;
 
