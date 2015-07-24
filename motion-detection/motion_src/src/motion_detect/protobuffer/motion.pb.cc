@@ -131,9 +131,11 @@ void protobuf_AssignDesc_motion_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Message_MotionMonth));
   Message_MotionDay_descriptor_ = Message_descriptor_->nested_type(2);
-  static const int Message_MotionDay_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionDay, daylabel_),
+  static const int Message_MotionDay_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionDay, instance_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionDay, daylabel_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionDay, db_dayid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionDay, db_recognitionsetupid_),
   };
   Message_MotionDay_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -257,7 +259,7 @@ void protobuf_AddDesc_motion_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014motion.proto\022\006motion\"\226\020\n\007Message\0220\n\004ty"
+    "\n\014motion.proto\022\006motion\"\307\020\n\007Message\0220\n\004ty"
     "pe\030\001 \002(\0162\032.motion.Message.ActionType:\006EN"
     "GAGE\022\014\n\004time\030\002 \001(\t\022\014\n\004data\030\003 \001(\014\022\023\n\013data"
     "_amount\030\004 \001(\005\022\022\n\ndata_total\030\005 \001(\005\022\020\n\010ser"
@@ -278,38 +280,39 @@ void protobuf_AddDesc_motion_2eproto() {
     "\033.motion.Message.MotionMonth\022\020\n\010cameraid"
     "\030\002 \001(\005\022\016\n\006camera\030\003 \001(\t\032O\n\013MotionMonth\022,\n"
     "\tmotionday\030\001 \003(\0132\031.motion.Message.Motion"
-    "Day\022\022\n\nmonthlabel\030\002 \001(\t\032I\n\tMotionDay\022\020\n\010"
-    "daylabel\030\001 \001(\t\022*\n\010instance\030\002 \003(\0132\030.motio"
-    "n.Message.Instance\032\277\001\n\010Instance\022\022\n\nidins"
-    "tance\030\001 \002(\005\022\025\n\rinstancestart\030\002 \001(\t\022\023\n\013in"
-    "stanceend\030\003 \001(\t\022\022\n\nfileformat\030\004 \001(\t\022\025\n\rc"
-    "roppedformat\030\005 \001(\t\022$\n\005image\030\006 \003(\0132\025.moti"
-    "on.Message.Image\022\"\n\004crop\030\007 \003(\0132\024.motion."
-    "Message.Crop\0329\n\005Image\022\014\n\004path\030\001 \001(\t\022\014\n\004n"
-    "ame\030\002 \001(\t\022\024\n\014imagechanges\030\003 \001(\005\0327\n\004Crop\022"
-    "\014\n\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\023\n\013imagefath"
-    "er\030\003 \001(\t\"\235\003\n\nActionType\022\013\n\006ENGAGE\020\350\007\022\016\n\t"
-    "REC_START\020\352\007\022\020\n\013REC_RUNNING\020\353\007\022\r\n\010REC_ST"
-    "OP\020\354\007\022\r\n\010UNENGAGE\020\355\007\022\r\n\010GET_TIME\020\356\007\022\r\n\010S"
-    "ET_TIME\020\357\007\022\r\n\010TIME_SET\020\360\007\022\017\n\nSTRM_START\020"
-    "\361\007\022\016\n\tSTRM_STOP\020\362\007\022\021\n\014TAKE_PICTURE\020\363\007\022\020\n"
-    "\013DISSCONNECT\020\364\007\022\014\n\007REFRESH\020\365\007\022\014\n\007GET_XML"
-    "\020\366\007\022\016\n\tGET_IMAGE\020\367\007\022\020\n\013RESPONSE_OK\020\320\017\022\022\n"
-    "\rRESPONSE_NEXT\020\332\017\022\021\n\014RESPONSE_END\020\344\017\022\024\n\017"
-    "RESPONSE_FINISH\020\356\017\022\024\n\017REC_HAS_CHANGES\020\370\017"
-    "\022\025\n\020REC_HAS_INSTANCE\020\202\020\022\023\n\016PROTO_HAS_FIL"
-    "E\020\326\027\022\022\n\rPROTO_NO_FILE\020\327\027\"\254\003\n\nSocketType\022"
-    "\031\n\025SOCKET_PROTO_TOSTRING\020\n\022\030\n\024SOCKET_PRO"
-    "TO_TOARRAY\020\013\022\025\n\021SOCKET_PLAIN_TEXT\020\014\022\024\n\020S"
-    "PLITTED_MESSAGE\020\r\022\022\n\016SINGLE_MESSAGE\020\016\022\034\n"
-    "\027SOCKET_BUFFER_NANO_SIZE\020\200\010\022\034\n\027SOCKET_BU"
-    "FFER_MINI_SIZE\020\200\020\022\035\n\030SOCKET_BUFFER_MICRO"
-    "_SIZE\020\200 \022\035\n\030SOCKET_BUFFER_SMALL_SIZE\020\204@\022"
-    " \n\032SOCKET_BUFFER_REGULAR_SIZE\020\210\200\001\022\037\n\031SOC"
-    "KET_BUFFER_MEDIUM_SIZE\020\220\200\002\022\034\n\026SOCKET_BUF"
-    "FER_BIG_SIZE\020\240\200\004\022\022\n\rTCP_ECHO_PORT\020\222\'\022\027\n\022"
-    "TCP_STREAMING_PORT\020\234\'\022\r\n\010UDP_PORT\020\246\'\022\021\n\014"
-    "TCP_MSG_PORT\020\260\'", 2095);
+    "Day\022\022\n\nmonthlabel\030\002 \001(\t\032z\n\tMotionDay\022*\n\010"
+    "instance\030\001 \003(\0132\030.motion.Message.Instance"
+    "\022\020\n\010daylabel\030\002 \001(\t\022\020\n\010db_dayid\030\003 \001(\005\022\035\n\025"
+    "db_recognitionsetupid\030\004 \001(\005\032\277\001\n\010Instance"
+    "\022\022\n\nidinstance\030\001 \002(\005\022\025\n\rinstancestart\030\002 "
+    "\001(\t\022\023\n\013instanceend\030\003 \001(\t\022\022\n\nfileformat\030\004"
+    " \001(\t\022\025\n\rcroppedformat\030\005 \001(\t\022$\n\005image\030\006 \003"
+    "(\0132\025.motion.Message.Image\022\"\n\004crop\030\007 \003(\0132"
+    "\024.motion.Message.Crop\0329\n\005Image\022\014\n\004path\030\001"
+    " \001(\t\022\014\n\004name\030\002 \001(\t\022\024\n\014imagechanges\030\003 \001(\005"
+    "\0327\n\004Crop\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\023\n\013"
+    "imagefather\030\003 \001(\t\"\235\003\n\nActionType\022\013\n\006ENGA"
+    "GE\020\350\007\022\016\n\tREC_START\020\352\007\022\020\n\013REC_RUNNING\020\353\007\022"
+    "\r\n\010REC_STOP\020\354\007\022\r\n\010UNENGAGE\020\355\007\022\r\n\010GET_TIM"
+    "E\020\356\007\022\r\n\010SET_TIME\020\357\007\022\r\n\010TIME_SET\020\360\007\022\017\n\nST"
+    "RM_START\020\361\007\022\016\n\tSTRM_STOP\020\362\007\022\021\n\014TAKE_PICT"
+    "URE\020\363\007\022\020\n\013DISSCONNECT\020\364\007\022\014\n\007REFRESH\020\365\007\022\014"
+    "\n\007GET_XML\020\366\007\022\016\n\tGET_IMAGE\020\367\007\022\020\n\013RESPONSE"
+    "_OK\020\320\017\022\022\n\rRESPONSE_NEXT\020\332\017\022\021\n\014RESPONSE_E"
+    "ND\020\344\017\022\024\n\017RESPONSE_FINISH\020\356\017\022\024\n\017REC_HAS_C"
+    "HANGES\020\370\017\022\025\n\020REC_HAS_INSTANCE\020\202\020\022\023\n\016PROT"
+    "O_HAS_FILE\020\326\027\022\022\n\rPROTO_NO_FILE\020\327\027\"\254\003\n\nSo"
+    "cketType\022\031\n\025SOCKET_PROTO_TOSTRING\020\n\022\030\n\024S"
+    "OCKET_PROTO_TOARRAY\020\013\022\025\n\021SOCKET_PLAIN_TE"
+    "XT\020\014\022\024\n\020SPLITTED_MESSAGE\020\r\022\022\n\016SINGLE_MES"
+    "SAGE\020\016\022\034\n\027SOCKET_BUFFER_NANO_SIZE\020\200\010\022\034\n\027"
+    "SOCKET_BUFFER_MINI_SIZE\020\200\020\022\035\n\030SOCKET_BUF"
+    "FER_MICRO_SIZE\020\200 \022\035\n\030SOCKET_BUFFER_SMALL"
+    "_SIZE\020\204@\022 \n\032SOCKET_BUFFER_REGULAR_SIZE\020\210"
+    "\200\001\022\037\n\031SOCKET_BUFFER_MEDIUM_SIZE\020\220\200\002\022\034\n\026S"
+    "OCKET_BUFFER_BIG_SIZE\020\240\200\004\022\022\n\rTCP_ECHO_PO"
+    "RT\020\222\'\022\027\n\022TCP_STREAMING_PORT\020\234\'\022\r\n\010UDP_PO"
+    "RT\020\246\'\022\021\n\014TCP_MSG_PORT\020\260\'", 2144);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "motion.proto", &protobuf_RegisterTypes);
   Message::default_instance_ = new Message();
@@ -1060,8 +1063,10 @@ void Message_MotionMonth::Swap(Message_MotionMonth* other) {
 // -------------------------------------------------------------------
 
 #ifndef _MSC_VER
-const int Message_MotionDay::kDaylabelFieldNumber;
 const int Message_MotionDay::kInstanceFieldNumber;
+const int Message_MotionDay::kDaylabelFieldNumber;
+const int Message_MotionDay::kDbDayidFieldNumber;
+const int Message_MotionDay::kDbRecognitionsetupidFieldNumber;
 #endif  // !_MSC_VER
 
 Message_MotionDay::Message_MotionDay()
@@ -1084,6 +1089,8 @@ void Message_MotionDay::SharedCtor() {
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   daylabel_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  db_dayid_ = 0;
+  db_recognitionsetupid_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1122,11 +1129,28 @@ Message_MotionDay* Message_MotionDay::New() const {
 }
 
 void Message_MotionDay::Clear() {
-  if (has_daylabel()) {
-    if (daylabel_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-      daylabel_->clear();
+#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
+  &reinterpret_cast<Message_MotionDay*>(16)->f) - \
+   reinterpret_cast<char*>(16))
+
+#define ZR_(first, last) do {                              \
+    size_t f = OFFSET_OF_FIELD_(first);                    \
+    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
+    ::memset(&first, 0, n);                                \
+  } while (0)
+
+  if (_has_bits_[0 / 32] & 14) {
+    ZR_(db_dayid_, db_recognitionsetupid_);
+    if (has_daylabel()) {
+      if (daylabel_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        daylabel_->clear();
+      }
     }
   }
+
+#undef OFFSET_OF_FIELD_
+#undef ZR_
+
   instance_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -1142,9 +1166,24 @@ bool Message_MotionDay::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional string daylabel = 1;
+      // repeated .motion.Message.Instance instance = 1;
       case 1: {
         if (tag == 10) {
+         parse_instance:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_instance()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(10)) goto parse_instance;
+        if (input->ExpectTag(18)) goto parse_daylabel;
+        break;
+      }
+
+      // optional string daylabel = 2;
+      case 2: {
+        if (tag == 18) {
+         parse_daylabel:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_daylabel()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -1154,20 +1193,36 @@ bool Message_MotionDay::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(18)) goto parse_instance;
+        if (input->ExpectTag(24)) goto parse_db_dayid;
         break;
       }
 
-      // repeated .motion.Message.Instance instance = 2;
-      case 2: {
-        if (tag == 18) {
-         parse_instance:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_instance()));
+      // optional int32 db_dayid = 3;
+      case 3: {
+        if (tag == 24) {
+         parse_db_dayid:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &db_dayid_)));
+          set_has_db_dayid();
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(18)) goto parse_instance;
+        if (input->ExpectTag(32)) goto parse_db_recognitionsetupid;
+        break;
+      }
+
+      // optional int32 db_recognitionsetupid = 4;
+      case 4: {
+        if (tag == 32) {
+         parse_db_recognitionsetupid:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &db_recognitionsetupid_)));
+          set_has_db_recognitionsetupid();
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -1197,20 +1252,30 @@ failure:
 void Message_MotionDay::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:motion.Message.MotionDay)
-  // optional string daylabel = 1;
+  // repeated .motion.Message.Instance instance = 1;
+  for (int i = 0; i < this->instance_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->instance(i), output);
+  }
+
+  // optional string daylabel = 2;
   if (has_daylabel()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->daylabel().data(), this->daylabel().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
       "daylabel");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      1, this->daylabel(), output);
+      2, this->daylabel(), output);
   }
 
-  // repeated .motion.Message.Instance instance = 2;
-  for (int i = 0; i < this->instance_size(); i++) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      2, this->instance(i), output);
+  // optional int32 db_dayid = 3;
+  if (has_db_dayid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->db_dayid(), output);
+  }
+
+  // optional int32 db_recognitionsetupid = 4;
+  if (has_db_recognitionsetupid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->db_recognitionsetupid(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -1223,7 +1288,14 @@ void Message_MotionDay::SerializeWithCachedSizes(
 ::google::protobuf::uint8* Message_MotionDay::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:motion.Message.MotionDay)
-  // optional string daylabel = 1;
+  // repeated .motion.Message.Instance instance = 1;
+  for (int i = 0; i < this->instance_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        1, this->instance(i), target);
+  }
+
+  // optional string daylabel = 2;
   if (has_daylabel()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->daylabel().data(), this->daylabel().length(),
@@ -1231,14 +1303,17 @@ void Message_MotionDay::SerializeWithCachedSizes(
       "daylabel");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        1, this->daylabel(), target);
+        2, this->daylabel(), target);
   }
 
-  // repeated .motion.Message.Instance instance = 2;
-  for (int i = 0; i < this->instance_size(); i++) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteMessageNoVirtualToArray(
-        2, this->instance(i), target);
+  // optional int32 db_dayid = 3;
+  if (has_db_dayid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->db_dayid(), target);
+  }
+
+  // optional int32 db_recognitionsetupid = 4;
+  if (has_db_recognitionsetupid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->db_recognitionsetupid(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -1252,16 +1327,30 @@ void Message_MotionDay::SerializeWithCachedSizes(
 int Message_MotionDay::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional string daylabel = 1;
+  if (_has_bits_[1 / 32] & (0xffu << (1 % 32))) {
+    // optional string daylabel = 2;
     if (has_daylabel()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->daylabel());
     }
 
+    // optional int32 db_dayid = 3;
+    if (has_db_dayid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->db_dayid());
+    }
+
+    // optional int32 db_recognitionsetupid = 4;
+    if (has_db_recognitionsetupid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->db_recognitionsetupid());
+    }
+
   }
-  // repeated .motion.Message.Instance instance = 2;
+  // repeated .motion.Message.Instance instance = 1;
   total_size += 1 * this->instance_size();
   for (int i = 0; i < this->instance_size(); i++) {
     total_size +=
@@ -1295,9 +1384,15 @@ void Message_MotionDay::MergeFrom(const ::google::protobuf::Message& from) {
 void Message_MotionDay::MergeFrom(const Message_MotionDay& from) {
   GOOGLE_CHECK_NE(&from, this);
   instance_.MergeFrom(from.instance_);
-  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (from._has_bits_[1 / 32] & (0xffu << (1 % 32))) {
     if (from.has_daylabel()) {
       set_daylabel(from.daylabel());
+    }
+    if (from.has_db_dayid()) {
+      set_db_dayid(from.db_dayid());
+    }
+    if (from.has_db_recognitionsetupid()) {
+      set_db_recognitionsetupid(from.db_recognitionsetupid());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -1323,8 +1418,10 @@ bool Message_MotionDay::IsInitialized() const {
 
 void Message_MotionDay::Swap(Message_MotionDay* other) {
   if (other != this) {
-    std::swap(daylabel_, other->daylabel_);
     instance_.Swap(&other->instance_);
+    std::swap(daylabel_, other->daylabel_);
+    std::swap(db_dayid_, other->db_dayid_);
+    std::swap(db_recognitionsetupid_, other->db_recognitionsetupid_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

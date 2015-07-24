@@ -28,15 +28,18 @@ void db_open()
     rc = sqlite3_open("database/motion.db", &db);
     if( rc ){
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-    }else{
-        fprintf(stdout, "Opened database successfully\n");
     }
+    //else{
+    //    fprintf(stdout, "Opened database successfully\n");
+    //}
 
 }
 
 
 vector<vector<string> > db_select(const char *sql, int columns)
 {
+    
+    cout << "HOLA" << endl;
     
     db_open();
     
@@ -49,9 +52,6 @@ vector<vector<string> > db_select(const char *sql, int columns)
         cerr << "SELECT failed: " << sqlite3_errmsg(db) << endl;
         //return NULL; // or throw
     }
-    
-    for( int i = 0; i < columns; i++ )
-        resutl.push_back(std::vector< std::string >());
     
     while (sqlite3_step(stmt) == SQLITE_ROW)
     {
@@ -80,10 +80,11 @@ void db_execute(const char *sql)
     {
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
         sqlite3_free(zErrMsg);
-    } else
-    {
-        fprintf(stdout, "Records created successfully\n");
     }
+    //else
+    //{
+    //    fprintf(stdout, "Records created successfully\n");
+    //}
     db_close();
 }
 
@@ -94,7 +95,7 @@ void db_close()
 
 
 
-void db_cpuinfo()
+int db_cpuinfo()
 {
 
         std::ifstream cpuinfo("/proc/cpuinfo");
@@ -111,8 +112,6 @@ void db_cpuinfo()
             
             if (!line.size())
                 continue;
-            
-            cout << "line: " << line << endl;
             
             if(line.find("model name") != std::string::npos)
             {
@@ -137,33 +136,37 @@ void db_cpuinfo()
         hardware    = splitString(hardware, ": ").at(1);
         revision    = splitString(revision, ": ").at(1);
         serial      = splitString(serial, ": ").at(1);
-        
-        /*std::string delimiter = " : ";
-         model       = model.substr(model.find(delimiter), model.size());
-         hardware    = hardware.substr(hardware.find(delimiter), hardware.size());
-         revision    = revision.substr(revision.find(delimiter), revision.size());
-         serial      = serial.substr(serial.find(delimiter), serial.size());*/
-        
-        //cout << "model: " << model << endl;
-        //cout << "hardware: " << hardware << endl;
-        //cout << "revision: " << revision << endl;
-        //cout << "serial: " << serial << endl;
-        
+    
         stringstream sql;
         sql <<
-        "INSERT INTO hardware (model,hardware,serial,revision) " <<
-        "VALUES ('" << model    << "'"
+        "INSERT INTO hardware (model, hardware, serial, revision) " <<
+        "SELECT '"  << model    << "'"
         ", '"       << hardware << "'"
         ", '"       << revision << "'"
-        ", '"       << serial   << "');" << endl;
-        
+        ", '"       << serial   << "'" <<
+        " WHERE NOT EXISTS (SELECT * FROM hardware WHERE model = '" << model << "' " <<
+        " AND hardware  = '" << hardware    << "' " <<
+        " AND serial    = '" << serial      << "' " <<
+        " AND revision  = '" << revision    << "' " << ");";
+        //cout << "sql hardware: " << sql.str() << endl;
         db_execute(sql.str().c_str());
+    
+        std::string last_hardware_id_query = "SELECT MAX(_id) FROM hardware;";
+        vector<vector<string> > hardware_array = db_select(last_hardware_id_query.c_str(), 1);
+        int db_hardware_id = atoi(hardware_array.at(0).at(0).c_str());
+        cout << "db_hardware_id: " << db_hardware_id << endl;
+    
+    return db_hardware_id;
+    
     
 }
 
 
-void db_cams(std::vector<int> cams)
+std::vector<int> db_cams(std::vector<int> cams)
 {
+    
+    std::vector<int> camsarray;
+    
     for(int i=0; i<cams.size(); i++)
     {
         std::stringstream command;
@@ -183,13 +186,22 @@ void db_cams(std::vector<int> cams)
         
         stringstream insert_camera_query;
         insert_camera_query <<
-        "INSERT INTO cameras (number, name) "       <<
-        "SELECT " << cams.at(i) << ",'" << camera << "' "  <<
-        "WHERE NOT EXISTS (SELECT * FROM cameras WHERE name = '" + camera + "');";
-        
+        "INSERT INTO cameras (number, name, recognizing) " <<
+        "SELECT " << cams.at(i) << ",'" << camera << "',"  << 0 <<
+        " WHERE NOT EXISTS (SELECT * FROM cameras WHERE name = '" + camera + "');";
+        cout << "insert_camera_query: " << insert_camera_query.str() << endl;
         db_execute(insert_camera_query.str().c_str());
-
+        
+        std::string last_cameras_id_query = "SELECT MAX(_id) FROM cameras";
+        vector<vector<string> > cameras_array = db_select(last_cameras_id_query.c_str(), 1);
+        int db_camera_id = atoi(cameras_array.at(0).at(0).c_str());
+        cout << "db_camera_id: " << db_camera_id << endl;
+        
+        camsarray.push_back(db_camera_id);
+        
     }
+    
+    return camsarray;
 }
 
 

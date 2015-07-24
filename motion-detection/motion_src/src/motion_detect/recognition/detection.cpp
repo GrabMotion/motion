@@ -28,6 +28,9 @@
 
 #include "../tinyxml/tinyxml.h"
 #include "../tinyxml/tinystr.h"
+
+#include "../database/database.h"
+
 #include <string>
 #include <vector>
 #include <functional>
@@ -40,9 +43,12 @@
 using namespace std;
 using namespace cv;
 
+motion::Message::MotionCamera * pcamera;
 motion::Message::MotionMonth * pmonth;
 motion::Message::MotionDay * pday;
 motion::Message::Instance * pinstance;
+
+pthread_t thread_store_instance;
 
 std::vector<cv::Point2f> stringToVectorPoint2f(std::string storedcoord)
 {
@@ -402,7 +408,7 @@ inline int detectMotionRegion(const cv::Mat & motionmat,
 
 struct arg_struct
 {
-    motion::Message message;
+    motion::Message::MotionDay day;
 };
 
 
@@ -418,9 +424,13 @@ void * startRecognition(void * arg)
     R_PROTO.Clear();
     R_PROTO = PROTO;
     
+    //Camera.
+    int cam = R_PROTO.activecamera();
+    
     //Region
     bool has_region;
     std::vector<cv::Point2f> region;
+    std::string rcoords;
     if (R_PROTO.region())
     {
         cout << "Has region." << endl;
@@ -429,7 +439,7 @@ void * startRecognition(void * arg)
             cout << "Has regioncoords." << endl;
             std::string rc = R_PROTO.regioncoords();
             cout << "rc." << rc << endl;
-            std::string rcoords = base64_decode(rc);
+            rcoords = base64_decode(rc);
             cout << "rcoords." << rcoords << endl;
             region = processRegionString(rcoords);
             cout << "REGION SIZE :: " << region.size() << endl;
@@ -442,6 +452,21 @@ void * startRecognition(void * arg)
     else
     {
         has_region = false;
+    }
+    
+    if (has_region)
+    {
+        stringstream sql_coord;
+        sql_coord <<
+        "INSERT INTO coordinates (coordinates) " <<
+        "VALUES ('" << rcoords    << "');";
+        db_execute(sql_coord.str().c_str());
+        cout << "pasa" << endl;
+        std::string last_coordinates_query = "SELECT MAX(_id) FROM coordinates";
+        vector<vector<string> > coords_array = db_select(last_coordinates_query.c_str(), 1);
+        cout << "coords_array: " << endl;
+        db_coordnates_id = atoi(coords_array.at(0).at(0).c_str());
+        cout << "db_coordnates_id: " << db_coordnates_id << endl;
     }
     
     std::string instancecode;
@@ -472,8 +497,6 @@ void * startRecognition(void * arg)
         R_PROTO.set_xmlfilename(XML_FILE);
     }
     
-    cout << "MONTH" << endl;
-    
     //Get Month abr.
     struct timeval tm;
     struct tm* ptm;
@@ -481,6 +504,46 @@ void * startRecognition(void * arg)
     gettimeofday (&tm, NULL);
     ptm = localtime (&tm.tv_sec);
     strftime (month_rasp, sizeof (month_rasp), "%h", ptm);
+    
+    //Check if exist month on proto or else add it.
+    string str_camera;
+    int sizec = R_PROTO.motioncamera_size();
+    cout << "sizec: " << sizec << endl;
+    bool cameraexist = false;
+    for (int i = 0; i < sizec; i++)
+    {
+        cout << "entra" << endl;
+        motion::Message::MotionCamera * mcamera = R_PROTO.mutable_motioncamera(i);
+        if (mcamera->has_camera())
+        {
+            cout << "has camera" << endl;
+            std::string camera = mcamera->camera();
+            if (str_camera.find(camera))
+            {
+                cout << "has camera" << endl;
+                pcamera = R_PROTO.mutable_motioncamera(i);
+                cameraexist=true;
+            }
+        }
+        else
+        {
+            cout << "has NO camera" << endl;
+        }
+    }
+    if(!cameraexist)
+    {
+        cout << "!cameraexist" << endl;
+        //Add proto camera.
+        pcamera = R_PROTO.add_motioncamera();
+        pcamera->set_camera(str_camera);
+        cout << "sigo" << endl;
+    }
+
+    //database camera id.
+    std::string camera_id_query = "SELECT _id FROM cameras where name = '" + pcamera->camera() + "';";
+    cout << " camera_id_query " << camera_id_query << endl;
+    vector<vector<string> > camera_array = db_select(camera_id_query.c_str(), 1);
+    db_camera_id = atoi(camera_array.at(0).at(0).c_str());
     
     //Month.
     string str_month;
@@ -491,38 +554,57 @@ void * startRecognition(void * arg)
     cout << "str_month: " << str_month << endl;
     
     //Check if exist month on proto or else add it.
-    int sizem = R_PROTO.motionmonth_size();
-    cout << "sizem: " << sizem << endl;
+    //int sizem = R_PROTO.motionmonth_size();
+    //cout << "sizem: " << sizem << endl;
     bool monthexist = false;
-    for (int i = 0; i < sizem; i++)
+    cout << "pcamera->motionmonth_size(): " << pcamera->motionmonth_size() << endl;
+    for (int i = 0; i < pcamera->motionmonth_size(); i++)
     {
-        cout << "entra" << endl;
-        motion::Message::MotionMonth * mmonth = R_PROTO.mutable_motionmonth(i);
-        if (mmonth->has_monthlabel())
-        {
-            cout << "has label" << endl;
-            std::string mlabel = mmonth->monthlabel();
+            std::string mlabel = pcamera->motionmonth(i).monthlabel();
+            cout << "mlabel: " << str_month << endl;
             if (str_month.find(mlabel))
             {
                 cout << "has month" << endl;
-                pmonth = R_PROTO.mutable_motionmonth(i);
+                pmonth = pcamera->mutable_motionmonth(i);
                 monthexist=true;
             }
-        }
-        else
-        {
-            cout << "has NO month" << endl;
-        }
     }
     if(!monthexist)
     {
         cout << "!monthexist" << endl;
         //Add proto month.
-        pmonth = R_PROTO.add_motionmonth();
+        pmonth = pcamera->add_motionmonth();
         pmonth->set_monthlabel(str_month);
         cout << "sigo" << endl;
     }
     
+    //month database.
+    stringstream sql_month;
+    sql_month <<
+    "INSERT INTO month (label) "       <<
+    "SELECT '" << str_month << "' "  <<
+    "WHERE NOT EXISTS (SELECT * FROM month WHERE label = '" + str_month + "');";
+    db_execute(sql_month.str().c_str());
+    std::string last_month_id_query = "SELECT MAX(_id) FROM month";
+    vector<vector<string> > month_array = db_select(last_month_id_query.c_str(), 1);
+    db_month_id = atoi(month_array.at(0).at(0).c_str());
+    cout << "db_month_id: " << db_month_id << endl;
+    
+    //rel_camera_month.
+    stringstream sql_rel_camera_month;
+    sql_rel_camera_month <<
+    "INSERT INTO rel_camera_month (_id_camera, _id_month) "       <<
+    "SELECT " << db_camera_id << ", "  << db_month_id <<
+    " WHERE NOT EXISTS (SELECT * FROM rel_camera_month WHERE _id_camera = " << db_camera_id <<
+    " AND _id_month = " << db_month_id << ");";
+    db_execute(sql_rel_camera_month.str().c_str());
+    
+    // get rel id.
+    std::string last_rel_camera_month_query = "SELECT MAX(_id) FROM rel_camera_month";
+    vector<vector<string> > rel_camera_month_array = db_select(last_rel_camera_month_query.c_str(), 1);
+    db_rel_camera_month_id = atoi(rel_camera_month_array.at(0).at(0).c_str());
+    cout << "db_rel_camera_month_id: " << db_rel_camera_month_id << endl;
+
     //Day.
     string str_day;
     if (R_PROTO.has_currday())
@@ -560,7 +642,55 @@ void * startRecognition(void * arg)
     std::cout << "writeImages: " << writeImages << endl;
     std::cout << "writeCroop: " << writeCroop << endl;
     
-    const string DIR        = "../../src/motion_web/pics/";          // directory where the images will be stored
+    //Day database.
+    stringstream sql_day;
+    sql_day <<
+    "INSERT INTO day (label) "     <<
+    "SELECT '" << str_day << "' "  <<
+    "WHERE NOT EXISTS (SELECT * FROM day WHERE label = '" + str_day + "');";
+    db_execute(sql_day.str().c_str());
+    std::string last_day_id_query = "SELECT MAX(_id) FROM day";
+    vector<vector<string> > day_array = db_select(last_day_id_query.c_str(), 1);
+    db_day_id = atoi(day_array.at(0).at(0).c_str());
+    cout << "db_day_id: " << db_day_id << endl;
+
+    //recognition_setup database.
+    stringstream sql_recognition_setup;
+    sql_recognition_setup <<
+    "INSERT INTO recognition_setup " <<
+    "(_id_day, _id_camera, _id_mat, storeimage, storecrop, codename, has_region, _id_coordinates, delay) " <<
+    "SELECT "           <<
+    db_day_id           << ", " <<
+    db_camera_id        << ", " <<
+    PROTO.activemat()   << ", " <<
+    writeImages         << ", " <<
+    writeCroop          << ", " <<
+    instancecode        << ", " <<
+    has_region          << ", " <<
+    db_coordnates_id    << ", " <<
+    delay               <<
+    " WHERE NOT EXISTS (SELECT * FROM recognition_setup WHERE" <<
+    " _id_day           = " << db_day_id            << " AND" <<
+    " _id_camera        = " << db_camera_id         << " AND" <<
+    " _id_mat           = " << PROTO.activemat()    << " AND" <<
+    " storeimage        = " << writeImages          << " AND" <<
+    " storecrop         = " << writeCroop           << " AND" <<
+    " codename          = " << instancecode         << " AND" <<
+    " has_region        = " << has_region           << ");";
+    db_execute(sql_recognition_setup.str().c_str());
+    std::string last_recognition_setup_id_query = "SELECT MAX(_id) FROM recognition_setup";
+    vector<vector<string> > recognition_setup_array = db_select(last_recognition_setup_id_query.c_str(), 1);
+    db_recognition_setup_id = atoi(day_array.at(0).at(0).c_str());
+    cout << "db_recognition_setup_id: " << db_day_id << endl;
+    
+    pday->set_db_dayid(db_day_id);
+    pday->set_db_recognitionsetupid(db_recognition_setup_id);
+    
+    //Camera dir.
+    std::stringstream camdir;
+    camdir << "../../src/motion_web/pics/" << "camera" << cam;
+   
+    const string DIR        = camdir.str();          // directory where the images will be stored
     //const string REGION     = "../../src/motion_web/pics/region/";   // directory where the regios are stored
     const string EXT        = ".jpg";                           // extension of the images
     const string EXT_DATA   = ".xml";                           // extension of the data
@@ -568,7 +698,6 @@ void * startRecognition(void * arg)
     const string LOG    = "../../src/motion_web/log";           // log for the export
     const string LOGCLEAR = LOG + "/log_remove";    
                                         // region vector storing xml region
-    
     // fps calculated using number of frames / seconds
     double fps; 
     // start and end times
@@ -596,7 +725,6 @@ void * startRecognition(void * arg)
     std::string image_file_recognized;
     
     // Set up camera
-    int cam = R_PROTO.activecamera();
     camera = cvCaptureFromCAM(cam); //CV_CAP_ANY);
     cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, 1280); //640); //1280); // width of viewport of camera
     cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, 720); //480); //720); // height of ...
@@ -811,6 +939,9 @@ void * startRecognition(void * arg)
                 pinstance->set_instanceend(end.str());
                 pthread_mutex_unlock(&protoMutex);
                 
+                motion::Message::MotionDay * pdi = pday;
+                pthread_create(&thread_store_instance, NULL, storenInstance, pdi);
+                
             }       
             
             // XML Instance
@@ -827,5 +958,92 @@ void * startRecognition(void * arg)
     }
     
     return 0;
+}
+
+void * storenInstance(void * arg)
+{
+    pthread_detach(pthread_self());
+    
+    struct arg_struct *args = (struct arg_struct *) arg;
+    motion::Message::MotionDay day      = args->day;
+    
+    time_t rawtime;
+    struct tm * timeinfo;
+    
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+    
+    for (int k = 0; k < day.instance_size(); k++)
+    {
+        const motion::Message::Instance & ins = day.instance(k);
+    
+        for (int j = 0; j < ins.image_size(); j++)
+        {
+            //Image
+            int db_image_id;
+            const motion::Message::Image & img = ins.image(j);
+            
+            stringstream sql_img;
+            sql_img <<
+            "INSERT INTO image (path,name,imagechanges) " <<
+            "VALUES ('" << img.path()      << "'"
+            ", '"       << img.name()          << "'"
+            ",  "       << img.imagechanges()  << ");";
+            db_execute(sql_img.str().c_str());
+            
+            std::string last_image_query = "SELECT MAX(_id) FROM image";
+            vector<vector<string> > image_array = db_select(last_image_query.c_str(), 1);
+            db_image_id = atoi(image_array.at(0).at(0).c_str());
+            cout << "db_image_id: " << db_image_id << endl;
+            
+            //Crop
+            int db_crop_id;
+            const motion::Message::Crop & crop = ins.crop(j);
+            string path = crop.path();
+            
+            stringstream sql_crop;
+            sql_crop <<
+            "INSERT INTO crop (path,name,_id_image_father) " <<
+            "VALUES ('" << crop.path()          << "'"
+            ", '"       << crop.name()          << "'"
+            ", "        << db_image_id           << ");";
+            db_execute(sql_crop.str().c_str());
+            
+            std::string last_crop_query = "SELECT MAX(_id) FROM crop";
+            vector<vector<string> > crop_array = db_select(last_crop_query.c_str(), 1);
+            db_crop_id = atoi(crop_array.at(0).at(0).c_str());
+            cout << "db_crop_id: " << db_crop_id << endl;
+            
+            //Instance
+            stringstream sql_instance;
+            sql_instance <<
+            "INSERT INTO instance (instancestart, instanceend, fileformat, croppedformat, id_image, id_crop, time) " <<
+            "VALUES ('" << ins.instancestart()     << "'"
+            ", '"       << ins.instanceend()       << "'"
+            ", '"       << ins.fileformat()        << "'"
+            ", "        << db_image_id              <<
+            ", "        << db_crop_id               <<
+            ", '"       << timeinfo                 << "');";
+            db_execute(sql_crop.str().c_str());
+            
+            std::string last_instance_query = "SELECT MAX(_id) FROM instance";
+            vector<vector<string> > instance_array = db_select(last_instance_query.c_str(), 1);
+            int db_instance_id = atoi(instance_array.at(0).at(0).c_str());
+            cout << "db_instance_id: " << db_instance_id << endl;
+            
+            //Instance
+            stringstream sql_rel_day_instance;
+            sql_rel_day_instance <<
+            "INSERT INTO rel_day_instance (_id_day, _id_instance, _id_recognition_setup) " <<
+            "VALUES ("  << day.db_dayid()                 <<
+            ", "        << db_instance_id                   <<
+            ", "        << day.db_recognitionsetupid()    << ");";
+            db_execute(sql_rel_day_instance.str().c_str());
+
+        }
+    
+    }
+    
+    
 }
 

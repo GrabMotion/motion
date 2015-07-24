@@ -35,6 +35,7 @@ void protobuf_AssignDesc_motion_2eproto();
 void protobuf_ShutdownFile_motion_2eproto();
 
 class Message;
+class Message_MotionCamera;
 class Message_MotionMonth;
 class Message_MotionDay;
 class Message_Instance;
@@ -115,6 +116,113 @@ inline bool Message_SocketType_Parse(
     Message_SocketType_descriptor(), name, value);
 }
 // ===================================================================
+
+class Message_MotionCamera : public ::google::protobuf::Message {
+ public:
+  Message_MotionCamera();
+  virtual ~Message_MotionCamera();
+
+  Message_MotionCamera(const Message_MotionCamera& from);
+
+  inline Message_MotionCamera& operator=(const Message_MotionCamera& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Message_MotionCamera& default_instance();
+
+  void Swap(Message_MotionCamera* other);
+
+  // implements Message ----------------------------------------------
+
+  Message_MotionCamera* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Message_MotionCamera& from);
+  void MergeFrom(const Message_MotionCamera& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .motion.Message.MotionMonth motionmonth = 1;
+  inline int motionmonth_size() const;
+  inline void clear_motionmonth();
+  static const int kMotionmonthFieldNumber = 1;
+  inline const ::motion::Message_MotionMonth& motionmonth(int index) const;
+  inline ::motion::Message_MotionMonth* mutable_motionmonth(int index);
+  inline ::motion::Message_MotionMonth* add_motionmonth();
+  inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionMonth >&
+      motionmonth() const;
+  inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionMonth >*
+      mutable_motionmonth();
+
+  // optional int32 cameraid = 2;
+  inline bool has_cameraid() const;
+  inline void clear_cameraid();
+  static const int kCameraidFieldNumber = 2;
+  inline ::google::protobuf::int32 cameraid() const;
+  inline void set_cameraid(::google::protobuf::int32 value);
+
+  // optional string camera = 3;
+  inline bool has_camera() const;
+  inline void clear_camera();
+  static const int kCameraFieldNumber = 3;
+  inline const ::std::string& camera() const;
+  inline void set_camera(const ::std::string& value);
+  inline void set_camera(const char* value);
+  inline void set_camera(const char* value, size_t size);
+  inline ::std::string* mutable_camera();
+  inline ::std::string* release_camera();
+  inline void set_allocated_camera(::std::string* camera);
+
+  // @@protoc_insertion_point(class_scope:motion.Message.MotionCamera)
+ private:
+  inline void set_has_cameraid();
+  inline void clear_has_cameraid();
+  inline void set_has_camera();
+  inline void clear_has_camera();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionMonth > motionmonth_;
+  ::std::string* camera_;
+  ::google::protobuf::int32 cameraid_;
+  friend void  protobuf_AddDesc_motion_2eproto();
+  friend void protobuf_AssignDesc_motion_2eproto();
+  friend void protobuf_ShutdownFile_motion_2eproto();
+
+  void InitAsDefaultInstance();
+  static Message_MotionCamera* default_instance_;
+};
+// -------------------------------------------------------------------
 
 class Message_MotionMonth : public ::google::protobuf::Message {
  public:
@@ -266,22 +374,10 @@ class Message_MotionDay : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string daylabel = 1;
-  inline bool has_daylabel() const;
-  inline void clear_daylabel();
-  static const int kDaylabelFieldNumber = 1;
-  inline const ::std::string& daylabel() const;
-  inline void set_daylabel(const ::std::string& value);
-  inline void set_daylabel(const char* value);
-  inline void set_daylabel(const char* value, size_t size);
-  inline ::std::string* mutable_daylabel();
-  inline ::std::string* release_daylabel();
-  inline void set_allocated_daylabel(::std::string* daylabel);
-
-  // repeated .motion.Message.Instance instance = 2;
+  // repeated .motion.Message.Instance instance = 1;
   inline int instance_size() const;
   inline void clear_instance();
-  static const int kInstanceFieldNumber = 2;
+  static const int kInstanceFieldNumber = 1;
   inline const ::motion::Message_Instance& instance(int index) const;
   inline ::motion::Message_Instance* mutable_instance(int index);
   inline ::motion::Message_Instance* add_instance();
@@ -290,17 +386,49 @@ class Message_MotionDay : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance >*
       mutable_instance();
 
+  // optional string daylabel = 2;
+  inline bool has_daylabel() const;
+  inline void clear_daylabel();
+  static const int kDaylabelFieldNumber = 2;
+  inline const ::std::string& daylabel() const;
+  inline void set_daylabel(const ::std::string& value);
+  inline void set_daylabel(const char* value);
+  inline void set_daylabel(const char* value, size_t size);
+  inline ::std::string* mutable_daylabel();
+  inline ::std::string* release_daylabel();
+  inline void set_allocated_daylabel(::std::string* daylabel);
+
+  // optional int32 db_dayid = 3;
+  inline bool has_db_dayid() const;
+  inline void clear_db_dayid();
+  static const int kDbDayidFieldNumber = 3;
+  inline ::google::protobuf::int32 db_dayid() const;
+  inline void set_db_dayid(::google::protobuf::int32 value);
+
+  // optional int32 db_recognitionsetupid = 4;
+  inline bool has_db_recognitionsetupid() const;
+  inline void clear_db_recognitionsetupid();
+  static const int kDbRecognitionsetupidFieldNumber = 4;
+  inline ::google::protobuf::int32 db_recognitionsetupid() const;
+  inline void set_db_recognitionsetupid(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:motion.Message.MotionDay)
  private:
   inline void set_has_daylabel();
   inline void clear_has_daylabel();
+  inline void set_has_db_dayid();
+  inline void clear_has_db_dayid();
+  inline void set_has_db_recognitionsetupid();
+  inline void clear_has_db_recognitionsetupid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::std::string* daylabel_;
   ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance > instance_;
+  ::std::string* daylabel_;
+  ::google::protobuf::int32 db_dayid_;
+  ::google::protobuf::int32 db_recognitionsetupid_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -749,6 +877,7 @@ class Message : public ::google::protobuf::Message {
 
   // nested types ----------------------------------------------------
 
+  typedef Message_MotionCamera MotionCamera;
   typedef Message_MotionMonth MotionMonth;
   typedef Message_MotionDay MotionDay;
   typedef Message_Instance Instance;
@@ -916,17 +1045,17 @@ class Message : public ::google::protobuf::Message {
   inline bool recognizing() const;
   inline void set_recognizing(bool value);
 
-  // repeated .motion.Message.MotionMonth motionmonth = 9;
-  inline int motionmonth_size() const;
-  inline void clear_motionmonth();
-  static const int kMotionmonthFieldNumber = 9;
-  inline const ::motion::Message_MotionMonth& motionmonth(int index) const;
-  inline ::motion::Message_MotionMonth* mutable_motionmonth(int index);
-  inline ::motion::Message_MotionMonth* add_motionmonth();
-  inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionMonth >&
-      motionmonth() const;
-  inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionMonth >*
-      mutable_motionmonth();
+  // repeated .motion.Message.MotionCamera motioncamera = 9;
+  inline int motioncamera_size() const;
+  inline void clear_motioncamera();
+  static const int kMotioncameraFieldNumber = 9;
+  inline const ::motion::Message_MotionCamera& motioncamera(int index) const;
+  inline ::motion::Message_MotionCamera* mutable_motioncamera(int index);
+  inline ::motion::Message_MotionCamera* add_motioncamera();
+  inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera >&
+      motioncamera() const;
+  inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera >*
+      mutable_motioncamera();
 
   // optional bool storeimage = 10;
   inline bool has_storeimage() const;
@@ -1199,7 +1328,7 @@ class Message : public ::google::protobuf::Message {
   ::std::string* data_;
   ::std::string* serverip_;
   ::std::string* clientip_;
-  ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionMonth > motionmonth_;
+  ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera > motioncamera_;
   ::google::protobuf::int32 data_total_;
   bool recognizing_;
   bool storeimage_;
@@ -1234,6 +1363,140 @@ class Message : public ::google::protobuf::Message {
 
 
 // ===================================================================
+
+// Message_MotionCamera
+
+// repeated .motion.Message.MotionMonth motionmonth = 1;
+inline int Message_MotionCamera::motionmonth_size() const {
+  return motionmonth_.size();
+}
+inline void Message_MotionCamera::clear_motionmonth() {
+  motionmonth_.Clear();
+}
+inline const ::motion::Message_MotionMonth& Message_MotionCamera::motionmonth(int index) const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionCamera.motionmonth)
+  return motionmonth_.Get(index);
+}
+inline ::motion::Message_MotionMonth* Message_MotionCamera::mutable_motionmonth(int index) {
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionCamera.motionmonth)
+  return motionmonth_.Mutable(index);
+}
+inline ::motion::Message_MotionMonth* Message_MotionCamera::add_motionmonth() {
+  // @@protoc_insertion_point(field_add:motion.Message.MotionCamera.motionmonth)
+  return motionmonth_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionMonth >&
+Message_MotionCamera::motionmonth() const {
+  // @@protoc_insertion_point(field_list:motion.Message.MotionCamera.motionmonth)
+  return motionmonth_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionMonth >*
+Message_MotionCamera::mutable_motionmonth() {
+  // @@protoc_insertion_point(field_mutable_list:motion.Message.MotionCamera.motionmonth)
+  return &motionmonth_;
+}
+
+// optional int32 cameraid = 2;
+inline bool Message_MotionCamera::has_cameraid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Message_MotionCamera::set_has_cameraid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Message_MotionCamera::clear_has_cameraid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void Message_MotionCamera::clear_cameraid() {
+  cameraid_ = 0;
+  clear_has_cameraid();
+}
+inline ::google::protobuf::int32 Message_MotionCamera::cameraid() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionCamera.cameraid)
+  return cameraid_;
+}
+inline void Message_MotionCamera::set_cameraid(::google::protobuf::int32 value) {
+  set_has_cameraid();
+  cameraid_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionCamera.cameraid)
+}
+
+// optional string camera = 3;
+inline bool Message_MotionCamera::has_camera() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Message_MotionCamera::set_has_camera() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Message_MotionCamera::clear_has_camera() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void Message_MotionCamera::clear_camera() {
+  if (camera_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    camera_->clear();
+  }
+  clear_has_camera();
+}
+inline const ::std::string& Message_MotionCamera::camera() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionCamera.camera)
+  return *camera_;
+}
+inline void Message_MotionCamera::set_camera(const ::std::string& value) {
+  set_has_camera();
+  if (camera_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    camera_ = new ::std::string;
+  }
+  camera_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionCamera.camera)
+}
+inline void Message_MotionCamera::set_camera(const char* value) {
+  set_has_camera();
+  if (camera_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    camera_ = new ::std::string;
+  }
+  camera_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionCamera.camera)
+}
+inline void Message_MotionCamera::set_camera(const char* value, size_t size) {
+  set_has_camera();
+  if (camera_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    camera_ = new ::std::string;
+  }
+  camera_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionCamera.camera)
+}
+inline ::std::string* Message_MotionCamera::mutable_camera() {
+  set_has_camera();
+  if (camera_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    camera_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionCamera.camera)
+  return camera_;
+}
+inline ::std::string* Message_MotionCamera::release_camera() {
+  clear_has_camera();
+  if (camera_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = camera_;
+    camera_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionCamera::set_allocated_camera(::std::string* camera) {
+  if (camera_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete camera_;
+  }
+  if (camera) {
+    set_has_camera();
+    camera_ = camera;
+  } else {
+    clear_has_camera();
+    camera_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionCamera.camera)
+}
+
+// -------------------------------------------------------------------
 
 // Message_MotionMonth
 
@@ -1347,15 +1610,45 @@ inline void Message_MotionMonth::set_allocated_monthlabel(::std::string* monthla
 
 // Message_MotionDay
 
-// optional string daylabel = 1;
+// repeated .motion.Message.Instance instance = 1;
+inline int Message_MotionDay::instance_size() const {
+  return instance_.size();
+}
+inline void Message_MotionDay::clear_instance() {
+  instance_.Clear();
+}
+inline const ::motion::Message_Instance& Message_MotionDay::instance(int index) const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDay.instance)
+  return instance_.Get(index);
+}
+inline ::motion::Message_Instance* Message_MotionDay::mutable_instance(int index) {
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDay.instance)
+  return instance_.Mutable(index);
+}
+inline ::motion::Message_Instance* Message_MotionDay::add_instance() {
+  // @@protoc_insertion_point(field_add:motion.Message.MotionDay.instance)
+  return instance_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance >&
+Message_MotionDay::instance() const {
+  // @@protoc_insertion_point(field_list:motion.Message.MotionDay.instance)
+  return instance_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance >*
+Message_MotionDay::mutable_instance() {
+  // @@protoc_insertion_point(field_mutable_list:motion.Message.MotionDay.instance)
+  return &instance_;
+}
+
+// optional string daylabel = 2;
 inline bool Message_MotionDay::has_daylabel() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void Message_MotionDay::set_has_daylabel() {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void Message_MotionDay::clear_has_daylabel() {
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void Message_MotionDay::clear_daylabel() {
   if (daylabel_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -1423,34 +1716,52 @@ inline void Message_MotionDay::set_allocated_daylabel(::std::string* daylabel) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDay.daylabel)
 }
 
-// repeated .motion.Message.Instance instance = 2;
-inline int Message_MotionDay::instance_size() const {
-  return instance_.size();
+// optional int32 db_dayid = 3;
+inline bool Message_MotionDay::has_db_dayid() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void Message_MotionDay::clear_instance() {
-  instance_.Clear();
+inline void Message_MotionDay::set_has_db_dayid() {
+  _has_bits_[0] |= 0x00000004u;
 }
-inline const ::motion::Message_Instance& Message_MotionDay::instance(int index) const {
-  // @@protoc_insertion_point(field_get:motion.Message.MotionDay.instance)
-  return instance_.Get(index);
+inline void Message_MotionDay::clear_has_db_dayid() {
+  _has_bits_[0] &= ~0x00000004u;
 }
-inline ::motion::Message_Instance* Message_MotionDay::mutable_instance(int index) {
-  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDay.instance)
-  return instance_.Mutable(index);
+inline void Message_MotionDay::clear_db_dayid() {
+  db_dayid_ = 0;
+  clear_has_db_dayid();
 }
-inline ::motion::Message_Instance* Message_MotionDay::add_instance() {
-  // @@protoc_insertion_point(field_add:motion.Message.MotionDay.instance)
-  return instance_.Add();
+inline ::google::protobuf::int32 Message_MotionDay::db_dayid() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDay.db_dayid)
+  return db_dayid_;
 }
-inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance >&
-Message_MotionDay::instance() const {
-  // @@protoc_insertion_point(field_list:motion.Message.MotionDay.instance)
-  return instance_;
+inline void Message_MotionDay::set_db_dayid(::google::protobuf::int32 value) {
+  set_has_db_dayid();
+  db_dayid_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDay.db_dayid)
 }
-inline ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance >*
-Message_MotionDay::mutable_instance() {
-  // @@protoc_insertion_point(field_mutable_list:motion.Message.MotionDay.instance)
-  return &instance_;
+
+// optional int32 db_recognitionsetupid = 4;
+inline bool Message_MotionDay::has_db_recognitionsetupid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void Message_MotionDay::set_has_db_recognitionsetupid() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void Message_MotionDay::clear_has_db_recognitionsetupid() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void Message_MotionDay::clear_db_recognitionsetupid() {
+  db_recognitionsetupid_ = 0;
+  clear_has_db_recognitionsetupid();
+}
+inline ::google::protobuf::int32 Message_MotionDay::db_recognitionsetupid() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDay.db_recognitionsetupid)
+  return db_recognitionsetupid_;
+}
+inline void Message_MotionDay::set_db_recognitionsetupid(::google::protobuf::int32 value) {
+  set_has_db_recognitionsetupid();
+  db_recognitionsetupid_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDay.db_recognitionsetupid)
 }
 
 // -------------------------------------------------------------------
@@ -2662,34 +2973,34 @@ inline void Message::set_recognizing(bool value) {
   // @@protoc_insertion_point(field_set:motion.Message.recognizing)
 }
 
-// repeated .motion.Message.MotionMonth motionmonth = 9;
-inline int Message::motionmonth_size() const {
-  return motionmonth_.size();
+// repeated .motion.Message.MotionCamera motioncamera = 9;
+inline int Message::motioncamera_size() const {
+  return motioncamera_.size();
 }
-inline void Message::clear_motionmonth() {
-  motionmonth_.Clear();
+inline void Message::clear_motioncamera() {
+  motioncamera_.Clear();
 }
-inline const ::motion::Message_MotionMonth& Message::motionmonth(int index) const {
-  // @@protoc_insertion_point(field_get:motion.Message.motionmonth)
-  return motionmonth_.Get(index);
+inline const ::motion::Message_MotionCamera& Message::motioncamera(int index) const {
+  // @@protoc_insertion_point(field_get:motion.Message.motioncamera)
+  return motioncamera_.Get(index);
 }
-inline ::motion::Message_MotionMonth* Message::mutable_motionmonth(int index) {
-  // @@protoc_insertion_point(field_mutable:motion.Message.motionmonth)
-  return motionmonth_.Mutable(index);
+inline ::motion::Message_MotionCamera* Message::mutable_motioncamera(int index) {
+  // @@protoc_insertion_point(field_mutable:motion.Message.motioncamera)
+  return motioncamera_.Mutable(index);
 }
-inline ::motion::Message_MotionMonth* Message::add_motionmonth() {
-  // @@protoc_insertion_point(field_add:motion.Message.motionmonth)
-  return motionmonth_.Add();
+inline ::motion::Message_MotionCamera* Message::add_motioncamera() {
+  // @@protoc_insertion_point(field_add:motion.Message.motioncamera)
+  return motioncamera_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionMonth >&
-Message::motionmonth() const {
-  // @@protoc_insertion_point(field_list:motion.Message.motionmonth)
-  return motionmonth_;
+inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera >&
+Message::motioncamera() const {
+  // @@protoc_insertion_point(field_list:motion.Message.motioncamera)
+  return motioncamera_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionMonth >*
-Message::mutable_motionmonth() {
-  // @@protoc_insertion_point(field_mutable_list:motion.Message.motionmonth)
-  return &motionmonth_;
+inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera >*
+Message::mutable_motioncamera() {
+  // @@protoc_insertion_point(field_mutable_list:motion.Message.motioncamera)
+  return &motioncamera_;
 }
 
 // optional bool storeimage = 10;

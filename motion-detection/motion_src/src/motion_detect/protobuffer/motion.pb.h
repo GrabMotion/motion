@@ -374,22 +374,10 @@ class Message_MotionDay : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional string daylabel = 1;
-  inline bool has_daylabel() const;
-  inline void clear_daylabel();
-  static const int kDaylabelFieldNumber = 1;
-  inline const ::std::string& daylabel() const;
-  inline void set_daylabel(const ::std::string& value);
-  inline void set_daylabel(const char* value);
-  inline void set_daylabel(const char* value, size_t size);
-  inline ::std::string* mutable_daylabel();
-  inline ::std::string* release_daylabel();
-  inline void set_allocated_daylabel(::std::string* daylabel);
-
-  // repeated .motion.Message.Instance instance = 2;
+  // repeated .motion.Message.Instance instance = 1;
   inline int instance_size() const;
   inline void clear_instance();
-  static const int kInstanceFieldNumber = 2;
+  static const int kInstanceFieldNumber = 1;
   inline const ::motion::Message_Instance& instance(int index) const;
   inline ::motion::Message_Instance* mutable_instance(int index);
   inline ::motion::Message_Instance* add_instance();
@@ -398,17 +386,49 @@ class Message_MotionDay : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance >*
       mutable_instance();
 
+  // optional string daylabel = 2;
+  inline bool has_daylabel() const;
+  inline void clear_daylabel();
+  static const int kDaylabelFieldNumber = 2;
+  inline const ::std::string& daylabel() const;
+  inline void set_daylabel(const ::std::string& value);
+  inline void set_daylabel(const char* value);
+  inline void set_daylabel(const char* value, size_t size);
+  inline ::std::string* mutable_daylabel();
+  inline ::std::string* release_daylabel();
+  inline void set_allocated_daylabel(::std::string* daylabel);
+
+  // optional int32 db_dayid = 3;
+  inline bool has_db_dayid() const;
+  inline void clear_db_dayid();
+  static const int kDbDayidFieldNumber = 3;
+  inline ::google::protobuf::int32 db_dayid() const;
+  inline void set_db_dayid(::google::protobuf::int32 value);
+
+  // optional int32 db_recognitionsetupid = 4;
+  inline bool has_db_recognitionsetupid() const;
+  inline void clear_db_recognitionsetupid();
+  static const int kDbRecognitionsetupidFieldNumber = 4;
+  inline ::google::protobuf::int32 db_recognitionsetupid() const;
+  inline void set_db_recognitionsetupid(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:motion.Message.MotionDay)
  private:
   inline void set_has_daylabel();
   inline void clear_has_daylabel();
+  inline void set_has_db_dayid();
+  inline void clear_has_db_dayid();
+  inline void set_has_db_recognitionsetupid();
+  inline void clear_has_db_recognitionsetupid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::std::string* daylabel_;
   ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance > instance_;
+  ::std::string* daylabel_;
+  ::google::protobuf::int32 db_dayid_;
+  ::google::protobuf::int32 db_recognitionsetupid_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -1590,15 +1610,45 @@ inline void Message_MotionMonth::set_allocated_monthlabel(::std::string* monthla
 
 // Message_MotionDay
 
-// optional string daylabel = 1;
+// repeated .motion.Message.Instance instance = 1;
+inline int Message_MotionDay::instance_size() const {
+  return instance_.size();
+}
+inline void Message_MotionDay::clear_instance() {
+  instance_.Clear();
+}
+inline const ::motion::Message_Instance& Message_MotionDay::instance(int index) const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDay.instance)
+  return instance_.Get(index);
+}
+inline ::motion::Message_Instance* Message_MotionDay::mutable_instance(int index) {
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDay.instance)
+  return instance_.Mutable(index);
+}
+inline ::motion::Message_Instance* Message_MotionDay::add_instance() {
+  // @@protoc_insertion_point(field_add:motion.Message.MotionDay.instance)
+  return instance_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance >&
+Message_MotionDay::instance() const {
+  // @@protoc_insertion_point(field_list:motion.Message.MotionDay.instance)
+  return instance_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance >*
+Message_MotionDay::mutable_instance() {
+  // @@protoc_insertion_point(field_mutable_list:motion.Message.MotionDay.instance)
+  return &instance_;
+}
+
+// optional string daylabel = 2;
 inline bool Message_MotionDay::has_daylabel() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void Message_MotionDay::set_has_daylabel() {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void Message_MotionDay::clear_has_daylabel() {
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void Message_MotionDay::clear_daylabel() {
   if (daylabel_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -1666,34 +1716,52 @@ inline void Message_MotionDay::set_allocated_daylabel(::std::string* daylabel) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDay.daylabel)
 }
 
-// repeated .motion.Message.Instance instance = 2;
-inline int Message_MotionDay::instance_size() const {
-  return instance_.size();
+// optional int32 db_dayid = 3;
+inline bool Message_MotionDay::has_db_dayid() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void Message_MotionDay::clear_instance() {
-  instance_.Clear();
+inline void Message_MotionDay::set_has_db_dayid() {
+  _has_bits_[0] |= 0x00000004u;
 }
-inline const ::motion::Message_Instance& Message_MotionDay::instance(int index) const {
-  // @@protoc_insertion_point(field_get:motion.Message.MotionDay.instance)
-  return instance_.Get(index);
+inline void Message_MotionDay::clear_has_db_dayid() {
+  _has_bits_[0] &= ~0x00000004u;
 }
-inline ::motion::Message_Instance* Message_MotionDay::mutable_instance(int index) {
-  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDay.instance)
-  return instance_.Mutable(index);
+inline void Message_MotionDay::clear_db_dayid() {
+  db_dayid_ = 0;
+  clear_has_db_dayid();
 }
-inline ::motion::Message_Instance* Message_MotionDay::add_instance() {
-  // @@protoc_insertion_point(field_add:motion.Message.MotionDay.instance)
-  return instance_.Add();
+inline ::google::protobuf::int32 Message_MotionDay::db_dayid() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDay.db_dayid)
+  return db_dayid_;
 }
-inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance >&
-Message_MotionDay::instance() const {
-  // @@protoc_insertion_point(field_list:motion.Message.MotionDay.instance)
-  return instance_;
+inline void Message_MotionDay::set_db_dayid(::google::protobuf::int32 value) {
+  set_has_db_dayid();
+  db_dayid_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDay.db_dayid)
 }
-inline ::google::protobuf::RepeatedPtrField< ::motion::Message_Instance >*
-Message_MotionDay::mutable_instance() {
-  // @@protoc_insertion_point(field_mutable_list:motion.Message.MotionDay.instance)
-  return &instance_;
+
+// optional int32 db_recognitionsetupid = 4;
+inline bool Message_MotionDay::has_db_recognitionsetupid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void Message_MotionDay::set_has_db_recognitionsetupid() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void Message_MotionDay::clear_has_db_recognitionsetupid() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void Message_MotionDay::clear_db_recognitionsetupid() {
+  db_recognitionsetupid_ = 0;
+  clear_has_db_recognitionsetupid();
+}
+inline ::google::protobuf::int32 Message_MotionDay::db_recognitionsetupid() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDay.db_recognitionsetupid)
+  return db_recognitionsetupid_;
+}
+inline void Message_MotionDay::set_db_recognitionsetupid(::google::protobuf::int32 value) {
+  set_has_db_recognitionsetupid();
+  db_recognitionsetupid_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDay.db_recognitionsetupid)
 }
 
 // -------------------------------------------------------------------

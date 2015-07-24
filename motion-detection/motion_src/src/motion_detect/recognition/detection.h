@@ -27,6 +27,17 @@ extern cv::Mat picture;
 extern motion::Message PROTO, R_PROTO;
 extern pthread_mutex_t protoMutex;
 
+//Database
+extern int db_camera_id;
+extern int db_month_id;
+extern int db_day_id;
+extern int db_rel_camera_month_id;
+extern int db_coordnates_id;
+extern int db_recognition_setup_id;
+
+//threads;
+void * storenInstance(void * arg);
+
 extern std::string DIR_FORMAT;
 
 void * startRecognition(void * args);

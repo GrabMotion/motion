@@ -31,7 +31,7 @@ extern std::string get_file_contents(std::string filename);
 
 //static int callback(void *NotUsed, int argc, char **argv, char **azColName);
 static int callback(void *ptr, int argc, char* argv[], char* cols[] );
-void db_cpuinfo();
-void db_cams(std::vector<int> cams);
+int db_cpuinfo();
+std::vector<int> db_cams(std::vector<int> cams);
 
 

@@ -127,6 +127,17 @@ int resutl_watch_detected;
 std::string startrecognitiontime;
 string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
 
+//Database ids
+int db_hardware_id;
+int db_camera_id;
+int db_rel_hardware_camera_id;
+int db_status_id;
+int db_month_id;
+int db_day_id;
+int db_rel_camera_month_id;
+int db_coordnates_id;
+int db_recognition_setup_id;
+
 //UDP
 int udpsend(motion::Message m);
 
@@ -643,6 +654,31 @@ motion::Message getLocalPtoro()
 
 }
 
+motion::Message getDatabasePtoro()
+{
+    motion::Message mlocal;
+    
+    std::string protofile = "data/data/localproto.txt";
+    
+    if (file_exist(protofile))
+    {
+        
+        mlocal.Clear();
+        std::string backfile = protofile;
+        pthread_mutex_lock(&fileMutex);
+        string loaded = get_file_contents(backfile);
+        pthread_mutex_unlock(&fileMutex);
+        std::string oridecoded = base64_decode(loaded);
+        mlocal.ParseFromArray(oridecoded.c_str(), oridecoded.size());
+        mlocal.set_time(getTimeRasp());
+    }
+    
+    
+    
+    return mlocal;
+    
+}
+
 motion::Message runCommand(motion::Message m)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -654,6 +690,14 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::ENGAGE:
         {
             cout << "motion::Message::ENGAGE" << endl;
+            
+            //Activity
+            stringstream sql_connection;
+            sql_connection <<
+            "INSERT into connections (serverip, time) VALUES ('"
+            << m.serverip() << "', '" << getTimeRasp() << "');";
+            db_execute(sql_connection.str().c_str());
+            
             m = getLocalPtoro();
             m.set_type(motion::Message::ENGAGE);
             m.set_cameras(T_PROTO.cameras());
@@ -1178,26 +1222,10 @@ void split(const string& s, char c, vector<string>& v)
 void * broadcastsender ( void * args )
 {
     
-   std::string sech = getIpAddress();
-   cout  <<  "IP: " << sech << endl;
-   local_ip = sech;
-   vector<string> ip_vector;
-   split(local_ip, '.', ip_vector);
-   for (int i=0; i<ip_vector.size(); i++)
-   {
-        if ( i==0 | i==1)
-        {
-             NETWORK_IP +=  ip_vector[i] + ".";
-        }
-        else if ( i==2 )
-        {
-             NETWORK_IP +=  ip_vector[i];
-        } 
-   }
    std::string destAddress = NETWORK_IP + ".255";
    unsigned short destPort = motion::Message::UDP_PORT;
-   char *sendString = new char[sech.length() + 1];
-   std::strcpy(sendString, sech.c_str());
+   char *sendString = new char[local_ip.length() + 1];
+   std::strcpy(sendString, local_ip.c_str());
    char recvString[MAXRCVSTRING + 1];
     try 
     {
@@ -1253,32 +1281,10 @@ void directoryExistsOrCreate(const char* pzPath)
 int main (int argc, char * const argv[])
 {
     
-    db_cpuinfo();
-
-    string camera_query = "SELECT id, number, name from cameras;";
-
-    vector<vector<string> > camera_array = db_select(camera_query.c_str(), 3);
+    cout << "Getting hard info." << endl;
+    int db_hardware_id = db_cpuinfo();
+    cout << "db_hardware_id: " << db_hardware_id << endl;
     
-    for (int i=0; i< camera_array.size(); i++)
-    {
-        vector<string> row;
-        row = camera_array.at(i);
-        for (int j=0; j<row.size(); j++)
-        {
-            cout << "row: " << row.at(j) << endl;
-        }
-        
-    }
-    
-    
-    struct timeval tr;
-    struct tm* ptmr;
-    char time_rasp[40];
-    gettimeofday (&tr, NULL);
-    ptmr = localtime (&tr.tv_sec);
-    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
-    cout <<  ":::start time:::: " << time_rasp << endl;
-
     //Rasp Variables.
     std::vector<int> cams = getCameras();
     stringstream ss;
@@ -1286,14 +1292,103 @@ int main (int argc, char * const argv[])
     std::string cameras = ss.str();
     cameras = cameras.substr(0, cameras.length()-1);
     //Store into database.
-    db_cams(cams);
+    vector<int> camsarray = db_cams(cams);
+
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    cout <<  ":::start time:::: " << time_rasp << endl;
     
+    //Activity
+    stringstream sql_activity;
+    sql_activity <<
+    "INSERT into activity (run_time) VALUES ('" << time_rasp << "');";
+    db_execute(sql_activity.str().c_str());
+    
+    local_ip = getIpAddress();
+    cout  <<  "IP: " << local_ip << endl;
+    local_ip = local_ip;
+    vector<string> ip_vector;
+    split(local_ip, '.', ip_vector);
+    for (int i=0; i<ip_vector.size(); i++)
+    {
+        if ( i==0 | i==1)
+        {
+            NETWORK_IP +=  ip_vector[i] + ".";
+        }
+        else if ( i==2 )
+        {
+            NETWORK_IP +=  ip_vector[i];
+        }
+    }
+    
+    //Status
+    stringstream sql_status;
+    sql_status <<
+    "INSERT INTO status (ipnumber, starttime, networkip) " <<
+    "SELECT '"  << local_ip         << "'"
+    ", '"       << time_rasp        << "'"
+    ", '"       << NETWORK_IP       << "' "
+    "WHERE NOT EXISTS (SELECT * FROM status WHERE ipnumber = '"<< local_ip << "' " <<
+    "AND networkip = '" << NETWORK_IP << "');";
+    db_execute(sql_status.str().c_str());
+    
+    std::string last_status_id_query = "SELECT MAX(_id) FROM status";
+    vector<vector<string> > status_array = db_select(last_status_id_query.c_str(), 1);
+    db_status_id = atoi(status_array.at(0).at(0).c_str());
+    cout << "db_status_id: " << db_status_id << endl;
+    
+    stringstream sql_status_update;
+    sql_status_update <<
+    "UPDATE status SET starttime = '" << time_rasp << "' WHERE _id = " << db_status_id << ";";
+    db_execute(sql_status_update.str().c_str());
+    
+    cout << "Getting hard info." << endl;
+    vector<int> camhard;
+    for (int i=0; i< camsarray.size(); i++)
+    {
+        stringstream insert_camera_query;
+        insert_camera_query <<
+        "INSERT INTO rel_hardware_camera (_id_hardware, _id_camera) " <<
+        "SELECT " << db_hardware_id << "," << camsarray.at(i) <<
+        " WHERE NOT EXISTS (SELECT * FROM rel_hardware_camera WHERE _id_hardware = "
+        << camera << " AND _id_camera = " << camsarray.at(i) << ");";
+        db_execute(insert_camera_query.str().c_str());
+            
+        std::string last_har_cam_id_query = "SELECT MAX(_id) FROM rel_hardware_camera";
+        vector<vector<string> > camhard_array = db_select(last_har_cam_id_query.c_str(), 1);
+        int db_cam_hard_id = atoi(camhard_array.at(0).at(0).c_str());
+        cout << "db_cam_hard_id: " << db_cam_hard_id << endl;
+            
+        camhard.push_back(db_cam_hard_id);
+        
+    }
+
+    
+    //rel_hardware_camera_status
+    for (int i=0; i< camhard.size(); i++)
+    {
+        
+        stringstream insert_rel_hardcamsta_query;
+        insert_rel_hardcamsta_query <<
+        "INSERT INTO rel_hardware_camera_status (_id_hardware_camera, _id_status) " <<
+        "SELECT " << camhard.at(i) << "," << db_status_id <<
+        " WHERE NOT EXISTS (SELECT * FROM rel_hardware_camera_status WHERE _id_hardware_camera = "
+        << camhard.at(i) << " AND _id_status = " << db_status_id << ");";
+        db_execute(insert_rel_hardcamsta_query.str().c_str());
+    }
+
+
     T_PROTO.set_cameras(cameras);
     T_PROTO.set_starttime(time_rasp);
     starttime = time_rasp;
 
     std::string basedatafile = "data";
     directoryExistsOrCreate(basedatafile.c_str());
+    
     //std::string secdatafile = "data/data";
     //directoryExistsOrCreate(secdatafile.c_str());
     //std::string matdatafile = "data/mat";
