@@ -54,7 +54,8 @@ void protobuf_AssignDesc_motion_2eproto() {
       "motion.proto");
   GOOGLE_CHECK(file != NULL);
   Message_descriptor_ = file->message_type(0);
-  static const int Message_offsets_[30] = {
+  static const int Message_offsets_[15] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, activecam_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, time_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, data_),
@@ -62,29 +63,13 @@ void protobuf_AssignDesc_motion_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, data_total_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, serverip_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, clientip_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, recognizing_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, devicestarttime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, motioncamera_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, storeimage_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, storecrop_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, codename_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, regioncoords_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, delay_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, starttime_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, startrecognitiontime_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, region_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, numberofchanges_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, amount_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, matfile_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, activemat_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, cameras_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, activecamera_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, xmlfilename_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, xmlfilepath_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, instancecount_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, imagefilepath_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, currmonth_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, currday_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, currcam_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, packagesize_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message, imagefilepath_),
   };
   Message_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -98,10 +83,24 @@ void protobuf_AssignDesc_motion_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Message));
   Message_MotionCamera_descriptor_ = Message_descriptor_->nested_type(0);
-  static const int Message_MotionCamera_offsets_[3] = {
+  static const int Message_MotionCamera_offsets_[17] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, motionmonth_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, cameraid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, camera_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, cameranumber_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, cameraname_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, recognizing_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, camerasince_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, storeimage_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, storecrop_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, codename_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, hasregion_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, coordinates_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, delay_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, startrectime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, stoprectime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, activemat_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, recognizing_flag_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, db_idcamera_),
   };
   Message_MotionCamera_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -131,11 +130,13 @@ void protobuf_AssignDesc_motion_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Message_MotionMonth));
   Message_MotionDay_descriptor_ = Message_descriptor_->nested_type(2);
-  static const int Message_MotionDay_offsets_[4] = {
+  static const int Message_MotionDay_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionDay, instance_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionDay, daylabel_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionDay, db_dayid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionDay, db_recognitionsetupid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionDay, xmlfilename_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionDay, xmlfilepath_),
   };
   Message_MotionDay_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -187,10 +188,11 @@ void protobuf_AssignDesc_motion_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Message_Image));
   Message_Crop_descriptor_ = Message_descriptor_->nested_type(5);
-  static const int Message_Crop_offsets_[3] = {
+  static const int Message_Crop_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Crop, path_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Crop, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Crop, imagefather_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Crop, db_imagefatherid_),
   };
   Message_Crop_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -240,6 +242,7 @@ void protobuf_ShutdownFile_motion_2eproto() {
   delete Message_reflection_;
   delete Message_MotionCamera::default_instance_;
   delete Message_MotionCamera_reflection_;
+  delete Message_MotionCamera::_default_codename_;
   delete Message_MotionMonth::default_instance_;
   delete Message_MotionMonth_reflection_;
   delete Message_MotionDay::default_instance_;
@@ -259,63 +262,67 @@ void protobuf_AddDesc_motion_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014motion.proto\022\006motion\"\307\020\n\007Message\0220\n\004ty"
-    "pe\030\001 \002(\0162\032.motion.Message.ActionType:\006EN"
-    "GAGE\022\014\n\004time\030\002 \001(\t\022\014\n\004data\030\003 \001(\014\022\023\n\013data"
-    "_amount\030\004 \001(\005\022\022\n\ndata_total\030\005 \001(\005\022\020\n\010ser"
-    "verip\030\006 \001(\t\022\020\n\010clientip\030\007 \001(\t\022\023\n\013recogni"
-    "zing\030\010 \001(\010\0222\n\014motioncamera\030\t \003(\0132\034.motio"
-    "n.Message.MotionCamera\022\022\n\nstoreimage\030\n \001"
-    "(\010\022\021\n\tstorecrop\030\013 \001(\010\022\020\n\010codename\030\014 \001(\t\022"
-    "\024\n\014regioncoords\030\r \001(\014\022\r\n\005delay\030\016 \001(\001\022\021\n\t"
-    "starttime\030\017 \001(\t\022\034\n\024startrecognitiontime\030"
-    "\020 \001(\t\022\016\n\006region\030\021 \001(\010\022\027\n\017numberofchanges"
-    "\030\022 \001(\005\022\016\n\006amount\030\023 \001(\005\022\017\n\007matfile\030\024 \003(\005\022"
-    "\021\n\tactivemat\030\025 \001(\005\022\017\n\007cameras\030\026 \001(\t\022\024\n\014a"
-    "ctivecamera\030\027 \001(\005\022\023\n\013xmlfilename\030\030 \001(\t\022\023"
-    "\n\013xmlfilepath\030\031 \001(\t\022\025\n\rinstancecount\030\032 \001"
-    "(\005\022\025\n\rimagefilepath\030\033 \001(\t\022\021\n\tcurrmonth\030\034"
-    " \001(\t\022\017\n\007currday\030\035 \001(\t\022\023\n\013packagesize\030\036 \001"
-    "(\005\032b\n\014MotionCamera\0220\n\013motionmonth\030\001 \003(\0132"
-    "\033.motion.Message.MotionMonth\022\020\n\010cameraid"
-    "\030\002 \001(\005\022\016\n\006camera\030\003 \001(\t\032O\n\013MotionMonth\022,\n"
-    "\tmotionday\030\001 \003(\0132\031.motion.Message.Motion"
-    "Day\022\022\n\nmonthlabel\030\002 \001(\t\032z\n\tMotionDay\022*\n\010"
-    "instance\030\001 \003(\0132\030.motion.Message.Instance"
-    "\022\020\n\010daylabel\030\002 \001(\t\022\020\n\010db_dayid\030\003 \001(\005\022\035\n\025"
-    "db_recognitionsetupid\030\004 \001(\005\032\277\001\n\010Instance"
-    "\022\022\n\nidinstance\030\001 \002(\005\022\025\n\rinstancestart\030\002 "
-    "\001(\t\022\023\n\013instanceend\030\003 \001(\t\022\022\n\nfileformat\030\004"
-    " \001(\t\022\025\n\rcroppedformat\030\005 \001(\t\022$\n\005image\030\006 \003"
-    "(\0132\025.motion.Message.Image\022\"\n\004crop\030\007 \003(\0132"
-    "\024.motion.Message.Crop\0329\n\005Image\022\014\n\004path\030\001"
-    " \001(\t\022\014\n\004name\030\002 \001(\t\022\024\n\014imagechanges\030\003 \001(\005"
-    "\0327\n\004Crop\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\023\n\013"
-    "imagefather\030\003 \001(\t\"\235\003\n\nActionType\022\013\n\006ENGA"
-    "GE\020\350\007\022\016\n\tREC_START\020\352\007\022\020\n\013REC_RUNNING\020\353\007\022"
-    "\r\n\010REC_STOP\020\354\007\022\r\n\010UNENGAGE\020\355\007\022\r\n\010GET_TIM"
-    "E\020\356\007\022\r\n\010SET_TIME\020\357\007\022\r\n\010TIME_SET\020\360\007\022\017\n\nST"
-    "RM_START\020\361\007\022\016\n\tSTRM_STOP\020\362\007\022\021\n\014TAKE_PICT"
-    "URE\020\363\007\022\020\n\013DISSCONNECT\020\364\007\022\014\n\007REFRESH\020\365\007\022\014"
-    "\n\007GET_XML\020\366\007\022\016\n\tGET_IMAGE\020\367\007\022\020\n\013RESPONSE"
-    "_OK\020\320\017\022\022\n\rRESPONSE_NEXT\020\332\017\022\021\n\014RESPONSE_E"
-    "ND\020\344\017\022\024\n\017RESPONSE_FINISH\020\356\017\022\024\n\017REC_HAS_C"
-    "HANGES\020\370\017\022\025\n\020REC_HAS_INSTANCE\020\202\020\022\023\n\016PROT"
-    "O_HAS_FILE\020\326\027\022\022\n\rPROTO_NO_FILE\020\327\027\"\254\003\n\nSo"
-    "cketType\022\031\n\025SOCKET_PROTO_TOSTRING\020\n\022\030\n\024S"
-    "OCKET_PROTO_TOARRAY\020\013\022\025\n\021SOCKET_PLAIN_TE"
-    "XT\020\014\022\024\n\020SPLITTED_MESSAGE\020\r\022\022\n\016SINGLE_MES"
-    "SAGE\020\016\022\034\n\027SOCKET_BUFFER_NANO_SIZE\020\200\010\022\034\n\027"
-    "SOCKET_BUFFER_MINI_SIZE\020\200\020\022\035\n\030SOCKET_BUF"
-    "FER_MICRO_SIZE\020\200 \022\035\n\030SOCKET_BUFFER_SMALL"
-    "_SIZE\020\204@\022 \n\032SOCKET_BUFFER_REGULAR_SIZE\020\210"
-    "\200\001\022\037\n\031SOCKET_BUFFER_MEDIUM_SIZE\020\220\200\002\022\034\n\026S"
-    "OCKET_BUFFER_BIG_SIZE\020\240\200\004\022\022\n\rTCP_ECHO_PO"
-    "RT\020\222\'\022\027\n\022TCP_STREAMING_PORT\020\234\'\022\r\n\010UDP_PO"
-    "RT\020\246\'\022\021\n\014TCP_MSG_PORT\020\260\'", 2144);
+    "\n\014motion.proto\022\006motion\"\232\021\n\007Message\022\021\n\tac"
+    "tivecam\030\001 \002(\005\0220\n\004type\030\002 \002(\0162\032.motion.Mes"
+    "sage.ActionType:\006ENGAGE\022\014\n\004time\030\003 \001(\t\022\014\n"
+    "\004data\030\004 \001(\014\022\023\n\013data_amount\030\005 \001(\005\022\022\n\ndata"
+    "_total\030\006 \001(\005\022\020\n\010serverip\030\007 \001(\t\022\020\n\010client"
+    "ip\030\010 \001(\t\022\027\n\017devicestarttime\030\t \001(\t\0222\n\014mot"
+    "ioncamera\030\n \003(\0132\034.motion.Message.MotionC"
+    "amera\022\021\n\tcurrmonth\030\013 \001(\t\022\017\n\007currday\030\014 \001("
+    "\t\022\017\n\007currcam\030\r \001(\005\022\023\n\013packagesize\030\016 \001(\005\022"
+    "\025\n\rimagefilepath\030\017 \001(\t\032\233\003\n\014MotionCamera\022"
+    "0\n\013motionmonth\030\001 \003(\0132\033.motion.Message.Mo"
+    "tionMonth\022\023\n\010cameraid\030\002 \001(\005:\0010\022\024\n\014camera"
+    "number\030\003 \001(\005\022\022\n\ncameraname\030\004 \001(\t\022\023\n\013reco"
+    "gnizing\030\005 \001(\010\022\023\n\013camerasince\030\006 \001(\t\022\030\n\nst"
+    "oreimage\030\007 \001(\010:\004true\022\027\n\tstorecrop\030\010 \001(\010:"
+    "\004true\022\026\n\010codename\030\t \001(\t:\004test\022\021\n\thasregi"
+    "on\030\n \001(\010\022\023\n\013coordinates\030\013 \001(\t\022\020\n\005delay\030\014"
+    " \001(\001:\0012\022\024\n\014startrectime\030\r \001(\t\022\023\n\013stoprec"
+    "time\030\016 \001(\t\022\021\n\tactivemat\030\017 \001(\005\022\030\n\020recogni"
+    "zing_flag\030\020 \001(\010\022\023\n\013db_idcamera\030\021 \001(\005\032O\n\013"
+    "MotionMonth\022,\n\tmotionday\030\001 \003(\0132\031.motion."
+    "Message.MotionDay\022\022\n\nmonthlabel\030\002 \001(\t\032\244\001"
+    "\n\tMotionDay\022*\n\010instance\030\001 \003(\0132\030.motion.M"
+    "essage.Instance\022\020\n\010daylabel\030\002 \001(\t\022\020\n\010db_"
+    "dayid\030\003 \001(\005\022\035\n\025db_recognitionsetupid\030\004 \001"
+    "(\005\022\023\n\013xmlfilename\030\005 \001(\t\022\023\n\013xmlfilepath\030\006"
+    " \001(\t\032\277\001\n\010Instance\022\022\n\nidinstance\030\001 \002(\005\022\025\n"
+    "\rinstancestart\030\002 \001(\t\022\023\n\013instanceend\030\003 \001("
+    "\t\022\022\n\nfileformat\030\004 \001(\t\022\025\n\rcroppedformat\030\005"
+    " \001(\t\022$\n\005image\030\006 \003(\0132\025.motion.Message.Ima"
+    "ge\022\"\n\004crop\030\007 \003(\0132\024.motion.Message.Crop\0329"
+    "\n\005Image\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\024\n\014i"
+    "magechanges\030\003 \001(\005\032Q\n\004Crop\022\014\n\004path\030\001 \001(\t\022"
+    "\014\n\004name\030\002 \001(\t\022\023\n\013imagefather\030\003 \001(\t\022\030\n\020db"
+    "_imagefatherid\030\004 \001(\005\"\235\003\n\nActionType\022\013\n\006E"
+    "NGAGE\020\350\007\022\016\n\tREC_START\020\352\007\022\020\n\013REC_RUNNING\020"
+    "\353\007\022\r\n\010REC_STOP\020\354\007\022\r\n\010UNENGAGE\020\355\007\022\r\n\010GET_"
+    "TIME\020\356\007\022\r\n\010SET_TIME\020\357\007\022\r\n\010TIME_SET\020\360\007\022\017\n"
+    "\nSTRM_START\020\361\007\022\016\n\tSTRM_STOP\020\362\007\022\021\n\014TAKE_P"
+    "ICTURE\020\363\007\022\020\n\013DISSCONNECT\020\364\007\022\014\n\007REFRESH\020\365"
+    "\007\022\014\n\007GET_XML\020\366\007\022\016\n\tGET_IMAGE\020\367\007\022\020\n\013RESPO"
+    "NSE_OK\020\320\017\022\022\n\rRESPONSE_NEXT\020\332\017\022\021\n\014RESPONS"
+    "E_END\020\344\017\022\024\n\017RESPONSE_FINISH\020\356\017\022\024\n\017REC_HA"
+    "S_CHANGES\020\370\017\022\025\n\020REC_HAS_INSTANCE\020\202\020\022\023\n\016P"
+    "ROTO_HAS_FILE\020\326\027\022\022\n\rPROTO_NO_FILE\020\327\027\"\254\003\n"
+    "\nSocketType\022\031\n\025SOCKET_PROTO_TOSTRING\020\n\022\030"
+    "\n\024SOCKET_PROTO_TOARRAY\020\013\022\025\n\021SOCKET_PLAIN"
+    "_TEXT\020\014\022\024\n\020SPLITTED_MESSAGE\020\r\022\022\n\016SINGLE_"
+    "MESSAGE\020\016\022\034\n\027SOCKET_BUFFER_NANO_SIZE\020\200\010\022"
+    "\034\n\027SOCKET_BUFFER_MINI_SIZE\020\200\020\022\035\n\030SOCKET_"
+    "BUFFER_MICRO_SIZE\020\200 \022\035\n\030SOCKET_BUFFER_SM"
+    "ALL_SIZE\020\204@\022 \n\032SOCKET_BUFFER_REGULAR_SIZ"
+    "E\020\210\200\001\022\037\n\031SOCKET_BUFFER_MEDIUM_SIZE\020\220\200\002\022\034"
+    "\n\026SOCKET_BUFFER_BIG_SIZE\020\240\200\004\022\022\n\rTCP_ECHO"
+    "_PORT\020\222\'\022\027\n\022TCP_STREAMING_PORT\020\234\'\022\r\n\010UDP"
+    "_PORT\020\246\'\022\021\n\014TCP_MSG_PORT\020\260\'", 2227);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "motion.proto", &protobuf_RegisterTypes);
   Message::default_instance_ = new Message();
+  Message_MotionCamera::_default_codename_ =
+      new ::std::string("test", 4);
   Message_MotionCamera::default_instance_ = new Message_MotionCamera();
   Message_MotionMonth::default_instance_ = new Message_MotionMonth();
   Message_MotionDay::default_instance_ = new Message_MotionDay();
@@ -453,10 +460,25 @@ const Message_SocketType Message::SocketType_MIN;
 const Message_SocketType Message::SocketType_MAX;
 const int Message::SocketType_ARRAYSIZE;
 #endif  // _MSC_VER
+::std::string* Message_MotionCamera::_default_codename_ = NULL;
 #ifndef _MSC_VER
 const int Message_MotionCamera::kMotionmonthFieldNumber;
 const int Message_MotionCamera::kCameraidFieldNumber;
-const int Message_MotionCamera::kCameraFieldNumber;
+const int Message_MotionCamera::kCameranumberFieldNumber;
+const int Message_MotionCamera::kCameranameFieldNumber;
+const int Message_MotionCamera::kRecognizingFieldNumber;
+const int Message_MotionCamera::kCamerasinceFieldNumber;
+const int Message_MotionCamera::kStoreimageFieldNumber;
+const int Message_MotionCamera::kStorecropFieldNumber;
+const int Message_MotionCamera::kCodenameFieldNumber;
+const int Message_MotionCamera::kHasregionFieldNumber;
+const int Message_MotionCamera::kCoordinatesFieldNumber;
+const int Message_MotionCamera::kDelayFieldNumber;
+const int Message_MotionCamera::kStartrectimeFieldNumber;
+const int Message_MotionCamera::kStoprectimeFieldNumber;
+const int Message_MotionCamera::kActivematFieldNumber;
+const int Message_MotionCamera::kRecognizingFlagFieldNumber;
+const int Message_MotionCamera::kDbIdcameraFieldNumber;
 #endif  // !_MSC_VER
 
 Message_MotionCamera::Message_MotionCamera()
@@ -479,7 +501,21 @@ void Message_MotionCamera::SharedCtor() {
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   cameraid_ = 0;
-  camera_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  cameranumber_ = 0;
+  cameraname_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  recognizing_ = false;
+  camerasince_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  storeimage_ = true;
+  storecrop_ = true;
+  codename_ = const_cast< ::std::string*>(_default_codename_);
+  hasregion_ = false;
+  coordinates_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  delay_ = 2;
+  startrectime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  stoprectime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  activemat_ = 0;
+  recognizing_flag_ = false;
+  db_idcamera_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -489,8 +525,23 @@ Message_MotionCamera::~Message_MotionCamera() {
 }
 
 void Message_MotionCamera::SharedDtor() {
-  if (camera_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete camera_;
+  if (cameraname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete cameraname_;
+  }
+  if (camerasince_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete camerasince_;
+  }
+  if (codename_ != _default_codename_) {
+    delete codename_;
+  }
+  if (coordinates_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete coordinates_;
+  }
+  if (startrectime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete startrectime_;
+  }
+  if (stoprectime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete stoprectime_;
   }
   if (this != default_instance_) {
   }
@@ -518,14 +569,62 @@ Message_MotionCamera* Message_MotionCamera::New() const {
 }
 
 void Message_MotionCamera::Clear() {
-  if (_has_bits_[0 / 32] & 6) {
-    cameraid_ = 0;
-    if (has_camera()) {
-      if (camera_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-        camera_->clear();
+#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
+  &reinterpret_cast<Message_MotionCamera*>(16)->f) - \
+   reinterpret_cast<char*>(16))
+
+#define ZR_(first, last) do {                              \
+    size_t f = OFFSET_OF_FIELD_(first);                    \
+    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
+    ::memset(&first, 0, n);                                \
+  } while (0)
+
+  if (_has_bits_[0 / 32] & 254) {
+    ZR_(cameraid_, cameranumber_);
+    if (has_cameraname()) {
+      if (cameraname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        cameraname_->clear();
       }
     }
+    recognizing_ = false;
+    if (has_camerasince()) {
+      if (camerasince_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        camerasince_->clear();
+      }
+    }
+    storeimage_ = true;
+    storecrop_ = true;
   }
+  if (_has_bits_[8 / 32] & 65280) {
+    ZR_(hasregion_, activemat_);
+    if (has_codename()) {
+      if (codename_ != _default_codename_) {
+        codename_->assign(*_default_codename_);
+      }
+    }
+    if (has_coordinates()) {
+      if (coordinates_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        coordinates_->clear();
+      }
+    }
+    delay_ = 2;
+    if (has_startrectime()) {
+      if (startrectime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        startrectime_->clear();
+      }
+    }
+    if (has_stoprectime()) {
+      if (stoprectime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        stoprectime_->clear();
+      }
+    }
+    recognizing_flag_ = false;
+  }
+  db_idcamera_ = 0;
+
+#undef OFFSET_OF_FIELD_
+#undef ZR_
+
   motionmonth_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -537,7 +636,7 @@ bool Message_MotionCamera::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   // @@protoc_insertion_point(parse_start:motion.Message.MotionCamera)
   for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(16383);
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
@@ -555,7 +654,7 @@ bool Message_MotionCamera::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 cameraid = 2;
+      // optional int32 cameraid = 2 [default = 0];
       case 2: {
         if (tag == 16) {
          parse_cameraid:
@@ -566,20 +665,240 @@ bool Message_MotionCamera::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_camera;
+        if (input->ExpectTag(24)) goto parse_cameranumber;
         break;
       }
 
-      // optional string camera = 3;
+      // optional int32 cameranumber = 3;
       case 3: {
-        if (tag == 26) {
-         parse_camera:
+        if (tag == 24) {
+         parse_cameranumber:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &cameranumber_)));
+          set_has_cameranumber();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_cameraname;
+        break;
+      }
+
+      // optional string cameraname = 4;
+      case 4: {
+        if (tag == 34) {
+         parse_cameraname:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_camera()));
+                input, this->mutable_cameraname()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->camera().data(), this->camera().length(),
+            this->cameraname().data(), this->cameraname().length(),
             ::google::protobuf::internal::WireFormat::PARSE,
-            "camera");
+            "cameraname");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(40)) goto parse_recognizing;
+        break;
+      }
+
+      // optional bool recognizing = 5;
+      case 5: {
+        if (tag == 40) {
+         parse_recognizing:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &recognizing_)));
+          set_has_recognizing();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(50)) goto parse_camerasince;
+        break;
+      }
+
+      // optional string camerasince = 6;
+      case 6: {
+        if (tag == 50) {
+         parse_camerasince:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_camerasince()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->camerasince().data(), this->camerasince().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "camerasince");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(56)) goto parse_storeimage;
+        break;
+      }
+
+      // optional bool storeimage = 7 [default = true];
+      case 7: {
+        if (tag == 56) {
+         parse_storeimage:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &storeimage_)));
+          set_has_storeimage();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(64)) goto parse_storecrop;
+        break;
+      }
+
+      // optional bool storecrop = 8 [default = true];
+      case 8: {
+        if (tag == 64) {
+         parse_storecrop:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &storecrop_)));
+          set_has_storecrop();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(74)) goto parse_codename;
+        break;
+      }
+
+      // optional string codename = 9 [default = "test"];
+      case 9: {
+        if (tag == 74) {
+         parse_codename:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_codename()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->codename().data(), this->codename().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "codename");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(80)) goto parse_hasregion;
+        break;
+      }
+
+      // optional bool hasregion = 10;
+      case 10: {
+        if (tag == 80) {
+         parse_hasregion:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &hasregion_)));
+          set_has_hasregion();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(90)) goto parse_coordinates;
+        break;
+      }
+
+      // optional string coordinates = 11;
+      case 11: {
+        if (tag == 90) {
+         parse_coordinates:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_coordinates()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->coordinates().data(), this->coordinates().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "coordinates");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(97)) goto parse_delay;
+        break;
+      }
+
+      // optional double delay = 12 [default = 2];
+      case 12: {
+        if (tag == 97) {
+         parse_delay:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &delay_)));
+          set_has_delay();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(106)) goto parse_startrectime;
+        break;
+      }
+
+      // optional string startrectime = 13;
+      case 13: {
+        if (tag == 106) {
+         parse_startrectime:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_startrectime()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->startrectime().data(), this->startrectime().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "startrectime");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(114)) goto parse_stoprectime;
+        break;
+      }
+
+      // optional string stoprectime = 14;
+      case 14: {
+        if (tag == 114) {
+         parse_stoprectime:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_stoprectime()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->stoprectime().data(), this->stoprectime().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "stoprectime");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(120)) goto parse_activemat;
+        break;
+      }
+
+      // optional int32 activemat = 15;
+      case 15: {
+        if (tag == 120) {
+         parse_activemat:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &activemat_)));
+          set_has_activemat();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(128)) goto parse_recognizing_flag;
+        break;
+      }
+
+      // optional bool recognizing_flag = 16;
+      case 16: {
+        if (tag == 128) {
+         parse_recognizing_flag:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &recognizing_flag_)));
+          set_has_recognizing_flag();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(136)) goto parse_db_idcamera;
+        break;
+      }
+
+      // optional int32 db_idcamera = 17;
+      case 17: {
+        if (tag == 136) {
+         parse_db_idcamera:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &db_idcamera_)));
+          set_has_db_idcamera();
         } else {
           goto handle_unusual;
         }
@@ -618,19 +937,114 @@ void Message_MotionCamera::SerializeWithCachedSizes(
       1, this->motionmonth(i), output);
   }
 
-  // optional int32 cameraid = 2;
+  // optional int32 cameraid = 2 [default = 0];
   if (has_cameraid()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->cameraid(), output);
   }
 
-  // optional string camera = 3;
-  if (has_camera()) {
+  // optional int32 cameranumber = 3;
+  if (has_cameranumber()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->cameranumber(), output);
+  }
+
+  // optional string cameraname = 4;
+  if (has_cameraname()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->camera().data(), this->camera().length(),
+      this->cameraname().data(), this->cameraname().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "camera");
+      "cameraname");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->camera(), output);
+      4, this->cameraname(), output);
+  }
+
+  // optional bool recognizing = 5;
+  if (has_recognizing()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(5, this->recognizing(), output);
+  }
+
+  // optional string camerasince = 6;
+  if (has_camerasince()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->camerasince().data(), this->camerasince().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "camerasince");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      6, this->camerasince(), output);
+  }
+
+  // optional bool storeimage = 7 [default = true];
+  if (has_storeimage()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(7, this->storeimage(), output);
+  }
+
+  // optional bool storecrop = 8 [default = true];
+  if (has_storecrop()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(8, this->storecrop(), output);
+  }
+
+  // optional string codename = 9 [default = "test"];
+  if (has_codename()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->codename().data(), this->codename().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "codename");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      9, this->codename(), output);
+  }
+
+  // optional bool hasregion = 10;
+  if (has_hasregion()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(10, this->hasregion(), output);
+  }
+
+  // optional string coordinates = 11;
+  if (has_coordinates()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->coordinates().data(), this->coordinates().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "coordinates");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      11, this->coordinates(), output);
+  }
+
+  // optional double delay = 12 [default = 2];
+  if (has_delay()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(12, this->delay(), output);
+  }
+
+  // optional string startrectime = 13;
+  if (has_startrectime()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->startrectime().data(), this->startrectime().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "startrectime");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      13, this->startrectime(), output);
+  }
+
+  // optional string stoprectime = 14;
+  if (has_stoprectime()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->stoprectime().data(), this->stoprectime().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "stoprectime");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      14, this->stoprectime(), output);
+  }
+
+  // optional int32 activemat = 15;
+  if (has_activemat()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(15, this->activemat(), output);
+  }
+
+  // optional bool recognizing_flag = 16;
+  if (has_recognizing_flag()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(16, this->recognizing_flag(), output);
+  }
+
+  // optional int32 db_idcamera = 17;
+  if (has_db_idcamera()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(17, this->db_idcamera(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -650,20 +1064,120 @@ void Message_MotionCamera::SerializeWithCachedSizes(
         1, this->motionmonth(i), target);
   }
 
-  // optional int32 cameraid = 2;
+  // optional int32 cameraid = 2 [default = 0];
   if (has_cameraid()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->cameraid(), target);
   }
 
-  // optional string camera = 3;
-  if (has_camera()) {
+  // optional int32 cameranumber = 3;
+  if (has_cameranumber()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->cameranumber(), target);
+  }
+
+  // optional string cameraname = 4;
+  if (has_cameraname()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->camera().data(), this->camera().length(),
+      this->cameraname().data(), this->cameraname().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "camera");
+      "cameraname");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->camera(), target);
+        4, this->cameraname(), target);
+  }
+
+  // optional bool recognizing = 5;
+  if (has_recognizing()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(5, this->recognizing(), target);
+  }
+
+  // optional string camerasince = 6;
+  if (has_camerasince()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->camerasince().data(), this->camerasince().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "camerasince");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        6, this->camerasince(), target);
+  }
+
+  // optional bool storeimage = 7 [default = true];
+  if (has_storeimage()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(7, this->storeimage(), target);
+  }
+
+  // optional bool storecrop = 8 [default = true];
+  if (has_storecrop()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(8, this->storecrop(), target);
+  }
+
+  // optional string codename = 9 [default = "test"];
+  if (has_codename()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->codename().data(), this->codename().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "codename");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        9, this->codename(), target);
+  }
+
+  // optional bool hasregion = 10;
+  if (has_hasregion()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(10, this->hasregion(), target);
+  }
+
+  // optional string coordinates = 11;
+  if (has_coordinates()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->coordinates().data(), this->coordinates().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "coordinates");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        11, this->coordinates(), target);
+  }
+
+  // optional double delay = 12 [default = 2];
+  if (has_delay()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(12, this->delay(), target);
+  }
+
+  // optional string startrectime = 13;
+  if (has_startrectime()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->startrectime().data(), this->startrectime().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "startrectime");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        13, this->startrectime(), target);
+  }
+
+  // optional string stoprectime = 14;
+  if (has_stoprectime()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->stoprectime().data(), this->stoprectime().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "stoprectime");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        14, this->stoprectime(), target);
+  }
+
+  // optional int32 activemat = 15;
+  if (has_activemat()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(15, this->activemat(), target);
+  }
+
+  // optional bool recognizing_flag = 16;
+  if (has_recognizing_flag()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(16, this->recognizing_flag(), target);
+  }
+
+  // optional int32 db_idcamera = 17;
+  if (has_db_idcamera()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(17, this->db_idcamera(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -678,18 +1192,108 @@ int Message_MotionCamera::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[1 / 32] & (0xffu << (1 % 32))) {
-    // optional int32 cameraid = 2;
+    // optional int32 cameraid = 2 [default = 0];
     if (has_cameraid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->cameraid());
     }
 
-    // optional string camera = 3;
-    if (has_camera()) {
+    // optional int32 cameranumber = 3;
+    if (has_cameranumber()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->cameranumber());
+    }
+
+    // optional string cameraname = 4;
+    if (has_cameraname()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->camera());
+          this->cameraname());
+    }
+
+    // optional bool recognizing = 5;
+    if (has_recognizing()) {
+      total_size += 1 + 1;
+    }
+
+    // optional string camerasince = 6;
+    if (has_camerasince()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->camerasince());
+    }
+
+    // optional bool storeimage = 7 [default = true];
+    if (has_storeimage()) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool storecrop = 8 [default = true];
+    if (has_storecrop()) {
+      total_size += 1 + 1;
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional string codename = 9 [default = "test"];
+    if (has_codename()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->codename());
+    }
+
+    // optional bool hasregion = 10;
+    if (has_hasregion()) {
+      total_size += 1 + 1;
+    }
+
+    // optional string coordinates = 11;
+    if (has_coordinates()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->coordinates());
+    }
+
+    // optional double delay = 12 [default = 2];
+    if (has_delay()) {
+      total_size += 1 + 8;
+    }
+
+    // optional string startrectime = 13;
+    if (has_startrectime()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->startrectime());
+    }
+
+    // optional string stoprectime = 14;
+    if (has_stoprectime()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->stoprectime());
+    }
+
+    // optional int32 activemat = 15;
+    if (has_activemat()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->activemat());
+    }
+
+    // optional bool recognizing_flag = 16;
+    if (has_recognizing_flag()) {
+      total_size += 2 + 1;
+    }
+
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    // optional int32 db_idcamera = 17;
+    if (has_db_idcamera()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->db_idcamera());
     }
 
   }
@@ -731,8 +1335,54 @@ void Message_MotionCamera::MergeFrom(const Message_MotionCamera& from) {
     if (from.has_cameraid()) {
       set_cameraid(from.cameraid());
     }
-    if (from.has_camera()) {
-      set_camera(from.camera());
+    if (from.has_cameranumber()) {
+      set_cameranumber(from.cameranumber());
+    }
+    if (from.has_cameraname()) {
+      set_cameraname(from.cameraname());
+    }
+    if (from.has_recognizing()) {
+      set_recognizing(from.recognizing());
+    }
+    if (from.has_camerasince()) {
+      set_camerasince(from.camerasince());
+    }
+    if (from.has_storeimage()) {
+      set_storeimage(from.storeimage());
+    }
+    if (from.has_storecrop()) {
+      set_storecrop(from.storecrop());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_codename()) {
+      set_codename(from.codename());
+    }
+    if (from.has_hasregion()) {
+      set_hasregion(from.hasregion());
+    }
+    if (from.has_coordinates()) {
+      set_coordinates(from.coordinates());
+    }
+    if (from.has_delay()) {
+      set_delay(from.delay());
+    }
+    if (from.has_startrectime()) {
+      set_startrectime(from.startrectime());
+    }
+    if (from.has_stoprectime()) {
+      set_stoprectime(from.stoprectime());
+    }
+    if (from.has_activemat()) {
+      set_activemat(from.activemat());
+    }
+    if (from.has_recognizing_flag()) {
+      set_recognizing_flag(from.recognizing_flag());
+    }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    if (from.has_db_idcamera()) {
+      set_db_idcamera(from.db_idcamera());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -760,7 +1410,21 @@ void Message_MotionCamera::Swap(Message_MotionCamera* other) {
   if (other != this) {
     motionmonth_.Swap(&other->motionmonth_);
     std::swap(cameraid_, other->cameraid_);
-    std::swap(camera_, other->camera_);
+    std::swap(cameranumber_, other->cameranumber_);
+    std::swap(cameraname_, other->cameraname_);
+    std::swap(recognizing_, other->recognizing_);
+    std::swap(camerasince_, other->camerasince_);
+    std::swap(storeimage_, other->storeimage_);
+    std::swap(storecrop_, other->storecrop_);
+    std::swap(codename_, other->codename_);
+    std::swap(hasregion_, other->hasregion_);
+    std::swap(coordinates_, other->coordinates_);
+    std::swap(delay_, other->delay_);
+    std::swap(startrectime_, other->startrectime_);
+    std::swap(stoprectime_, other->stoprectime_);
+    std::swap(activemat_, other->activemat_);
+    std::swap(recognizing_flag_, other->recognizing_flag_);
+    std::swap(db_idcamera_, other->db_idcamera_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -1067,6 +1731,8 @@ const int Message_MotionDay::kInstanceFieldNumber;
 const int Message_MotionDay::kDaylabelFieldNumber;
 const int Message_MotionDay::kDbDayidFieldNumber;
 const int Message_MotionDay::kDbRecognitionsetupidFieldNumber;
+const int Message_MotionDay::kXmlfilenameFieldNumber;
+const int Message_MotionDay::kXmlfilepathFieldNumber;
 #endif  // !_MSC_VER
 
 Message_MotionDay::Message_MotionDay()
@@ -1091,6 +1757,8 @@ void Message_MotionDay::SharedCtor() {
   daylabel_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   db_dayid_ = 0;
   db_recognitionsetupid_ = 0;
+  xmlfilename_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  xmlfilepath_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1102,6 +1770,12 @@ Message_MotionDay::~Message_MotionDay() {
 void Message_MotionDay::SharedDtor() {
   if (daylabel_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete daylabel_;
+  }
+  if (xmlfilename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete xmlfilename_;
+  }
+  if (xmlfilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete xmlfilepath_;
   }
   if (this != default_instance_) {
   }
@@ -1139,11 +1813,21 @@ void Message_MotionDay::Clear() {
     ::memset(&first, 0, n);                                \
   } while (0)
 
-  if (_has_bits_[0 / 32] & 14) {
+  if (_has_bits_[0 / 32] & 62) {
     ZR_(db_dayid_, db_recognitionsetupid_);
     if (has_daylabel()) {
       if (daylabel_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         daylabel_->clear();
+      }
+    }
+    if (has_xmlfilename()) {
+      if (xmlfilename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        xmlfilename_->clear();
+      }
+    }
+    if (has_xmlfilepath()) {
+      if (xmlfilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        xmlfilepath_->clear();
       }
     }
   }
@@ -1223,6 +1907,40 @@ bool Message_MotionDay::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(42)) goto parse_xmlfilename;
+        break;
+      }
+
+      // optional string xmlfilename = 5;
+      case 5: {
+        if (tag == 42) {
+         parse_xmlfilename:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_xmlfilename()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->xmlfilename().data(), this->xmlfilename().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "xmlfilename");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(50)) goto parse_xmlfilepath;
+        break;
+      }
+
+      // optional string xmlfilepath = 6;
+      case 6: {
+        if (tag == 50) {
+         parse_xmlfilepath:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_xmlfilepath()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->xmlfilepath().data(), this->xmlfilepath().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "xmlfilepath");
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -1278,6 +1996,26 @@ void Message_MotionDay::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->db_recognitionsetupid(), output);
   }
 
+  // optional string xmlfilename = 5;
+  if (has_xmlfilename()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->xmlfilename().data(), this->xmlfilename().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "xmlfilename");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      5, this->xmlfilename(), output);
+  }
+
+  // optional string xmlfilepath = 6;
+  if (has_xmlfilepath()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->xmlfilepath().data(), this->xmlfilepath().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "xmlfilepath");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      6, this->xmlfilepath(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1316,6 +2054,28 @@ void Message_MotionDay::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->db_recognitionsetupid(), target);
   }
 
+  // optional string xmlfilename = 5;
+  if (has_xmlfilename()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->xmlfilename().data(), this->xmlfilename().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "xmlfilename");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        5, this->xmlfilename(), target);
+  }
+
+  // optional string xmlfilepath = 6;
+  if (has_xmlfilepath()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->xmlfilepath().data(), this->xmlfilepath().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "xmlfilepath");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        6, this->xmlfilepath(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -1347,6 +2107,20 @@ int Message_MotionDay::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->db_recognitionsetupid());
+    }
+
+    // optional string xmlfilename = 5;
+    if (has_xmlfilename()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->xmlfilename());
+    }
+
+    // optional string xmlfilepath = 6;
+    if (has_xmlfilepath()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->xmlfilepath());
     }
 
   }
@@ -1394,6 +2168,12 @@ void Message_MotionDay::MergeFrom(const Message_MotionDay& from) {
     if (from.has_db_recognitionsetupid()) {
       set_db_recognitionsetupid(from.db_recognitionsetupid());
     }
+    if (from.has_xmlfilename()) {
+      set_xmlfilename(from.xmlfilename());
+    }
+    if (from.has_xmlfilepath()) {
+      set_xmlfilepath(from.xmlfilepath());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -1422,6 +2202,8 @@ void Message_MotionDay::Swap(Message_MotionDay* other) {
     std::swap(daylabel_, other->daylabel_);
     std::swap(db_dayid_, other->db_dayid_);
     std::swap(db_recognitionsetupid_, other->db_recognitionsetupid_);
+    std::swap(xmlfilename_, other->xmlfilename_);
+    std::swap(xmlfilepath_, other->xmlfilepath_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -2326,6 +3108,7 @@ void Message_Image::Swap(Message_Image* other) {
 const int Message_Crop::kPathFieldNumber;
 const int Message_Crop::kNameFieldNumber;
 const int Message_Crop::kImagefatherFieldNumber;
+const int Message_Crop::kDbImagefatheridFieldNumber;
 #endif  // !_MSC_VER
 
 Message_Crop::Message_Crop()
@@ -2350,6 +3133,7 @@ void Message_Crop::SharedCtor() {
   path_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   name_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   imagefather_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  db_imagefatherid_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -2394,7 +3178,7 @@ Message_Crop* Message_Crop::New() const {
 }
 
 void Message_Crop::Clear() {
-  if (_has_bits_[0 / 32] & 7) {
+  if (_has_bits_[0 / 32] & 15) {
     if (has_path()) {
       if (path_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         path_->clear();
@@ -2410,6 +3194,7 @@ void Message_Crop::Clear() {
         imagefather_->clear();
       }
     }
+    db_imagefatherid_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -2468,6 +3253,21 @@ bool Message_Crop::MergePartialFromCodedStream(
             this->imagefather().data(), this->imagefather().length(),
             ::google::protobuf::internal::WireFormat::PARSE,
             "imagefather");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(32)) goto parse_db_imagefatherid;
+        break;
+      }
+
+      // optional int32 db_imagefatherid = 4;
+      case 4: {
+        if (tag == 32) {
+         parse_db_imagefatherid:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &db_imagefatherid_)));
+          set_has_db_imagefatherid();
         } else {
           goto handle_unusual;
         }
@@ -2530,6 +3330,11 @@ void Message_Crop::SerializeWithCachedSizes(
       3, this->imagefather(), output);
   }
 
+  // optional int32 db_imagefatherid = 4;
+  if (has_db_imagefatherid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->db_imagefatherid(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -2573,6 +3378,11 @@ void Message_Crop::SerializeWithCachedSizes(
         3, this->imagefather(), target);
   }
 
+  // optional int32 db_imagefatherid = 4;
+  if (has_db_imagefatherid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->db_imagefatherid(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -2604,6 +3414,13 @@ int Message_Crop::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->imagefather());
+    }
+
+    // optional int32 db_imagefatherid = 4;
+    if (has_db_imagefatherid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->db_imagefatherid());
     }
 
   }
@@ -2642,6 +3459,9 @@ void Message_Crop::MergeFrom(const Message_Crop& from) {
     if (from.has_imagefather()) {
       set_imagefather(from.imagefather());
     }
+    if (from.has_db_imagefatherid()) {
+      set_db_imagefatherid(from.db_imagefatherid());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -2668,6 +3488,7 @@ void Message_Crop::Swap(Message_Crop* other) {
     std::swap(path_, other->path_);
     std::swap(name_, other->name_);
     std::swap(imagefather_, other->imagefather_);
+    std::swap(db_imagefatherid_, other->db_imagefatherid_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -2686,6 +3507,7 @@ void Message_Crop::Swap(Message_Crop* other) {
 // -------------------------------------------------------------------
 
 #ifndef _MSC_VER
+const int Message::kActivecamFieldNumber;
 const int Message::kTypeFieldNumber;
 const int Message::kTimeFieldNumber;
 const int Message::kDataFieldNumber;
@@ -2693,29 +3515,13 @@ const int Message::kDataAmountFieldNumber;
 const int Message::kDataTotalFieldNumber;
 const int Message::kServeripFieldNumber;
 const int Message::kClientipFieldNumber;
-const int Message::kRecognizingFieldNumber;
+const int Message::kDevicestarttimeFieldNumber;
 const int Message::kMotioncameraFieldNumber;
-const int Message::kStoreimageFieldNumber;
-const int Message::kStorecropFieldNumber;
-const int Message::kCodenameFieldNumber;
-const int Message::kRegioncoordsFieldNumber;
-const int Message::kDelayFieldNumber;
-const int Message::kStarttimeFieldNumber;
-const int Message::kStartrecognitiontimeFieldNumber;
-const int Message::kRegionFieldNumber;
-const int Message::kNumberofchangesFieldNumber;
-const int Message::kAmountFieldNumber;
-const int Message::kMatfileFieldNumber;
-const int Message::kActivematFieldNumber;
-const int Message::kCamerasFieldNumber;
-const int Message::kActivecameraFieldNumber;
-const int Message::kXmlfilenameFieldNumber;
-const int Message::kXmlfilepathFieldNumber;
-const int Message::kInstancecountFieldNumber;
-const int Message::kImagefilepathFieldNumber;
 const int Message::kCurrmonthFieldNumber;
 const int Message::kCurrdayFieldNumber;
+const int Message::kCurrcamFieldNumber;
 const int Message::kPackagesizeFieldNumber;
+const int Message::kImagefilepathFieldNumber;
 #endif  // !_MSC_VER
 
 Message::Message()
@@ -2737,6 +3543,7 @@ Message::Message(const Message& from)
 void Message::SharedCtor() {
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
+  activecam_ = 0;
   type_ = 1000;
   time_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   data_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
@@ -2744,27 +3551,12 @@ void Message::SharedCtor() {
   data_total_ = 0;
   serverip_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   clientip_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  recognizing_ = false;
-  storeimage_ = false;
-  storecrop_ = false;
-  codename_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  regioncoords_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  delay_ = 0;
-  starttime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  startrecognitiontime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  region_ = false;
-  numberofchanges_ = 0;
-  amount_ = 0;
-  activemat_ = 0;
-  cameras_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  activecamera_ = 0;
-  xmlfilename_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  xmlfilepath_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  instancecount_ = 0;
-  imagefilepath_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  devicestarttime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   currmonth_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   currday_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  currcam_ = 0;
   packagesize_ = 0;
+  imagefilepath_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -2786,35 +3578,17 @@ void Message::SharedDtor() {
   if (clientip_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete clientip_;
   }
-  if (codename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete codename_;
-  }
-  if (regioncoords_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete regioncoords_;
-  }
-  if (starttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete starttime_;
-  }
-  if (startrecognitiontime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete startrecognitiontime_;
-  }
-  if (cameras_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete cameras_;
-  }
-  if (xmlfilename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete xmlfilename_;
-  }
-  if (xmlfilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete xmlfilepath_;
-  }
-  if (imagefilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete imagefilepath_;
+  if (devicestarttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete devicestarttime_;
   }
   if (currmonth_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete currmonth_;
   }
   if (currday_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete currday_;
+  }
+  if (imagefilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete imagefilepath_;
   }
   if (this != default_instance_) {
   }
@@ -2853,7 +3627,8 @@ void Message::Clear() {
   } while (0)
 
   if (_has_bits_[0 / 32] & 255) {
-    ZR_(data_total_, recognizing_);
+    ZR_(data_amount_, data_total_);
+    activecam_ = 0;
     type_ = 1000;
     if (has_time()) {
       if (time_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -2865,7 +3640,6 @@ void Message::Clear() {
         data_->clear();
       }
     }
-    data_amount_ = 0;
     if (has_serverip()) {
       if (serverip_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         serverip_->clear();
@@ -2877,55 +3651,11 @@ void Message::Clear() {
       }
     }
   }
-  if (_has_bits_[8 / 32] & 65024) {
-    ZR_(storeimage_, storecrop_);
-    if (has_codename()) {
-      if (codename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-        codename_->clear();
-      }
-    }
-    if (has_regioncoords()) {
-      if (regioncoords_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-        regioncoords_->clear();
-      }
-    }
-    delay_ = 0;
-    if (has_starttime()) {
-      if (starttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-        starttime_->clear();
-      }
-    }
-    if (has_startrecognitiontime()) {
-      if (startrecognitiontime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-        startrecognitiontime_->clear();
-      }
-    }
-  }
-  if (_has_bits_[16 / 32] & 16187392) {
-    ZR_(numberofchanges_, amount_);
-    ZR_(activemat_, activecamera_);
-    region_ = false;
-    if (has_cameras()) {
-      if (cameras_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-        cameras_->clear();
-      }
-    }
-    if (has_xmlfilename()) {
-      if (xmlfilename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-        xmlfilename_->clear();
-      }
-    }
-  }
-  if (_has_bits_[24 / 32] & 1056964608) {
-    ZR_(instancecount_, packagesize_);
-    if (has_xmlfilepath()) {
-      if (xmlfilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-        xmlfilepath_->clear();
-      }
-    }
-    if (has_imagefilepath()) {
-      if (imagefilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-        imagefilepath_->clear();
+  if (_has_bits_[8 / 32] & 32000) {
+    ZR_(currcam_, packagesize_);
+    if (has_devicestarttime()) {
+      if (devicestarttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        devicestarttime_->clear();
       }
     }
     if (has_currmonth()) {
@@ -2938,13 +3668,17 @@ void Message::Clear() {
         currday_->clear();
       }
     }
+    if (has_imagefilepath()) {
+      if (imagefilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        imagefilepath_->clear();
+      }
+    }
   }
 
 #undef OFFSET_OF_FIELD_
 #undef ZR_
 
   motioncamera_.Clear();
-  matfile_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -2955,13 +3689,28 @@ bool Message::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   // @@protoc_insertion_point(parse_start:motion.Message)
   for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(16383);
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required .motion.Message.ActionType type = 1 [default = ENGAGE];
+      // required int32 activecam = 1;
       case 1: {
         if (tag == 8) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &activecam_)));
+          set_has_activecam();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_type;
+        break;
+      }
+
+      // required .motion.Message.ActionType type = 2 [default = ENGAGE];
+      case 2: {
+        if (tag == 16) {
+         parse_type:
           int value;
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
@@ -2969,18 +3718,18 @@ bool Message::MergePartialFromCodedStream(
           if (::motion::Message_ActionType_IsValid(value)) {
             set_type(static_cast< ::motion::Message_ActionType >(value));
           } else {
-            mutable_unknown_fields()->AddVarint(1, value);
+            mutable_unknown_fields()->AddVarint(2, value);
           }
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(18)) goto parse_time;
+        if (input->ExpectTag(26)) goto parse_time;
         break;
       }
 
-      // optional string time = 2;
-      case 2: {
-        if (tag == 18) {
+      // optional string time = 3;
+      case 3: {
+        if (tag == 26) {
          parse_time:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_time()));
@@ -2991,26 +3740,26 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_data;
+        if (input->ExpectTag(34)) goto parse_data;
         break;
       }
 
-      // optional bytes data = 3;
-      case 3: {
-        if (tag == 26) {
+      // optional bytes data = 4;
+      case 4: {
+        if (tag == 34) {
          parse_data:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_data()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(32)) goto parse_data_amount;
+        if (input->ExpectTag(40)) goto parse_data_amount;
         break;
       }
 
-      // optional int32 data_amount = 4;
-      case 4: {
-        if (tag == 32) {
+      // optional int32 data_amount = 5;
+      case 5: {
+        if (tag == 40) {
          parse_data_amount:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -3019,13 +3768,13 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(40)) goto parse_data_total;
+        if (input->ExpectTag(48)) goto parse_data_total;
         break;
       }
 
-      // optional int32 data_total = 5;
-      case 5: {
-        if (tag == 40) {
+      // optional int32 data_total = 6;
+      case 6: {
+        if (tag == 48) {
          parse_data_total:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -3034,13 +3783,13 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(50)) goto parse_serverip;
+        if (input->ExpectTag(58)) goto parse_serverip;
         break;
       }
 
-      // optional string serverip = 6;
-      case 6: {
-        if (tag == 50) {
+      // optional string serverip = 7;
+      case 7: {
+        if (tag == 58) {
          parse_serverip:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_serverip()));
@@ -3051,13 +3800,13 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(58)) goto parse_clientip;
+        if (input->ExpectTag(66)) goto parse_clientip;
         break;
       }
 
-      // optional string clientip = 7;
-      case 7: {
-        if (tag == 58) {
+      // optional string clientip = 8;
+      case 8: {
+        if (tag == 66) {
          parse_clientip:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_clientip()));
@@ -3068,328 +3817,44 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(64)) goto parse_recognizing;
+        if (input->ExpectTag(74)) goto parse_devicestarttime;
         break;
       }
 
-      // optional bool recognizing = 8;
-      case 8: {
-        if (tag == 64) {
-         parse_recognizing:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &recognizing_)));
-          set_has_recognizing();
+      // optional string devicestarttime = 9;
+      case 9: {
+        if (tag == 74) {
+         parse_devicestarttime:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_devicestarttime()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->devicestarttime().data(), this->devicestarttime().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "devicestarttime");
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(74)) goto parse_motioncamera;
+        if (input->ExpectTag(82)) goto parse_motioncamera;
         break;
       }
 
-      // repeated .motion.Message.MotionCamera motioncamera = 9;
-      case 9: {
-        if (tag == 74) {
+      // repeated .motion.Message.MotionCamera motioncamera = 10;
+      case 10: {
+        if (tag == 82) {
          parse_motioncamera:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_motioncamera()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(74)) goto parse_motioncamera;
-        if (input->ExpectTag(80)) goto parse_storeimage;
+        if (input->ExpectTag(82)) goto parse_motioncamera;
+        if (input->ExpectTag(90)) goto parse_currmonth;
         break;
       }
 
-      // optional bool storeimage = 10;
-      case 10: {
-        if (tag == 80) {
-         parse_storeimage:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &storeimage_)));
-          set_has_storeimage();
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(88)) goto parse_storecrop;
-        break;
-      }
-
-      // optional bool storecrop = 11;
+      // optional string currmonth = 11;
       case 11: {
-        if (tag == 88) {
-         parse_storecrop:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &storecrop_)));
-          set_has_storecrop();
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(98)) goto parse_codename;
-        break;
-      }
-
-      // optional string codename = 12;
-      case 12: {
-        if (tag == 98) {
-         parse_codename:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_codename()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->codename().data(), this->codename().length(),
-            ::google::protobuf::internal::WireFormat::PARSE,
-            "codename");
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(106)) goto parse_regioncoords;
-        break;
-      }
-
-      // optional bytes regioncoords = 13;
-      case 13: {
-        if (tag == 106) {
-         parse_regioncoords:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
-                input, this->mutable_regioncoords()));
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(113)) goto parse_delay;
-        break;
-      }
-
-      // optional double delay = 14;
-      case 14: {
-        if (tag == 113) {
-         parse_delay:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &delay_)));
-          set_has_delay();
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(122)) goto parse_starttime;
-        break;
-      }
-
-      // optional string starttime = 15;
-      case 15: {
-        if (tag == 122) {
-         parse_starttime:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_starttime()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->starttime().data(), this->starttime().length(),
-            ::google::protobuf::internal::WireFormat::PARSE,
-            "starttime");
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(130)) goto parse_startrecognitiontime;
-        break;
-      }
-
-      // optional string startrecognitiontime = 16;
-      case 16: {
-        if (tag == 130) {
-         parse_startrecognitiontime:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_startrecognitiontime()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->startrecognitiontime().data(), this->startrecognitiontime().length(),
-            ::google::protobuf::internal::WireFormat::PARSE,
-            "startrecognitiontime");
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(136)) goto parse_region;
-        break;
-      }
-
-      // optional bool region = 17;
-      case 17: {
-        if (tag == 136) {
-         parse_region:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &region_)));
-          set_has_region();
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(144)) goto parse_numberofchanges;
-        break;
-      }
-
-      // optional int32 numberofchanges = 18;
-      case 18: {
-        if (tag == 144) {
-         parse_numberofchanges:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &numberofchanges_)));
-          set_has_numberofchanges();
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(152)) goto parse_amount;
-        break;
-      }
-
-      // optional int32 amount = 19;
-      case 19: {
-        if (tag == 152) {
-         parse_amount:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &amount_)));
-          set_has_amount();
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(160)) goto parse_matfile;
-        break;
-      }
-
-      // repeated int32 matfile = 20;
-      case 20: {
-        if (tag == 160) {
-         parse_matfile:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 2, 160, input, this->mutable_matfile())));
-        } else if (tag == 162) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, this->mutable_matfile())));
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(160)) goto parse_matfile;
-        if (input->ExpectTag(168)) goto parse_activemat;
-        break;
-      }
-
-      // optional int32 activemat = 21;
-      case 21: {
-        if (tag == 168) {
-         parse_activemat:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &activemat_)));
-          set_has_activemat();
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(178)) goto parse_cameras;
-        break;
-      }
-
-      // optional string cameras = 22;
-      case 22: {
-        if (tag == 178) {
-         parse_cameras:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_cameras()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->cameras().data(), this->cameras().length(),
-            ::google::protobuf::internal::WireFormat::PARSE,
-            "cameras");
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(184)) goto parse_activecamera;
-        break;
-      }
-
-      // optional int32 activecamera = 23;
-      case 23: {
-        if (tag == 184) {
-         parse_activecamera:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &activecamera_)));
-          set_has_activecamera();
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(194)) goto parse_xmlfilename;
-        break;
-      }
-
-      // optional string xmlfilename = 24;
-      case 24: {
-        if (tag == 194) {
-         parse_xmlfilename:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_xmlfilename()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->xmlfilename().data(), this->xmlfilename().length(),
-            ::google::protobuf::internal::WireFormat::PARSE,
-            "xmlfilename");
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(202)) goto parse_xmlfilepath;
-        break;
-      }
-
-      // optional string xmlfilepath = 25;
-      case 25: {
-        if (tag == 202) {
-         parse_xmlfilepath:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_xmlfilepath()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->xmlfilepath().data(), this->xmlfilepath().length(),
-            ::google::protobuf::internal::WireFormat::PARSE,
-            "xmlfilepath");
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(208)) goto parse_instancecount;
-        break;
-      }
-
-      // optional int32 instancecount = 26;
-      case 26: {
-        if (tag == 208) {
-         parse_instancecount:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &instancecount_)));
-          set_has_instancecount();
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(218)) goto parse_imagefilepath;
-        break;
-      }
-
-      // optional string imagefilepath = 27;
-      case 27: {
-        if (tag == 218) {
-         parse_imagefilepath:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_imagefilepath()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->imagefilepath().data(), this->imagefilepath().length(),
-            ::google::protobuf::internal::WireFormat::PARSE,
-            "imagefilepath");
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(226)) goto parse_currmonth;
-        break;
-      }
-
-      // optional string currmonth = 28;
-      case 28: {
-        if (tag == 226) {
+        if (tag == 90) {
          parse_currmonth:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_currmonth()));
@@ -3400,13 +3865,13 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(234)) goto parse_currday;
+        if (input->ExpectTag(98)) goto parse_currday;
         break;
       }
 
-      // optional string currday = 29;
-      case 29: {
-        if (tag == 234) {
+      // optional string currday = 12;
+      case 12: {
+        if (tag == 98) {
          parse_currday:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_currday()));
@@ -3417,18 +3882,50 @@ bool Message::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(240)) goto parse_packagesize;
+        if (input->ExpectTag(104)) goto parse_currcam;
         break;
       }
 
-      // optional int32 packagesize = 30;
-      case 30: {
-        if (tag == 240) {
+      // optional int32 currcam = 13;
+      case 13: {
+        if (tag == 104) {
+         parse_currcam:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &currcam_)));
+          set_has_currcam();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(112)) goto parse_packagesize;
+        break;
+      }
+
+      // optional int32 packagesize = 14;
+      case 14: {
+        if (tag == 112) {
          parse_packagesize:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &packagesize_)));
           set_has_packagesize();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(122)) goto parse_imagefilepath;
+        break;
+      }
+
+      // optional string imagefilepath = 15;
+      case 15: {
+        if (tag == 122) {
+         parse_imagefilepath:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_imagefilepath()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->imagefilepath().data(), this->imagefilepath().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "imagefilepath");
         } else {
           goto handle_unusual;
         }
@@ -3461,219 +3958,117 @@ failure:
 void Message::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:motion.Message)
-  // required .motion.Message.ActionType type = 1 [default = ENGAGE];
-  if (has_type()) {
-    ::google::protobuf::internal::WireFormatLite::WriteEnum(
-      1, this->type(), output);
+  // required int32 activecam = 1;
+  if (has_activecam()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->activecam(), output);
   }
 
-  // optional string time = 2;
+  // required .motion.Message.ActionType type = 2 [default = ENGAGE];
+  if (has_type()) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      2, this->type(), output);
+  }
+
+  // optional string time = 3;
   if (has_time()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->time().data(), this->time().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
       "time");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      2, this->time(), output);
+      3, this->time(), output);
   }
 
-  // optional bytes data = 3;
+  // optional bytes data = 4;
   if (has_data()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
-      3, this->data(), output);
+      4, this->data(), output);
   }
 
-  // optional int32 data_amount = 4;
+  // optional int32 data_amount = 5;
   if (has_data_amount()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->data_amount(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->data_amount(), output);
   }
 
-  // optional int32 data_total = 5;
+  // optional int32 data_total = 6;
   if (has_data_total()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->data_total(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->data_total(), output);
   }
 
-  // optional string serverip = 6;
+  // optional string serverip = 7;
   if (has_serverip()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->serverip().data(), this->serverip().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
       "serverip");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      6, this->serverip(), output);
+      7, this->serverip(), output);
   }
 
-  // optional string clientip = 7;
+  // optional string clientip = 8;
   if (has_clientip()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->clientip().data(), this->clientip().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
       "clientip");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      7, this->clientip(), output);
+      8, this->clientip(), output);
   }
 
-  // optional bool recognizing = 8;
-  if (has_recognizing()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(8, this->recognizing(), output);
+  // optional string devicestarttime = 9;
+  if (has_devicestarttime()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->devicestarttime().data(), this->devicestarttime().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "devicestarttime");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      9, this->devicestarttime(), output);
   }
 
-  // repeated .motion.Message.MotionCamera motioncamera = 9;
+  // repeated .motion.Message.MotionCamera motioncamera = 10;
   for (int i = 0; i < this->motioncamera_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      9, this->motioncamera(i), output);
+      10, this->motioncamera(i), output);
   }
 
-  // optional bool storeimage = 10;
-  if (has_storeimage()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(10, this->storeimage(), output);
-  }
-
-  // optional bool storecrop = 11;
-  if (has_storecrop()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(11, this->storecrop(), output);
-  }
-
-  // optional string codename = 12;
-  if (has_codename()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->codename().data(), this->codename().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "codename");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      12, this->codename(), output);
-  }
-
-  // optional bytes regioncoords = 13;
-  if (has_regioncoords()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
-      13, this->regioncoords(), output);
-  }
-
-  // optional double delay = 14;
-  if (has_delay()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(14, this->delay(), output);
-  }
-
-  // optional string starttime = 15;
-  if (has_starttime()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->starttime().data(), this->starttime().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "starttime");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      15, this->starttime(), output);
-  }
-
-  // optional string startrecognitiontime = 16;
-  if (has_startrecognitiontime()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->startrecognitiontime().data(), this->startrecognitiontime().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "startrecognitiontime");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      16, this->startrecognitiontime(), output);
-  }
-
-  // optional bool region = 17;
-  if (has_region()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(17, this->region(), output);
-  }
-
-  // optional int32 numberofchanges = 18;
-  if (has_numberofchanges()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(18, this->numberofchanges(), output);
-  }
-
-  // optional int32 amount = 19;
-  if (has_amount()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(19, this->amount(), output);
-  }
-
-  // repeated int32 matfile = 20;
-  for (int i = 0; i < this->matfile_size(); i++) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(
-      20, this->matfile(i), output);
-  }
-
-  // optional int32 activemat = 21;
-  if (has_activemat()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(21, this->activemat(), output);
-  }
-
-  // optional string cameras = 22;
-  if (has_cameras()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->cameras().data(), this->cameras().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "cameras");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      22, this->cameras(), output);
-  }
-
-  // optional int32 activecamera = 23;
-  if (has_activecamera()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(23, this->activecamera(), output);
-  }
-
-  // optional string xmlfilename = 24;
-  if (has_xmlfilename()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->xmlfilename().data(), this->xmlfilename().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "xmlfilename");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      24, this->xmlfilename(), output);
-  }
-
-  // optional string xmlfilepath = 25;
-  if (has_xmlfilepath()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->xmlfilepath().data(), this->xmlfilepath().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "xmlfilepath");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      25, this->xmlfilepath(), output);
-  }
-
-  // optional int32 instancecount = 26;
-  if (has_instancecount()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(26, this->instancecount(), output);
-  }
-
-  // optional string imagefilepath = 27;
-  if (has_imagefilepath()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->imagefilepath().data(), this->imagefilepath().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "imagefilepath");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      27, this->imagefilepath(), output);
-  }
-
-  // optional string currmonth = 28;
+  // optional string currmonth = 11;
   if (has_currmonth()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->currmonth().data(), this->currmonth().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
       "currmonth");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      28, this->currmonth(), output);
+      11, this->currmonth(), output);
   }
 
-  // optional string currday = 29;
+  // optional string currday = 12;
   if (has_currday()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->currday().data(), this->currday().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
       "currday");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      29, this->currday(), output);
+      12, this->currday(), output);
   }
 
-  // optional int32 packagesize = 30;
+  // optional int32 currcam = 13;
+  if (has_currcam()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(13, this->currcam(), output);
+  }
+
+  // optional int32 packagesize = 14;
   if (has_packagesize()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(30, this->packagesize(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(14, this->packagesize(), output);
+  }
+
+  // optional string imagefilepath = 15;
+  if (has_imagefilepath()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->imagefilepath().data(), this->imagefilepath().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "imagefilepath");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      15, this->imagefilepath(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -3686,13 +4081,18 @@ void Message::SerializeWithCachedSizes(
 ::google::protobuf::uint8* Message::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:motion.Message)
-  // required .motion.Message.ActionType type = 1 [default = ENGAGE];
-  if (has_type()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
-      1, this->type(), target);
+  // required int32 activecam = 1;
+  if (has_activecam()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->activecam(), target);
   }
 
-  // optional string time = 2;
+  // required .motion.Message.ActionType type = 2 [default = ENGAGE];
+  if (has_type()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      2, this->type(), target);
+  }
+
+  // optional string time = 3;
   if (has_time()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->time().data(), this->time().length(),
@@ -3700,27 +4100,27 @@ void Message::SerializeWithCachedSizes(
       "time");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        2, this->time(), target);
+        3, this->time(), target);
   }
 
-  // optional bytes data = 3;
+  // optional bytes data = 4;
   if (has_data()) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        3, this->data(), target);
+        4, this->data(), target);
   }
 
-  // optional int32 data_amount = 4;
+  // optional int32 data_amount = 5;
   if (has_data_amount()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->data_amount(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->data_amount(), target);
   }
 
-  // optional int32 data_total = 5;
+  // optional int32 data_total = 6;
   if (has_data_total()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->data_total(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->data_total(), target);
   }
 
-  // optional string serverip = 6;
+  // optional string serverip = 7;
   if (has_serverip()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->serverip().data(), this->serverip().length(),
@@ -3728,10 +4128,10 @@ void Message::SerializeWithCachedSizes(
       "serverip");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        6, this->serverip(), target);
+        7, this->serverip(), target);
   }
 
-  // optional string clientip = 7;
+  // optional string clientip = 8;
   if (has_clientip()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->clientip().data(), this->clientip().length(),
@@ -3739,157 +4139,28 @@ void Message::SerializeWithCachedSizes(
       "clientip");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        7, this->clientip(), target);
+        8, this->clientip(), target);
   }
 
-  // optional bool recognizing = 8;
-  if (has_recognizing()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(8, this->recognizing(), target);
+  // optional string devicestarttime = 9;
+  if (has_devicestarttime()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->devicestarttime().data(), this->devicestarttime().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "devicestarttime");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        9, this->devicestarttime(), target);
   }
 
-  // repeated .motion.Message.MotionCamera motioncamera = 9;
+  // repeated .motion.Message.MotionCamera motioncamera = 10;
   for (int i = 0; i < this->motioncamera_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        9, this->motioncamera(i), target);
+        10, this->motioncamera(i), target);
   }
 
-  // optional bool storeimage = 10;
-  if (has_storeimage()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(10, this->storeimage(), target);
-  }
-
-  // optional bool storecrop = 11;
-  if (has_storecrop()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(11, this->storecrop(), target);
-  }
-
-  // optional string codename = 12;
-  if (has_codename()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->codename().data(), this->codename().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "codename");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        12, this->codename(), target);
-  }
-
-  // optional bytes regioncoords = 13;
-  if (has_regioncoords()) {
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        13, this->regioncoords(), target);
-  }
-
-  // optional double delay = 14;
-  if (has_delay()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(14, this->delay(), target);
-  }
-
-  // optional string starttime = 15;
-  if (has_starttime()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->starttime().data(), this->starttime().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "starttime");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        15, this->starttime(), target);
-  }
-
-  // optional string startrecognitiontime = 16;
-  if (has_startrecognitiontime()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->startrecognitiontime().data(), this->startrecognitiontime().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "startrecognitiontime");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        16, this->startrecognitiontime(), target);
-  }
-
-  // optional bool region = 17;
-  if (has_region()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(17, this->region(), target);
-  }
-
-  // optional int32 numberofchanges = 18;
-  if (has_numberofchanges()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(18, this->numberofchanges(), target);
-  }
-
-  // optional int32 amount = 19;
-  if (has_amount()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(19, this->amount(), target);
-  }
-
-  // repeated int32 matfile = 20;
-  for (int i = 0; i < this->matfile_size(); i++) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteInt32ToArray(20, this->matfile(i), target);
-  }
-
-  // optional int32 activemat = 21;
-  if (has_activemat()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(21, this->activemat(), target);
-  }
-
-  // optional string cameras = 22;
-  if (has_cameras()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->cameras().data(), this->cameras().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "cameras");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        22, this->cameras(), target);
-  }
-
-  // optional int32 activecamera = 23;
-  if (has_activecamera()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(23, this->activecamera(), target);
-  }
-
-  // optional string xmlfilename = 24;
-  if (has_xmlfilename()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->xmlfilename().data(), this->xmlfilename().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "xmlfilename");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        24, this->xmlfilename(), target);
-  }
-
-  // optional string xmlfilepath = 25;
-  if (has_xmlfilepath()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->xmlfilepath().data(), this->xmlfilepath().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "xmlfilepath");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        25, this->xmlfilepath(), target);
-  }
-
-  // optional int32 instancecount = 26;
-  if (has_instancecount()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(26, this->instancecount(), target);
-  }
-
-  // optional string imagefilepath = 27;
-  if (has_imagefilepath()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->imagefilepath().data(), this->imagefilepath().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "imagefilepath");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        27, this->imagefilepath(), target);
-  }
-
-  // optional string currmonth = 28;
+  // optional string currmonth = 11;
   if (has_currmonth()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->currmonth().data(), this->currmonth().length(),
@@ -3897,10 +4168,10 @@ void Message::SerializeWithCachedSizes(
       "currmonth");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        28, this->currmonth(), target);
+        11, this->currmonth(), target);
   }
 
-  // optional string currday = 29;
+  // optional string currday = 12;
   if (has_currday()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->currday().data(), this->currday().length(),
@@ -3908,12 +4179,28 @@ void Message::SerializeWithCachedSizes(
       "currday");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        29, this->currday(), target);
+        12, this->currday(), target);
   }
 
-  // optional int32 packagesize = 30;
+  // optional int32 currcam = 13;
+  if (has_currcam()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(13, this->currcam(), target);
+  }
+
+  // optional int32 packagesize = 14;
   if (has_packagesize()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(30, this->packagesize(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(14, this->packagesize(), target);
+  }
+
+  // optional string imagefilepath = 15;
+  if (has_imagefilepath()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->imagefilepath().data(), this->imagefilepath().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "imagefilepath");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        15, this->imagefilepath(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -3928,214 +4215,112 @@ int Message::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required .motion.Message.ActionType type = 1 [default = ENGAGE];
+    // required int32 activecam = 1;
+    if (has_activecam()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->activecam());
+    }
+
+    // required .motion.Message.ActionType type = 2 [default = ENGAGE];
     if (has_type()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
     }
 
-    // optional string time = 2;
+    // optional string time = 3;
     if (has_time()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->time());
     }
 
-    // optional bytes data = 3;
+    // optional bytes data = 4;
     if (has_data()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
           this->data());
     }
 
-    // optional int32 data_amount = 4;
+    // optional int32 data_amount = 5;
     if (has_data_amount()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->data_amount());
     }
 
-    // optional int32 data_total = 5;
+    // optional int32 data_total = 6;
     if (has_data_total()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->data_total());
     }
 
-    // optional string serverip = 6;
+    // optional string serverip = 7;
     if (has_serverip()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->serverip());
     }
 
-    // optional string clientip = 7;
+    // optional string clientip = 8;
     if (has_clientip()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->clientip());
     }
 
-    // optional bool recognizing = 8;
-    if (has_recognizing()) {
-      total_size += 1 + 1;
-    }
-
   }
-  if (_has_bits_[9 / 32] & (0xffu << (9 % 32))) {
-    // optional bool storeimage = 10;
-    if (has_storeimage()) {
-      total_size += 1 + 1;
-    }
-
-    // optional bool storecrop = 11;
-    if (has_storecrop()) {
-      total_size += 1 + 1;
-    }
-
-    // optional string codename = 12;
-    if (has_codename()) {
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional string devicestarttime = 9;
+    if (has_devicestarttime()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->codename());
+          this->devicestarttime());
     }
 
-    // optional bytes regioncoords = 13;
-    if (has_regioncoords()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::BytesSize(
-          this->regioncoords());
-    }
-
-    // optional double delay = 14;
-    if (has_delay()) {
-      total_size += 1 + 8;
-    }
-
-    // optional string starttime = 15;
-    if (has_starttime()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->starttime());
-    }
-
-    // optional string startrecognitiontime = 16;
-    if (has_startrecognitiontime()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->startrecognitiontime());
-    }
-
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    // optional bool region = 17;
-    if (has_region()) {
-      total_size += 2 + 1;
-    }
-
-    // optional int32 numberofchanges = 18;
-    if (has_numberofchanges()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->numberofchanges());
-    }
-
-    // optional int32 amount = 19;
-    if (has_amount()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->amount());
-    }
-
-    // optional int32 activemat = 21;
-    if (has_activemat()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->activemat());
-    }
-
-    // optional string cameras = 22;
-    if (has_cameras()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->cameras());
-    }
-
-    // optional int32 activecamera = 23;
-    if (has_activecamera()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->activecamera());
-    }
-
-    // optional string xmlfilename = 24;
-    if (has_xmlfilename()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->xmlfilename());
-    }
-
-  }
-  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
-    // optional string xmlfilepath = 25;
-    if (has_xmlfilepath()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->xmlfilepath());
-    }
-
-    // optional int32 instancecount = 26;
-    if (has_instancecount()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->instancecount());
-    }
-
-    // optional string imagefilepath = 27;
-    if (has_imagefilepath()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->imagefilepath());
-    }
-
-    // optional string currmonth = 28;
+    // optional string currmonth = 11;
     if (has_currmonth()) {
-      total_size += 2 +
+      total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->currmonth());
     }
 
-    // optional string currday = 29;
+    // optional string currday = 12;
     if (has_currday()) {
-      total_size += 2 +
+      total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->currday());
     }
 
-    // optional int32 packagesize = 30;
+    // optional int32 currcam = 13;
+    if (has_currcam()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->currcam());
+    }
+
+    // optional int32 packagesize = 14;
     if (has_packagesize()) {
-      total_size += 2 +
+      total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->packagesize());
     }
 
+    // optional string imagefilepath = 15;
+    if (has_imagefilepath()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->imagefilepath());
+    }
+
   }
-  // repeated .motion.Message.MotionCamera motioncamera = 9;
+  // repeated .motion.Message.MotionCamera motioncamera = 10;
   total_size += 1 * this->motioncamera_size();
   for (int i = 0; i < this->motioncamera_size(); i++) {
     total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
         this->motioncamera(i));
-  }
-
-  // repeated int32 matfile = 20;
-  {
-    int data_size = 0;
-    for (int i = 0; i < this->matfile_size(); i++) {
-      data_size += ::google::protobuf::internal::WireFormatLite::
-        Int32Size(this->matfile(i));
-    }
-    total_size += 2 * this->matfile_size() + data_size;
   }
 
   if (!unknown_fields().empty()) {
@@ -4164,8 +4349,10 @@ void Message::MergeFrom(const ::google::protobuf::Message& from) {
 void Message::MergeFrom(const Message& from) {
   GOOGLE_CHECK_NE(&from, this);
   motioncamera_.MergeFrom(from.motioncamera_);
-  matfile_.MergeFrom(from.matfile_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_activecam()) {
+      set_activecam(from.activecam());
+    }
     if (from.has_type()) {
       set_type(from.type());
     }
@@ -4187,65 +4374,10 @@ void Message::MergeFrom(const Message& from) {
     if (from.has_clientip()) {
       set_clientip(from.clientip());
     }
-    if (from.has_recognizing()) {
-      set_recognizing(from.recognizing());
-    }
   }
-  if (from._has_bits_[9 / 32] & (0xffu << (9 % 32))) {
-    if (from.has_storeimage()) {
-      set_storeimage(from.storeimage());
-    }
-    if (from.has_storecrop()) {
-      set_storecrop(from.storecrop());
-    }
-    if (from.has_codename()) {
-      set_codename(from.codename());
-    }
-    if (from.has_regioncoords()) {
-      set_regioncoords(from.regioncoords());
-    }
-    if (from.has_delay()) {
-      set_delay(from.delay());
-    }
-    if (from.has_starttime()) {
-      set_starttime(from.starttime());
-    }
-    if (from.has_startrecognitiontime()) {
-      set_startrecognitiontime(from.startrecognitiontime());
-    }
-  }
-  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    if (from.has_region()) {
-      set_region(from.region());
-    }
-    if (from.has_numberofchanges()) {
-      set_numberofchanges(from.numberofchanges());
-    }
-    if (from.has_amount()) {
-      set_amount(from.amount());
-    }
-    if (from.has_activemat()) {
-      set_activemat(from.activemat());
-    }
-    if (from.has_cameras()) {
-      set_cameras(from.cameras());
-    }
-    if (from.has_activecamera()) {
-      set_activecamera(from.activecamera());
-    }
-    if (from.has_xmlfilename()) {
-      set_xmlfilename(from.xmlfilename());
-    }
-  }
-  if (from._has_bits_[24 / 32] & (0xffu << (24 % 32))) {
-    if (from.has_xmlfilepath()) {
-      set_xmlfilepath(from.xmlfilepath());
-    }
-    if (from.has_instancecount()) {
-      set_instancecount(from.instancecount());
-    }
-    if (from.has_imagefilepath()) {
-      set_imagefilepath(from.imagefilepath());
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_devicestarttime()) {
+      set_devicestarttime(from.devicestarttime());
     }
     if (from.has_currmonth()) {
       set_currmonth(from.currmonth());
@@ -4253,8 +4385,14 @@ void Message::MergeFrom(const Message& from) {
     if (from.has_currday()) {
       set_currday(from.currday());
     }
+    if (from.has_currcam()) {
+      set_currcam(from.currcam());
+    }
     if (from.has_packagesize()) {
       set_packagesize(from.packagesize());
+    }
+    if (from.has_imagefilepath()) {
+      set_imagefilepath(from.imagefilepath());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -4273,7 +4411,7 @@ void Message::CopyFrom(const Message& from) {
 }
 
 bool Message::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
 
   if (!::google::protobuf::internal::AllAreInitialized(this->motioncamera())) return false;
   return true;
@@ -4281,6 +4419,7 @@ bool Message::IsInitialized() const {
 
 void Message::Swap(Message* other) {
   if (other != this) {
+    std::swap(activecam_, other->activecam_);
     std::swap(type_, other->type_);
     std::swap(time_, other->time_);
     std::swap(data_, other->data_);
@@ -4288,29 +4427,13 @@ void Message::Swap(Message* other) {
     std::swap(data_total_, other->data_total_);
     std::swap(serverip_, other->serverip_);
     std::swap(clientip_, other->clientip_);
-    std::swap(recognizing_, other->recognizing_);
+    std::swap(devicestarttime_, other->devicestarttime_);
     motioncamera_.Swap(&other->motioncamera_);
-    std::swap(storeimage_, other->storeimage_);
-    std::swap(storecrop_, other->storecrop_);
-    std::swap(codename_, other->codename_);
-    std::swap(regioncoords_, other->regioncoords_);
-    std::swap(delay_, other->delay_);
-    std::swap(starttime_, other->starttime_);
-    std::swap(startrecognitiontime_, other->startrecognitiontime_);
-    std::swap(region_, other->region_);
-    std::swap(numberofchanges_, other->numberofchanges_);
-    std::swap(amount_, other->amount_);
-    matfile_.Swap(&other->matfile_);
-    std::swap(activemat_, other->activemat_);
-    std::swap(cameras_, other->cameras_);
-    std::swap(activecamera_, other->activecamera_);
-    std::swap(xmlfilename_, other->xmlfilename_);
-    std::swap(xmlfilepath_, other->xmlfilepath_);
-    std::swap(instancecount_, other->instancecount_);
-    std::swap(imagefilepath_, other->imagefilepath_);
     std::swap(currmonth_, other->currmonth_);
     std::swap(currday_, other->currday_);
+    std::swap(currcam_, other->currcam_);
     std::swap(packagesize_, other->packagesize_);
+    std::swap(imagefilepath_, other->imagefilepath_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

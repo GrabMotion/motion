@@ -248,20 +248,20 @@ inline string saveImg(
     string image_file = ss.str().c_str();
     imwrite(image_file, image);
     
-    std::cout << "image_file: " << image_file << std::endl;
-    
     if (img.empty())
     {
         motion::Message::Image * pimage = pinstance->add_image();
         pimage->set_path(image_file.c_str());
-        pimage->set_name(n_file);
+        pimage->set_name(n_str_file);
         pimage->set_imagechanges(n_o_changes);
+        std::cout << "image_file: " << image_file << std::endl;
     } else
     {
         motion::Message::Crop * pcrop = pinstance->add_crop();
         pcrop->set_path(image_file.c_str());
-        pcrop->set_name(n_file);
+        pcrop->set_name(n_str_file);
         pcrop->set_imagefather(img);
+        std::cout << "image_crop_file: " << image_file << std::endl;
     }
     return image_file;
 }
@@ -293,9 +293,11 @@ inline bool createDirectoryTree(
     ss << "/xml";
     directoryExistsOrCreate(ss.str().c_str());
     zz.str("");
-    zz << DIRECTORY << TIME << "/" + instance;         
+    zz << DIRECTORY << TIME << "/" + instance;
+    cout << "CREATE DIRECTORY:: " << zz.str() << endl;
     directoryExistsOrCreate(zz.str().c_str());
     zz << "/cropped";
+    cout << "CREATE CROPPED DIRECTORY:: " << zz.str() << endl;
     directoryExistsOrCreate(zz.str().c_str());    
     
     return true;
@@ -343,8 +345,8 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
             Point x(min_x,min_y);
             Point y(max_x,max_y);
             Rect rect(x,y);
-            //Mat cropped = result(rect);
-            //cropped.copyTo(result_cropped);
+            Mat cropped = result(rect);
+            cropped.copyTo(result_cropped);
             rectangle(result,rect,color,1);
         }
         return number_of_changes;
@@ -396,8 +398,8 @@ inline int detectMotionRegion(const cv::Mat & motionmat,
             Point x(min_x,min_y);
             Point y(max_x,max_y);
             Rect rect(x,y);
-            //Mat cropped = result(rect);
-            //cropped.copyTo(result_cropped);
+            Mat cropped = result(rect);
+            cropped.copyTo(result_cropped);
             rectangle(result,rect,color,1);
         }
         
@@ -425,29 +427,80 @@ void * startRecognition(void * arg)
     R_PROTO = PROTO;
     
     //Camera.
-    int cam = R_PROTO.activecamera();
+    int cam = R_PROTO.activecam();
+    
+    //Get Month abr.
+    struct timeval tm;
+    struct tm* ptm;
+    char month_rasp[3];
+    gettimeofday (&tm, NULL);
+    ptm = localtime (&tm.tv_sec);
+    strftime (month_rasp, sizeof (month_rasp), "%h", ptm);
+    
+    //database camera id.
+    stringstream camera_id_query;
+    camera_id_query <<
+    "SELECT _id, name FROM cameras where number = " << cam << ";";
+    cout << " camera_id_query " << camera_id_query << endl;
+    vector<vector<string> > camera_array = db_select(camera_id_query.str().c_str(), 2);
+    db_camera_id = atoi(camera_array.at(0).at(0).c_str());
+    string str_camera = camera_array.at(0).at(1);
+    
+    //Check if exist month on proto or else add it.
+    int sizec = R_PROTO.motioncamera_size();
+    cout << "sizec: " << sizec << endl;
+    bool cameraexist = false;
+    for (int i = 0; i < sizec; i++)
+    {
+        cout << "entra" << endl;
+        motion::Message::MotionCamera * mcamera = R_PROTO.mutable_motioncamera(i);
+        if (mcamera->has_cameraname())
+        {
+            std::string camera = mcamera->cameraname();
+            cout << "camera: " << camera << endl;
+            if (str_camera.find(camera))
+            {
+                cout << "has camera" << endl;
+                pcamera = R_PROTO.mutable_motioncamera(i);
+                cameraexist=true;
+            }
+        }
+    }
+    if(!cameraexist)
+    {
+        cout << "!cameraexist" << endl;
+        //Add proto camera.
+        pcamera = R_PROTO.add_motioncamera();
+        pcamera->set_cameraname(str_camera);
+        cout << "sigo" << endl;
+    }
+    if (pcamera->has_cameraid())
+        cout << "pcamera->cameraid(): "     << pcamera->cameraid()      << endl;
+    
+    if (pcamera->has_cameranumber())
+        cout << "pcamera->cameranumber(): " << pcamera->cameranumber()  << endl;
+    
+    if (pcamera->has_cameraname())
+        cout << "pcamera->cameraname(): "   << pcamera->cameraname()    << endl;
     
     //Region
     bool has_region;
     std::vector<cv::Point2f> region;
     std::string rcoords;
-    if (R_PROTO.region())
+    if (pcamera->hasregion())
     {
         cout << "Has region." << endl;
-        if (R_PROTO.has_regioncoords())
-        {
-            cout << "Has regioncoords." << endl;
-            std::string rc = R_PROTO.regioncoords();
-            cout << "rc." << rc << endl;
-            rcoords = base64_decode(rc);
-            cout << "rcoords." << rcoords << endl;
-            region = processRegionString(rcoords);
-            cout << "REGION SIZE :: " << region.size() << endl;
-            if (region.size()>0)
-                has_region = true;
-            else
-                has_region = false;
-        }
+        std::string rc = pcamera->coordinates();
+        cout << "rc." << rc << endl;
+        rcoords = base64_decode(rc);
+        cout << "rcoords." << rcoords << endl;
+        region = processRegionString(rcoords);
+        cout << "REGION SIZE :: " << region.size() << endl;
+        if (region.size()>0)
+            has_region = true;
+        else
+            has_region = false;
+        
     }
     else
     {
@@ -456,6 +509,7 @@ void * startRecognition(void * arg)
     
     if (has_region)
     {
+        std::replace( rcoords.begin(), rcoords.end(), '\n', ' ');
         stringstream sql_coord;
         sql_coord <<
         "INSERT INTO coordinates (coordinates) " <<
@@ -468,82 +522,29 @@ void * startRecognition(void * arg)
         db_coordnates_id = atoi(coords_array.at(0).at(0).c_str());
         cout << "db_coordnates_id: " << db_coordnates_id << endl;
     }
-    
+
     std::string instancecode;
-    if (R_PROTO.has_codename())
+    string XML_FILE;
+    if (pcamera->has_codename())
     {
         cout << "Has codename." << endl;
-        std::string instancecode = R_PROTO.codename();
+        instancecode = pcamera->codename();
     }
     if (instancecode.empty())
         instancecode = "Prueba";
     
+    cout << "::1::" << endl;
     double delay;
-    if (R_PROTO.has_delay())
+    if (pcamera->has_delay())
     {
-        delay = R_PROTO.delay();
+        delay = pcamera->delay();
     }
+    
+    cout << "::2:: " << delay << endl;
     time_t delaymark;
     
-    string XML_FILE;
-    if (R_PROTO.has_xmlfilename())
-    {
-        cout << "has_xmlfile." << endl;
-        XML_FILE = R_PROTO.xmlfilename();
-    }
-    else
-    {
-        XML_FILE  =  "<import>session";
-        R_PROTO.set_xmlfilename(XML_FILE);
-    }
+    cout << "::3:: " <<  pcamera->cameraname() << endl;
     
-    //Get Month abr.
-    struct timeval tm;
-    struct tm* ptm;
-    char month_rasp[3];
-    gettimeofday (&tm, NULL);
-    ptm = localtime (&tm.tv_sec);
-    strftime (month_rasp, sizeof (month_rasp), "%h", ptm);
-    
-    //Check if exist month on proto or else add it.
-    string str_camera;
-    int sizec = R_PROTO.motioncamera_size();
-    cout << "sizec: " << sizec << endl;
-    bool cameraexist = false;
-    for (int i = 0; i < sizec; i++)
-    {
-        cout << "entra" << endl;
-        motion::Message::MotionCamera * mcamera = R_PROTO.mutable_motioncamera(i);
-        if (mcamera->has_camera())
-        {
-            cout << "has camera" << endl;
-            std::string camera = mcamera->camera();
-            if (str_camera.find(camera))
-            {
-                cout << "has camera" << endl;
-                pcamera = R_PROTO.mutable_motioncamera(i);
-                cameraexist=true;
-            }
-        }
-        else
-        {
-            cout << "has NO camera" << endl;
-        }
-    }
-    if(!cameraexist)
-    {
-        cout << "!cameraexist" << endl;
-        //Add proto camera.
-        pcamera = R_PROTO.add_motioncamera();
-        pcamera->set_camera(str_camera);
-        cout << "sigo" << endl;
-    }
-
-    //database camera id.
-    std::string camera_id_query = "SELECT _id FROM cameras where name = '" + pcamera->camera() + "';";
-    cout << " camera_id_query " << camera_id_query << endl;
-    vector<vector<string> > camera_array = db_select(camera_id_query.c_str(), 1);
-    db_camera_id = atoi(camera_array.at(0).at(0).c_str());
     
     //Month.
     string str_month;
@@ -635,20 +636,39 @@ void * startRecognition(void * arg)
         cout << "sigo" << endl;
     }
     
-    bool writeImages = R_PROTO.storeimage();
-    bool writeCroop  = R_PROTO.storecrop();
+    if (pday->has_xmlfilename())
+    {
+        cout << "has_xmlfile." << endl;
+        XML_FILE = pday->xmlfilename();
+    }
+    else
+    {
+        XML_FILE  =  "<import>session";
+        pday->set_xmlfilename(XML_FILE);
+    }
+
+    
+    bool writeImages = pcamera->storeimage();
+    bool writeCroop  = pcamera->storecrop();
     bool send_number_detected = true;
     
     std::cout << "writeImages: " << writeImages << endl;
     std::cout << "writeCroop: " << writeCroop << endl;
     
+    google::protobuf::uint32 activecam = R_PROTO.activecam();
+    
+    std::string xml_path = getXMLFilePathAndName(activecam, R_PROTO, XML_FILE);
+    
     //Day database.
     stringstream sql_day;
     sql_day <<
-    "INSERT INTO day (label) "     <<
-    "SELECT '" << str_day << "' "  <<
-    "WHERE NOT EXISTS (SELECT * FROM day WHERE label = '" + str_day + "');";
+    "INSERT INTO day (label, xmlfile, xmlfilepath) " <<
+    "SELECT '" << str_day << "', '" << XML_FILE << "', '" << xml_path   << "' " <<
+    "WHERE NOT EXISTS (SELECT * FROM day WHERE label = '" << str_day    << "' " <<
+    "AND xmlfile        = '" << XML_FILE << "' " <<
+    "AND xmlfilepath    = '" << xml_path << "');";
     db_execute(sql_day.str().c_str());
+    
     std::string last_day_id_query = "SELECT MAX(_id) FROM day";
     vector<vector<string> > day_array = db_select(last_day_id_query.c_str(), 1);
     db_day_id = atoi(day_array.at(0).at(0).c_str());
@@ -660,22 +680,22 @@ void * startRecognition(void * arg)
     "INSERT INTO recognition_setup " <<
     "(_id_day, _id_camera, _id_mat, storeimage, storecrop, codename, has_region, _id_coordinates, delay) " <<
     "SELECT "           <<
-    db_day_id           << ", " <<
-    db_camera_id        << ", " <<
-    PROTO.activemat()   << ", " <<
-    writeImages         << ", " <<
-    writeCroop          << ", " <<
-    instancecode        << ", " <<
-    has_region          << ", " <<
-    db_coordnates_id    << ", " <<
+    db_day_id           << ", "     <<
+    db_camera_id        << ", "     <<
+    pcamera->activemat()<< ", "     <<
+    writeImages         << ", "     <<
+    writeCroop          << ", '"    <<
+    instancecode        << "' ,"    <<
+    has_region          << ", "     <<
+    db_coordnates_id    << ", "     <<
     delay               <<
     " WHERE NOT EXISTS (SELECT * FROM recognition_setup WHERE" <<
     " _id_day           = " << db_day_id            << " AND" <<
     " _id_camera        = " << db_camera_id         << " AND" <<
-    " _id_mat           = " << PROTO.activemat()    << " AND" <<
+    " _id_mat           = " << pcamera->activemat() << " AND" <<
     " storeimage        = " << writeImages          << " AND" <<
     " storecrop         = " << writeCroop           << " AND" <<
-    " codename          = " << instancecode         << " AND" <<
+    " codename          = '" << instancecode        << "' AND"<<
     " has_region        = " << has_region           << ");";
     db_execute(sql_recognition_setup.str().c_str());
     std::string last_recognition_setup_id_query = "SELECT MAX(_id) FROM recognition_setup";
@@ -683,12 +703,33 @@ void * startRecognition(void * arg)
     db_recognition_setup_id = atoi(day_array.at(0).at(0).c_str());
     cout << "db_recognition_setup_id: " << db_day_id << endl;
     
+    //time
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    
+    //rel_camera_month.
+    stringstream sql_rel_camera_recognition_setup;
+    sql_rel_camera_recognition_setup <<
+    "INSERT INTO rel_camera_recognition_setup (_id_camera, _id_recognition_setup, start_rec_time) " <<
+    "SELECT " << db_camera_id << ", "  << db_recognition_setup_id << ", '" << time_rasp << "' "
+    " WHERE NOT EXISTS (SELECT * FROM rel_camera_recognition_setup WHERE _id_camera = " << db_camera_id <<
+    " AND _id_recognition_setup = " << db_recognition_setup_id << ");";
+    cout << "sql_rel_camera_recognition_setup: " << sql_rel_camera_recognition_setup.str() << endl;
+    db_execute(sql_rel_camera_recognition_setup.str().c_str());
+    
     pday->set_db_dayid(db_day_id);
     pday->set_db_recognitionsetupid(db_recognition_setup_id);
     
     //Camera dir.
     std::stringstream camdir;
-    camdir << "../../src/motion_web/pics/" << "camera" << cam;
+    camdir << "../../src/motion_web/pics/" << "camera" << cam << "/";
+
+    //Create camera directory
+    directoryExistsOrCreate(camdir.str().c_str());
    
     const string DIR        = camdir.str();          // directory where the images will be stored
     //const string REGION     = "../../src/motion_web/pics/region/";   // directory where the regios are stored
@@ -706,6 +747,8 @@ void * startRecognition(void * arg)
     int counter = 0; 
     // floating point seconds elapsed since start
     double sec;
+    
+    cout << "DIR:: " << DIR << endl;
     
     // Create log directory if not exist. 
     directoryExistsOrCreate(LOG.c_str());   
@@ -773,14 +816,7 @@ void * startRecognition(void * arg)
     
     init_time = clock();
     
-    struct timeval tr;
-    struct tm* ptmr;
-    char time_rasp[40];
-    gettimeofday (&tr, NULL);
-    ptmr = localtime (&tr.tv_sec);
-    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
-
-    R_PROTO.set_startrecognitiontime(time_rasp);
+    pcamera->set_startrectime(time_rasp);
     startrecognitiontime = time_rasp;
     
     cout << "TIME STARTED: " << time_rasp << endl;
@@ -821,18 +857,28 @@ void * startRecognition(void * arg)
         if(number_of_changes>=there_is_motion)
         {
             
+            cout << "number_of_changes>=there_is_motion" << endl;
+            
+            cout << "number_of_sequence:: " << number_of_sequence << endl;
+            
             if(number_of_sequence>0)
             {
                 
+                cout << "!motion_detected:: " << motion_detected << endl;
+                
                 init_motion = true;
                 
-                if (!motion_detected) {                    
+                if (!motion_detected)
+                {
                     
                     count_sequence_cero = 0;
                     motion_detected     = true;
                     begin_time = clock();                             
                     
-                    if (!has_instance_directory){
+                    cout << "!has_instance_directory:: " << has_instance_directory << endl;
+                    
+                    if (!has_instance_directory)
+                    {
                         
                         //New Instance
                         instance_counter++;
@@ -841,11 +887,15 @@ void * startRecognition(void * arg)
                         instance = id.str(); 
                         
                         //Add proto instance.
+                        cout << "::ADD INSTANCE::"  << endl;
                         pinstance = pday->add_instance();
                         pinstance->set_idinstance(std::atoi(instance.c_str()));
                         
                         FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "%d%h%Y_%H%M%S";
-                        CROPPED_FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "/cropped/" + "%d%h%Y_%H%M%S";
+                        CROPPED_FILE_FORMAT = DIR_FORMAT + "/" + instance + "/cropped/" + "%d%h%Y_%H%M%S";
+                        
+                        cout << "FILE_FORMAT:: "  << FILE_FORMAT << endl;
+                        cout << "CROPPED_FILE_FORMAT:: "  << CROPPED_FILE_FORMAT << endl;
                         
                         createDirectoryTree (
                             DIR, 
@@ -856,9 +906,8 @@ void * startRecognition(void * arg)
                         
                         has_instance_directory = true;
                         
-                        pinstance->set_fileformat(FILE_FORMAT);
-                        pinstance->set_croppedformat(FILE_FORMAT);
-                        R_PROTO.set_instancecount(instance_counter);
+                        //pinstance->set_fileformat(FILE_FORMAT);
+                        //pinstance->set_croppedformat(CROPPED_FILE_FORMAT);
                         
                     }    
                 }
@@ -899,14 +948,16 @@ void * startRecognition(void * arg)
             
             double seconds_since_start = difftime( time(0), delaymark);
             
+            cout << "seconds_since_start: " << seconds_since_start << " delay: " << delay << endl;
+            
             if ( seconds_since_start > delay & init_motion )
             {
                 
                 has_instance_directory = false;                  
                 
-                //std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
-                //std::cout << ":::::::::::: DUMP INSTANCE :::::::::::::" << std::endl;
-                //std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
+                std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
+                std::cout << ":::::::::::: DUMP INSTANCE :::::::::::::" << std::endl;
+                std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
                 
                 end = clock();               
                 
@@ -967,6 +1018,9 @@ void * storenInstance(void * arg)
     struct arg_struct *args = (struct arg_struct *) arg;
     motion::Message::MotionDay day      = args->day;
     
+    
+    cout << "day.instance_size():: " << day.instance_size() << endl;
+    
     time_t rawtime;
     struct tm * timeinfo;
     
@@ -975,7 +1029,10 @@ void * storenInstance(void * arg)
     
     for (int k = 0; k < day.instance_size(); k++)
     {
+        
         const motion::Message::Instance & ins = day.instance(k);
+        
+        cout << "ins.image_size():: " << ins.image_size() << endl;
     
         for (int j = 0; j < ins.image_size(); j++)
         {
@@ -983,17 +1040,21 @@ void * storenInstance(void * arg)
             int db_image_id;
             const motion::Message::Image & img = ins.image(j);
             
+            cout << "img.path():: " << img.path() << endl;
+            
             stringstream sql_img;
             sql_img <<
             "INSERT INTO image (path,name,imagechanges) " <<
             "VALUES ('" << img.path()      << "'"
             ", '"       << img.name()          << "'"
             ",  "       << img.imagechanges()  << ");";
+            pthread_mutex_lock(&databaseMutex);
             db_execute(sql_img.str().c_str());
-            
-            std::string last_image_query = "SELECT MAX(_id) FROM image";
-            vector<vector<string> > image_array = db_select(last_image_query.c_str(), 1);
+                std::string last_image_query = "SELECT MAX(_id) FROM image";
+                vector<vector<string> > image_array = db_select(last_image_query.c_str(), 1);
+            pthread_mutex_unlock(&databaseMutex);
             db_image_id = atoi(image_array.at(0).at(0).c_str());
+            
             cout << "db_image_id: " << db_image_id << endl;
             
             //Crop
@@ -1003,42 +1064,44 @@ void * storenInstance(void * arg)
             
             stringstream sql_crop;
             sql_crop <<
-            "INSERT INTO crop (path,name,_id_image_father) " <<
+            "INSERT INTO crop (path, name, _id_image_father) " <<
             "VALUES ('" << crop.path()          << "'"
             ", '"       << crop.name()          << "'"
             ", "        << db_image_id           << ");";
-            db_execute(sql_crop.str().c_str());
-            
-            std::string last_crop_query = "SELECT MAX(_id) FROM crop";
-            vector<vector<string> > crop_array = db_select(last_crop_query.c_str(), 1);
+            pthread_mutex_lock(&databaseMutex);
+                db_execute(sql_crop.str().c_str());
+                std::string last_crop_query = "SELECT MAX(_id) FROM crop";
+                vector<vector<string> > crop_array = db_select(last_crop_query.c_str(), 1);
+            pthread_mutex_unlock(&databaseMutex);
             db_crop_id = atoi(crop_array.at(0).at(0).c_str());
             cout << "db_crop_id: " << db_crop_id << endl;
             
             //Instance
             stringstream sql_instance;
             sql_instance <<
-            "INSERT INTO instance (instancestart, instanceend, fileformat, croppedformat, id_image, id_crop, time) " <<
-            "VALUES ('" << ins.instancestart()     << "'"
-            ", '"       << ins.instanceend()       << "'"
-            ", '"       << ins.fileformat()        << "'"
+            "INSERT INTO instance (instancestart, instanceend, id_image, id_crop, time) " <<
+            "VALUES ('" << ins.instancestart()      << "'"
+            ", '"       << ins.instanceend()        << "'"
             ", "        << db_image_id              <<
             ", "        << db_crop_id               <<
             ", '"       << timeinfo                 << "');";
-            db_execute(sql_crop.str().c_str());
-            
-            std::string last_instance_query = "SELECT MAX(_id) FROM instance";
-            vector<vector<string> > instance_array = db_select(last_instance_query.c_str(), 1);
+            pthread_mutex_lock(&databaseMutex);
+                db_execute(sql_instance.str().c_str());
+                std::string last_instance_query = "SELECT MAX(_id) FROM instance";
+                vector<vector<string> > instance_array = db_select(last_instance_query.c_str(), 1);
+            pthread_mutex_unlock(&databaseMutex);
             int db_instance_id = atoi(instance_array.at(0).at(0).c_str());
             cout << "db_instance_id: " << db_instance_id << endl;
             
             //Instance
             stringstream sql_rel_day_instance;
             sql_rel_day_instance <<
-            "INSERT INTO rel_day_instance (_id_day, _id_instance, _id_recognition_setup) " <<
+            "INSERT INTO rel_day_instance (_id_day, _id_instance) " <<
             "VALUES ("  << day.db_dayid()                 <<
-            ", "        << db_instance_id                   <<
-            ", "        << day.db_recognitionsetupid()    << ");";
-            db_execute(sql_rel_day_instance.str().c_str());
+            ", "        << db_instance_id                 << ");";
+            pthread_mutex_lock(&databaseMutex);
+                db_execute(sql_rel_day_instance.str().c_str());
+            pthread_mutex_unlock(&databaseMutex);
 
         }
     

@@ -22,10 +22,11 @@ extern bool is_recognizing;
 extern int resutl_watch_detected;
 extern std::string startrecognitiontime;
 
+extern std::string getXMLFilePathAndName(int cam, motion::Message m, std::string name);
 extern std::string getGlobalIntToString(int id);
 extern cv::Mat picture;
 extern motion::Message PROTO, R_PROTO;
-extern pthread_mutex_t protoMutex;
+extern pthread_mutex_t protoMutex, databaseMutex;
 
 //Database
 extern int db_camera_id;

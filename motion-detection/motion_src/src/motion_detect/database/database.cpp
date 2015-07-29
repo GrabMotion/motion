@@ -38,9 +38,6 @@ void db_open()
 
 vector<vector<string> > db_select(const char *sql, int columns)
 {
-    
-    cout << "HOLA" << endl;
-    
     db_open();
     
     vector<vector<string> > resutl;
@@ -93,6 +90,17 @@ void db_close()
     sqlite3_close(db);
 }
 
+void updateCameraDB(int status, char * time, int camera)
+{
+    stringstream sql_updatecameras;
+    sql_updatecameras <<
+    "UPDATE cameras set recognizing = " << status << ", since = '" << time << "', "  <<
+    "WHERE number = " << camera << ";";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_updatecameras.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+    
+}
 
 
 int db_cpuinfo()
@@ -144,11 +152,9 @@ int db_cpuinfo()
         ", '"       << hardware << "'"
         ", '"       << revision << "'"
         ", '"       << serial   << "'" <<
-        " WHERE NOT EXISTS (SELECT * FROM hardware WHERE model = '" << model << "' " <<
-        " AND hardware  = '" << hardware    << "' " <<
+        " WHERE NOT EXISTS (SELECT * FROM hardware WHERE hardware  = '" << hardware    << "' " <<
         " AND serial    = '" << serial      << "' " <<
         " AND revision  = '" << revision    << "' " << ");";
-        //cout << "sql hardware: " << sql.str() << endl;
         db_execute(sql.str().c_str());
     
         std::string last_hardware_id_query = "SELECT MAX(_id) FROM hardware;";
@@ -186,9 +192,9 @@ std::vector<int> db_cams(std::vector<int> cams)
         
         stringstream insert_camera_query;
         insert_camera_query <<
-        "INSERT INTO cameras (number, name, recognizing) " <<
-        "SELECT " << cams.at(i) << ",'" << camera << "',"  << 0 <<
-        " WHERE NOT EXISTS (SELECT * FROM cameras WHERE name = '" + camera + "');";
+        "INSERT INTO cameras (number, name, recognizing, since) " <<
+        "SELECT " << cams.at(i) << ",'" << camera << "',"  << 0 << "," << NULL << 
+        " WHERE NOT EXISTS (SELECT * FROM cameras WHERE name = '" << camera << "');";
         cout << "insert_camera_query: " << insert_camera_query.str() << endl;
         db_execute(insert_camera_query.str().c_str());
         

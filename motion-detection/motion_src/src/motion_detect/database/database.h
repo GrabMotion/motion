@@ -28,8 +28,9 @@ extern vector<string> splitString(string input, string delimiter);
 extern std::string getGlobalIntToString(int id);
 extern bool checkFile(const std::string &file);
 extern std::string get_file_contents(std::string filename);
+extern pthread_mutex_t databaseMutex;
 
-//static int callback(void *NotUsed, int argc, char **argv, char **azColName);
+void updateCameraDB(int status, char * time, int camera);
 static int callback(void *ptr, int argc, char* argv[], char* cols[] );
 int db_cpuinfo();
 std::vector<int> db_cams(std::vector<int> cams);
