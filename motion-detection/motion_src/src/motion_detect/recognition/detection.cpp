@@ -1,5 +1,5 @@
 
-/* 
+/*
  * File:   main.cpp
  * Author: jose
  *
@@ -113,11 +113,11 @@ char * CharArrayPlusChar( const char *array, char c )
 
 // Create initial XML file
 void build_xml(const char * xmlPath)
-{    
+{
     time_t     now = time(0);
     struct tm  tstruct;
     char       secs[80];
-    tstruct = *localtime(&now);   
+    tstruct = *localtime(&now);
     //strftime(secs, sizeof(secs), "%Y:%m:%d %X", &tstruct);
     strftime(secs, sizeof(secs), "%Y-%m-%d %H:%M:%S %z", &tstruct);
     
@@ -127,19 +127,19 @@ void build_xml(const char * xmlPath)
     
     TiXmlDocument doc;
     TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "utf-8", "");
-    TiXmlElement * file = new TiXmlElement( "file" );    
-    TiXmlElement * session_info = new TiXmlElement( "SESSION_INFO" );    
-    TiXmlElement * start_time = new TiXmlElement( "start_time" );    
+    TiXmlElement * file = new TiXmlElement( "file" );
+    TiXmlElement * session_info = new TiXmlElement( "SESSION_INFO" );
+    TiXmlElement * start_time = new TiXmlElement( "start_time" );
     TiXmlText * text_start_time = new TiXmlText( result );
     TiXmlElement * all_instances = new TiXmlElement( "ALL_INSTANCES" );
     
-    start_time->LinkEndChild( text_start_time );    
-    session_info->LinkEndChild(start_time);        
-    file->LinkEndChild(session_info); 
-    file->LinkEndChild(all_instances);     
-    doc.LinkEndChild( decl );   
-    doc.LinkEndChild( file );   
-    doc.SaveFile( xmlPath );       
+    start_time->LinkEndChild( text_start_time );
+    session_info->LinkEndChild(start_time);
+    file->LinkEndChild(session_info);
+    file->LinkEndChild(all_instances);
+    doc.LinkEndChild( decl );
+    doc.LinkEndChild( file );
+    doc.SaveFile( xmlPath );
 }
 
 
@@ -147,49 +147,49 @@ void build_xml(const char * xmlPath)
 // Check if the xml file exists, if not create it
 // Write  the log for the motion detected.
 inline void writeXMLInstance (
-        string XMLFILE, 
-        string time_start, 
-        string time_end,
-        string instance
-)
-{      
+                              string XMLFILE,
+                              string time_start,
+                              string time_end,
+                              string instance
+                              )
+{
     
-    TiXmlDocument doc( XMLFILE.c_str() );    
+    TiXmlDocument doc( XMLFILE.c_str() );
     if ( doc.LoadFile() ){
         
-        TiXmlElement* file = doc.FirstChildElement();	
+        TiXmlElement* file = doc.FirstChildElement();
         
         TiXmlElement* session_info = file->FirstChildElement();
         
         TiXmlElement* all_instances = session_info->NextSiblingElement();;
-	                       
-        TiXmlElement * ID = new TiXmlElement( "ID" );        
+        
+        TiXmlElement * ID = new TiXmlElement( "ID" );
         TiXmlText * text_ID = new TiXmlText( instance.c_str() );
         ID->LinkEndChild(text_ID);
-
-        TiXmlElement * start = new TiXmlElement( "start" );        
+        
+        TiXmlElement * start = new TiXmlElement( "start" );
         TiXmlText * text_start = new TiXmlText( time_start.c_str()  );
         start->LinkEndChild(text_start);
-
-        TiXmlElement * end = new TiXmlElement( "end" );  
+        
+        TiXmlElement * end = new TiXmlElement( "end" );
         TiXmlText * text_end = new TiXmlText( time_end.c_str() );
         end->LinkEndChild(text_end);
-       
-        TiXmlElement * code = new TiXmlElement( "code" );                    
+        
+        TiXmlElement * code = new TiXmlElement( "code" );
         TiXmlText * text_code = new TiXmlText( "Prueba" );
         code->LinkEndChild(text_code);
-
-        TiXmlElement * instance = new TiXmlElement( "instance" );   
+        
+        TiXmlElement * instance = new TiXmlElement( "instance" );
         instance->LinkEndChild(ID);
         instance->LinkEndChild(start);
         instance->LinkEndChild(end);
-        instance->LinkEndChild(code);        
-
-        all_instances->LinkEndChild(instance);                           
+        instance->LinkEndChild(code);
         
-        doc.SaveFile( XMLFILE.c_str() );             
+        all_instances->LinkEndChild(instance);
         
-    } 
+        doc.SaveFile( XMLFILE.c_str() );
+        
+    }
 }
 
 
@@ -213,15 +213,15 @@ inline void directoryExistsOrCreate(const char* pzPath)
 //    - Build the directory and image names.
 int incr = 0;
 inline string saveImg(
-        Mat image, 
-        const string DIRECTORY,         
-        const string EXTENSION, 
-        const char * DIR_FORMAT, 
-        const char * FILE_FORMAT,
-        int n_o_changes,
-        string img
-)
-{   
+                      Mat image,
+                      const string DIRECTORY,
+                      const string EXTENSION,
+                      const char * DIR_FORMAT,
+                      const char * FILE_FORMAT,
+                      int n_o_changes,
+                      string img
+                      )
+{
     stringstream ss;
     time_t seconds;
     struct tm * timeinfo;
@@ -241,7 +241,7 @@ inline string saveImg(
     std::cout << "n_file: " << n_file << std::endl;
     
     // Create name for the image
-    strftime (TIME,80,FILE_FORMAT,timeinfo);    
+    strftime (TIME,80,FILE_FORMAT,timeinfo);
     if(incr < 100) incr++; // quick fix for when delay < 1s && > 10ms, (when delay <= 10ms, images are overwritten)
     else incr = 0;
     ss << DIRECTORY << TIME << static_cast<int>(incr) << n_file << EXTENSION;
@@ -270,12 +270,12 @@ inline string saveImg(
 //    - Check if the directory exists where the image will be stored.
 //    - Build the directory and image names.
 inline bool createDirectoryTree(
-        const string DIRECTORY, 
-        const string EXTENSION, 
-        const char * DIR_FORMAT, 
-        const char * FILE_FORMAT,
-        std::string instance
-)
+                                const string DIRECTORY,
+                                const string EXTENSION,
+                                const char * DIR_FORMAT,
+                                const char * FILE_FORMAT,
+                                std::string instance
+                                )
 {
     std::stringstream ss, zz;
     time_t seconds;
@@ -288,8 +288,8 @@ inline bool createDirectoryTree(
     // Create name for the date directory
     strftime (TIME,80,DIR_FORMAT,timeinfo);
     ss.str("");
-    ss << DIRECTORY << TIME;        
-    directoryExistsOrCreate(ss.str().c_str());    
+    ss << DIRECTORY << TIME;
+    directoryExistsOrCreate(ss.str().c_str());
     ss << "/xml";
     directoryExistsOrCreate(ss.str().c_str());
     zz.str("");
@@ -298,7 +298,7 @@ inline bool createDirectoryTree(
     directoryExistsOrCreate(zz.str().c_str());
     zz << "/cropped";
     cout << "CREATE CROPPED DIRECTORY:: " << zz.str() << endl;
-    directoryExistsOrCreate(zz.str().c_str());    
+    directoryExistsOrCreate(zz.str().c_str());
     
     return true;
 }
@@ -357,11 +357,11 @@ inline int detectMotion(const Mat & motion, Mat & result, Mat & result_cropped,
 // Check if there is motion in the result matrix
 // count the number of changes and return.
 inline int detectMotionRegion(const cv::Mat & motionmat,
-                        cv::Mat & result,
-                        cv::Mat & result_cropped,
-                        std::vector<cv::Point2f> & region,
-                        int max_deviation,
-                        cv::Scalar & color)
+                              cv::Mat & result,
+                              cv::Mat & result_cropped,
+                              std::vector<cv::Point2f> & region,
+                              int max_deviation,
+                              cv::Scalar & color)
 {
     
     // calculate the standard deviation
@@ -420,7 +420,7 @@ void * startRecognition(void * arg)
     cout << "START RECOGNITION." << endl;
     
     pthread_detach(pthread_self());
-
+    
     is_recognizing = false;
     
     R_PROTO.Clear();
@@ -440,12 +440,16 @@ void * startRecognition(void * arg)
     //database camera id.
     stringstream camera_id_query;
     camera_id_query <<
-    "SELECT _id, name FROM cameras where number = " << cam << ";";
-    cout << " camera_id_query " << camera_id_query << endl;
-    vector<vector<string> > camera_array = db_select(camera_id_query.str().c_str(), 2);
-    db_camera_id = atoi(camera_array.at(0).at(0).c_str());
-    string str_camera = camera_array.at(0).at(1);
-    
+    "SELECT _id, name, number FROM cameras where number = " << cam << ";";
+    cout << " camera_id_query " << camera_id_query.str() << endl;
+    vector<vector<string> > camera_array = db_select(camera_id_query.str().c_str(), 3);
+    db_camera_id        = atoi(camera_array.at(0).at(0).c_str());
+    string str_camera   = camera_array.at(0).at(1);
+    int number          = atoi(camera_array.at(0).at(2).c_str());
+    cout << "str_camera: " << str_camera << endl;
+    cout << "db_camera_id: " << db_camera_id << endl;
+    cout << "number: " << number << endl;
+
     //Check if exist month on proto or else add it.
     int sizec = R_PROTO.motioncamera_size();
     cout << "sizec: " << sizec << endl;
@@ -454,11 +458,16 @@ void * startRecognition(void * arg)
     {
         cout << "entra" << endl;
         motion::Message::MotionCamera * mcamera = R_PROTO.mutable_motioncamera(i);
-        if (mcamera->has_cameraname())
+        if (mcamera->has_db_idcamera())
         {
-            std::string camera = mcamera->cameraname();
+            //std::string camera = mcamera->cameraname();
             cout << "camera: " << camera << endl;
-            if (str_camera.find(camera))
+            cout << "mcamera->cameranumber(): " << mcamera->cameranumber() << endl;
+            
+            //std::replace( camera.begin(),       camera.end(),       '\n', ' ');
+            //std::replace( str_camera.begin(),   str_camera.end(),   '\n', ' ');
+            
+            if (number==mcamera->cameranumber())
             {
                 cout << "has camera" << endl;
                 pcamera = R_PROTO.mutable_motioncamera(i);
@@ -522,7 +531,7 @@ void * startRecognition(void * arg)
         db_coordnates_id = atoi(coords_array.at(0).at(0).c_str());
         cout << "db_coordnates_id: " << db_coordnates_id << endl;
     }
-
+    
     std::string instancecode;
     string XML_FILE;
     if (pcamera->has_codename())
@@ -561,14 +570,14 @@ void * startRecognition(void * arg)
     cout << "pcamera->motionmonth_size(): " << pcamera->motionmonth_size() << endl;
     for (int i = 0; i < pcamera->motionmonth_size(); i++)
     {
-            std::string mlabel = pcamera->motionmonth(i).monthlabel();
-            cout << "mlabel: " << str_month << endl;
-            if (str_month.find(mlabel))
-            {
-                cout << "has month" << endl;
-                pmonth = pcamera->mutable_motionmonth(i);
-                monthexist=true;
-            }
+        std::string mlabel = pcamera->motionmonth(i).monthlabel();
+        cout << "mlabel: " << str_month << endl;
+        if (str_month.find(mlabel))
+        {
+            cout << "has month" << endl;
+            pmonth = pcamera->mutable_motionmonth(i);
+            monthexist=true;
+        }
     }
     if(!monthexist)
     {
@@ -605,7 +614,7 @@ void * startRecognition(void * arg)
     vector<vector<string> > rel_camera_month_array = db_select(last_rel_camera_month_query.c_str(), 1);
     db_rel_camera_month_id = atoi(rel_camera_month_array.at(0).at(0).c_str());
     cout << "db_rel_camera_month_id: " << db_rel_camera_month_id << endl;
-
+    
     //Day.
     string str_day;
     if (R_PROTO.has_currday())
@@ -613,7 +622,7 @@ void * startRecognition(void * arg)
         str_day = R_PROTO.currday();
     }
     cout << "str_day: " << str_day << endl;
-
+    
     //Check if day exist or else add it.
     bool dayexist=false;
     cout << "pmonth->motionday_size(): " << pmonth->motionday_size() << endl;
@@ -646,7 +655,7 @@ void * startRecognition(void * arg)
         XML_FILE  =  "<import>session";
         pday->set_xmlfilename(XML_FILE);
     }
-
+    
     
     bool writeImages = pcamera->storeimage();
     bool writeCroop  = pcamera->storecrop();
@@ -673,7 +682,7 @@ void * startRecognition(void * arg)
     vector<vector<string> > day_array = db_select(last_day_id_query.c_str(), 1);
     db_day_id = atoi(day_array.at(0).at(0).c_str());
     cout << "db_day_id: " << db_day_id << endl;
-
+    
     //recognition_setup database.
     stringstream sql_recognition_setup;
     sql_recognition_setup <<
@@ -695,7 +704,7 @@ void * startRecognition(void * arg)
     " _id_mat           = " << pcamera->activemat() << " AND" <<
     " storeimage        = " << writeImages          << " AND" <<
     " storecrop         = " << writeCroop           << " AND" <<
-    " codename          = '" << instancecode        << "' AND"<<
+    " codename          = '" << instancecode        <<"' AND"<<
     " has_region        = " << has_region           << ");";
     db_execute(sql_recognition_setup.str().c_str());
     std::string last_recognition_setup_id_query = "SELECT MAX(_id) FROM recognition_setup";
@@ -727,33 +736,33 @@ void * startRecognition(void * arg)
     //Camera dir.
     std::stringstream camdir;
     camdir << "../../src/motion_web/pics/" << "camera" << cam << "/";
-
+    
     //Create camera directory
     directoryExistsOrCreate(camdir.str().c_str());
-   
+    
     const string DIR        = camdir.str();          // directory where the images will be stored
     //const string REGION     = "../../src/motion_web/pics/region/";   // directory where the regios are stored
     const string EXT        = ".jpg";                           // extension of the images
     const string EXT_DATA   = ".xml";                           // extension of the data
     const int DELAY         = 500;                              // in mseconds, take a picture every 1/2 second
     const string LOG    = "../../src/motion_web/log";           // log for the export
-    const string LOGCLEAR = LOG + "/log_remove";    
-                                        // region vector storing xml region
+    const string LOGCLEAR = LOG + "/log_remove";
+    // region vector storing xml region
     // fps calculated using number of frames / seconds
-    double fps; 
+    double fps;
     // start and end times
-    time_t start, end; 
+    time_t start, end;
     // frame counter
-    int counter = 0; 
+    int counter = 0;
     // floating point seconds elapsed since start
     double sec;
     
     cout << "DIR:: " << DIR << endl;
     
-    // Create log directory if not exist. 
-    directoryExistsOrCreate(LOG.c_str());   
+    // Create log directory if not exist.
+    directoryExistsOrCreate(LOG.c_str());
     if(!std::ifstream(LOGCLEAR.c_str()))
-    {    
+    {
         ofstream logfile;
         logfile.open ( LOGCLEAR.c_str() );
         logfile << "Removed files log.\n";
@@ -788,12 +797,12 @@ void * startRecognition(void * arg)
     // color, the color for drawing the rectangle when something has changed.
     Mat d1, d2, motionmat;
     int number_of_changes, number_of_sequence = 0, count_sequence_cero = 0, count_save_image = 0;
-    Scalar mean_, color(0,255,255); // yellow 
+    Scalar mean_, color(0,255,255); // yellow
     
     // Detect motion in window
     int x_start = 10, x_stop = current_frame.cols-11;
     int y_start = 350, y_stop = 530;
-
+    
     // If more than 'there_is_motion' pixels are changed, we say there is motion
     // and store an image on disk
     int there_is_motion = 5;
@@ -802,16 +811,16 @@ void * startRecognition(void * arg)
     int max_deviation = 20;
     
     // Erode kernel
-    Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2)); 
+    Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2));
     
-    //count instance time     
-    string start_instance_time, total_elapsed_time; 
+    //count instance time
+    string start_instance_time, total_elapsed_time;
     bool motion_detected = false, init_motion = false, has_instance_directory = false;
-    double init_time, begin_time, end_time;    
+    double init_time, begin_time, end_time;
     //Directory Tree
     stringstream directoryTree;
     // Instance counter
-    int instance_counter = 0; 
+    int instance_counter = 0;
     string instance;
     
     init_time = clock();
@@ -828,7 +837,7 @@ void * startRecognition(void * arg)
         
         is_recognizing = true;
         
-       // Take a new image
+        // Take a new image
         prev_frame = current_frame;
         current_frame = next_frame;
         next_frame = cvQueryFrame(camera);
@@ -845,7 +854,7 @@ void * startRecognition(void * arg)
         
         if (!has_region)
         {
-            number_of_changes = detectMotion(motionmat, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
+           number_of_changes = detectMotion(motionmat, result, result_cropped,  x_start, x_stop, y_start, y_stop, max_deviation, color);
         }
         else
         {
@@ -873,7 +882,7 @@ void * startRecognition(void * arg)
                     
                     count_sequence_cero = 0;
                     motion_detected     = true;
-                    begin_time = clock();                             
+                    begin_time = clock();
                     
                     cout << "!has_instance_directory:: " << has_instance_directory << endl;
                     
@@ -884,7 +893,7 @@ void * startRecognition(void * arg)
                         instance_counter++;
                         stringstream id;
                         id << instance_counter;
-                        instance = id.str(); 
+                        instance = id.str();
                         
                         //Add proto instance.
                         cout << "::ADD INSTANCE::"  << endl;
@@ -898,85 +907,86 @@ void * startRecognition(void * arg)
                         cout << "CROPPED_FILE_FORMAT:: "  << CROPPED_FILE_FORMAT << endl;
                         
                         createDirectoryTree (
-                            DIR, 
-                            EXT, 
-                            DIR_FORMAT.c_str(), 
-                            FILE_FORMAT.c_str(), 
-                            instance );
+                                             DIR,
+                                             EXT,
+                                             DIR_FORMAT.c_str(),
+                                             FILE_FORMAT.c_str(),
+                                             instance );
                         
                         has_instance_directory = true;
                         
                         //pinstance->set_fileformat(FILE_FORMAT);
                         //pinstance->set_croppedformat(CROPPED_FILE_FORMAT);
                         
-                    }    
+                    }
                 }
                 if (writeImages)
                 {
                     std::string emptystr = string();
                     image_file_recognized = saveImg (
-                        result, 
-                        DIR, 
-                        EXT, 
-                        DIR_FORMAT.c_str(), 
-                        FILE_FORMAT.c_str(),
-                        number_of_changes,
-                        emptystr
-                    );
+                                                     result,
+                                                     DIR,
+                                                     EXT,
+                                                     DIR_FORMAT.c_str(),
+                                                     FILE_FORMAT.c_str(),
+                                                     number_of_changes,
+                                                     emptystr
+                                                     );
                 }
                 if (writeCroop)
                 {
                     string cropped_image_file = saveImg (
-                            result_cropped,
-                            DIR,
-                            EXT,
-                            DIR_FORMAT.c_str(),
-                            CROPPED_FILE_FORMAT.c_str(),
-                            number_of_changes,
-                            image_file_recognized
-                    );
+                                                         result_cropped,
+                                                         DIR,
+                                                         EXT,
+                                                         DIR_FORMAT.c_str(),
+                                                         CROPPED_FILE_FORMAT.c_str(),
+                                                         number_of_changes,
+                                                         image_file_recognized
+                                                         );
                 }
-                                
+                
             }
             delaymark = time(0);
             number_of_sequence++;
         }
         else
-        {            
+        {
             
             number_of_sequence = 0;
             
             double seconds_since_start = difftime( time(0), delaymark);
             
-            cout << "seconds_since_start: " << seconds_since_start << " delay: " << delay << endl;
+            //cout << "seconds_since_start: " << seconds_since_start << " delay: " << delay << endl;
             
             if ( seconds_since_start > delay & init_motion )
             {
                 
-                has_instance_directory = false;                  
+                has_instance_directory = false;
+                init_motion = false;
                 
                 std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
                 std::cout << ":::::::::::: DUMP INSTANCE :::::::::::::" << std::endl;
                 std::cout << "::::::::::::::::::::::::::::::::::::::::" << std::endl;
                 
-                end = clock();               
+                end = clock();
                 
                 //create xml file if not exists
                 time_t seconds;
                 struct tm * timeinfo;
                 char TIME[80];
-                time (&seconds);   
-                timeinfo = localtime (&seconds);     
+                time (&seconds);
+                timeinfo = localtime (&seconds);
                 
                 // Create name for the date directory
                 const char * dir = DIR_FORMAT.c_str();
-                strftime (TIME,80,dir,timeinfo);    
-                string XMLFILE = DIR + TIME + "/xml/" + XML_FILE + "" + EXT_DATA;    
-                if(!std::ifstream(XMLFILE.c_str()))    
-                {   
-                    build_xml(XMLFILE.c_str());       
-                }                                                              
-                       
+                strftime (TIME,80,dir,timeinfo);
+                string XMLFILE = DIR + TIME + "/xml/" + XML_FILE + "" + EXT_DATA;
+                if(!std::ifstream(XMLFILE.c_str()))
+                {
+                    build_xml(XMLFILE.c_str());
+                }
+                
                 std::ostringstream begin;
                 begin << (begin_time - init_time) / CLOCKS_PER_SEC;
                 
@@ -991,14 +1001,15 @@ void * startRecognition(void * arg)
                 pthread_mutex_unlock(&protoMutex);
                 
                 motion::Message::MotionDay * pdi = pday;
+                pinstance->Clear();
                 pthread_create(&thread_store_instance, NULL, storenInstance, pdi);
                 
-            }       
+            }
             
             // XML Instance
-            motion_detected = false;        
-            count_sequence_cero++;    
-                
+            motion_detected = false;
+            count_sequence_cero++;
+            
             if (count_sequence_cero==1){
                 end_time = clock();
             }
@@ -1033,7 +1044,7 @@ void * storenInstance(void * arg)
         const motion::Message::Instance & ins = day.instance(k);
         
         cout << "ins.image_size():: " << ins.image_size() << endl;
-    
+        
         for (int j = 0; j < ins.image_size(); j++)
         {
             //Image
@@ -1042,16 +1053,24 @@ void * storenInstance(void * arg)
             
             cout << "img.path():: " << img.path() << endl;
             
+            /*"INSERT INTO image (path,name,imagechanges) " <<
+             "VALUES ('" << img.path()      << "'"
+             ", '"       << img.name()          << "'"
+             ",  "       << img.imagechanges()  << ");";*/
+            
             stringstream sql_img;
             sql_img <<
             "INSERT INTO image (path,name,imagechanges) " <<
-            "VALUES ('" << img.path()      << "'"
-            ", '"       << img.name()          << "'"
-            ",  "       << img.imagechanges()  << ");";
+            "SELECT '"  << img.path() <<
+            "', '"      << img.name() <<
+            "', "       << img.imagechanges() <<
+            " WHERE NOT EXISTS (SELECT * FROM image WHERE path = '" << img.path() << "'" <<
+            " AND name = '" << img.name() << "'" <<
+            " AND imagechanges = " << img.imagechanges() << ");";
             pthread_mutex_lock(&databaseMutex);
             db_execute(sql_img.str().c_str());
-                std::string last_image_query = "SELECT MAX(_id) FROM image";
-                vector<vector<string> > image_array = db_select(last_image_query.c_str(), 1);
+            std::string last_image_query = "SELECT MAX(_id) FROM image";
+            vector<vector<string> > image_array = db_select(last_image_query.c_str(), 1);
             pthread_mutex_unlock(&databaseMutex);
             db_image_id = atoi(image_array.at(0).at(0).c_str());
             
@@ -1062,16 +1081,24 @@ void * storenInstance(void * arg)
             const motion::Message::Crop & crop = ins.crop(j);
             string path = crop.path();
             
+            /*"INSERT INTO crop (path, name, _id_image_father) " <<
+             "VALUES ('" << crop.path()          << "'"
+             ", '"       << crop.name()          << "'"
+             ", "        << db_image_id           << ");";*/
+            
             stringstream sql_crop;
             sql_crop <<
             "INSERT INTO crop (path, name, _id_image_father) " <<
-            "VALUES ('" << crop.path()          << "'"
-            ", '"       << crop.name()          << "'"
-            ", "        << db_image_id           << ");";
+            "SELECT '"  << crop.path() <<
+            "', '"      << crop.name() <<
+            "', "       << db_image_id <<
+            " WHERE NOT EXISTS (SELECT * FROM crop WHERE path = '" << crop.path() << "'" <<
+            " AND name = '"             << crop.name()      << "'"  <<
+            " AND _id_image_father = "  << db_image_id      << ");";
             pthread_mutex_lock(&databaseMutex);
-                db_execute(sql_crop.str().c_str());
-                std::string last_crop_query = "SELECT MAX(_id) FROM crop";
-                vector<vector<string> > crop_array = db_select(last_crop_query.c_str(), 1);
+            db_execute(sql_crop.str().c_str());
+            std::string last_crop_query = "SELECT MAX(_id) FROM crop";
+            vector<vector<string> > crop_array = db_select(last_crop_query.c_str(), 1);
             pthread_mutex_unlock(&databaseMutex);
             db_crop_id = atoi(crop_array.at(0).at(0).c_str());
             cout << "db_crop_id: " << db_crop_id << endl;
@@ -1079,32 +1106,52 @@ void * storenInstance(void * arg)
             //Instance
             stringstream sql_instance;
             sql_instance <<
+            
+            /*"INSERT INTO instance (instancestart, instanceend, id_image, id_crop, time) " <<
+             "VALUES ('" << ins.instancestart()      << "'"
+             ", '"       << ins.instanceend()        << "'"
+             ", "        << db_image_id              <<
+             ", "        << db_crop_id               <<
+             ", '"       << timeinfo                 << "');";*/
+            
             "INSERT INTO instance (instancestart, instanceend, id_image, id_crop, time) " <<
-            "VALUES ('" << ins.instancestart()      << "'"
+            "SELECT '"  << ins.instancestart()      << "'"
             ", '"       << ins.instanceend()        << "'"
             ", "        << db_image_id              <<
             ", "        << db_crop_id               <<
-            ", '"       << timeinfo                 << "');";
+            ", '"       << timeinfo                 <<
+            " WHERE NOT EXISTS (SELECT * FROM instance WHERE instancestart = '" << ins.instancestart() << "'" <<
+            " AND instanceend = '"  << ins.instanceend()    << "'"  <<
+            " AND id_image = "      << db_image_id          << "'"  <<
+            " AND id_crop =  "      << db_crop_id           <<
+            " AND time =  '"        << timeinfo             << "'"  << ");";
             pthread_mutex_lock(&databaseMutex);
-                db_execute(sql_instance.str().c_str());
-                std::string last_instance_query = "SELECT MAX(_id) FROM instance";
-                vector<vector<string> > instance_array = db_select(last_instance_query.c_str(), 1);
+            db_execute(sql_instance.str().c_str());
+            std::string last_instance_query = "SELECT MAX(_id) FROM instance";
+            vector<vector<string> > instance_array = db_select(last_instance_query.c_str(), 1);
             pthread_mutex_unlock(&databaseMutex);
             int db_instance_id = atoi(instance_array.at(0).at(0).c_str());
             cout << "db_instance_id: " << db_instance_id << endl;
             
+            /*"INSERT INTO rel_day_instance (_id_day, _id_instance) " <<
+             "VALUES ("  << day.db_dayid()                 <<
+             ", "        << db_instance_id                 << ");";*/
+            
             //Instance
             stringstream sql_rel_day_instance;
             sql_rel_day_instance <<
-            "INSERT INTO rel_day_instance (_id_day, _id_instance) " <<
-            "VALUES ("  << day.db_dayid()                 <<
-            ", "        << db_instance_id                 << ");";
+            "INSERT INTO rel_day_instance (_id_day, _id_instance, time) " <<
+            "SELECT "  << day.db_dayid()    <<
+            ", "       << db_instance_id    <<
+            ", "       << timeinfo          <<
+            " WHERE NOT EXISTS (SELECT * FROM rel_day_instance WHERE _id_day = '" << day.db_dayid() << "'" <<
+            " AND _id_instance = "      << db_instance_id   << ");";
             pthread_mutex_lock(&databaseMutex);
-                db_execute(sql_rel_day_instance.str().c_str());
+            db_execute(sql_rel_day_instance.str().c_str());
             pthread_mutex_unlock(&databaseMutex);
-
+            
         }
-    
+        
     }
     
     
