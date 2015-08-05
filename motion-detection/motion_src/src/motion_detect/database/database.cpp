@@ -9,24 +9,35 @@
 
 sqlite3 *db;
 char *zErrMsg = 0;
-int  rc;
-
+int  cd, rc;
 
 static int callback(void *NotUsed, int argc, char **argv, char **azColName)
 {
     int i;
-    for(i=0; i<argc; i++){
+    for(i=0; i<argc; i++)
+    {
         printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
     }
     printf("\n");
     return 0;
 }
 
+/*void db_create()
+{
+    cd = sqlite3_open_v2("test.db", &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL );
+    if (cd != SQLITE_OK) 
+    {
+        cerr << "SELECT failed: " << sqlite3_errmsg(db) << endl;
+        //return NULL; // or throw
+    }
+}*/
+
 void db_open()
 {
     /* Open database */
-    rc = sqlite3_open("database/motion.db", &db);
-    if( rc ){
+    rc = sqlite3_open("src/motion_detect/database/motion.db", &db);
+    if ( rc )
+    {
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
     }
     //else{
@@ -45,7 +56,8 @@ vector<vector<string> > db_select(const char *sql, int columns)
     sqlite3_stmt *stmt;
     rc = sqlite3_prepare_v2(db, sql,
                             -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
+    if (rc != SQLITE_OK) 
+    {
         cerr << "SELECT failed: " << sqlite3_errmsg(db) << endl;
         //return NULL; // or throw
     }
@@ -68,7 +80,7 @@ vector<vector<string> > db_select(const char *sql, int columns)
     
 }
 
-void db_execute(const char *sql)
+void db_execute(const char * sql)
 {
     db_open();
     
@@ -140,7 +152,16 @@ int db_cpuinfo()
             
         }
         
-        model       = splitString(model, ":").at(1);
+        std::string testquery = "SELECT name FROM sqlite_master WHERE type='table';";
+        vector<vector<string> > table_array = db_select(testquery.c_str(), 1);  
+      
+        
+        model    = splitString(model, ":").at(1);
+        std:string initmodel = model.substr(0, 1);
+        
+        if (initmodel == " ")
+            model = model.substr(1, model.size());
+        
         hardware    = splitString(hardware, ": ").at(1);
         revision    = splitString(revision, ": ").at(1);
         serial      = splitString(serial, ": ").at(1);
@@ -168,7 +189,7 @@ int db_cpuinfo()
 }
 
 
-std::vector<int> db_cams(std::vector<int> cams)
+std::vector<int> db_cams(std::vector<int> cams, std::string time)
 {
     
     std::vector<int> camsarray;
@@ -180,7 +201,7 @@ std::vector<int> db_cams(std::vector<int> cams)
         std::string file = command.str();
         
         stringstream nfile;
-        nfile << "data/camera_" << cams.at(i) << ".txt";
+        nfile << "src/motion_detect/data/camera_" << cams.at(i) << ".txt";
         string newfile = nfile.str();
         
         std::ifstream  src(file.c_str(), std::ios::binary);
@@ -188,12 +209,13 @@ std::vector<int> db_cams(std::vector<int> cams)
         dst << src.rdbuf();
         dst.close();
         
-        string camera = get_file_contents(newfile);
-        
+        std::string camera = get_file_contents(newfile);
+        camera.erase(std::remove(camera.begin(), camera.end(), '\n'), camera.end());
+      
         stringstream insert_camera_query;
         insert_camera_query <<
-        "INSERT INTO cameras (number, name, recognizing, since) " <<
-        "SELECT " << cams.at(i) << ",'" << camera << "',"  << 0 << "," << NULL << 
+        "INSERT INTO cameras (number, name, created, recognizing, since) " <<
+        "SELECT " << cams.at(i) << ",'" << camera << "','" << time << "'," << 0 << "," << NULL << 
         " WHERE NOT EXISTS (SELECT * FROM cameras WHERE name = '" << camera << "');";
         cout << "insert_camera_query: " << insert_camera_query.str() << endl;
         db_execute(insert_camera_query.str().c_str());

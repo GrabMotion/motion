@@ -35,6 +35,7 @@ extern int db_day_id;
 extern int db_rel_camera_month_id;
 extern int db_coordnates_id;
 extern int db_recognition_setup_id;
+extern int db_interval_id;
 
 //threads;
 void * storenInstance(void * arg);

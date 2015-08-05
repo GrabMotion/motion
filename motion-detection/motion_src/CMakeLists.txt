@@ -62,7 +62,7 @@ ADD_EXECUTABLE(motion_detect_raspberry
 	src/motion_detect/database/database.cpp
 )
 
-TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm ${PROTOBUF_LIBRARIES} -lsqlite3 -lusb)
+TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lpthread -lm -ldl ${PROTOBUF_LIBRARIES} -lsqlite3 -lusb)
 
-SET(CMAKE_BUILD_TYPE Release)
+SET(CMAKE_BUILD_TYPE Debug)
 

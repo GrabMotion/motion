@@ -139,6 +139,7 @@ int db_rel_camera_month_id;
 int db_coordnates_id;
 int db_recognition_setup_id;
 int db_mats_id;
+int db_interval_id;
 
 //UDP
 int udpsend(motion::Message m);
@@ -401,10 +402,12 @@ motion::Message getImageToProto(std::string imagefilepath)
     localm.set_data(oriencoded.c_str());
 
     return localm;
+    
 }
 
 
-uint64_t GetTimeStamp() {
+uint64_t GetTimeStamp() 
+{
     struct timeval tv;
     gettimeofday(&tv,NULL);
     return tv.tv_sec*(uint64_t)1000000+tv.tv_usec;
@@ -461,10 +464,6 @@ motion::Message takePictureToProto(motion::Message m)
     cout << "height_s: " << height_s << endl;
     cout << "type_s: " << type_s << endl;
     cout << "size_s: " << size_s << endl;
-
-    
-    // Initialize a stringstream and write the data
-    int size_init = m.ByteSize();
     
     // Write the whole image data
     std::stringstream ss;
@@ -487,18 +486,22 @@ motion::Message takePictureToProto(motion::Message m)
 
     cout << "activemat::::: " << activemat << endl;
     
-    motion::Message::MotionCamera * mcam = m.mutable_motioncamera(m.activecam());
+    motion::Message::MotionCamera * mcam = m.add_motioncamera();
+            //m.mutable_motioncamera(m.activecam());
     mcam->set_activemat(activemat);
-
+    
+    // Initialize a stringstream and write the data
+    int size_init = m.ByteSize();
+    
     cout << "mcam->db_idcamera::" << mcam->db_idcamera() << endl;
     
     //Write base64 to file for checking.
     std::string basefile = "data/mat/" + IntToString(activemat);
     
-    //std::ofstream out;
-    //out.open (basefile.c_str());
-    //out << m.data() << "\n";
-    //out.close();
+    std::ofstream out;
+    out.open (basefile.c_str());
+    out << m.data() << "\n";
+    out.close();
     
     stringstream insert_mats_query;
     insert_mats_query <<
@@ -644,7 +647,6 @@ motion::Message getLocalPtoro()
     
     if (file_exist(protofile))
     {
-        
         mlocal.Clear();
         std::string backfile = protofile;
         pthread_mutex_lock(&fileMutex);
@@ -732,29 +734,10 @@ std::string getXMLFilePathAndName(int cam, motion::Message m, std::string name)
     return xml_path;
 }
 
-motion::Message runCommand(motion::Message m)
+motion::Message getRefreshProto(motion::Message m)
 {
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
     
-    cout << "runCommand:: " << m.type() << endl;
-    
-    switch (m.type())
-    {
-        case motion::Message::ENGAGE:
-        {
-            cout << "motion::Message::ENGAGE" << endl;
-            
-            //Activity
-            stringstream sql_connection;
-            sql_connection <<
-            "INSERT into connections (serverip, time) VALUES ('"
-            << m.serverip() << "', '" << getTimeRasp() << "');";
-            cout << "sql_connection: " << sql_connection.str() << endl;
-            db_execute(sql_connection.str().c_str());
-            
-            m.set_type(motion::Message::ENGAGE);
-
-            //cout << "m.set_type:: " << motion::Message::ENGAGE << endl;
+    //cout << "m.set_type:: " << motion::Message::ENGAGE << endl;
             
             struct timeval tr;
             struct tm* ptmr;
@@ -838,6 +821,40 @@ motion::Message runCommand(motion::Message m)
                     mmonth = getMonthByCameraIdMonthAndDate(mmonth, rows.at(0), m.currmonth(), m.currday());
                 }
             }
+            return m;
+    
+}
+
+motion::Message runCommand(motion::Message m)
+{
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    
+    cout << "runCommand:: " << m.type() << endl;
+    
+    switch (m.type())
+    {
+        case motion::Message::ENGAGE:
+        {
+            cout << "motion::Message::ENGAGE" << endl;
+            
+            struct timeval tr;
+            struct tm* ptmr;
+            char time_rasp[40];
+            gettimeofday (&tr, NULL);
+            ptmr = localtime (&tr.tv_sec);
+            strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+            
+            //Activity
+            stringstream sql_connection;
+            sql_connection <<
+            "INSERT into connections (serverip, time) VALUES ('"
+            << m.serverip() << "', '" << time_rasp << "');";
+            cout << "sql_connection: " << sql_connection.str() << endl;
+            db_execute(sql_connection.str().c_str());
+            
+            m.set_type(motion::Message::ENGAGE);
+
+            m = getRefreshProto(m);
           
             stringstream sql_starttime;
             sql_starttime << "SELECT starttime FROM status;";
@@ -877,7 +894,7 @@ motion::Message runCommand(motion::Message m)
             cout << "motion::Message::GET_IMAGE" << endl;
             m = getImageToProto(m.imagefilepath());
             m.set_type(motion::Message::GET_IMAGE);
-            
+
         }
         break;
         case motion::Message::DISSCONNECT:
@@ -910,7 +927,18 @@ motion::Message runCommand(motion::Message m)
         {
             
             cout << "motion::Message::TAKE_PICTURE" << endl;
+            //m = getRefreshProto(m);
             m = takePictureToProto(m);
+            
+            struct timeval tr;
+            struct tm* ptmr;
+            char time_rasp[40];
+            gettimeofday (&tr, NULL);
+            ptmr = localtime (&tr.tv_sec);
+            strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+            
+            m.set_time(time_rasp);
+            m.set_type(motion::Message::TAKE_PICTURE);
             
         }
         break;
@@ -1068,26 +1096,23 @@ try
       totalBytesReceived += recvMsgSize;     // Keep tally of total bytes
       echoBuffer[recvMsgSize] = '\0';        // Terminate the string!
         
-      cout << "::1::" << endl;
       stringstream sss;
       sss << echoBuffer;
       string strproto = sss.str();
-      
-      cout << "::2:: " << strproto << endl;
+     
       std::string strdecoded;
       strdecoded.clear();
       strdecoded = base64_decode(strproto);
       
-      cout << "::3:: " << strdecoded << endl;
       GOOGLE_PROTOBUF_VERIFY_VERSION;
-      ::motion::Message ms;
+      motion::Message ms;
       ms.ParseFromArray(strdecoded.c_str(), strdecoded.size());
+      
+      int camamounts = ms.motioncamera_size();
         
-      cout << "::4::" << endl;
       PROTO.Clear();
       PROTO = ms;
         
-      cout << "::5::" << endl;
       value = ms.type();
       T_PROTO.set_serverip(ms.serverip());
         
@@ -1152,6 +1177,8 @@ try
         
       cout << "Serializing proto response." << endl;
       
+      int m_amounts = m.motioncamera_size();
+      
       //Split file outside proto.
       std::string datafile;
       if (m.has_data())
@@ -1176,12 +1203,15 @@ try
       char dataresponse[size];
     
       cout << "Proto size   : " << size << endl;
+      
+      cout << "active cam: " << m.activecam() << endl;
+      cout << "type: " << m.type() << endl;
 
       m.SerializeToArray(&dataresponse, size);
      
       cout << "Encoding." << endl;
         
-        std::string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
+      std::string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
         
       std::stringstream ssenc;
         
@@ -1276,7 +1306,7 @@ try
 
         
         ms.Clear();
-        google::protobuf::ShutdownProtobufLibrary();
+        //google::protobuf::ShutdownProtobufLibrary();
     
         totalsSocket();
         
@@ -1425,7 +1455,8 @@ void directoryExistsOrCreate(const char* pzPath)
 
 int main (int argc, char * const argv[])
 {
-    
+    //Create database.
+    //db_create();
     cout << "Getting hard info." << endl;
     int db_hardware_id = db_cpuinfo();
     cout << "db_hardware_id: " << db_hardware_id << endl;
@@ -1436,9 +1467,7 @@ int main (int argc, char * const argv[])
     copy( cams.begin(), cams.end(), ostream_iterator<int>(ss, " "));
     std::string cameras = ss.str();
     cameras = cameras.substr(0, cameras.length()-1);
-    //Store into database.
-    vector<int> camsarray = db_cams(cams);
-
+   
     struct timeval tr;
     struct tm* ptmr;
     char time_rasp[40];
@@ -1446,6 +1475,9 @@ int main (int argc, char * const argv[])
     ptmr = localtime (&tr.tv_sec);
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     cout <<  ":::start time:::: " << time_rasp << endl;
+    
+     //Store into database.
+    vector<int> camsarray = db_cams(cams, time_rasp);
     
     //Activity
     stringstream sql_activity;
@@ -1540,7 +1572,6 @@ int main (int argc, char * const argv[])
     pthread_mutex_init(&fileMutex, 0);
     pthread_mutex_init(&databaseMutex, 0);
     
-    
     // UDP
    runb = pthread_create(&thread_broadcast, NULL, broadcastsender, NULL);
    if ( runb  != 0) {
@@ -1568,6 +1599,7 @@ int main (int argc, char * const argv[])
     
     cout << "THREAD TERMINATED!!!!!!!!!!!!!!!!!!!!! = " << runs << endl;
     return 0;
+    
 }
 
             

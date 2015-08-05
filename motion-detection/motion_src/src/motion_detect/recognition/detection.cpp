@@ -19,7 +19,6 @@
 #include <dirent.h>
 #include <string>
 #include <sstream>
-#include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -683,12 +682,29 @@ void * startRecognition(void * arg)
     db_day_id = atoi(day_array.at(0).at(0).c_str());
     cout << "db_day_id: " << db_day_id << endl;
     
+    
+    //Alarm Interval Start End
+    stringstream sql_interval;
+    sql_interval <<
+    "INSERT INTO interval (timestart, timeend) " <<
+    "SELECT '" << pcamera->timestart() << "', '" << pcamera->timeend() << "' " << 
+    "WHERE NOT EXISTS (SELECT * FROM interval WHERE timestart = '" << pcamera->timestart() << "' " <<
+    "AND timeend = '" << pcamera->timeend() << "');";
+    db_execute(sql_interval.str().c_str());
+    
+    std::string last_interval_id_query = "SELECT MAX(_id) FROM interval";
+    vector<vector<string> > interval_array = db_select(last_interval_id_query.c_str(), 1);
+    db_interval_id = atoi(interval_array.at(0).at(0).c_str());
+    cout << "db_interval_id: " << db_interval_id << endl;
+            
     //recognition_setup database.
     stringstream sql_recognition_setup;
     sql_recognition_setup <<
     "INSERT INTO recognition_setup " <<
-    "(_id_day, _id_camera, _id_mat, storeimage, storecrop, codename, has_region, _id_coordinates, delay) " <<
-    "SELECT "           <<
+    "(name, _id_interval, _id_day, _id_camera, _id_mat, storeimage, storecrop, codename, has_region, _id_coordinates, delay) " <<
+    "SELECT "           << "'"      << 
+    pcamera->name()     << "', "    <<
+    db_interval_id      << ", "     <<
     db_day_id           << ", "     <<
     db_camera_id        << ", "     <<
     pcamera->activemat()<< ", "     <<
@@ -699,6 +715,8 @@ void * startRecognition(void * arg)
     db_coordnates_id    << ", "     <<
     delay               <<
     " WHERE NOT EXISTS (SELECT * FROM recognition_setup WHERE" <<
+    " name              = " << pcamera->name()      << " AND" <<
+    " _id_interval      = " << db_interval_id       << " AND" <<
     " _id_day           = " << db_day_id            << " AND" <<
     " _id_camera        = " << db_camera_id         << " AND" <<
     " _id_mat           = " << pcamera->activemat() << " AND" <<
