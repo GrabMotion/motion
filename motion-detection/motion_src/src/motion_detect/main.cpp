@@ -36,14 +36,14 @@
 #include "opencv2/highgui/highgui.hpp"
 
 #include "practical/PracticalSocket.h" 
-//#include "practical/sendmessage.h"
 #include "recognition/detection.h"
+
 #include "protobuffer/motion.pb.h"
+#include "protobuffer/server.pb.h"
+
 #include "socket/streamlistener.h"
 #include "socket/netcvc.h"
 #include "database/database.h"
-
-//#include "socket/udp-send.c"
 
 #include "b64/base64.h"
 
@@ -60,16 +60,24 @@
 
 #include <usb.h>
 
+#include <curl/curl.h>
+
 using namespace google::protobuf::io;
 
 using namespace std;
 using namespace cv;
+
+//Folder
+std::string basepath;
+std::string sourcepath;
 
 void * ThreadMain(void *clntSock);
 motion::Message::ActionType HandleTCPClient(TCPSocket *sock);
 void RunUICommand(int result, string from_ip);
 void * watch_amount (void * t);
 std::string getXMLFilePathAndName(int cam, motion::Message m, std::string name);
+void directoryExistsOrCreate(const char* pzPath);
+void startMainRecognition();
 
 // Threading
 pthread_t thread_broadcast, thread_echo, thread_socket,
@@ -118,6 +126,7 @@ std::string starttime;
 
 //Recognition
 CvCapture * camera;
+VideoCapture * videocam;
 bool stop_capture;
 bool is_recognizing;
 bool is_recognizing_flag = false;
@@ -152,10 +161,37 @@ const int MAXRCVSTRING = 4096;          // Longest string to receive
 //Operations
 vector<string> splitString(string input, string delimiter);
 std::string getGlobalIntToString(int id);
+std::string getCurrentDayLabel();
+std::string getCurrentMonthLabel();
 
 int getGlobalStringToInt(std::string id);
 char * setMessageValueBody(int value, std::string body);
 bool checkFile(const std::string &file);
+
+std::string getCurrentDayLabel()
+{
+    struct timeval td;
+    struct tm* ptd;
+    char day_rasp[9];
+    gettimeofday (&td, NULL);
+    ptd = localtime (&td.tv_sec);
+    const char * dir = "%d%h%Y";
+    strftime (day_rasp, sizeof (day_rasp), dir, ptd);
+    std::string _day(day_rasp, 9);
+    return _day;
+}
+
+std::string getCurrentMonthLabel()
+{
+    struct timeval tm;
+    struct tm* ptm;
+    char month_rasp[3];
+    gettimeofday (&tm, NULL);
+    ptm = localtime (&tm.tv_sec);
+    strftime (month_rasp, sizeof (month_rasp), "%h", ptm);
+    std::string _month(month_rasp, 3);
+    return _month;
+}
 
 bool to_bool(std::string const& s)
 {
@@ -513,6 +549,8 @@ motion::Message takePictureToProto(motion::Message m)
     vector<vector<string> > mats_array = db_select(last_mats_query.c_str(), 1);
     db_mats_id = atoi(mats_array.at(0).at(0).c_str());
     cout << "db_mats_id: " << db_mats_id << endl;
+    
+    mcam->set_db_idmat(db_mats_id);
 
     stringstream insert_rel_cameras_mats_query;
     insert_rel_cameras_mats_query <<
@@ -525,8 +563,6 @@ motion::Message takePictureToProto(motion::Message m)
     cout << "ByteSize: " << size_init <<  endl;
     
     cvReleaseCapture(&capture);
-    
-    //google::protobuf::ShutdownProtobufLibrary();
     
     return m;
 }
@@ -671,12 +707,7 @@ motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(motion::Message::M
     "D.xmlfilepath, "       <<
     "I.instancestart, "     <<
     "I.instanceend, "       <<
-    "IMG.imagechanges, "    <<
-    "IMG.name, "            <<
-    "IMG.path, "            <<
-    "IMG._id,  "            <<
-    "CRP.name, "            <<
-    "CRP.path "             <<
+    "I.image_ids "          <<
     "FROM month AS M "      <<
     "JOIN rel_camera_month AS RCM ON M._id = RCM._id "          <<
     "JOIN month ON RCM._id_month = M._id "                      <<
@@ -684,12 +715,12 @@ motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(motion::Message::M
     "JOIN day AS D ON D._id = RMD._id_day "                     <<
     "JOIN rel_day_instance AS RDI ON RDI._id_day = D._id "      <<
     "JOIN instance AS I ON RDI._id_instance = I._id "           <<
-    "JOIN image AS IMG ON I.id_image = IMG._id "                <<
-    "JOIN crop AS CRP ON I.id_crop = CRP._id "                  <<
     "WHERE RCM._id_camera = " << camid << " "                   <<
     "AND M._id IN (SELECT _id from month WHERE label    = '" << month << "') "<<
     "AND D._id IN (SELECT _id from day WHERE label      = '" << day   << "'); ";
-    vector<vector<string> > rcm_array = db_select(sql_month.str().c_str(), 10);
+    std::string sql_monthstr = sql_month.str();
+    cout << "sql_monthstr: " << sql_monthstr << endl;
+    vector<vector<string> > rcm_array = db_select(sql_monthstr.c_str(), 6);
     for (int i=0; i< rcm_array.size(); i++)
     {
         vector<string> rowc = rcm_array.at(i);
@@ -707,18 +738,49 @@ motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(motion::Message::M
         minstance->set_instancestart(rowc.at(3));
         minstance->set_instanceend(rowc.at(4));
         
-        motion::Message::Image * mimage = minstance->add_image();
-        google::protobuf::int32 imagechanges = atoi(rowc.at(5).c_str());
-        mimage->set_imagechanges(imagechanges);
-        mimage->set_name(rowc.at(6));
-        mimage->set_path(rowc.at(7));
-
-        motion::Message::Crop * mcrop = minstance->add_crop();
-        google::protobuf::int32 imagefather = atoi(rowc.at(8).c_str());
-        mcrop->set_db_imagefatherid(imagefather);
-        mcrop->set_name(rowc.at(9));
-        mcrop->set_path(rowc.at(10));
-        mcrop->set_imagefather(rowc.at(7));
+        std::string imgids = rowc.at(5).c_str();
+        std::stringstream ss(imgids);
+        std::istream_iterator<std::string> begin(ss);
+        std::istream_iterator<std::string> end;
+        std::vector<std::string> imagesvector(begin, end);
+        std::copy(imagesvector.begin(), imagesvector.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+        
+        for (int i=0; i<imagesvector.size(); i++)
+        {
+             int id = atoi(imagesvector.at(i).c_str());
+            
+            stringstream sql_img;
+            sql_img << "SELECT IMG._id, IMG.imagechanges, IMG.name, IMG.path FROM image AS IMG WHERE _id = " << id << ";";
+            vector<vector<string> > img_array = db_select(sql_img.str().c_str(), 3);
+          
+            for (int j=0; j< img_array.size(); j++)
+            {
+                vector<string> rowi = img_array.at(j);
+                motion::Message::Image * mimage = minstance->add_image();
+                int imgid = atoi(rowi.at(0).c_str());
+                mimage->set_imagechanges(atoi(rowi.at(1).c_str()));
+                mimage->set_name(rowi.at(2));
+                mimage->set_path(rowi.at(3));
+               
+                stringstream sql_crop;
+                sql_crop << "SELECT C.name, C.path FROM crop AS C WHERE C._id_image_father = " << imgid << ";";
+                vector<vector<string> > crop_array = db_select(sql_crop.str().c_str(), 2);
+            
+                for (int k=0; k< crop_array.size(); k++)
+                {
+                    vector<string> rowc = crop_array.at(k);
+                    motion::Message::Crop * mcrop = minstance->add_crop();
+                    mcrop->set_db_imagefatherid(imgid);
+                    mcrop->set_name(rowc.at(0));
+                    mcrop->set_path(rowc.at(1));
+                    mcrop->set_imagefather(mimage->path());
+                }
+                
+            }
+         
+        }
+        
+        
 
     }
 }
@@ -748,6 +810,10 @@ motion::Message getRefreshProto(motion::Message m)
             cout <<  ":::start time:::: " << time_rasp << endl;
             
             m.set_time(time_rasp);
+            if (!m.has_activecam())
+            {
+                m.set_activecam(m.activecam());
+            }
             
             //cout << "m.set_time:: " << time_rasp << endl;
             
@@ -781,24 +847,25 @@ motion::Message getRefreshProto(motion::Message m)
                 //cout << "mcam->set_camerasince:: " << rowc.at(4) << endl;
                 
                 stringstream sql_cam_req_setup;
-                sql_cam_req_setup <<
+                sql_cam_req_setup       <<
                 "SELECT "               <<
                 "R.storeimage, "        <<
                 "R.storecrop, "         <<
+                "R.storevideo, "        <<
                 "R.codename, "          <<
                 "R.has_region, "        <<
                 "C.coordinates, "       <<
                 "R.delay, "             <<
                 "M.matfile, "           <<
-                "RCRS.start_rec_time "  <<
+                "RCRS.start_rec_time, "  <<
                 "RCRS._id_recognition_setup " <<
                 "FROM rel_camera_recognition_setup AS RCRS "    <<
                 "JOIN recognition_setup AS R ON RCRS._id_recognition_setup = R._id " <<
-                "JOIN mats AS M ON R._id_mat = M._id "  <<
+                "JOIN mat AS M ON R._id_mat = M._id "  <<
                 "JOIN coordinates AS C ON R._id_coordinates = C._id " <<
                 "WHERE R._id_camera = " << rowc.at(0) << ";";
                 cout << "sql_cam_req_setup.str(): " << sql_cam_req_setup.str() << endl;
-                vector<vector<string> > crs_array = db_select(sql_cam_req_setup.str().c_str(), 9);
+                vector<vector<string> > crs_array = db_select(sql_cam_req_setup.str().c_str(), 10);
                 cout << "crs_array size: " << crs_array.size() << endl;
                 
                 if (crs_array.size()>0)
@@ -808,13 +875,14 @@ motion::Message getRefreshProto(motion::Message m)
                     mcam->set_db_idcamera(camid);
                     mcam->set_storeimage(to_bool(rows.at(0)));
                     mcam->set_storecrop(to_bool(rows.at(1)));
-                    mcam->set_codename(rows.at(2));
-                    mcam->set_hasregion(to_bool(rows.at(3)));
-                    mcam->set_coordinates(rows.at(4));
-                    mcam->set_delay(atof(rows.at(5).c_str()));
-                    google::protobuf::int32 camamat = atoi(rows.at(6).c_str());
+                    mcam->set_storevideo(to_bool(rows.at(2)));
+                    mcam->set_codename(rows.at(3));
+                    mcam->set_hasregion(to_bool(rows.at(4)));
+                    mcam->set_coordinates(rows.at(5));
+                    mcam->set_delay(atof(rows.at(6).c_str()));
+                    google::protobuf::int32 camamat = atoi(rows.at(7).c_str());
                     mcam->set_activemat(camamat);
-                    mcam->set_startrectime(rows.at(7));
+                    mcam->set_startrectime(rows.at(8));
                     cout << "Month: "   << m.currmonth() << endl;
                     cout << "Day: "     << m.currday()  << endl;
                     motion::Message::MotionMonth * mmonth = mcam->add_motionmonth();
@@ -823,6 +891,15 @@ motion::Message getRefreshProto(motion::Message m)
             }
             return m;
     
+}
+
+void startMainRecognition()
+{
+    cout << "motion::Message::REC_START" << endl;
+    runr = pthread_create(&thread_recognition, NULL, startRecognition, NULL);
+    if ( runr  != 0) {
+        cerr << "Unable to create thread" << endl;
+    }
 }
 
 motion::Message runCommand(motion::Message m)
@@ -905,11 +982,7 @@ motion::Message runCommand(motion::Message m)
         break;
         case motion::Message::REC_START:
         {
-            cout << "motion::Message::REC_START" << endl;
-            runr = pthread_create(&thread_recognition, NULL, startRecognition, NULL);
-            if ( runr  != 0) {
-                cerr << "Unable to create thread" << endl;
-            }
+            startMainRecognition();
         }
         break;
         case motion::Message::REC_STOP:
@@ -1146,8 +1219,8 @@ try
           cout << "header 2 : " << header << endl;
           cout << "size: " << msg.size() << endl;
           cout << "..........................................." << endl;
-          cout << msg << endl;
-          cout << "..........................................." << endl;
+          //cout << msg << endl;
+          //cout << "..........................................." << endl;
           
           totalsSocket();
           
@@ -1261,8 +1334,8 @@ try
           cout << "header 1 : " << header << endl;
           cout << "size: " << msg.size() << endl;
           cout << "..........................................." << endl;
-          cout << msg << endl;
-          cout << "..........................................." << endl;
+          //cout << msg << endl;
+          //cout << "..........................................." << endl;
 
       }
       else
@@ -1288,8 +1361,8 @@ try
           cout << "header 0 : " << header << endl;
           cout << "size: " << msg.size() << endl;
           cout << "..........................................." << endl;
-          cout << msg << endl;
-          cout << "..........................................." << endl;
+          //cout << msg << endl;
+          //cout << "..........................................." << endl;
           
       }
       
@@ -1425,7 +1498,7 @@ std::vector<int> getCameras()
 {
     std::vector<int> camsv;
     CvCapture* temp_camera;
-    int maxTested = 3;
+    int maxTested = 2;
     for (int i = 0; i < maxTested; i++){
         temp_camera = cvCreateCameraCapture(i);
         if (temp_camera!=NULL)
@@ -1452,9 +1525,108 @@ void directoryExistsOrCreate(const char* pzPath)
         (void) closedir (pDir);
 }
 
+/*struct url_data {
+    size_t size;
+    char* data;
+};*/
 
-int main (int argc, char * const argv[])
+
+/*size_t write_data(void *ptr, size_t size, size_t nmemb, struct url_data *data) {
+    size_t index = data->size;
+    size_t n = (size * nmemb);
+    char* tmp;
+
+    data->size += (size * nmemb);
+
+    tmp = realloc(data.data, data->size + 1); // +1 for '\0' 
+
+    if(tmp) {
+        data->data = tmp;
+    } else {
+        if(data->data) {
+            free(data->data);
+        }
+        fprintf(stderr, "Failed to allocate memory.\n");
+        return 0;
+    }
+
+    memcpy((data->data + index), ptr, n);
+    data->data[data->size] = '\0';
+
+    return size * nmemb;
+}*/
+
+/*char *handle_url(char* url) {
+    CURL *curl;
+
+    struct url_data data;
+    data.size = 0;
+    data.data = malloc(4096); 
+    if(NULL == data.data) {
+        fprintf(stderr, "Failed to allocate memory.\n");
+        return NULL;
+    }
+
+    data.data[0] = '\0';
+
+    CURLcode res;
+
+    curl = curl_easy_init();
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
+        res = curl_easy_perform(curl);
+        if(res != CURLE_OK) {
+                fprintf(stderr, "curl_easy_perform() failed: %s\n",  
+                        curl_easy_strerror(res));
+        }
+
+        curl_easy_cleanup(curl);
+
+    }
+    return data.data;
+}*/
+
+
+
+int main (int argc, char * const av[])
 {
+    
+    //motion 
+        //status
+        //start name
+        //stop name
+    
+    const char **argv = (const char **) av;
+    
+    argc = 3;
+    argv[1] = "-start"; //"start";
+    argv[2] = "0";
+    argv[3] = "VEREDA";
+   
+    cout << "argv[0]: " << argv[0] << endl;
+    
+    if (argc==2)
+            cout << "argv[1]: " << argv[1] << endl;
+    
+    if (argc==3)
+        cout << "argv[2]: " << argv[2] << endl;
+    
+    
+    std::string runparam = argv[0];
+    if (runparam=="./motion_detect_raspberry")
+    {
+        basepath = "";
+        sourcepath = "../../src/";
+        
+    }
+    else if (runparam.find("/home/pi/motion/motion-detection/motion_src/src/motion_detect/motion_detect_raspberry") != std::string::npos )
+    {
+        basepath    = "src/motion_detect/";
+        sourcepath  = "src/";
+    }
+    
     //Create database.
     //db_create();
     cout << "Getting hard info." << endl;
@@ -1476,13 +1648,20 @@ int main (int argc, char * const argv[])
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     cout <<  ":::start time:::: " << time_rasp << endl;
     
+    std::string basedatafile = basepath + "data"; //"data";
+    directoryExistsOrCreate(basedatafile.c_str());
+    
      //Store into database.
     vector<int> camsarray = db_cams(cams, time_rasp);
-    
+     
+    //char * public_ip =  handle_url("http://automation.whatismyip.com/n09230945.asp");
+   
     //Activity
+    stringstream allparams;
+    allparams << argv;
     stringstream sql_activity;
     sql_activity <<
-    "INSERT into activity (run_time) VALUES ('" << time_rasp << "');";
+    "INSERT into activity (params, run_time) VALUES ('"<< allparams.str() << "', '" << time_rasp << "');";
     db_execute(sql_activity.str().c_str());
     
     local_ip = getIpAddress();
@@ -1558,13 +1737,39 @@ int main (int argc, char * const argv[])
     
     starttime = time_rasp;
 
-    std::string basedatafile = "data";
-    directoryExistsOrCreate(basedatafile.c_str());
-    
-    std::string secdatafile = "data/data";
+    std::string secdatafile = basepath + "data/data";
     directoryExistsOrCreate(secdatafile.c_str());
-    std::string matdatafile = "data/mat";
+    std::string matdatafile = basepath + "data/mat";
     directoryExistsOrCreate(matdatafile.c_str());
+    
+    //Params
+    if ( argc >= 2 ) 
+    {
+        std::string doparam = argv[1];
+        std::string param = argv[2];
+        if (doparam=="-status")
+        {
+            status();
+            return 0;
+        }
+        else if (doparam=="-start")
+        {
+            std::string param_camera = argv[2];
+            std::string param_name   = argv[3];
+            
+            if (loadStartQuery(param_camera, param_name))
+            {
+                startMainRecognition();
+            } else 
+            {
+                cout << "No matching values for the current arguments." << endl; 
+            }
+        } 
+        else if (doparam=="-stop")
+        {
+            
+        }
+    }
     
     cout << "Start Time:: " << starttime << endl;
 

@@ -16,6 +16,7 @@ SET(CMAKE_DEPENDS_CHECK_CXX
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.cc" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/server.pb.cc" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/server.pb.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/streamlistener.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o"
