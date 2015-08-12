@@ -59,6 +59,7 @@ enum Message_ActionType {
   Message_ActionType_REFRESH = 1013,
   Message_ActionType_GET_XML = 1014,
   Message_ActionType_GET_IMAGE = 1015,
+  Message_ActionType_GET_VIDEO = 1016,
   Message_ActionType_RESPONSE_OK = 2000,
   Message_ActionType_RESPONSE_NEXT = 2010,
   Message_ActionType_RESPONSE_END = 2020,
@@ -347,31 +348,38 @@ class Message_MotionCamera : public ::google::protobuf::Message {
   inline ::std::string* release_stoprectime();
   inline void set_allocated_stoprectime(::std::string* stoprectime);
 
-  // optional int32 activemat = 19;
+  // optional bool runatstartup = 19;
+  inline bool has_runatstartup() const;
+  inline void clear_runatstartup();
+  static const int kRunatstartupFieldNumber = 19;
+  inline bool runatstartup() const;
+  inline void set_runatstartup(bool value);
+
+  // optional int32 activemat = 20;
   inline bool has_activemat() const;
   inline void clear_activemat();
-  static const int kActivematFieldNumber = 19;
+  static const int kActivematFieldNumber = 20;
   inline ::google::protobuf::int32 activemat() const;
   inline void set_activemat(::google::protobuf::int32 value);
 
-  // optional bool recognizing_flag = 20;
+  // optional bool recognizing_flag = 21;
   inline bool has_recognizing_flag() const;
   inline void clear_recognizing_flag();
-  static const int kRecognizingFlagFieldNumber = 20;
+  static const int kRecognizingFlagFieldNumber = 21;
   inline bool recognizing_flag() const;
   inline void set_recognizing_flag(bool value);
 
-  // optional int32 db_idcamera = 21;
+  // optional int32 db_idcamera = 22;
   inline bool has_db_idcamera() const;
   inline void clear_db_idcamera();
-  static const int kDbIdcameraFieldNumber = 21;
+  static const int kDbIdcameraFieldNumber = 22;
   inline ::google::protobuf::int32 db_idcamera() const;
   inline void set_db_idcamera(::google::protobuf::int32 value);
 
-  // optional int32 db_idmat = 22;
+  // optional int32 db_idmat = 23;
   inline bool has_db_idmat() const;
   inline void clear_db_idmat();
-  static const int kDbIdmatFieldNumber = 22;
+  static const int kDbIdmatFieldNumber = 23;
   inline ::google::protobuf::int32 db_idmat() const;
   inline void set_db_idmat(::google::protobuf::int32 value);
 
@@ -411,6 +419,8 @@ class Message_MotionCamera : public ::google::protobuf::Message {
   inline void clear_has_startrectime();
   inline void set_has_stoprectime();
   inline void clear_has_stoprectime();
+  inline void set_has_runatstartup();
+  inline void clear_has_runatstartup();
   inline void set_has_activemat();
   inline void clear_has_activemat();
   inline void set_has_recognizing_flag();
@@ -432,14 +442,15 @@ class Message_MotionCamera : public ::google::protobuf::Message {
   ::std::string* timeend_;
   ::std::string* name_;
   ::std::string* camerasince_;
+  static ::std::string* _default_codename_;
+  ::std::string* codename_;
   bool recognizing_;
   bool storeimage_;
   bool storecrop_;
   bool storevideo_;
   bool hasregion_;
+  bool runatstartup_;
   bool recognizing_flag_;
-  static ::std::string* _default_codename_;
-  ::std::string* codename_;
   ::std::string* coordinates_;
   double delay_;
   ::std::string* startrectime_;
@@ -961,17 +972,17 @@ class Message_Image : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 imagechanges() const;
   inline void set_imagechanges(::google::protobuf::int32 value);
 
-  // optional string time = 4;
-  inline bool has_time() const;
-  inline void clear_time();
-  static const int kTimeFieldNumber = 4;
-  inline const ::std::string& time() const;
-  inline void set_time(const ::std::string& value);
-  inline void set_time(const char* value);
-  inline void set_time(const char* value, size_t size);
-  inline ::std::string* mutable_time();
-  inline ::std::string* release_time();
-  inline void set_allocated_time(::std::string* time);
+  // optional string timeimage = 4;
+  inline bool has_timeimage() const;
+  inline void clear_timeimage();
+  static const int kTimeimageFieldNumber = 4;
+  inline const ::std::string& timeimage() const;
+  inline void set_timeimage(const ::std::string& value);
+  inline void set_timeimage(const char* value);
+  inline void set_timeimage(const char* value, size_t size);
+  inline ::std::string* mutable_timeimage();
+  inline ::std::string* release_timeimage();
+  inline void set_allocated_timeimage(::std::string* timeimage);
 
   // @@protoc_insertion_point(class_scope:motion.Message.Image)
  private:
@@ -981,8 +992,8 @@ class Message_Image : public ::google::protobuf::Message {
   inline void clear_has_name();
   inline void set_has_imagechanges();
   inline void clear_has_imagechanges();
-  inline void set_has_time();
-  inline void clear_has_time();
+  inline void set_has_timeimage();
+  inline void clear_has_timeimage();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -990,7 +1001,7 @@ class Message_Image : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::std::string* path_;
   ::std::string* name_;
-  ::std::string* time_;
+  ::std::string* timeimage_;
   ::google::protobuf::int32 imagechanges_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
@@ -1202,12 +1213,26 @@ class Message_Video : public ::google::protobuf::Message {
   inline ::std::string* release_name();
   inline void set_allocated_name(::std::string* name);
 
+  // optional string instancefolder = 3;
+  inline bool has_instancefolder() const;
+  inline void clear_instancefolder();
+  static const int kInstancefolderFieldNumber = 3;
+  inline const ::std::string& instancefolder() const;
+  inline void set_instancefolder(const ::std::string& value);
+  inline void set_instancefolder(const char* value);
+  inline void set_instancefolder(const char* value, size_t size);
+  inline ::std::string* mutable_instancefolder();
+  inline ::std::string* release_instancefolder();
+  inline void set_allocated_instancefolder(::std::string* instancefolder);
+
   // @@protoc_insertion_point(class_scope:motion.Message.Video)
  private:
   inline void set_has_path();
   inline void clear_has_path();
   inline void set_has_name();
   inline void clear_has_name();
+  inline void set_has_instancefolder();
+  inline void clear_has_instancefolder();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1215,6 +1240,7 @@ class Message_Video : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::std::string* path_;
   ::std::string* name_;
+  ::std::string* instancefolder_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -1299,6 +1325,7 @@ class Message : public ::google::protobuf::Message {
   static const ActionType REFRESH = Message_ActionType_REFRESH;
   static const ActionType GET_XML = Message_ActionType_GET_XML;
   static const ActionType GET_IMAGE = Message_ActionType_GET_IMAGE;
+  static const ActionType GET_VIDEO = Message_ActionType_GET_VIDEO;
   static const ActionType RESPONSE_OK = Message_ActionType_RESPONSE_OK;
   static const ActionType RESPONSE_NEXT = Message_ActionType_RESPONSE_NEXT;
   static const ActionType RESPONSE_END = Message_ActionType_RESPONSE_END;
@@ -1518,6 +1545,18 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_imagefilepath();
   inline void set_allocated_imagefilepath(::std::string* imagefilepath);
 
+  // optional string videofilepath = 16;
+  inline bool has_videofilepath() const;
+  inline void clear_videofilepath();
+  static const int kVideofilepathFieldNumber = 16;
+  inline const ::std::string& videofilepath() const;
+  inline void set_videofilepath(const ::std::string& value);
+  inline void set_videofilepath(const char* value);
+  inline void set_videofilepath(const char* value, size_t size);
+  inline ::std::string* mutable_videofilepath();
+  inline ::std::string* release_videofilepath();
+  inline void set_allocated_videofilepath(::std::string* videofilepath);
+
   // @@protoc_insertion_point(class_scope:motion.Message)
  private:
   inline void set_has_activecam();
@@ -1548,6 +1587,8 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_packagesize();
   inline void set_has_imagefilepath();
   inline void clear_has_imagefilepath();
+  inline void set_has_videofilepath();
+  inline void clear_has_videofilepath();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1568,6 +1609,7 @@ class Message : public ::google::protobuf::Message {
   ::google::protobuf::int32 currcam_;
   ::google::protobuf::int32 packagesize_;
   ::std::string* imagefilepath_;
+  ::std::string* videofilepath_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -2488,15 +2530,39 @@ inline void Message_MotionCamera::set_allocated_stoprectime(::std::string* stopr
   // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionCamera.stoprectime)
 }
 
-// optional int32 activemat = 19;
-inline bool Message_MotionCamera::has_activemat() const {
+// optional bool runatstartup = 19;
+inline bool Message_MotionCamera::has_runatstartup() const {
   return (_has_bits_[0] & 0x00040000u) != 0;
 }
-inline void Message_MotionCamera::set_has_activemat() {
+inline void Message_MotionCamera::set_has_runatstartup() {
   _has_bits_[0] |= 0x00040000u;
 }
-inline void Message_MotionCamera::clear_has_activemat() {
+inline void Message_MotionCamera::clear_has_runatstartup() {
   _has_bits_[0] &= ~0x00040000u;
+}
+inline void Message_MotionCamera::clear_runatstartup() {
+  runatstartup_ = false;
+  clear_has_runatstartup();
+}
+inline bool Message_MotionCamera::runatstartup() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionCamera.runatstartup)
+  return runatstartup_;
+}
+inline void Message_MotionCamera::set_runatstartup(bool value) {
+  set_has_runatstartup();
+  runatstartup_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionCamera.runatstartup)
+}
+
+// optional int32 activemat = 20;
+inline bool Message_MotionCamera::has_activemat() const {
+  return (_has_bits_[0] & 0x00080000u) != 0;
+}
+inline void Message_MotionCamera::set_has_activemat() {
+  _has_bits_[0] |= 0x00080000u;
+}
+inline void Message_MotionCamera::clear_has_activemat() {
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline void Message_MotionCamera::clear_activemat() {
   activemat_ = 0;
@@ -2512,15 +2578,15 @@ inline void Message_MotionCamera::set_activemat(::google::protobuf::int32 value)
   // @@protoc_insertion_point(field_set:motion.Message.MotionCamera.activemat)
 }
 
-// optional bool recognizing_flag = 20;
+// optional bool recognizing_flag = 21;
 inline bool Message_MotionCamera::has_recognizing_flag() const {
-  return (_has_bits_[0] & 0x00080000u) != 0;
+  return (_has_bits_[0] & 0x00100000u) != 0;
 }
 inline void Message_MotionCamera::set_has_recognizing_flag() {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00100000u;
 }
 inline void Message_MotionCamera::clear_has_recognizing_flag() {
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline void Message_MotionCamera::clear_recognizing_flag() {
   recognizing_flag_ = false;
@@ -2536,15 +2602,15 @@ inline void Message_MotionCamera::set_recognizing_flag(bool value) {
   // @@protoc_insertion_point(field_set:motion.Message.MotionCamera.recognizing_flag)
 }
 
-// optional int32 db_idcamera = 21;
+// optional int32 db_idcamera = 22;
 inline bool Message_MotionCamera::has_db_idcamera() const {
-  return (_has_bits_[0] & 0x00100000u) != 0;
+  return (_has_bits_[0] & 0x00200000u) != 0;
 }
 inline void Message_MotionCamera::set_has_db_idcamera() {
-  _has_bits_[0] |= 0x00100000u;
+  _has_bits_[0] |= 0x00200000u;
 }
 inline void Message_MotionCamera::clear_has_db_idcamera() {
-  _has_bits_[0] &= ~0x00100000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline void Message_MotionCamera::clear_db_idcamera() {
   db_idcamera_ = 0;
@@ -2560,15 +2626,15 @@ inline void Message_MotionCamera::set_db_idcamera(::google::protobuf::int32 valu
   // @@protoc_insertion_point(field_set:motion.Message.MotionCamera.db_idcamera)
 }
 
-// optional int32 db_idmat = 22;
+// optional int32 db_idmat = 23;
 inline bool Message_MotionCamera::has_db_idmat() const {
-  return (_has_bits_[0] & 0x00200000u) != 0;
+  return (_has_bits_[0] & 0x00400000u) != 0;
 }
 inline void Message_MotionCamera::set_has_db_idmat() {
-  _has_bits_[0] |= 0x00200000u;
+  _has_bits_[0] |= 0x00400000u;
 }
 inline void Message_MotionCamera::clear_has_db_idmat() {
-  _has_bits_[0] &= ~0x00200000u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline void Message_MotionCamera::clear_db_idmat() {
   db_idmat_ = 0;
@@ -3617,80 +3683,80 @@ inline void Message_Image::set_imagechanges(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.Image.imagechanges)
 }
 
-// optional string time = 4;
-inline bool Message_Image::has_time() const {
+// optional string timeimage = 4;
+inline bool Message_Image::has_timeimage() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void Message_Image::set_has_time() {
+inline void Message_Image::set_has_timeimage() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void Message_Image::clear_has_time() {
+inline void Message_Image::clear_has_timeimage() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void Message_Image::clear_time() {
-  if (time_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    time_->clear();
+inline void Message_Image::clear_timeimage() {
+  if (timeimage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    timeimage_->clear();
   }
-  clear_has_time();
+  clear_has_timeimage();
 }
-inline const ::std::string& Message_Image::time() const {
-  // @@protoc_insertion_point(field_get:motion.Message.Image.time)
-  return *time_;
+inline const ::std::string& Message_Image::timeimage() const {
+  // @@protoc_insertion_point(field_get:motion.Message.Image.timeimage)
+  return *timeimage_;
 }
-inline void Message_Image::set_time(const ::std::string& value) {
-  set_has_time();
-  if (time_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    time_ = new ::std::string;
+inline void Message_Image::set_timeimage(const ::std::string& value) {
+  set_has_timeimage();
+  if (timeimage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    timeimage_ = new ::std::string;
   }
-  time_->assign(value);
-  // @@protoc_insertion_point(field_set:motion.Message.Image.time)
+  timeimage_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.Image.timeimage)
 }
-inline void Message_Image::set_time(const char* value) {
-  set_has_time();
-  if (time_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    time_ = new ::std::string;
+inline void Message_Image::set_timeimage(const char* value) {
+  set_has_timeimage();
+  if (timeimage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    timeimage_ = new ::std::string;
   }
-  time_->assign(value);
-  // @@protoc_insertion_point(field_set_char:motion.Message.Image.time)
+  timeimage_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.Image.timeimage)
 }
-inline void Message_Image::set_time(const char* value, size_t size) {
-  set_has_time();
-  if (time_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    time_ = new ::std::string;
+inline void Message_Image::set_timeimage(const char* value, size_t size) {
+  set_has_timeimage();
+  if (timeimage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    timeimage_ = new ::std::string;
   }
-  time_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:motion.Message.Image.time)
+  timeimage_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.Image.timeimage)
 }
-inline ::std::string* Message_Image::mutable_time() {
-  set_has_time();
-  if (time_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    time_ = new ::std::string;
+inline ::std::string* Message_Image::mutable_timeimage() {
+  set_has_timeimage();
+  if (timeimage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    timeimage_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:motion.Message.Image.time)
-  return time_;
+  // @@protoc_insertion_point(field_mutable:motion.Message.Image.timeimage)
+  return timeimage_;
 }
-inline ::std::string* Message_Image::release_time() {
-  clear_has_time();
-  if (time_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+inline ::std::string* Message_Image::release_timeimage() {
+  clear_has_timeimage();
+  if (timeimage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
   } else {
-    ::std::string* temp = time_;
-    time_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    ::std::string* temp = timeimage_;
+    timeimage_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     return temp;
   }
 }
-inline void Message_Image::set_allocated_time(::std::string* time) {
-  if (time_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete time_;
+inline void Message_Image::set_allocated_timeimage(::std::string* timeimage) {
+  if (timeimage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete timeimage_;
   }
-  if (time) {
-    set_has_time();
-    time_ = time;
+  if (timeimage) {
+    set_has_timeimage();
+    timeimage_ = timeimage;
   } else {
-    clear_has_time();
-    time_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    clear_has_timeimage();
+    timeimage_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:motion.Message.Image.time)
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.Image.timeimage)
 }
 
 // -------------------------------------------------------------------
@@ -4103,6 +4169,82 @@ inline void Message_Video::set_allocated_name(::std::string* name) {
     name_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:motion.Message.Video.name)
+}
+
+// optional string instancefolder = 3;
+inline bool Message_Video::has_instancefolder() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Message_Video::set_has_instancefolder() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Message_Video::clear_has_instancefolder() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void Message_Video::clear_instancefolder() {
+  if (instancefolder_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    instancefolder_->clear();
+  }
+  clear_has_instancefolder();
+}
+inline const ::std::string& Message_Video::instancefolder() const {
+  // @@protoc_insertion_point(field_get:motion.Message.Video.instancefolder)
+  return *instancefolder_;
+}
+inline void Message_Video::set_instancefolder(const ::std::string& value) {
+  set_has_instancefolder();
+  if (instancefolder_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    instancefolder_ = new ::std::string;
+  }
+  instancefolder_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.Video.instancefolder)
+}
+inline void Message_Video::set_instancefolder(const char* value) {
+  set_has_instancefolder();
+  if (instancefolder_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    instancefolder_ = new ::std::string;
+  }
+  instancefolder_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.Video.instancefolder)
+}
+inline void Message_Video::set_instancefolder(const char* value, size_t size) {
+  set_has_instancefolder();
+  if (instancefolder_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    instancefolder_ = new ::std::string;
+  }
+  instancefolder_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.Video.instancefolder)
+}
+inline ::std::string* Message_Video::mutable_instancefolder() {
+  set_has_instancefolder();
+  if (instancefolder_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    instancefolder_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.Video.instancefolder)
+  return instancefolder_;
+}
+inline ::std::string* Message_Video::release_instancefolder() {
+  clear_has_instancefolder();
+  if (instancefolder_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = instancefolder_;
+    instancefolder_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_Video::set_allocated_instancefolder(::std::string* instancefolder) {
+  if (instancefolder_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete instancefolder_;
+  }
+  if (instancefolder) {
+    set_has_instancefolder();
+    instancefolder_ = instancefolder;
+  } else {
+    clear_has_instancefolder();
+    instancefolder_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.Video.instancefolder)
 }
 
 // -------------------------------------------------------------------
@@ -4890,6 +5032,82 @@ inline void Message::set_allocated_imagefilepath(::std::string* imagefilepath) {
     imagefilepath_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:motion.Message.imagefilepath)
+}
+
+// optional string videofilepath = 16;
+inline bool Message::has_videofilepath() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void Message::set_has_videofilepath() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void Message::clear_has_videofilepath() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void Message::clear_videofilepath() {
+  if (videofilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    videofilepath_->clear();
+  }
+  clear_has_videofilepath();
+}
+inline const ::std::string& Message::videofilepath() const {
+  // @@protoc_insertion_point(field_get:motion.Message.videofilepath)
+  return *videofilepath_;
+}
+inline void Message::set_videofilepath(const ::std::string& value) {
+  set_has_videofilepath();
+  if (videofilepath_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    videofilepath_ = new ::std::string;
+  }
+  videofilepath_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.videofilepath)
+}
+inline void Message::set_videofilepath(const char* value) {
+  set_has_videofilepath();
+  if (videofilepath_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    videofilepath_ = new ::std::string;
+  }
+  videofilepath_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.videofilepath)
+}
+inline void Message::set_videofilepath(const char* value, size_t size) {
+  set_has_videofilepath();
+  if (videofilepath_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    videofilepath_ = new ::std::string;
+  }
+  videofilepath_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.videofilepath)
+}
+inline ::std::string* Message::mutable_videofilepath() {
+  set_has_videofilepath();
+  if (videofilepath_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    videofilepath_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.videofilepath)
+  return videofilepath_;
+}
+inline ::std::string* Message::release_videofilepath() {
+  clear_has_videofilepath();
+  if (videofilepath_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = videofilepath_;
+    videofilepath_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message::set_allocated_videofilepath(::std::string* videofilepath) {
+  if (videofilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete videofilepath_;
+  }
+  if (videofilepath) {
+    set_has_videofilepath();
+    videofilepath_ = videofilepath;
+  } else {
+    clear_has_videofilepath();
+    videofilepath_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.videofilepath)
 }
 
 
