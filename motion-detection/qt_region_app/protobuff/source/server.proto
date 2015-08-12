@@ -1,0 +1,19 @@
+package server;  
+  
+message Message 
+{    
+	
+	required ActionType type 		= 2 [default = ENGAGE];
+	
+	optional string time 			= 3;  
+	
+	enum ActionType 
+	{
+		 ENGAGE                   = 1000;
+		 REC_START			      = 1002;
+		 REC_RUNNING			  = 1003;
+	}
+	
+		
+}  
+

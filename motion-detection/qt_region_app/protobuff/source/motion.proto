@@ -2,50 +2,23 @@ package motion;
   
 message Message 
 {    
-	required ActionType type 		= 1 [default = ENGAGE];
 	
-	optional string time 			= 2;  
-	
-	optional bytes data 			= 3;
-	optional int32 data_amount		= 4;
-	optional int32 data_total 		= 5;
-	
-	optional string serverip 		= 6;
-	optional string clientip 		= 7;
-	
-	optional bool recognizing       = 8;
-
-	repeated MotionMonth motionmonth  = 9;
-	
-	optional bool storeimage 		= 10;
-	optional bool storecrop 		= 11;
-	optional string codename        = 12;
-	optional bytes regioncoords		= 13;
-	optional double delay			= 14;
-	
-	optional string starttime       		= 15;
-	
-	optional string startrecognitiontime 	= 16;
-	
-	optional bool region       		= 17;
-	optional int32 numberofchanges  = 18;
-	optional int32 	amount 	        = 19;
-	
-	repeated int32 matfile 			= 20;
-	optional int32 activemat		= 21;
-	
-	optional string cameras 		= 22;
-	
-	optional string xmlfilename		= 23;
-	optional string xmlfilepath		= 24;
-	optional int32 instancecount    = 25;
-	
-	optional string imagefilepath   = 26;
-
-	optional string 	currmonth 	= 27;
-	optional string 	currday	 	= 28;
-	
-	optional int32 packagesize 		= 29;	
+	optional int32 activecam 			= 1; 
+	required ActionType type 			= 2 [default = ENGAGE];
+	optional string time 				= 3;  
+	optional bytes data 				= 4;
+	optional int32 data_amount			= 5;
+	optional int32 data_total 			= 6;
+	optional string serverip 			= 7;
+	optional string clientip 			= 8;
+	optional string devicestarttime 	= 9;
+	repeated MotionCamera motioncamera  = 10;
+	optional string 	currmonth 		= 11;
+	optional string 	currday	 		= 12;
+	optional int32 		currcam			= 13;
+	optional int32 packagesize 			= 14;	
+	optional string imagefilepath 		= 15; 
+	optional string videofilepath 		= 16;
 	
 	enum ActionType 
 	{
@@ -64,6 +37,7 @@ message Message
 		 REFRESH				  = 1013;
 		 GET_XML				  = 1014;
 		 GET_IMAGE				  = 1015;
+		 GET_VIDEO				  = 1016;
 		 RESPONSE_OK			  = 2000;
 		 RESPONSE_NEXT			  = 2010;
 		 RESPONSE_END			  = 2020;
@@ -94,6 +68,33 @@ message Message
 		TCP_MSG_PORT            	= 5040;
 	}
 	
+	message MotionCamera
+	{
+		repeated MotionMonth motionmonth    = 1;
+		optional int32 cameraid   			= 2 [default = 0];
+		optional int32 cameranumber   		= 3;
+		optional string cameraname   		= 4;
+		optional string timestart			= 5;
+		optional string timeend				= 6;
+		optional string name 			 	= 7;
+		optional bool recognizing           = 8;
+		optional string camerasince   		= 9;	 
+		optional bool storeimage 		= 10 [default = true];
+		optional bool storecrop 		= 11 [default = true];
+		optional bool storevideo 		= 12 [default = true];
+		optional string codename        = 13 [default = "test"];
+		optional bool hasregion		    = 14;
+		optional string coordinates		= 15;
+		optional double delay			= 16 [default = 2];
+		optional string startrectime 	= 17;
+		optional string stoprectime 	= 18;
+		optional bool	runatstartup	= 19;
+		optional int32 activemat		= 20;
+		optional bool recognizing_flag  = 21;
+		optional int32 db_idcamera 		= 22;
+		optional int32 db_idmat 		= 23;
+	}
+	
 	message MotionMonth
 	{
 		repeated MotionDay motionday 		= 1;
@@ -102,8 +103,12 @@ message Message
 
 	message MotionDay
 	{
-		optional string daylabel			= 1;
-		repeated Instance instance      	= 2; 
+		repeated Instance instance      		= 1;
+		optional string daylabel				= 2;
+		optional int32 db_dayid 				= 3;
+		optional int32 db_recognitionsetupid    = 4;
+		optional string xmlfilename				= 5;
+		optional string xmlfilepath				= 6; 
 	}
 	
 	message Instance
@@ -115,6 +120,7 @@ message Message
 		optional string 	croppedformat	= 5;
 		repeated Image 		image      	    = 6;
 		repeated Crop 		crop      	    = 7;		
+		optional Video 		video      	    = 8;
 	}
 	
 	message Image
@@ -122,6 +128,7 @@ message Message
 		optional string path 				= 1;
 		optional string name				= 2;
 		optional int32 	imagechanges 	    = 3;
+		optional string timeimage			= 4;
 	}
 	
 	message Crop
@@ -129,6 +136,14 @@ message Message
 		optional string path 				= 1;
 		optional string name				= 2;
 		optional string imagefather			= 3;
+		optional int32 db_imagefatherid		= 4;
+	}
+	
+	message Video
+	{
+		optional string path 				= 1;
+		optional string name				= 2;
+		optional string instancefolder		= 3;
 	}
 }  
 
