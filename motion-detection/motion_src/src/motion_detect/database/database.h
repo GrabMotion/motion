@@ -19,6 +19,9 @@
 
 #include <sqlite3.h>
 
+#include <sys/time.h>
+
+
 #include "../protobuffer/motion.pb.h"
 #include "../b64/base64.h"
 
@@ -50,8 +53,9 @@ extern motion::Message PROTO, R_PROTO;
 void updateCameraDB(int status, char * time, int camera);
 static int callback(void *ptr, int argc, char* argv[], char* cols[] );
 int db_cpuinfo();
-std::vector<int> db_cams(std::vector<int> cams, std::string time);
+std::vector<int> db_cams(std::vector<int> cams);
 bool loadStartQuery(std::string camera, std::string recname);
+vector<string> startIfNotRunningQuery(std::string camera, char * time);
 
 extern std::string getCurrentDayLabel();
 extern std::string getCurrentMonthLabel();

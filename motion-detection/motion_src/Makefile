@@ -175,6 +175,21 @@ src/motion_detect/database/database.s:
 .PHONY : src/motion_detect/database/database.s
 
 # target to build an object file
+src/motion_detect/http/httppost.o:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/http/httppost.o
+.PHONY : src/motion_detect/http/httppost.o
+
+# target to preprocess a source file
+src/motion_detect/http/httppost.i:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/http/httppost.i
+.PHONY : src/motion_detect/http/httppost.i
+
+# target to generate assembly for a file
+src/motion_detect/http/httppost.s:
+	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/http/httppost.s
+.PHONY : src/motion_detect/http/httppost.s
+
+# target to build an object file
 src/motion_detect/main.o:
 	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o
 .PHONY : src/motion_detect/main.o
@@ -233,21 +248,6 @@ src/motion_detect/protobuffer/motion.pb.i:
 src/motion_detect/protobuffer/motion.pb.s:
 	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.s
 .PHONY : src/motion_detect/protobuffer/motion.pb.s
-
-# target to build an object file
-src/motion_detect/protobuffer/server.pb.o:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/server.pb.o
-.PHONY : src/motion_detect/protobuffer/server.pb.o
-
-# target to preprocess a source file
-src/motion_detect/protobuffer/server.pb.i:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/server.pb.i
-.PHONY : src/motion_detect/protobuffer/server.pb.i
-
-# target to generate assembly for a file
-src/motion_detect/protobuffer/server.pb.s:
-	$(MAKE) -f CMakeFiles/motion_detect_raspberry.dir/build.make CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/server.pb.s
-.PHONY : src/motion_detect/protobuffer/server.pb.s
 
 # target to build an object file
 src/motion_detect/recognition/detection.o:
@@ -375,6 +375,9 @@ help:
 	@echo "... src/motion_detect/database/database.o"
 	@echo "... src/motion_detect/database/database.i"
 	@echo "... src/motion_detect/database/database.s"
+	@echo "... src/motion_detect/http/httppost.o"
+	@echo "... src/motion_detect/http/httppost.i"
+	@echo "... src/motion_detect/http/httppost.s"
 	@echo "... src/motion_detect/main.o"
 	@echo "... src/motion_detect/main.i"
 	@echo "... src/motion_detect/main.s"
@@ -387,9 +390,6 @@ help:
 	@echo "... src/motion_detect/protobuffer/motion.pb.o"
 	@echo "... src/motion_detect/protobuffer/motion.pb.i"
 	@echo "... src/motion_detect/protobuffer/motion.pb.s"
-	@echo "... src/motion_detect/protobuffer/server.pb.o"
-	@echo "... src/motion_detect/protobuffer/server.pb.i"
-	@echo "... src/motion_detect/protobuffer/server.pb.s"
 	@echo "... src/motion_detect/recognition/detection.o"
 	@echo "... src/motion_detect/recognition/detection.i"
 	@echo "... src/motion_detect/recognition/detection.s"

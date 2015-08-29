@@ -39,13 +39,15 @@
 #include "recognition/detection.h"
 
 #include "protobuffer/motion.pb.h"
-#include "protobuffer/server.pb.h"
+//#include "protobuffer/server.pb.h"
 
 #include "socket/streamlistener.h"
 #include "socket/netcvc.h"
 #include "database/database.h"
 
 #include "b64/base64.h"
+
+#include "http/httppost.c"
 
 #include <unistd.h>
 #include <google/protobuf/message.h>
@@ -149,6 +151,8 @@ int db_coordnates_id;
 int db_recognition_setup_id;
 int db_mats_id;
 int db_interval_id;
+int db_image_id;
+int db_crop_id;
 
 //UDP
 int udpsend(motion::Message m);
@@ -315,7 +319,7 @@ char * setMessageValueBody(int value, std::string body)
     return buffer;
 }
 
-char *getTimeRasp()
+char * getTimeRasp()
 {
     struct timeval tr;
     struct tm* ptmr;
@@ -401,23 +405,23 @@ int udpsend(motion::Message m)
     return 0;
 }
 
-motion::Message getImageToProto(std::string imagefilepath)
+motion::Message serializeMediaToProto(motion::Message m, Mat mat)
 {
     
-    cout << "+++++++++++LOADING IMAGE TO PROTO++++++++++++++" << endl;
+    m.set_serverip(PROTO.serverip());
     
-    motion::Message localm;
-    localm.Clear();
+    int active = m.activecam();
+    motion::Message::MotionCamera * mcam = m.add_motioncamera();
+    mcam->set_activemat(active);
     
-    cout << "imagefilepath : " << imagefilepath << endl;
-    
-    Mat mat = imread(imagefilepath);
-    
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-    
-    localm.set_type(motion::Message::TAKE_PICTURE);
-    localm.set_serverip(PROTO.serverip());
-    localm.set_time(getTimeRasp());
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+            
+    m.set_time(time_rasp);
     
     // We will need to also serialize the width, height, type and size of the matrix
     int width_s     = mat.cols;
@@ -426,14 +430,14 @@ motion::Message getImageToProto(std::string imagefilepath)
     int size_s      = mat.total() * mat.elemSize();
     
     cout << "width_s: " << width_s << endl;
-        cout << "height_s: " << height_s << endl;
-        cout << "type_s: " << type_s << endl;
-        cout << "size_s: " << size_s << endl;
+    cout << "height_s: " << height_s << endl;
+    cout << "type_s: " << type_s << endl;
+    cout << "size_s: " << size_s << endl;
     
     // Initialize a stringstream and write the data
-    int size_init = localm.ByteSize();
+    int size_init = m.ByteSize();
     
-    cout << "m.ByteSize: " << localm.ByteSize() << endl;
+    cout << "m.ByteSize: " << m.ByteSize() << endl;
     
     // Write the whole image data
     std::stringstream ss;
@@ -450,18 +454,9 @@ motion::Message getImageToProto(std::string imagefilepath)
     cout << " oriencoded size : " << oriencoded.size() << endl;
     
     //Store into proto
-    localm.set_data(oriencoded.c_str());
+    m.set_data(oriencoded.c_str());
 
-    return localm;
-    
-}
-
-
-uint64_t GetTimeStamp() 
-{
-    struct timeval tv;
-    gettimeofday(&tv,NULL);
-    return tv.tv_sec*(uint64_t)1000000+tv.tv_usec;
+    return m;
 }
 
 motion::Message takePictureToProto(motion::Message m)
@@ -478,8 +473,8 @@ motion::Message takePictureToProto(motion::Message m)
 
     }
     
-    int w = 1280; //640; //1280; //320;
-    int h = 720;  //480; //720;  //240;
+    int w = 640; //1280; //320;
+    int h = 480; //720;  //240;
     
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
@@ -530,16 +525,20 @@ motion::Message takePictureToProto(motion::Message m)
     
     //Store into proto
     m.set_data(oriencoded.c_str());
-    
-    uint64_t active = GetTimeStamp();
+      
+    std::time_t t = std::time(0);
+    stringstream tst;
+    tst << t;
+    int activemat = atoi(tst.str().c_str());
 
-    int activemat = abs(active);
-
-    cout << "activemat::::: " << activemat << endl;
+    cout << "activemat::::: " << activemat << endl; 
     
     motion::Message::MotionCamera * mcam = m.add_motioncamera();
-            //m.mutable_motioncamera(m.activecam());
     mcam->set_activemat(activemat);
+    mcam->set_matrows(height_s);
+    mcam->set_matcols(width_s);
+    mcam->set_matheight(h);
+    mcam->set_matwidth(w);
     
     // Initialize a stringstream and write the data
     int size_init = m.ByteSize();
@@ -554,10 +553,15 @@ motion::Message takePictureToProto(motion::Message m)
     out << m.data() << "\n";
     out.close();
     
+    mcam->set_matrows(height_s);
+    mcam->set_matcols(width_s);
+    mcam->set_matheight(h);
+    mcam->set_matwidth(w);
+    
     stringstream insert_mats_query;
     insert_mats_query <<
-    "INSERT INTO mat (matfile, data) " <<
-    "SELECT " << activemat << ",'" << m.data() << "'"
+    "INSERT INTO mat (matcols, matrows, matwidth, matheight, matfile, data) " <<
+    "SELECT " << width_s << ", " << height_s << ", " << w << ", " << h << ", " << activemat << ",'" << m.data() << "'"
     " WHERE NOT EXISTS (SELECT * FROM mat WHERE matfile = " << activemat << ");";
     db_execute(insert_mats_query.str().c_str());
     std::string last_mats_query = "SELECT MAX(_id) FROM mat";
@@ -643,36 +647,41 @@ void * sendEcho(motion::Message m)
 
 void * startObserver(void * arg)
 {
-    
     cout << "startObserver" << endl;
-    
     while (true)
     {
-        
         int sizec = R_PROTO.motioncamera_size();
         for (int i = 0; i < sizec; i++)
         {
-
             motion::Message::MotionCamera * mcamera = R_PROTO.mutable_motioncamera(i);
-            
             if (mcamera->recognizing())
             {
                 std::cout << "number_of_changes = " << resutl_watch_detected << std::endl;
                 if (!mcamera->recognizing_flag())
                 {
-                    updateCameraDB(1, getTimeRasp(), mcamera->cameranumber());
+                    struct timeval tr;
+                    struct tm* ptmr;
+                    char time_rasp[40];
+                    gettimeofday (&tr, NULL);
+                    ptmr = localtime (&tr.tv_sec);
+                    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+                    updateCameraDB(1, time_rasp, mcamera->cameranumber());
+                    pthread_mutex_lock(&protoMutex);
                     mcamera->set_recognizing_flag(true);
+                    pthread_mutex_unlock(&protoMutex);
                 }
             } else
             {
                 if (mcamera->recognizing_flag())
                 {
                     updateCameraDB(0, NULL, mcamera->cameranumber());
+                    pthread_mutex_lock(&protoMutex);
                     mcamera->set_recognizing_flag(false);
+                    pthread_mutex_unlock(&protoMutex);
                 }
             }
         }
-        sleep(1);
+        sleep(1000);
     }
     cout << "stopObserver" << endl;
     
@@ -711,9 +720,12 @@ motion::Message getLocalPtoro()
 
 }
 
-motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(motion::Message::MotionMonth * mmonth, std::string camid, std::string month, std::string day)
+motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(
+                motion::Message::MotionMonth * mmonth,   
+                std::string camid, 
+                std::string month, 
+                std::string day)
 {
-    
     stringstream sql_month;
     sql_month               <<
     "SELECT "               <<  
@@ -726,8 +738,11 @@ motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(motion::Message::M
     "IM.imagechanges, "     <<  // 6
     "IM.name AS imagename, "<<  // 7
     "IM.path AS imagepath, "<<  // 8
-    "C.name AS cropname, "  <<  // 9
-    "C.path AS cropath "    <<  // 10
+    "C.rect, "              <<  // 9
+    "I.number, "            <<  // 10
+    "I._id, "               <<  // 11   
+    "V.name,"               <<  // 12
+    "V.path "               <<  // 13
     "FROM month AS M "      <<  
     "JOIN rel_camera_month AS RCM ON M._id = RCM._id "              <<
     "JOIN month ON RCM._id_month = M._id "                          <<
@@ -738,20 +753,22 @@ motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(motion::Message::M
     "JOIN rel_instance_image AS RII ON I._id = RII._id_instance "   <<
     "JOIN image AS IM ON RII._id_image = IM._id "                   <<
     "JOIN crop AS C ON C._id_image_father = IM._id "                <<
+    "JOIN video AS V ON I._id_video = V._id "                       <<        
     "WHERE RCM._id_camera = 1 AND M._id IN (SELECT _id from month WHERE label  = '" << month << "') " <<
     "AND D._id IN (SELECT _id from day WHERE label = '" << day << "');";
   
     std::string sql_monthstr = sql_month.str();
-    //cout << "sql_monthstr: " << sql_monthstr << endl;
+    cout << "sql_monthstr: " << sql_monthstr << endl;
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > rcm_array = db_select(sql_monthstr.c_str(), 11);
+    vector<vector<string> > rcm_array = db_select(sql_monthstr.c_str(), 14);
     pthread_mutex_unlock(&databaseMutex);
+    
+    mmonth->set_monthlabel(month);
     
     if (rcm_array.size()>0)
     {
         vector<string> rowc = rcm_array.at(0);
         
-        mmonth->set_monthlabel(month);
         motion::Message::MotionDay * mday = mmonth->add_motionday();
         mday->set_daylabel(day);
         
@@ -759,15 +776,36 @@ motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(motion::Message::M
         mday->set_db_dayid(dayid);
         mday->set_xmlfilename(rowc.at(1).c_str());
         mday->set_xmlfilepath(rowc.at(2).c_str());
-        
-        motion::Message::Instance * minstance = mday->add_instance();
-        minstance->set_instancestart(rowc.at(3));
-        minstance->set_instanceend(rowc.at(4));
-        
+      
+        int instancecounter = 0;
+        motion::Message::Instance * minstance;
+    
         for (int i=0; i< rcm_array.size(); i++)
         {
             vector<string> rowi = rcm_array.at(i);
-
+            
+            google::protobuf::int32 instanceid = atoi(rowi.at(11).c_str());
+           
+            if (instanceid != instancecounter)
+            {    
+                minstance = mday->add_instance();
+                minstance->set_instancestart(rowi.at(3));
+                minstance->set_instanceend(rowi.at(4));
+                
+                cout << "instancecounter:: " << instancecounter << " instanceid:: " << instanceid << endl;
+                
+                std::string last = rowi.at(10).c_str();
+                google::protobuf::int32 idinstance = atoi(last.c_str());
+                minstance->set_idinstance(idinstance);
+                instancecounter = instanceid;
+                
+                motion::Message::Video * mvideo = minstance->mutable_video();
+                std::string vname = rowi.at(12);
+                mvideo->set_name(vname);        
+                std::string vpath = rowi.at(13);
+                mvideo->set_path(vpath);
+            }
+                
             motion::Message::Image * mimage = minstance->add_image();
             int imgid = atoi(rowi.at(5).c_str());
             mimage->set_imagechanges(atoi(rowi.at(6).c_str()));
@@ -776,12 +814,10 @@ motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(motion::Message::M
             
             motion::Message::Crop * mcrop = minstance->add_crop();
             mcrop->set_db_imagefatherid(imgid);
-            mcrop->set_name(rowi.at(9));
-            mcrop->set_path(rowi.at(10));
-            mcrop->set_imagefather(mimage->path());
+            mcrop->set_rect(rowi.at(9));
+           
         }
     }
-  
 }
 
 std::string getXMLFilePathAndName(int cam, motion::Message m, std::string name)
@@ -789,9 +825,9 @@ std::string getXMLFilePathAndName(int cam, motion::Message m, std::string name)
     std::string currday = m.currday();
     std::string curmonth = m.currmonth();
     stringstream DIR;
-    DIR << "../../src/motion_web/pics/" << "camera" << cam;
+    DIR << sourcepath << "motion_web/pics/" << "camera" << cam << "/" << m.currday() << "/";
     std::string XML_FILE  =  "xml/" + name;
-    std::string xml_path = DIR.str() + "/" + currday + "/" + curmonth + "/" + XML_FILE;
+    std::string xml_path = DIR.str() + XML_FILE;
     return xml_path;
 }
 
@@ -806,14 +842,9 @@ motion::Message getRefreshProto(motion::Message m)
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     cout <<  ":::start time:::: " << time_rasp << endl;
 
-    m.set_time(time_rasp);
-    if (!m.has_activecam())
-    {
-        m.set_activecam(m.activecam());
-    }
-
-    //cout << "m.set_time:: " << time_rasp << endl;
-
+    m.set_time(time_rasp);    
+    m.set_activecam(m.activecam());
+    
     vector<int> cams;
     stringstream sql_cameras;
     sql_cameras <<
@@ -824,70 +855,119 @@ motion::Message getRefreshProto(motion::Message m)
 
     for (int i=0; i<cameras_array.size(); i++ )
     {
-
-        //cout << "entra cameras_array " << endl;
         vector<string> rowc = cameras_array.at(i);
         motion::Message::MotionCamera * mcam = m.add_motioncamera();
+        
+        stringstream sql_rec_setup;
+        sql_rec_setup   <<
+        "SELECT RCS._id, RCS.name FROM recognition_setup AS RCS;";
+        cout << "sql_rec_setup: " << sql_rec_setup.str() << endl;
+        pthread_mutex_lock(&databaseMutex);
+        vector<vector<string> > rec_setup_array = db_select(sql_rec_setup.str().c_str(), 1);
+        pthread_mutex_unlock(&databaseMutex);
+        
+        if (rec_setup_array.size()>0)
+        {
+            vector<string> rows = rec_setup_array.at(0);
+            motion::Message::MotionRecognition * mrec = mcam->add_motionrec();
+            google::protobuf::int32 recid = atoi(rows.at(0).c_str());
+            mrec->set_db_idrec(recid);
+            mrec->set_name(rows.at(1));
+        }
+        
         google::protobuf::int32 camid = atoi(rowc.at(0).c_str());
         mcam->set_cameraid(camid);
-        //cout << "mcam->set_cameraid:: " << camid << endl;
         google::protobuf::int32 camnum = atoi(rowc.at(1).c_str());
         mcam->set_cameranumber(camnum);
-        //cout << "mcam->set_cameranumber:: " << camnum << endl;
         mcam->set_cameraname(rowc.at(2));
-        //cout << "mcam->set_cameraname:: " << rowc.at(2) << endl;
-        mcam->set_recognizing(to_bool(rowc.at(3)));
-        //cout << "mcam->set_recognizing:: " << rowc.at(3) << endl;
+        bool rec = to_bool(rowc.at(3));
+        mcam->set_recognizing(rec);
         mcam->set_camerasince(rowc.at(4));
-        //cout << "mcam->set_camerasince:: " << rowc.at(4) << endl;
-
+        
+        stringstream sql_last_instance;
+        sql_last_instance   <<
+        "SELECT coalesce( MAX(I._id), 0) FROM instance AS I "               <<
+        "JOIN rel_day_instance AS RDI ON I._id = RDI._id_instance "         <<
+        "JOIN rel_month_day AS RMD ON RDI._id_day = RMD._id_day "           <<
+        "JOIN day as D ON RMD._id_day = D._id "                             <<
+        "JOIN month AS M ON RMD._id_month = M._id "                         <<
+        "JOIN rel_camera_month AS RCM ON RMD._id_month = RMD._id_month "    <<
+        "JOIN cameras AS C ON RCM._id_camera = C._id "                      <<
+        "WHERE C.number = " << camnum << " AND D.label = '" << m.currday()  << "';";
+        std::string sqllaststd = sql_last_instance.str();
+        cout << "sqllaststd: " << sqllaststd << endl;
+        pthread_mutex_lock(&databaseMutex);
+        vector<vector<string> > lastinstance_array = db_select(sqllaststd.c_str(), 1);
+        pthread_mutex_unlock(&databaseMutex);
+        
+        std::string last = lastinstance_array.at(0).at(0).c_str();
+        int ln = atoi(last.c_str());
+        if (ln>0)
+            mcam->set_lastinstance(last);
+       
         stringstream sql_cam_req_setup;
         sql_cam_req_setup       <<
         "SELECT "               <<
-        "R.storeimage, "        <<          // 0
-        "R.storecrop, "         <<          // 1
-        "R.storevideo, "        <<          // 2
-        "R.codename, "          <<          // 3
-        "R.has_region, "        <<          // 4
-        "C.coordinates, "       <<          // 5
-        "R.delay, "             <<          // 6
-        "M.matfile, "           <<          // 7
-        "RCRS.start_rec_time, " <<          // 8
-        "RCRS._id_recognition_setup, "  <<  // 9
-        "R.runatstartup "               <<  // 10
+        "R.storeimage, "        <<              // 0
+        "R.storevideo, "        <<              // 1
+        "R.codename, "          <<              // 2
+        "R.has_region, "        <<              // 3
+        "C.coordinates, "       <<              // 4
+        "R.delay, "             <<              // 5
+        "M.matfile, "           <<              // 6
+        "RCRS.start_rec_time, " <<              // 7
+        "RCRS._id_recognition_setup, "      <<  // 8
+        "R.runatstartup, "                  <<  // 9
+        "M.matcols, "                       <<  // 10
+        "M.matrows, "                       <<  // 11
+        "M.matwidth, "                      <<  // 12
+        "M.matheight, "                     <<  // 13
+        "CAM.recognizing, "                 <<  // 14
+        "R.name "                           <<  // 15
         "FROM rel_camera_recognition_setup AS RCRS "    <<
-        "JOIN recognition_setup AS R ON RCRS._id_recognition_setup = R._id " <<
-        "JOIN mat AS M ON R._id_mat = M._id "  <<
-        "JOIN coordinates AS C ON R._id_coordinates = C._id " <<
+        "JOIN recognition_setup AS R ON RCRS._id_recognition_setup = R._id "    <<
+        "JOIN mat AS M ON R._id_mat = M._id "                                   <<
+        "JOIN coordinates AS C ON R._id_coordinates = C._id "                   <<
+        "JOIN cameras AS CAM ON RCRS._id_camera = CAM._id "                     <<   
         "WHERE R._id_camera = " << rowc.at(0) << ";";
         
-        //cout << "sql_cam_req_setup.str(): " << sql_cam_req_setup.str() << endl;
-        
+        std::string sqlcamstr =  sql_cam_req_setup.str();
+        cout << "sqlcamstr: " << sqlcamstr << endl;
+       
         pthread_mutex_lock(&databaseMutex);
-        vector<vector<string> > crs_array = db_select(sql_cam_req_setup.str().c_str(), 11);
+        vector<vector<string> > crs_array = db_select(sqlcamstr.c_str(), 16);
         pthread_mutex_unlock(&databaseMutex);
-        //cout << "crs_array size: " << crs_array.size() << endl;
-
+        
         if (crs_array.size()>0)
         {
             vector<string> rows = crs_array.at(0);
             mcam->set_db_idcamera(camid);
             mcam->set_storeimage(to_bool(rows.at(0)));
-            mcam->set_storecrop(to_bool(rows.at(1)));
-            mcam->set_storevideo(to_bool(rows.at(2)));
-            mcam->set_codename(rows.at(3));
-            mcam->set_hasregion(to_bool(rows.at(4)));
-            mcam->set_coordinates(rows.at(5));
-            mcam->set_delay(atof(rows.at(6).c_str()));
-            google::protobuf::int32 camamat = atoi(rows.at(7).c_str());
+            mcam->set_storevideo(to_bool(rows.at(1)));
+            mcam->set_codename(rows.at(2));
+            mcam->set_hasregion(to_bool(rows.at(3)));
+            mcam->set_coordinates(rows.at(4));
+            google::protobuf::int32 delay = atoi(rows.at(5).c_str());
+            mcam->set_delay(delay); 
+            google::protobuf::int32 camamat = atoi(rows.at(6).c_str());
             mcam->set_activemat(camamat);
-            mcam->set_startrectime(rows.at(8));
-            mcam->set_runatstartup(to_bool(rows.at(10)));
+            mcam->set_startrectime(rows.at(7));
+            mcam->set_runatstartup(to_bool(rows.at(9)));
+            google::protobuf::int32 matcols = atoi(rows.at(10).c_str());
+            mcam->set_matcols(matcols);
+            google::protobuf::int32 matrows = atoi(rows.at(11).c_str());
+            mcam->set_matrows(matrows);
+            google::protobuf::int32 matwidth = atoi(rows.at(12).c_str());
+            mcam->set_matwidth(matwidth);
+            google::protobuf::int32 matheight = atoi(rows.at(13).c_str());
+            mcam->set_matheight(matheight);
+            mcam->set_name(rows.at(15));
             cout << "Month: "   << m.currmonth() << endl;
             cout << "Day: "     << m.currday()  << endl;
             motion::Message::MotionMonth * mmonth = mcam->add_motionmonth();
-            mmonth = getMonthByCameraIdMonthAndDate(mmonth, rows.at(0), m.currmonth(), m.currday());
+            getMonthByCameraIdMonthAndDate(mmonth, rows.at(0), m.currmonth(), m.currday());
         }
+        
     }
     return m;
     
@@ -895,7 +975,6 @@ motion::Message getRefreshProto(motion::Message m)
 
 void startMainRecognition()
 {
-    cout << "motion::Message::REC_START" << endl;
     runr = pthread_create(&thread_recognition, NULL, startRecognition, NULL);
     if ( runr  != 0) {
         cerr << "Unable to create thread" << endl;
@@ -944,18 +1023,24 @@ motion::Message runCommand(motion::Message m)
             m.set_devicestarttime(starttime);
             cout << "starttime: " << starttime << endl;
             
+            motion::Message::MotionCamera * mcam = m.mutable_motioncamera(m.activecam());
+            int sizee = mcam->motionmonth_size();
+            
+            cout << ":::: size_engage ::::" << sizee << endl;
+            
         }
         break;
+        
         case motion::Message::REFRESH:
         {
             cout << "motion::Message::REFRESH" << endl;
-            
+            int cam = m.activecam();
             m.set_time(getTimeRasp());
             m.set_type(motion::Message::REFRESH);
             m = getRefreshProto(m);
-
         }
         break;
+        
         case motion::Message::GET_XML:
         {
             cout << "motion::Message::GET_XML" << endl;
@@ -971,66 +1056,106 @@ motion::Message runCommand(motion::Message m)
             
         }
         break;
+        
         case motion::Message::GET_VIDEO:
         {
+            
             cout << "motion::Message::GET_VIDEO" << endl;
-
             int cam = m.activecam();
-          
+           
+            std::string videofilepath = m.videofilepath();
+            cout << "imagefilepath : " << videofilepath << endl;
+
+            std::string s = "src/";
+
+            std::string::size_type i = videofilepath.find(s);
+
+            if (i != std::string::npos)
+                videofilepath.erase(0, s.size());
+            
+            stringstream strmpath;
+            strmpath << sourcepath << videofilepath;
+
+            std::string path = strmpath.str();
+            
+            string filename = m.data();
+        
             std::string command;
             command += "cat ";
-            command += m.videofilepath();
-            command += "/*.jpg | ffmpeg -framerate 20  -f image2pipe -c:v mjpeg -i - ";
-            command += m.data(); 
-       
+            command += path;
+            command += "*.jpg | ffmpeg -framerate 20  -f image2pipe -c:v mjpeg -i - ";
+            command += filename;
+            cout << "command: " << command << endl;
             char *cstr = new char[command.length() + 1];
             strcpy(cstr, command.c_str());
-            
             std::string resutl_commnd = exec_command(cstr);
             delete [] cstr;
-      
-            std::string video_loaded = get_file_contents(m.data());
-            string encoded_video = base64_encode(reinterpret_cast<const unsigned char*>(video_loaded.c_str()),video_loaded.length());
+            
+            std::ifstream in(filename.c_str());
+            std::stringstream buffer;
+            buffer << in.rdbuf();
+            std::string contents(buffer.str());
+            
+            std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(contents.c_str()), contents.length());
+    
+            int size = oriencoded.size();
+            
+            //Store into proto
+            m.set_data(oriencoded.c_str());
             
             m.set_type(motion::Message::GET_VIDEO);
-            m.set_data(encoded_video.c_str());
             
         }
         break;
+        
         case motion::Message::GET_IMAGE:
         {
             cout << "motion::Message::GET_IMAGE" << endl;
-            
-            m = getImageToProto(m.imagefilepath());
+            std::string imagefilepath = m.imagefilepath();
+            Mat mat = imread(imagefilepath);
+            m = serializeMediaToProto(m, mat);
             m.set_type(motion::Message::GET_IMAGE);
-            
+            m.set_activecam(m.activecam());
         }
         break;
+        
         case motion::Message::DISSCONNECT:
         {
             cout << "motion::Message::DISSCONNECT" << endl;
-            
         }
         break;
+        
         case motion::Message::REC_START:
         {
+            cout << "motion::Message::REC_START" << endl;
             startMainRecognition();
         }
         break;
+        
         case motion::Message::REC_STOP:
         {
             cout << "motion::Message::REC_STOP" << endl;
             is_recognizing = false;
             pthread_cancel(thread_recognition);
-            cvReleaseCapture(&camera);
             int cam = m.activecam();
-            motion::Message::MotionCamera * mcam = m.add_motioncamera();
+            motion::Message::MotionCamera * mcam = m.add_motioncamera(); //.mutable_motioncamera(cam);
             mcam->set_recognizing(false);
+     
+            if (camera)
+                cvReleaseCapture(&camera);
+            
+            struct timeval tr;
+            struct tm* ptmr;
+            char time_rasp[40];
+            gettimeofday (&tr, NULL);
+            ptmr = localtime (&tr.tv_sec);
+            strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+            updateCameraDB(0, time_rasp, mcam->cameranumber());
         }
         break;
+        
         case motion::Message::TAKE_PICTURE:
         {
-            
             cout << "motion::Message::TAKE_PICTURE" << endl;
             //m = getRefreshProto(m);
             m = takePictureToProto(m);
@@ -1044,50 +1169,52 @@ motion::Message runCommand(motion::Message m)
             
             m.set_time(time_rasp);
             m.set_type(motion::Message::TAKE_PICTURE);
-            
         }
         break;
+        
         case motion::Message::STRM_START:
         {
             cout << "motion::Message::STRM_START" << endl;
             netcvc();
         }
         break;
+        
         case motion::Message::STRM_STOP:
         {
             cout << "motion::Message::STRM_STOP" << endl;
             stop_capture = true;
-            
         }
         break;
+        
         case motion::Message::GET_TIME:
         {
             cout << "motion::Message::GET_TIME" << endl;
+            struct timeval tr;
+            struct tm* ptmr;
+            char time_rasp[40];
+            gettimeofday (&tr, NULL);
+            ptmr = localtime (&tr.tv_sec);
+            strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+            
+            cout << "time_rasp: " << time_rasp << endl;
+  
+            m.set_time(time_rasp);
             m.set_type(motion::Message::GET_TIME);
-            m.set_serverip(PROTO.serverip());
-            m.set_time(getTimeRasp());
         }
         break;
+        
         case motion::Message::SET_TIME:
         {
             cout << "motion::Message::SET_TIME" << endl;
-            
             result_message = m.time();
-            
             cout << "coming time: "  << result_message  << endl;
-            
-
             struct tm tmremote;
             char *bufr;
-            
             bufr = new char[result_message.length() + 1];
             strcpy(bufr, result_message.c_str());
-            
             cout << "bufr       : " << bufr << endl;
-            
             memset(&tmremote, 0, sizeof(struct tm));
             strptime(bufr, "%Y-%m-%d %H:%M:%S %z", &tmremote);
-            
             std::cout << std::endl;
             std::cout << " Seconds  :"  << tmremote.tm_sec  << std::endl;
             std::cout << " Minutes  :"  << tmremote.tm_min  << std::endl;
@@ -1095,50 +1222,38 @@ motion::Message runCommand(motion::Message m)
             std::cout << " Day      :"  << tmremote.tm_mday << std::endl;
             std::cout << " Month    :"  << tmremote.tm_mon  << std::endl;
             std::cout << " Year     :"  << tmremote.tm_year << std::endl;
-            
             std::cout << std::endl;
-        
             struct tm mytime;
             struct timeval tv;
             time_t epoch_time;
             struct timezone timez;
-            
             char * text_time;
-            
+            int hour = tmremote.tm_hour; // + 3;
             mytime.tm_sec 	= tmremote.tm_sec  ;
             mytime.tm_min 	= tmremote.tm_min  ;
-            mytime.tm_hour  = tmremote.tm_hour ;
+            mytime.tm_hour  = hour;
             mytime.tm_mday  = tmremote.tm_mday ;
             mytime.tm_mon   = tmremote.tm_mon  ;
             mytime.tm_year  = tmremote.tm_year ;
-            
             epoch_time = mktime(&mytime);
-            
             cout << "epoch_time : " << epoch_time << endl;
-            
             /* Now set the clock to this time */
             tv.tv_sec = epoch_time;
             tv.tv_usec = 0;
-
             // Set new system time.
             if (settimeofday(&tv, NULL) != 0)
             {
                 cout << "Cannot set system time" << endl;
             }
-            
             // Get current date & time since Epoch.
             if (gettimeofday(&tv, NULL) != 0)
             {
                 printf("Cannot get current date & time since Epoch.");
             }
-            
             text_time = ctime(&tv.tv_sec);
-            
             printf("The system time is set to %s\n", text_time);
-            
             m.set_type(motion::Message::TIME_SET);
             m.set_serverip(PROTO.serverip());
-
         }
         break;
     }
@@ -1209,9 +1324,13 @@ try
       strdecoded.clear();
       strdecoded = base64_decode(strproto);
       
+      cout << "RECEIVE" << endl;
+      
       GOOGLE_PROTOBUF_VERIFY_VERSION;
       motion::Message ms;
       ms.ParseFromArray(strdecoded.c_str(), strdecoded.size());
+      
+      cout << "PARSE" << endl;
       
       int camamounts = ms.motioncamera_size();
         
@@ -1219,7 +1338,8 @@ try
       PROTO = ms;
         
       value = ms.type();
-      T_PROTO.set_serverip(ms.serverip());
+      if (ms.has_serverip())
+        T_PROTO.set_serverip(ms.serverip());
         
       cout << "value:: " << value << endl;
     
@@ -1393,6 +1513,7 @@ try
           cout << "header 0 : " << header << endl;
           cout << "size: " << msg.size() << endl;
           cout << "..........................................." << endl;
+          
           //cout << msg << endl;
           //cout << "..........................................." << endl;
           
@@ -1415,7 +1536,7 @@ try
     
         totalsSocket();
         
-        cout << "socket size: " << msg.size() << endl;
+        cout << "Socket Sent Size: " << msg.size() << endl;
         
         sock->send(msg.c_str(), msg.size());
         
@@ -1557,70 +1678,6 @@ void directoryExistsOrCreate(const char* pzPath)
         (void) closedir (pDir);
 }
 
-/*struct url_data {
-    size_t size;
-    char* data;
-};*/
-
-
-/*size_t write_data(void *ptr, size_t size, size_t nmemb, struct url_data *data) {
-    size_t index = data->size;
-    size_t n = (size * nmemb);
-    char* tmp;
-
-    data->size += (size * nmemb);
-
-    tmp = realloc(data.data, data->size + 1); // +1 for '\0' 
-
-    if(tmp) {
-        data->data = tmp;
-    } else {
-        if(data->data) {
-            free(data->data);
-        }
-        fprintf(stderr, "Failed to allocate memory.\n");
-        return 0;
-    }
-
-    memcpy((data->data + index), ptr, n);
-    data->data[data->size] = '\0';
-
-    return size * nmemb;
-}*/
-
-/*char *handle_url(char* url) {
-    CURL *curl;
-
-    struct url_data data;
-    data.size = 0;
-    data.data = malloc(4096); 
-    if(NULL == data.data) {
-        fprintf(stderr, "Failed to allocate memory.\n");
-        return NULL;
-    }
-
-    data.data[0] = '\0';
-
-    CURLcode res;
-
-    curl = curl_easy_init();
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
-        res = curl_easy_perform(curl);
-        if(res != CURLE_OK) {
-                fprintf(stderr, "curl_easy_perform() failed: %s\n",  
-                        curl_easy_strerror(res));
-        }
-
-        curl_easy_cleanup(curl);
-
-    }
-    return data.data;
-}*/
-
-
 
 int main (int argc, char * const av[])
 {
@@ -1632,10 +1689,10 @@ int main (int argc, char * const av[])
     
     const char **argv = (const char **) av;
     
-    argc = 3;
-    argv[1] = "-start"; //"start";
-    argv[2] = "0";
-    argv[3] = "VEREDA";
+    //argc = 3;
+    //argv[1] = "-start"; //"start";
+    //argv[2] = "0";
+    //argv[3] = "VEREDA";
    
     cout << "argv[0]: " << argv[0] << endl;
     
@@ -1684,10 +1741,8 @@ int main (int argc, char * const av[])
     directoryExistsOrCreate(basedatafile.c_str());
     
      //Store into database.
-    vector<int> camsarray = db_cams(cams, time_rasp);
+    vector<int> camsarray = db_cams(cams);
      
-    //char * public_ip =  handle_url("http://automation.whatismyip.com/n09230945.asp");
-   
     //Activity
     stringstream allparams;
     allparams << argv;
@@ -1713,15 +1768,54 @@ int main (int argc, char * const av[])
         }
     }
     
+    FILE *in;
+    char buff[512];
+
+    //if(!(in = popen("curl ifconfig.me", "r"))){
+    //        return 1;
+    //}
+
+    std::string publicip= "200.200.200.222";
+    //while(fgets(buff, sizeof(buff), in)!=NULL)
+    //{
+    //    stringstream bus;
+    //    bus << buff;
+    //    publicip = bus.str();
+   // }
+    
+    cout << "ipnumber: " << NETWORK_IP << endl;
+    cout << "publicip: " << publicip << endl;
+    
+     //Status
+    stringstream sql_network;
+    sql_network <<
+    "INSERT INTO network (ipnumber, ippublic) " <<
+    "SELECT '"  << local_ip        << "'"
+    ", '"       << publicip        << "' "
+    "WHERE NOT EXISTS (SELECT * FROM network WHERE ipnumber = '"<< local_ip << "' " <<
+    "AND ippublic = '" << publicip << "');";
+    db_execute(sql_network.str().c_str());
+    
+    if(!(in = popen("uptime", "r"))){
+            return 1;
+    }
+
+    std::string uptime;
+    while(fgets(buff, sizeof(buff), in)!=NULL)
+    {
+        stringstream bus;
+        bus << buff;
+        uptime = bus.str();
+    }
+    
     //Status
     stringstream sql_status;
     sql_status <<
-    "INSERT INTO status (ipnumber, starttime, networkip) " <<
-    "SELECT '"  << local_ip         << "'"
-    ", '"       << time_rasp        << "'"
-    ", '"       << NETWORK_IP       << "' "
-    "WHERE NOT EXISTS (SELECT * FROM status WHERE ipnumber = '"<< local_ip << "' " <<
-    "AND networkip = '" << NETWORK_IP << "');";
+    "INSERT INTO status (uptime, starttime) " <<
+    "SELECT '"  << uptime         << "'"
+    ", '"       << time_rasp        << "' "
+    "WHERE NOT EXISTS (SELECT * FROM status WHERE uptime = '"<< uptime << "' " <<
+    "AND starttime = '" << time_rasp << "');";
     db_execute(sql_status.str().c_str());
     
     std::string last_status_id_query = "SELECT MAX(_id) FROM status";
@@ -1731,7 +1825,10 @@ int main (int argc, char * const av[])
     
     stringstream sql_status_update;
     sql_status_update <<
-    "UPDATE status SET starttime = '" << time_rasp << "' WHERE _id = " << db_status_id << ";";
+    "UPDATE status SET "
+    "uptime = '"    << uptime << "',"
+    "starttime = '" << time_rasp << "' "
+    "WHERE _id = " << db_status_id << ";";
     db_execute(sql_status_update.str().c_str());
     
     cout << "Getting hard info." << endl;
@@ -1801,6 +1898,40 @@ int main (int argc, char * const av[])
         {
             
         }
+    }
+    
+    for (int t=0; t< cams.size(); t++)
+    {
+       
+        //struct timeval tr;
+        //struct tm* ptmr;
+        char time_interval[8];
+        //gettimeofday (&tr, NULL);
+        //ptmr = localtime (&tr.tv_sec);
+        //strftime (time_interval, sizeof (time_interval), "%H:%M:%S", ptmr);
+        
+     
+        std::string timecompare = "11:00:00";
+          
+        char *cstr = new char[timecompare.length() + 1];
+        strcpy(cstr, timecompare.c_str());
+        
+    
+       stringstream camstr;
+       camstr << cams.at(t);
+       vector<string> runvector = startIfNotRunningQuery(camstr.str(), cstr);
+       if (runvector.size()>0)
+       {
+           std::string camer    = camstr.str();
+           std::string recname  = runvector.at(1); 
+           if (loadStartQuery(camer, recname))
+            {
+                startMainRecognition();
+            } else 
+            {
+                cout << "No matching values for the current arguments." << endl; 
+            }
+       }
     }
     
     cout << "Start Time:: " << starttime << endl;

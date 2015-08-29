@@ -18,6 +18,8 @@
               </df>
               <df name="database">
               </df>
+              <df name="http">
+              </df>
               <df name="ntp">
               </df>
               <df name="practical">
@@ -32,6 +34,8 @@
               </df>
             </df>
           </df>
+        </df>
+        <df name="Progress">
         </df>
       </df>
       <df name="data">
@@ -64,6 +68,9 @@
             <in>database.cpp</in>
             <in>database.h</in>
           </df>
+          <df name="http">
+            <in>httppost.c</in>
+          </df>
           <df name="ntp">
             <in>hwclock.c</in>
             <in>ndp_client.cpp</in>
@@ -77,13 +84,10 @@
           <df name="protobuffer">
             <in>motion.pb.cc</in>
             <in>motion.pb.h</in>
-            <in>server.pb.cc</in>
-            <in>server.pb.h</in>
           </df>
           <df name="recognition">
             <in>detection.cpp</in>
             <in>detection.h</in>
-            <in>detection_mal.cpp</in>
           </df>
           <df name="socket">
             <in>netcvc.cpp</in>
@@ -126,74 +130,146 @@
           </df>
           <df name="pics">
             <df name="camera0">
-              <df name="11Aug2015">
+              <df name="28Aug2015">
                 <df name="1">
-                  <df name="cropped">
-                  </df>
+                </df>
+                <df name="10">
                 </df>
                 <df name="2">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="3">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="4">
-                  <df name="cropped">
-                  </df>
+                </df>
+                <df name="5">
+                </df>
+                <df name="6">
+                </df>
+                <df name="7">
+                </df>
+                <df name="8">
+                </df>
+                <df name="9">
                 </df>
                 <df name="xml">
                 </df>
               </df>
-              <df name="12Aug2015">
+            </df>
+            <df name="region">
+            </df>
+            <df name="screenshots">
+            </df>
+          </df>
+          <df name="samba">
+          </df>
+        </df>
+      </df>
+    </df>
+    <df root="." name="1">
+      <df name="CMakeFiles">
+        <df name="CMakeTmp">
+        </df>
+        <df name="CompilerIdC">
+        </df>
+        <df name="CompilerIdCXX">
+        </df>
+        <df name="motion_detect_raspberry.dir">
+          <df name="src">
+            <df name="motion_detect">
+              <df name="b64">
+              </df>
+              <df name="database">
+              </df>
+              <df name="http">
+              </df>
+              <df name="ntp">
+              </df>
+              <df name="practical">
+              </df>
+              <df name="protobuffer">
+              </df>
+              <df name="recognition">
+              </df>
+              <df name="socket">
+              </df>
+              <df name="tinyxml">
+              </df>
+            </df>
+          </df>
+        </df>
+        <df name="Progress">
+        </df>
+      </df>
+      <df name="data">
+        <df name="data">
+        </df>
+        <df name="mat">
+        </df>
+      </df>
+      <df name="src">
+        <df name="motion_cron">
+        </df>
+        <df name="motion_detect">
+          <df name="b64">
+          </df>
+          <df name="data">
+            <df name="data">
+            </df>
+            <df name="mat">
+            </df>
+          </df>
+          <df name="database">
+          </df>
+          <df name="http">
+          </df>
+          <df name="ntp">
+          </df>
+          <df name="practical">
+          </df>
+          <df name="protobuffer">
+          </df>
+          <df name="recognition">
+          </df>
+          <df name="socket">
+          </df>
+          <df name="streaming">
+          </df>
+          <df name="tinyxml">
+          </df>
+        </df>
+        <df name="motion_web">
+          <df name="apache.conf">
+            <df name="conf.d">
+            </df>
+          </df>
+          <df name="fancybox">
+            <df name="images">
+            </df>
+          </df>
+          <df name="log">
+          </df>
+          <df name="pics">
+            <df name="camera0">
+              <df name="28Aug2015">
                 <df name="1">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="10">
-                  <df name="cropped">
-                  </df>
-                </df>
-                <df name="11">
-                  <df name="cropped">
-                  </df>
-                </df>
-                <df name="12">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="2">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="3">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="4">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="5">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="6">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="7">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="8">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="9">
-                  <df name="cropped">
-                  </df>
                 </df>
                 <df name="xml">
                 </df>
@@ -235,8 +311,6 @@
         <gdb_interceptlist>
           <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
         </gdb_interceptlist>
-        <gdb_signals>
-        </gdb_signals>
         <gdb_options>
           <DebugOptions>
           </DebugOptions>

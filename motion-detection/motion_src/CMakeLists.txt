@@ -16,6 +16,7 @@ INCLUDE_DIRECTORIES(
 	${BASE64_DIRECTORY}     /src/motion_detect/b64
 	${SOCKET_DIRECTORY}  /src/motion_detect/socket
 	${DATABASE_DIRECTORY}  /src/motion_detect/database
+        ${HTTP_DIRECTORY}  /src/motion_detect/http
 )
 
 FIND_PACKAGE(Protobuf REQUIRED)
@@ -46,8 +47,8 @@ ADD_EXECUTABLE(motion_detect_raspberry
         src/motion_detect/ntp/hwclock.c
 	src/motion_detect/protobuffer/motion.pb.h
 	src/motion_detect/protobuffer/motion.pb.cc
-        src/motion_detect/protobuffer/server.pb.h
-	src/motion_detect/protobuffer/server.pb.cc
+        #src/motion_detect/protobuffer/server.pb.h
+	#src/motion_detect/protobuffer/server.pb.cc
 	src/motion_detect/b64/cdecode.c
 	src/motion_detect/b64/cdecode.h
 	src/motion_detect/b64/cencode.c
@@ -62,6 +63,7 @@ ADD_EXECUTABLE(motion_detect_raspberry
         src/motion_detect/socket/netcvc.h
 	src/motion_detect/database/database.h
 	src/motion_detect/database/database.cpp
+        src/motion_detect/http/httppost.c
 )
 
 TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lcurl -lpthread -lm -ldl ${PROTOBUF_LIBRARIES} -lsqlite3 -lusb)
