@@ -249,6 +249,22 @@ std::vector<int> db_cams(std::vector<int> cams)
     
     std::vector<int> camsarray;
     
+    stringstream sql_active_cam;
+    sql_active_cam   <<
+    "SELECT C._id FROM cameras AS C WHERE C.active = 1;";
+    cout << "sql_active_cam: " << sql_active_cam.str() << endl;
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > rec_active_cam = db_select(sql_active_cam.str().c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    int id_active;
+    bool hasactive;
+    if (rec_active_cam.size()>0)
+    {
+        id_active = atoi(rec_active_cam.at(0).at(0).c_str());
+        hasactive = true;
+    }
+
     for(int i=0; i<cams.size(); i++)
     {
         
@@ -275,17 +291,33 @@ std::vector<int> db_cams(std::vector<int> cams)
         
         std::string camera = get_file_contents(newfile);
         camera.erase(std::remove(camera.begin(), camera.end(), '\n'), camera.end());
+        
+        bool active = false;
+        if (hasactive)
+        {
+            if (i==id_active)
+            {
+               active = true; 
+            }
+            
+        } else 
+        {
+            if (i==0)
+            {
+                active = true;
+            }
+        }
       
         stringstream insert_camera_query;
         insert_camera_query <<
-        "INSERT INTO cameras (number, name, created, recognizing, since) " <<
-        "SELECT " << cams.at(i) << ",'" << camera << "','" << time_rasp << "'," << 0 << "," << NULL << 
+        "INSERT INTO cameras (number, name, active, created, recognizing, since) " <<
+        "SELECT " << cams.at(i) << ",'" << camera << "'," << active << ",'" << time_rasp << "'," << 0 << "," << NULL << 
         " WHERE NOT EXISTS (SELECT * FROM cameras WHERE name = '" << camera << "');";
         cout << "insert_camera_query: " << insert_camera_query.str() << endl;
         pthread_mutex_lock(&databaseMutex);
         db_execute(insert_camera_query.str().c_str());
         pthread_mutex_unlock(&databaseMutex);
-        
+       
         std::string last_cameras_id_query = "SELECT MAX(_id) FROM cameras";
         pthread_mutex_lock(&databaseMutex);
         vector<vector<string> > cameras_array = db_select(last_cameras_id_query.c_str(), 1);
@@ -372,6 +404,36 @@ void getCamerasQuery()
 
 bool loadStartQuery(std::string camera, std::string recname)
 {
+    
+    stringstream sql_db_cam;
+    sql_db_cam      << 
+    "SELECT RS._id_camera, C.number FROM recognition_setup AS RS JOIN cameras AS C ON RS._id_camera = C._id WHERE RS.name = '" << recname << "';";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > db_cam_array = db_select(sql_db_cam.str().c_str(), 2);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_cam_id = atoi(db_cam_array.at(0).at(0).c_str());
+    int camnum = atoi(db_cam_array.at(0).at(1).c_str());
+    cout << "db_cam_id: " << db_cam_id << endl;
+    
+    std::string _month = getCurrentMonthLabel();
+    int db_monthid = insertMonthIntoDatabase(_month, db_cam_id);
+    
+    std::string _day = getCurrentDayLabel();
+    
+    std::string XML_FILE = "<import>session"; 
+    
+    std::string xml_path = getXMLFilePathAndName(camnum, recname, _month, _day, XML_FILE);
+  
+    int db_dayid = insertDayIntoDatabase(_day, XML_FILE, xml_path, db_monthid);
+    
+    stringstream sql_rec_day_update;
+    sql_rec_day_update <<
+    "UPDATE recognition_setup set _id_day = " << db_dayid <<
+    " WHERE name = '" << recname << "';";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_rec_day_update.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+    
     stringstream sql_load_recognition;
     sql_load_recognition << "SELECT " <<
     "RC.codename, "         << // 0
@@ -380,7 +442,7 @@ bool loadStartQuery(std::string camera, std::string recname)
     "RC.delay, "            << // 3
     "RC.storeimage, "       << // 4
     "RC.storevideo, "       << // 5
-    "RC._id_mat, "          << // 6
+    "RC._id_mat AS matid, " << // 6
     "CO.coordinates, "      << // 7
     "C._id, "               << // 8
     "C.name, "              << // 9
@@ -392,18 +454,25 @@ bool loadStartQuery(std::string camera, std::string recname)
     "M.matrows, "           << // 15 
     "M.matwidth, "          << // 16
     "M.matheight, "         << // 17
-    "I.number "             << // 18
-    "FROM recognition_setup RC "                            << 
-    "JOIN coordinates AS CO ON RC._id_coordinates = CO._id "<<
-    "JOIN interval AS I ON RC._id_interval = I._id "        <<
-    "JOIN cameras AS C ON RC._id_camera = C._id "           <<
-    "JOIN mat AS M ON RC._id_mat = M._id "                  <<
+    "I._id AS instanceid, " << // 18
+    "D._id, "               << // 19
+    "MO._id, "              << // 20
+    "D.xmlfilepath "        << // 21
+    "FROM recognition_setup RC "                                << 
+    "JOIN coordinates AS CO ON RC._id_coordinates = CO._id "    <<
+    "JOIN interval AS I ON RC._id_interval = I._id "            <<
+    "JOIN cameras AS C ON RC._id_camera = C._id "               <<
+    "JOIN mat AS M ON RC._id_mat = M._id "                      <<
+    "JOIN day AS D ON RC._id_day = D._id "                      <<
+    "JOIN rel_month_day AS RMD ON D._id = RMD._id_day "         <<
+    "JOIN month AS MO ON RMD._id_month = MO._id "                 <<        
     "WHERE C.number = " << camera << " AND RC.name = '" << recname << "';";
     cout << "sql_load_recognition: " << sql_load_recognition.str() << endl;
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > start_array = db_select(sql_load_recognition.str().c_str(), 19);
+    vector<vector<string> > start_array = db_select(sql_load_recognition.str().c_str(), 22);
     pthread_mutex_unlock(&databaseMutex);
-    if (start_array.size()>0)
+    int size = start_array.size();
+    if (size>0)
     {
         vector<string> rows = start_array.at(0);
 
@@ -455,21 +524,29 @@ bool loadStartQuery(std::string camera, std::string recname)
         mcamera->set_timestart(rows.at(11));
         mcamera->set_timeend(rows.at(12));
 
-        mcamera->set_name(rows.at(13));
+        mcamera->set_recname(rows.at(13));
         
-        google::protobuf::int32 matcols = atoi(rows.at(13).c_str());
+        google::protobuf::int32 matcols = atoi(rows.at(14).c_str());
         mcamera->set_matcols(matcols);
         
-        google::protobuf::int32 matrows = atoi(rows.at(14).c_str());
+        google::protobuf::int32 matrows = atoi(rows.at(15).c_str());
         mcamera->set_matrows(matrows);
-
+     
         std::string _day = getCurrentDayLabel();
         m.set_currday(_day);
-
+        
         std::string _month = getCurrentMonthLabel();
         m.set_currmonth(_month);
         
         mcamera->set_lastinstance(rows.at(18));
+        
+        google::protobuf::int32 dbidday = atoi(rows.at(19).c_str());
+        mcamera->set_db_idday(dbidday);
+        
+        google::protobuf::int32 dbidmonth = atoi(rows.at(20).c_str());
+        mcamera->set_db_idmonth(dbidmonth);
+        
+        mcamera->set_xmlfilepath(rows.at(21));
         
         PROTO.Clear();
         PROTO = m;
@@ -513,4 +590,249 @@ bool loadStartQuery(std::string camera, std::string recname)
     
 }
 
+int insertMonthIntoDatabase(std::string str_month, int db_camera_id)
+{
+    //month database.
+    stringstream sql_month;
+    sql_month <<
+    "INSERT INTO month (label) "       <<
+    "SELECT '" << str_month << "' "  <<
+    "WHERE NOT EXISTS (SELECT * FROM month WHERE label = '" + str_month + "');";
+    db_execute(sql_month.str().c_str());
+    std::string last_month_id_query = "SELECT MAX(_id) FROM month";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > month_array = db_select(last_month_id_query.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_month_id = atoi(month_array.at(0).at(0).c_str());
+    cout << "db_month_id: " << db_month_id << endl;
 
+    //rel_camera_month.
+    stringstream sql_rel_camera_month;
+    sql_rel_camera_month <<
+    "INSERT INTO rel_camera_month (_id_camera, _id_month) "       <<
+    "SELECT " << db_camera_id << ", "  << db_month_id <<
+    " WHERE NOT EXISTS (SELECT * FROM rel_camera_month WHERE _id_camera = " << db_camera_id <<
+    " AND _id_month = " << db_month_id << ");";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_rel_camera_month.str().c_str());
+    pthread_mutex_unlock(&databaseMutex); 
+    // get rel id.
+    std::string last_rel_camera_month_query = "SELECT MAX(_id) FROM rel_camera_month";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > rel_camera_month_array = db_select(last_rel_camera_month_query.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_rel_camera_month_id = atoi(rel_camera_month_array.at(0).at(0).c_str());
+    cout << "db_rel_camera_month_id: " << db_rel_camera_month_id << endl;
+
+    return db_month_id;
+}
+ 
+int insertRegionIntoDatabase(std::string rcoords)
+{
+    std::replace( rcoords.begin(), rcoords.end(), '\n', ' ');
+    stringstream sql_coord;
+    sql_coord <<
+    "INSERT INTO coordinates (coordinates) " <<
+    "VALUES ('" << rcoords    << "');";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_coord.str().c_str());
+    std::string last_coordinates_query = "SELECT MAX(_id) FROM coordinates";
+    vector<vector<string> > coords_array = db_select(last_coordinates_query.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    cout << "coords_array: " << endl;
+    int db_coordnates_id = atoi(coords_array.at(0).at(0).c_str());
+    cout << "db_coordnates_id: " << db_coordnates_id << endl;
+    return db_coordnates_id;
+}
+
+void updateRegionIntoDatabase(std::string rcoords, int db_recognitionid)
+{
+    std::replace( rcoords.begin(), rcoords.end(), '\n', ' ');
+    stringstream sql_coord_update;
+    sql_coord_update <<
+    "UPDATE coordinates set coordinates = '" << rcoords << "' " <<
+    "WHERE _id = " << db_recognitionid << ";";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_coord_update.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+}
+
+int insertDayIntoDatabase(std::string str_day, std::string XML_FILE, std::string xml_path, int db_month_id)
+{
+    vector<vector<string> > day_array;
+    //Day database.
+    stringstream sql_day;
+    sql_day <<
+    "INSERT INTO day (label, xmlfilepath) " <<
+    "SELECT '" << str_day << "', '" << xml_path   << "' " <<
+    "WHERE NOT EXISTS (SELECT * FROM day WHERE label = '" << str_day    << "' " <<
+    "AND xmlfilepath    = '" << xml_path << "');";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_day.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+    std::string last_day_id_query = "SELECT MAX(_id) FROM day";
+    pthread_mutex_lock(&databaseMutex);
+    day_array = db_select(last_day_id_query.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_day_id = atoi(day_array.at(0).at(0).c_str());
+    //cout << "db_day_id: " << db_day_id << endl;
+     
+    //Rel day month.
+    stringstream sql_rel_day_month;
+    sql_rel_day_month <<
+    "INSERT INTO rel_month_day (_id_month, _id_day) " <<
+    "SELECT " << db_month_id << ", " << db_day_id << 
+    " WHERE NOT EXISTS (SELECT * FROM rel_month_day WHERE _id_month = " << db_month_id <<
+    " AND _id_day = " << db_day_id << ");";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_rel_day_month.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+    
+    return db_day_id;
+}
+
+int insertIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera)
+{
+    //Alarm Interval Start End
+    stringstream sql_interval;
+    sql_interval <<
+    "INSERT INTO interval (timestart, timeend) " <<
+    "SELECT '" << pcamera->timestart() << "', '" << pcamera->timeend() << "' " << 
+    "WHERE NOT EXISTS (SELECT * FROM interval WHERE timestart = '" << pcamera->timestart() << "' " <<
+    "AND timeend = '" << pcamera->timeend() << "');";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_interval.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+     
+    std::string last_interval_id_query = "SELECT MAX(_id) FROM interval";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > interval_array = db_select(last_interval_id_query.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_interval_id = atoi(interval_array.at(0).at(0).c_str());
+    cout << "db_interval_id: " << db_interval_id << endl;
+    
+    return db_interval_id;
+}
+
+void updateIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera)
+{
+    stringstream sql_interval_update;
+    sql_interval_update <<
+    "UPDATE interval set timestart = '" << pcamera->timestart() << "', "
+    " timeend = '" << pcamera->timeend()        << "' " <<
+    "WHERE _id = " << pcamera->db_intervalid()  << ";";        
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_interval_update.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+}
+
+int insertIntoRecognitionSetup(
+        motion::Message::MotionCamera * pcamera, 
+        int db_interval_id,
+        int db_day_id,
+        int db_camera_id,
+        int db_coordnates_id)
+{
+    //recognition_setup database.
+    stringstream sql_recognition_setup;
+    sql_recognition_setup <<
+    "INSERT INTO recognition_setup " <<
+    "(name, "                   <<
+            "_id_interval, "    <<
+            "_id_day, "         <<
+            "_id_camera, "      <<
+            "_id_mat, "         <<
+            "storeimage, "      <<
+            "storevideo, "      <<
+            "codename, "        <<
+            "has_region, "      <<
+            "_id_coordinates, " <<
+            "delay, "           <<
+            "runatstartup) "    <<
+    "SELECT "               << "'"      << 
+    pcamera->recname()         << "', "    <<
+    db_interval_id          << ", "     <<
+    db_day_id               << ", "     <<
+    db_camera_id            << ", "     <<
+    pcamera->db_idmat()     << ", "     <<
+    pcamera->storeimage()   << ", "     <<
+    pcamera->storevideo()   << ", '"    <<
+    pcamera->codename()     << "' ,"    <<
+    pcamera->hasregion()    << ", "     <<
+    db_coordnates_id        << ", "     <<
+    pcamera->delay()        << ", "     <<
+    pcamera->runatstartup() <<    
+    " WHERE NOT EXISTS (SELECT * FROM recognition_setup WHERE"  <<
+    " name              = '"    << pcamera->recname()          << "' AND"  <<
+    " _id_interval      = "     << db_interval_id           << " AND"   <<
+    " _id_day           = "     << db_day_id                << " AND"   <<
+    " _id_camera        = "     << db_camera_id             << " AND"   <<
+    " _id_mat           = "     << pcamera->db_idmat()      << " AND"   <<
+    " storeimage        = "     << pcamera->storeimage()    << " AND"   <<
+    " storevideo        = "     << pcamera->storevideo()    << " AND"   <<
+    " codename          = '"    << pcamera->codename()      <<"' AND"   <<
+    " has_region        = "     << pcamera->hasregion()     <<" AND"   <<
+    " runatstartup      = "     << pcamera->runatstartup()  << ");";
+    std::string sqlrecsetup = sql_recognition_setup.str();
+    cout << "rec setup sql: " << sqlrecsetup << endl;
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sqlrecsetup.c_str());
+    pthread_mutex_unlock(&databaseMutex);
+    std::string last_recognition_setup_id_query = "SELECT MAX(_id) FROM recognition_setup";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > recognition_setup_array = db_select(last_recognition_setup_id_query.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_recognition_setup_id = atoi(recognition_setup_array.at(0).at(0).c_str());
+    
+    return db_recognition_setup_id;
+}
+
+void updateRecognitionSetup(motion::Message::MotionCamera * pcamera, motion::Message::MotionDay * pday)
+{
+    stringstream sql_recognition_setup;
+    sql_recognition_setup <<
+    "UPDATE recognition_setup set "                     <<
+    "name = '"          << pcamera->recname()              << "', "    <<
+    "_id_interval = "   << pcamera->db_intervalid()     << ", "     <<
+    "_id_day = "        << pday->db_dayid()             << ", "     <<
+    "_id_camera = "     << pcamera->db_idcamera()       << ", "     <<        
+    "_id_mat = "        << pcamera->db_idmat()          << ", "     <<
+    "storeimage = "     << pcamera->storeimage()        << ", "     <<
+    "storevideo = "     << pcamera->storevideo()        << ", "     <<
+    "codename = '"      << pcamera->codename()          << "', "    <<       
+    "has_region = "     << pcamera->hasregion()         << ", "     <<
+    "_id_coordinates = "<< pcamera->db_idcoordinates()  << ", "     <<
+    "delay = "          << pcamera->delay()             << ", "     <<        
+    "runatstartup = "   << pcamera->runatstartup()      << ", "     <<        
+    "WHERE _id = "      << pday->db_recognitionsetupid()<< ";";                
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_recognition_setup.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);    
+}
+
+void insertIntoCameraMonth(char * time_rasp, int db_recognition_setup_id, int db_camera_id)
+{
+    //rel_camera_month.
+    stringstream sql_rel_camera_recognition_setup;
+    sql_rel_camera_recognition_setup <<
+    "INSERT INTO rel_camera_recognition_setup (_id_camera, _id_recognition_setup, start_rec_time) " <<
+    "SELECT " << db_camera_id << ", "  << db_recognition_setup_id << ", '" << time_rasp << "' "
+    " WHERE NOT EXISTS (SELECT * FROM rel_camera_recognition_setup WHERE _id_camera = " << db_camera_id <<
+    " AND _id_recognition_setup = " << db_recognition_setup_id << ");";
+    //cout << "sql_rel_camera_recognition_setup: " << sql_rel_camera_recognition_setup.str() << endl;
+    pthread_mutex_lock(&databaseMutex); 
+    db_execute(sql_rel_camera_recognition_setup.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+}
+
+void updateCameraMonth(char * time_rasp, int db_recognitionsetupid)
+{
+    stringstream sql_cameramonth_update;
+    sql_cameramonth_update <<
+    "UPDATE rel_camera_recognition_setup set "      <<
+    "start_rec_time = '"  << time_rasp << "', "     <<
+    "WHERE _id = "        << db_recognitionsetupid  << ";";                
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_cameramonth_update.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);    
+}

@@ -40,6 +40,8 @@
 #include <ctime>
 #include <unistd.h>
 #include <cstring>
+#include <algorithm>
+#include <new>
   
 #include <sys/time.h>
   
@@ -47,20 +49,6 @@ using namespace std;
 using namespace cv;
 
 //database
-void insertIntoCameraMonth(char * time_rasp, int db_recognition_setup_id, int db_camera_id );
-
-int insertIntoRecognitionSetup(
-        motion::Message::MotionCamera * pcamera, 
-        int db_interval_id,
-        int db_day_id,
-        int db_camera_id,
-        int db_coordnates_id);
-
-int insertIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera);
-int insertDayIntoDatabase(std::string str_day, std::string XML_FILE, std::string xml_path, int db_month_id);
-
-int insertRegionIntoDatabase(std::string rcoords);
-int insertMonthIntoDatabase(std::string str_month, int db_camera_id);
 int insertIntoIMage(const motion::Message::Image & img);
 void insertIntoCrop(const motion::Message::Crop & crop, int db_image_id);
 int insertIntoVideo(motion::Message::Video dvideo);
@@ -277,57 +265,69 @@ inline string saveImg(
                       const char * FILE_FORMAT,
                       vector<int> n_o_changes)
 {
-    stringstream ss;
-    time_t seconds;
-    struct tm * timeinfo;
-    char TIME[80];
-    time (&seconds);
-    // Get the current time
-    timeinfo = localtime (&seconds);
-     
-    std::string amount_str = getGlobalIntToString(n_o_changes.at(0));
-     
-    std::string n_str_file = "_" + amount_str;
     
-    char * n_file = new char[n_str_file.size() + 1];
-    std::copy(n_str_file.begin(), n_str_file.end(), n_file);
-    n_file[n_str_file.size()] = '\0';
-   
-    // Create name for the image
-    strftime (TIME,80,FILE_FORMAT,timeinfo);
-    //if(incr < 100) incr++; // quick fix for when delay < 1s && > 10ms, (when delay <= 10ms, images are overwritten)
-    //else incr = 0;
-    ss << DIRECTORY << TIME << static_cast<int>(incr) << n_file << EXTENSION;
-    string image_file = ss.str().c_str();
+    string image_file;
     
-    ImageArgs.mat = image;
-    ImageArgs.path = image_file;
-    pthread_create(&thread_image, NULL, storeimage, &ImageArgs);
+    try
+    {
+
+        stringstream ss;
+        time_t seconds;
+        struct tm * timeinfo;
+        char TIME[80];
+        time (&seconds);
+        // Get the current time
+        timeinfo = localtime (&seconds);
+
+        std::string amount_str = getGlobalIntToString(n_o_changes.at(0));
+
+        std::string n_str_file = "_" + amount_str;
+
+        char * n_file = new char[n_str_file.size() + 1];
+        std::copy(n_str_file.begin(), n_str_file.end(), n_file);
+        n_file[n_str_file.size()] = '\0';
+
+        // Create name for the image
+        strftime (TIME,80,FILE_FORMAT,timeinfo);
+        //if(incr < 100) incr++; // quick fix for when delay < 1s && > 10ms, (when delay <= 10ms, images are overwritten)
+        //else incr = 0;
+        ss << DIRECTORY << TIME << static_cast<int>(incr) << n_file << EXTENSION;
+        image_file = ss.str().c_str();
+
+        ImageArgs.mat = image;
+        ImageArgs.path = image_file;
+        pthread_create(&thread_image, NULL, storeimage, &ImageArgs);
+
+        //imwrite(image_file, image);
+
+        struct timeval tr;
+        struct tm* ptmr;
+        char time_info[40];
+        gettimeofday (&tr, NULL);
+        ptmr = localtime (&tr.tv_sec);
+        strftime (time_info, sizeof (time_info), "%Y-%m-%d %H:%M:%S %z", ptmr);
+        //cout <<  ":::time_info:::: " << time_info << endl;
+
+        stringstream rct;
+        rct << n_o_changes.at(1) << " " << n_o_changes.at(2) << " " << n_o_changes.at(3) << " " << n_o_changes.at(4); 
+        //cout << "rct: " << rct.str() << endl; 
+
+        pthread_mutex_lock(&protoMutex);
+        motion::Message::Image * pimage = pinstance->add_image();
+        pimage->set_path(image_file.c_str());
+        pimage->set_name(n_str_file);
+        pimage->set_imagechanges(n_o_changes.at(0));
+        pimage->set_time(time_info);
+        motion::Message::Crop * pcrop = pinstance->add_crop();
+        pcrop->set_rect(rct.str());
+        pthread_mutex_unlock(&protoMutex);
     
-    //imwrite(image_file, image);
-    
-    struct timeval tr;
-    struct tm* ptmr;
-    char time_info[40];
-    gettimeofday (&tr, NULL);
-    ptmr = localtime (&tr.tv_sec);
-    strftime (time_info, sizeof (time_info), "%Y-%m-%d %H:%M:%S %z", ptmr);
-    //cout <<  ":::time_info:::: " << time_info << endl;
-    
-    stringstream rct;
-    rct << n_o_changes.at(1) << " " << n_o_changes.at(2) << " " << n_o_changes.at(3) << " " << n_o_changes.at(4); 
-    //cout << "rct: " << rct.str() << endl; 
-    
-    pthread_mutex_lock(&protoMutex);
-    motion::Message::Image * pimage = pinstance->add_image();
-    pimage->set_path(image_file.c_str());
-    pimage->set_name(n_str_file);
-    pimage->set_imagechanges(n_o_changes.at(0));
-    pimage->set_time(time_info);
-    motion::Message::Crop * pcrop = pinstance->add_crop();
-    pcrop->set_rect(rct.str());
-    pthread_mutex_unlock(&protoMutex);
-    
+    }
+    catch (std::bad_alloc& ba)
+    {
+      std::cerr << "bad_alloc caught: " << ba.what() << '\n';
+    } 
+
     return image_file;
 }
   
@@ -388,49 +388,55 @@ inline vector<int> detectMotion(const Mat & motion,
     // if not to much changes then the motion is real (neglect agressive snow, temporary sunlight)
     if(stddev[0] < max_deviation)
     {
-        int number_of_changes = 0;
-        int min_x = motion.cols, max_x = 0;
-        int min_y = motion.rows, max_y = 0;
-        // loop over image and detect changes
-        for(int j = y_start; j < y_stop; j+=2){ // height
-            for(int i = x_start; i < x_stop; i+=2){ // width
-                // check if at pixel (j,i) intensity is equal to 255
-                // this means that the pixel is different in the sequence
-                // of images (prev_frame, current_frame, next_frame)
-                if(static_cast<int>(motion.at<uchar>(j,i)) == 255)
-                {
-                    number_of_changes++;
-                    if(min_x>i) min_x = i;
-                    if(max_x<i) max_x = i;
-                    if(min_y>j) min_y = j;
-                    if(max_y<j) max_y = j;
+        try
+        {
+            int number_of_changes = 0;
+            int min_x = motion.cols, max_x = 0;
+            int min_y = motion.rows, max_y = 0;
+            // loop over image and detect changes
+            for(int j = y_start; j < y_stop; j+=2){ // height
+                for(int i = x_start; i < x_stop; i+=2){ // width
+                    // check if at pixel (j,i) intensity is equal to 255
+                    // this means that the pixel is different in the sequence
+                    // of images (prev_frame, current_frame, next_frame)
+                    if(static_cast<int>(motion.at<uchar>(j,i)) == 255)
+                    {
+                        number_of_changes++;
+                        if(min_x>i) min_x = i;
+                        if(max_x<i) max_x = i;
+                        if(min_y>j) min_y = j;
+                        if(max_y<j) max_y = j;
+                    }
                 }
             }
+            if( number_of_changes >= there_is_motion)
+            {
+                changes.push_back(number_of_changes);
+                //check if not out of bounds
+                if(min_x-10 > 0) min_x -= 10;
+                if(min_y-10 > 0) min_y -= 10;
+                if(max_x+10 < result.cols-1) max_x += 10;
+                if(max_y+10 < result.rows-1) max_y += 10;
+                // draw rectangle round the changed pixel
+                Point x(min_x,min_y);
+                Point y(max_x,max_y);
+                Rect rect(x,y);
+                changes.push_back(min_x);
+                changes.push_back(min_y);
+                changes.push_back(max_x);
+                changes.push_back(max_y);
+                //Mat cropped = result(rect);
+                //cropped.copyTo(result_cropped);
+                rectangle(result,rect,color,1);
+            }
+            else {
+                changes.push_back(0);   
+            }
         }
-        //if(number_of_changes)
-        if( number_of_changes >= there_is_motion)
+        catch (std::bad_alloc& ba)
         {
-            changes.push_back(number_of_changes);
-            //check if not out of bounds
-            if(min_x-10 > 0) min_x -= 10;
-            if(min_y-10 > 0) min_y -= 10;
-            if(max_x+10 < result.cols-1) max_x += 10;
-            if(max_y+10 < result.rows-1) max_y += 10;
-            // draw rectangle round the changed pixel
-            Point x(min_x,min_y);
-            Point y(max_x,max_y);
-            Rect rect(x,y);
-            changes.push_back(min_x);
-            changes.push_back(min_y);
-            changes.push_back(max_x);
-            changes.push_back(max_y);
-            //Mat cropped = result(rect);
-            //cropped.copyTo(result_cropped);
-            rectangle(result,rect,color,1);
-        }
-        else {
-            changes.push_back(0);   
-        }
+          std::cerr << "bad_alloc caught: " << ba.what() << '\n';
+        } 
         return changes;
     }
     return changes;
@@ -452,43 +458,52 @@ inline vector<int> detectMotionRegion(const cv::Mat & motionmat,
     // if not to much changes then the motion is real (neglect agressive snow, temporary sunlight)
     if(stddev[0] < max_deviation)
     {
-        int number_of_changes = 0;
-        int min_x = motionmat.cols, max_x = 0;
-        int min_y = motionmat.rows, max_y = 0;
-        // loop over image and detect changes
-        int x, y, size = region.size();
-        for(int i = 0; i < size; i++){ // loop over region
-            x = region[i].x;
-            y = region[i].y;
-            if(static_cast<int>(motionmat.at<uchar>(y,x)) == 255)
-            {
-                number_of_changes++;
-                if(min_x>x) min_x = x;
-                if(max_x<x) max_x = x;
-                if(min_y>y) min_y = y;
-                if(max_y<y) max_y = y;
+        
+        try
+        {
+            int number_of_changes = 0;
+            int min_x = motionmat.cols, max_x = 0;
+            int min_y = motionmat.rows, max_y = 0;
+            // loop over image and detect changes
+            int x, y, size = region.size();
+            for(int i = 0; i < size; i++){ // loop over region
+                x = region[i].x;
+                y = region[i].y;
+                if(static_cast<int>(motionmat.at<uchar>(y,x)) == 255)
+                {
+                    number_of_changes++;
+                    if(min_x>x) min_x = x;
+                    if(max_x<x) max_x = x;
+                    if(min_y>y) min_y = y;
+                    if(max_y<y) max_y = y;
+                }
             }
-        }
-        changes.push_back(number_of_changes);
-        if(number_of_changes){
-            //check if not out of bounds
-            if(min_x-10 > 0) min_x -= 10;
-            if(min_y-10 > 0) min_y -= 10;
-            if(max_x+10 < result.cols-1) max_x += 10;
-            if(max_y+10 < result.rows-1) max_y += 10;
-            // draw rectangle round the changed pixel
-            Point x(min_x,min_y);
-            Point y(max_x,max_y);
-            Rect rect(x,y);
-            changes.push_back(min_x);
-            changes.push_back(min_y);
-            changes.push_back(max_x);
-            changes.push_back(max_y);
-            //Mat cropped = result(rect);
-            //cropped.copyTo(result_cropped);
-            rectangle(result,rect,color,1);
-        }
-         
+            changes.push_back(number_of_changes);
+            if(number_of_changes){
+                //check if not out of bounds
+                if(min_x-10 > 0) min_x -= 10;
+                if(min_y-10 > 0) min_y -= 10;
+                if(max_x+10 < result.cols-1) max_x += 10;
+                if(max_y+10 < result.rows-1) max_y += 10;
+                // draw rectangle round the changed pixel
+                Point x(min_x,min_y);
+                Point y(max_x,max_y);
+                Rect rect(x,y);
+                changes.push_back(min_x);
+                changes.push_back(min_y);
+                changes.push_back(max_x);
+                changes.push_back(max_y);
+                //Mat cropped = result(rect);
+                //cropped.copyTo(result_cropped);
+                rectangle(result,rect,color,1);
+            }
+            
+        }    
+        catch (std::bad_alloc& ba)
+        {
+          std::cerr << "bad_alloc caught: " << ba.what() << '\n';
+        } 
+        
         return changes;
     }
     return changes;
@@ -576,9 +591,9 @@ void * startRecognition(void * arg)
     int db_camera_id        = atoi(camera_array.at(0).at(0).c_str());
     string str_camera   = camera_array.at(0).at(1);
     int number          = atoi(camera_array.at(0).at(2).c_str());
-    cout << "str_camera: " << str_camera << endl;
-    cout << "db_camera_id: " << db_camera_id << endl;
-    cout << "number: " << number << endl;
+    cout << "str_camera: "      << str_camera << endl;
+    cout << "db_camera_id: "    << db_camera_id << endl;
+    cout << "number: "          << number << endl;
   
     //Check if exist month on proto or else add it.
     int sizec = R_PROTO.motioncamera_size();
@@ -666,14 +681,9 @@ void * startRecognition(void * arg)
         has_region = false;
     }
      
-    int db_coordnates_id;
-    if (has_region & fromcamera)
-    {
-        db_coordnates_id = insertRegionIntoDatabase(rcoords);
-    }
+    int db_idcoordnates = pcamera->db_idcoordinates();
      
     std::string instancecode;
-    string XML_FILE;
     if (pcamera->has_codename())
     {
         cout << "Has codename." << endl;
@@ -721,16 +731,13 @@ void * startRecognition(void * arg)
         pthread_mutex_lock(&protoMutex);
         pmonth = pcamera->add_motionmonth();
         pmonth->set_monthlabel(str_month);
+        pmonth->set_db_monthid(pcamera->db_idmonth());
         pthread_mutex_unlock(&protoMutex);
         cout << "sigo" << endl;
     }
      
-    int db_month_id;
-    if (fromcamera)
-    {
-       db_month_id = insertMonthIntoDatabase(str_month, db_camera_id);
-    }
-     
+    int db_monthid = pmonth->db_monthid();
+   
     //Day.
     string str_day;
     if (R_PROTO.has_currday())
@@ -759,23 +766,18 @@ void * startRecognition(void * arg)
         pthread_mutex_lock(&protoMutex);
         pday = pmonth->add_motionday();
         pday->set_daylabel(str_day);
+        pday->set_db_dayid(pcamera->db_idday());
         pthread_mutex_unlock(&protoMutex);
         cout << "sigo" << endl;
     }
      
-    if (pday->has_xmlfilename())
-    {
-        cout << "has_xmlfile." << endl;
-        XML_FILE = pday->xmlfilename();
+    int db_dayid = pday->db_dayid();
+    
+    std::string XML_FILE;
+    if (pcamera->has_xmlfilepath())
+    { 
+        XML_FILE = pcamera->xmlfilepath();  
     }
-    else
-    {
-        XML_FILE  =  "<import>session";
-        pthread_mutex_lock(&protoMutex);
-        pday->set_xmlfilename(XML_FILE);
-        pthread_mutex_unlock(&protoMutex);
-    }
-     
      
     bool writeImages = pcamera->storeimage();
     bool writeVideo  = pcamera->storevideo();
@@ -784,8 +786,6 @@ void * startRecognition(void * arg)
     std::cout << "writeImages: " << writeImages << endl;
      
     google::protobuf::uint32 activecam = R_PROTO.activecam();
-     
-    std::string xml_path = getXMLFilePathAndName(activecam, R_PROTO, XML_FILE);
     
     //time
     struct timeval tr;
@@ -795,30 +795,32 @@ void * startRecognition(void * arg)
     ptmr = localtime (&tr.tv_sec);
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     
-    int db_day_id;
-    int db_recognition_setup_id;
-    if (fromcamera)
-    {
-        db_day_id = insertDayIntoDatabase(str_day, XML_FILE, xml_path, db_month_id);
-        int db_interval_id = insertIntervalsIntoDatabase(pcamera);
-        db_recognition_setup_id = insertIntoRecognitionSetup(pcamera, db_interval_id, db_day_id, db_camera_id, db_coordnates_id);
-        insertIntoCameraMonth(time_rasp, db_recognition_setup_id, db_camera_id);
-    }       
-    
+    int db_interval_id = pcamera->db_intervalid();
+    int db_recognition_setup_id = pday->db_recognitionsetupid();
+   
     pthread_mutex_lock(&protoMutex);
-    pday->set_db_dayid(db_day_id);
+    pday->set_db_dayid(db_dayid);
     pday->set_db_recognitionsetupid(db_recognition_setup_id);
     pthread_mutex_unlock(&protoMutex);
      
     //Camera dir.
     std::stringstream camdir;
-    camdir << sourcepath << "motion_web/pics/" << "camera" << cam << "/";
-    std::string cmd = camdir.str();
+    camdir << sourcepath << "motion_web/pics/" << "camera" << cam; 
     
-    //Create camera directory
+    // Create camera directory
     directoryExistsOrCreate(camdir.str().c_str());
+    
+    std::string name = pcamera->recname();
+    std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+    
+    // Rec dir.
+    std::stringstream reddir;
+    reddir << camdir.str() << "/" << name << "/"; 
+    
+    //Create rec name directory
+    directoryExistsOrCreate(reddir.str().c_str());
      
-    const string DIR        = camdir.str();          // directory where the images will be stored
+    const string DIR        = reddir.str();          // directory where the images will be stored
     //const string REGION     = sourcepath + "motion_web/pics/region/";   // directory where the regios are stored
     const string EXT        = ".jpg";                           // extension of the images
     const string EXT_DATA   = ".xml";                           // extension of the data
@@ -927,224 +929,256 @@ void * startRecognition(void * arg)
     // take as many pictures you want..
     while (true)
     {
-         
-        is_recognizing = true;
-         
-        pthread_mutex_lock(&protoMutex);
-        pcamera->set_recognizing(true);
-        pthread_mutex_unlock(&protoMutex);
-        
-        // Take a new image
-        prev_frame = current_frame;
-        current_frame = next_frame;
-        next_frame = cvQueryFrame(camera);
-        result = next_frame;
-        cvtColor(next_frame, next_frame, CV_RGB2GRAY);
-         
-        // Calc differences between the images and do AND-operation
-        // threshold image, low differences are ignored (ex. contrast change due to sunlight)
-        absdiff(prev_frame, next_frame, d1);
-        absdiff(next_frame, current_frame, d2);
-        bitwise_and(d1, d2, motionmat);
-        threshold(motionmat, motionmat, 35, 255, CV_THRESH_BINARY);
-        erode(motionmat, motionmat, kernel_ero);
-         
-        number_of_changes.clear();
-        
-        if (!has_region)
+        try
         {
-           number_of_changes = detectMotion(motionmat, result, x_start, x_stop, y_start, y_stop, max_deviation, color, number_of_changes);
+            
+            is_recognizing = true;
+
+            pthread_mutex_lock(&protoMutex);
+            pcamera->set_recognizing(true);
+            pthread_mutex_unlock(&protoMutex);
+
+            // Take a new image
+            prev_frame = current_frame;
+            current_frame = next_frame;
+            next_frame = cvQueryFrame(camera);
+            result = next_frame;
+            cvtColor(next_frame, next_frame, CV_RGB2GRAY);
+
+            // Calc differences between the images and do AND-operation
+            // threshold image, low differences are ignored (ex. contrast change due to sunlight)
+            absdiff(prev_frame, next_frame, d1);
+            absdiff(next_frame, current_frame, d2);
+            bitwise_and(d1, d2, motionmat);
+            threshold(motionmat, motionmat, 35, 255, CV_THRESH_BINARY);
+            erode(motionmat, motionmat, kernel_ero);
+
+            number_of_changes.clear();
+
+            if (!has_region)
+            {
+               number_of_changes = detectMotion(motionmat, result, x_start, x_stop, y_start, y_stop, max_deviation, color, number_of_changes);
+            }
+            else
+            {
+                number_of_changes = detectMotionRegion(motionmat, result, region, max_deviation, color, number_of_changes);
+            }
+            if (number_of_changes.size()>0)
+                resutl_watch_detected = number_of_changes.at(0);
+        
         }
-        else
+        catch (std::bad_alloc& ba)
         {
-            number_of_changes = detectMotionRegion(motionmat, result, region, max_deviation, color, number_of_changes);
-        }
-        if (number_of_changes.size()>0)
-            resutl_watch_detected = number_of_changes.at(0);
+            std::cerr << "bad_alloc caught: " << ba.what() << '\n';
+        } 
         
         //cout << "resutl_watch_detected: " << resutl_watch_detected << endl;
          
         // If a lot of changes happened, we assume something changed.
         if( resutl_watch_detected >= there_is_motion)
         {
-            cout << "resutl_watch_detected: " << resutl_watch_detected << endl;
-            //cout << "number_of_sequence:: " << number_of_sequence << endl;
-             
-            if(number_of_sequence>0 & number_of_changes.size()>1)
+            
+            try
             {
-                 
-                //cout << "!motion_detected:: " << motion_detected << endl;
-                 
-                init_motion = true;
-                 
-                if (!motion_detected)
-                {
-                     
-                    count_sequence_cero = 0;
-                    motion_detected     = true;
-                    begin_time = clock();
-                     
-                    //cout << "!has_instance_directory:: " << has_instance_directory << endl;
-                     
-                    if (!has_instance_directory)
-                    {
-                         
-                        //New Instance
-                        instance_counter++;
-                        stringstream id;
-                        id << instance_counter;
-                        instance = id.str();
-                         
-                        //Add proto instance.
-                        cout << ":::::::::::  ADD  INSTANCE " << instance << "  ::::::::::::"  << endl;
-                        pthread_mutex_lock(&protoMutex);
-                        pinstance = pday->add_instance();
-                        pinstance->set_idinstance(std::atoi(instance.c_str()));
-                        pthread_mutex_unlock(&protoMutex);
-                        
-                        FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "%H%M%S";
-                        //CROPPED_FILE_FORMAT = DIR_FORMAT + "/" + instance + "/cropped/" + "%d%h%Y_%H%M%S";
-                         
-                        vector<string> dirs = createDirectoryTree (DIR,EXT,DIR_FORMAT.c_str(),instance );
-                        
-                        if (writeVideo)
-                        {    
-                            
-                            //std::string ext = ".avi";
-                            //std::string ext = ".mpeg";
-                            //std::string ext = ".mp4";
-                            //std::string ext = ".divx";
-                            //std::string ext = ".flv";
-                            std::string ext = ".mpg";
+                cout << "resutl_watch_detected: " << resutl_watch_detected << endl;
+                //cout << "number_of_sequence:: " << number_of_sequence << endl;
 
-                            //std::string ext = ".mjpeg";
-                            
-                            std::string  videoname = dirs.at(0) + "_" + instance + ext;
-                            std::string videopath = dirs.at(1) + "/" + videoname;
-                           
-                            //int codec = CV_FOURCC('I','4','2','0');
-                            //int codec = CV_FOURCC('A','V','C','1');
-                            //int codec = CV_FOURCC('Y','U','V','1');
-                            //int codec = CV_FOURCC('P','I','M','1'); 
-                            int codec = CV_FOURCC('M','J','P','G');
-                            //int codec = CV_FOURCC('M','P','4','2');
-                            //int codec = CV_FOURCC('D','I','V','3');
-                            //int codec = CV_FOURCC('D','I','V','X');
-                            //int codec = CV_FOURCC('U','2','6','3');
-                            //int codec = CV_FOURCC('I','2','6','3');
-                            //int codec = CV_FOURCC('F','L','V','1');
-                            //int codec = CV_FOURCC('H','2','6','4');
-                            //int codec = CV_FOURCC('A','Y','U','V');
-                            //int codec = CV_FOURCC('I','U','Y','V');
-                            //int codec = CV_FOURCC('X','V','I','D');
-                            //int codec = CV_FOURCC('P','I','M','1');
-                            //int codec = CV_FOURCC('W','M','V','2');
-                            //int codec = -1;
-                            
-                            
-                            cv::Size size = cv::Size(640,480);
-                            
-                            /*for (int t=800000000; t<5448695113; t++)
-                            {
-                                if( (cvvideout = cvCreateVideoWriter(videopath.c_str(), t, fps, size, true)) == NULL )
+                if(number_of_sequence>0 & number_of_changes.size()>1)
+                {
+
+                    //cout << "!motion_detected:: " << motion_detected << endl;
+
+                    init_motion = true;
+
+                    if (!motion_detected)
+                    {
+
+                        count_sequence_cero = 0;
+                        motion_detected     = true;
+                        begin_time = clock();
+
+                        //cout << "!has_instance_directory:: " << has_instance_directory << endl;
+
+                        if (!has_instance_directory)
+                        {
+
+                            //New Instance
+                            instance_counter++;
+                            stringstream id;
+                            id << instance_counter;
+                            instance = id.str();
+
+                            //Add proto instance.
+                            cout << ":::::::::::  ADD  INSTANCE " << instance << "  ::::::::::::"  << endl;
+                            pthread_mutex_lock(&protoMutex);
+                            pinstance = pday->add_instance();
+                            pinstance->set_idinstance(std::atoi(instance.c_str()));
+                            pthread_mutex_unlock(&protoMutex);
+
+                            FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "%H%M%S";
+                            //CROPPED_FILE_FORMAT = DIR_FORMAT + "/" + instance + "/cropped/" + "%d%h%Y_%H%M%S";
+
+                            vector<string> dirs = createDirectoryTree (DIR,EXT,DIR_FORMAT.c_str(),instance );
+
+                            if (writeVideo)
+                            {    
+
+                                //std::string ext = ".avi";
+                                //std::string ext = ".mpeg";
+                                //std::string ext = ".mp4";
+                                //std::string ext = ".divx";
+                                //std::string ext = ".flv";
+
+                                std::string ext = ".mpg"; 
+
+                                //std::string ext = ".mjpeg";
+
+                                std::string  videoname = dirs.at(0) + "_" + instance + ext;
+                                std::string videopath = dirs.at(1) + "/" + videoname;
+
+                                //int codec = CV_FOURCC('I','4','2','0');
+                                //int codec = CV_FOURCC('A','V','C','1');
+                                //int codec = CV_FOURCC('Y','U','V','1');
+                                //int codec = CV_FOURCC('P','I','M','1'); 
+                                //int codec = CV_FOURCC('M','J','P','G');
+                                //int codec = CV_FOURCC('M','P','4','2');
+                                //int codec = CV_FOURCC('D','I','V','3');
+                                //int codec = CV_FOURCC('D','I','V','X');
+                                //int codec = CV_FOURCC('U','2','6','3');
+                                //int codec = CV_FOURCC('I','2','6','3');
+                                //int codec = CV_FOURCC('F','L','V','1');
+                                //int codec = CV_FOURCC('H','2','6','4');
+                                //int codec = CV_FOURCC('A','Y','U','V');
+                                //int codec = CV_FOURCC('I','U','Y','V');
+                                //int codec = CV_FOURCC('X','V','I','D');
+                                //int codec = CV_FOURCC('P','I','M','1');
+                                //int codec = CV_FOURCC('W','M','V','2');
+                                //int codec = -1;
+
+
+                                //cv::Size size = cv::Size(640,480);
+
+                                /*for (int t=800000000; t<5448695113; t++)
                                 {
-                                    cout << "An error occured whilst making the video file. " << t <<  endl;
+                                    if( (cvvideout = cvCreateVideoWriter(videopath.c_str(), t, fps, size, true)) == NULL )
+                                    {
+                                        cout << "An error occured whilst making the video file. " << t <<  endl;
+                                    }
+                                     else
+                                    {
+                                        cout << "Video creation successful!" << endl;
+                                    }
+                                }*/
+
+
+                                //videout = new cv::VideoWriter(videopath.c_str(), codec, fps, size, true);
+                                //if (videout->open(videopath, codec, fps, size, true))
+                                //{
+                                //    cout << "opened" << endl;
+                                //}
+
+                                /*if( (cvvideout = cvCreateVideoWriter(videopath.c_str(), codec, fps, size, true)) == NULL )
+                                {
+                                    cout << "An error occured whilst making the video file." << endl;
                                 }
-                                 else
+                                else
                                 {
                                     cout << "Video creation successful!" << endl;
-                                }
-                            }*/
+                                }*/
 
-                            
-                            videout = new cv::VideoWriter(videopath.c_str(), codec, fps, size, true);
-                            if (videout->open(videopath, codec, fps, size, true))
-                            {
-                                cout << "opened" << endl;
+                                pthread_mutex_lock(&protoMutex);
+                                motion::Message::Video * pvideo = pinstance->mutable_video();
+                                pvideo->set_path(videopath.c_str());
+                                pvideo->set_name(videoname.c_str());
+                                pvideo->set_instancefolder(dirs.at(1));
+                                pthread_mutex_unlock(&protoMutex);
+
                             }
-                
-                            /*if( (cvvideout = cvCreateVideoWriter(videopath.c_str(), codec, fps, size, true)) == NULL )
-                            {
-                                cout << "An error occured whilst making the video file." << endl;
-                            }
-                            else
-                            {
-                                cout << "Video creation successful!" << endl;
-                            }*/
-                           
-                            pthread_mutex_lock(&protoMutex);
-                            motion::Message::Video * pvideo = pinstance->mutable_video();
-                            pvideo->set_path(videopath.c_str());
-                            pvideo->set_name(videoname.c_str());
-                            pvideo->set_instancefolder(dirs.at(1));
-                            pthread_mutex_unlock(&protoMutex);
-                            
+
+                            has_instance_directory = true;
+
                         }
-                    
-                        has_instance_directory = true;
-                         
                     }
+
+                    if (writeImages)
+                    {
+                        image_file_recognized = saveImg (result, DIR, EXT, DIR_FORMAT.c_str(), FILE_FORMAT.c_str(), number_of_changes);
+                    }
+
+                    //if (writeVideo)
+                    //{
+                    //    videout->write(result);
+                    //}
+
                 }
-                
-                if (writeImages)
-                {
-                    image_file_recognized = saveImg (result, DIR, EXT, DIR_FORMAT.c_str(), FILE_FORMAT.c_str(), number_of_changes);
-                }
-                
-                if (writeVideo)
-                {
-                    videout->write(result);
-                }
-                    
+                delaymark = time(0);
+                number_of_sequence++;
             }
-            delaymark = time(0);
-            number_of_sequence++;
+            catch (std::bad_alloc& ba)
+            {
+              std::cerr << "bad_alloc caught: " << ba.what() << '\n';
+            } 
         }
         else
         {
              
-            number_of_sequence = 0;
-             
-            double seconds_since_start = difftime( time(0), delaymark);
-            
-            //cout << "seconds_since_start: " << seconds_since_start << " delay: " << delay << " init_motion: " << init_motion << endl;
-             
-            if ( seconds_since_start > delay & init_motion )
+            try
             {
-                
-                has_instance_directory = false;
-                init_motion = false;
-                                
-                std::cout << ":::::::::::: DUMP INSTANCE "<< instance << "  :::::::::::" << std::endl;
-   
-                end = clock();
-                
-                ProtoArgs.pinstance     = pinstance; //pday->mutable_instance(0);
-                ProtoArgs.DIR           = DIR;
-                ProtoArgs.XML_FILE      = XML_FILE;
-                ProtoArgs.EXT_DATA      = EXT_DATA;
-                ProtoArgs.init_time     = init_time;
-                ProtoArgs.begin_time    = begin_time;
-                ProtoArgs.end_time      = end_time;
-                ProtoArgs.end           = end; 
-                ProtoArgs.instance      = instance;
-                pthread_create(&thread_store, NULL, storeproto, &ProtoArgs);
-                
-                //pinstance->Clear();
-                
+                number_of_sequence = 0;
+
+                double seconds_since_start = difftime( time(0), delaymark);
+
+                //cout << "seconds_since_start: " << seconds_since_start << " delay: " << delay << " init_motion: " << init_motion << endl;
+
+                if ( seconds_since_start > delay & init_motion )
+                {
+
+                    has_instance_directory = false;
+                    init_motion = false;
+
+                    std::cout << ":::::::::::: DUMP INSTANCE "<< instance << "  :::::::::::" << std::endl;
+
+                    end = clock();
+
+                    ProtoArgs.pinstance     = pinstance; //pday->mutable_instance(0);
+                    ProtoArgs.DIR           = DIR;
+                    ProtoArgs.XML_FILE      = XML_FILE;
+                    ProtoArgs.EXT_DATA      = EXT_DATA;
+                    ProtoArgs.init_time     = init_time;
+                    ProtoArgs.begin_time    = begin_time;
+                    ProtoArgs.end_time      = end_time;
+                    ProtoArgs.end           = end; 
+                    ProtoArgs.instance      = instance;
+                    cout << "pthread_create" << endl;
+                    int runb = pthread_create(&thread_store, NULL, storeproto, &ProtoArgs);
+                    //cout << "pthread_join" << endl;
+                    //pthread_join(thread_store,  (void**) &runb);
+                    //cout << "pthread_cancel" << endl;
+
+                    //pinstance->Clear();
+
+                }
+
+                // XML Instance
+                motion_detected = false;
+                count_sequence_cero++;
+
+                if (count_sequence_cero==1)
+                {
+                    end_time = clock();
+                }
+             
             }
-             
-            // XML Instance
-            motion_detected = false;
-            count_sequence_cero++;
-             
-            if (count_sequence_cero==1){
-                end_time = clock();
+            catch (std::bad_alloc& ba)
+            {
+              std::cerr << "bad_alloc caught: " << ba.what() << '\n';
             }
-             
-            // Delay, wait a 1/2 second.
-            cvWaitKey (DELAY);
+           
+            
         }
+        
+         // Delay, wait a 1/2 second.
+        //cvWaitKey (DELAY);
     }
      
     pthread_mutex_lock(&protoMutex);
@@ -1168,10 +1202,7 @@ void * storeproto(void * args)
     time (&seconds);
     timeinfo = localtime (&seconds);
 
-    // Create name for the date directory
-    const char * dir = DIR_FORMAT.c_str();
-    strftime (TIME,80,dir,timeinfo);
-    string XMLFILE = arg->DIR + TIME + "/xml/" + arg->XML_FILE + "" + arg->EXT_DATA;
+    string XMLFILE = arg->XML_FILE; 
     if(!std::ifstream(XMLFILE.c_str()))
     {
         build_xml(XMLFILE.c_str());
@@ -1220,6 +1251,9 @@ void * storeproto(void * args)
     pinstance->Clear();
     arg->pinstance->Clear();
     pinstance->Clear();
+    
+    cout << "INSTANCE CLEANED: " << endl; 
+    pthread_cancel(thread_store);
                 
 }
 
@@ -1330,6 +1364,7 @@ void insertIntoCrop(const motion::Message::Crop & crop, int db_image_id)
     vector<vector<string> > crop_array = db_select(last_crop_query.c_str(), 1);
     pthread_mutex_unlock(&databaseMutex);
     db_crop_id = atoi(crop_array.at(0).at(0).c_str());
+    //cout << "db_crop_id: " << db_crop_id << endl;
     
 }
     
@@ -1355,201 +1390,11 @@ int insertIntoIMage(const motion::Message::Image & img)
     vector<vector<string> > image_array = db_select(last_image_query.c_str(), 1);
     pthread_mutex_unlock(&databaseMutex);
     int db_image_id = atoi(image_array.at(0).at(0).c_str());
-    
+    //cout << "db_image_id: " << db_image_id << endl;
     return db_image_id;
 }
 
-void insertIntoCameraMonth(char * time_rasp, int db_recognition_setup_id, int db_camera_id)
-{
-    //rel_camera_month.
-    stringstream sql_rel_camera_recognition_setup;
-    sql_rel_camera_recognition_setup <<
-    "INSERT INTO rel_camera_recognition_setup (_id_camera, _id_recognition_setup, start_rec_time) " <<
-    "SELECT " << db_camera_id << ", "  << db_recognition_setup_id << ", '" << time_rasp << "' "
-    " WHERE NOT EXISTS (SELECT * FROM rel_camera_recognition_setup WHERE _id_camera = " << db_camera_id <<
-    " AND _id_recognition_setup = " << db_recognition_setup_id << ");";
-    //cout << "sql_rel_camera_recognition_setup: " << sql_rel_camera_recognition_setup.str() << endl;
-    pthread_mutex_lock(&databaseMutex); 
-    db_execute(sql_rel_camera_recognition_setup.str().c_str());
-    pthread_mutex_unlock(&databaseMutex);
-    
-}
 
-int insertIntoRecognitionSetup(
-        motion::Message::MotionCamera * pcamera, 
-        int db_interval_id,
-        int db_day_id,
-        int db_camera_id,
-        int db_coordnates_id)
-{
-    //recognition_setup database.
-    stringstream sql_recognition_setup;
-    sql_recognition_setup <<
-    "INSERT INTO recognition_setup " <<
-    "(name, "                   <<
-            "_id_interval, "    <<
-            "_id_day, "         <<
-            "_id_camera, "      <<
-            "_id_mat, "         <<
-            "storeimage, "      <<
-            "storevideo, "      <<
-            "codename, "        <<
-            "has_region, "      <<
-            "_id_coordinates, " <<
-            "delay, "           <<
-            "runatstartup) "    <<
-    "SELECT "               << "'"      << 
-    pcamera->name()         << "', "    <<
-    db_interval_id          << ", "     <<
-    db_day_id               << ", "     <<
-    db_camera_id            << ", "     <<
-    pcamera->db_idmat()     << ", "     <<
-    pcamera->storeimage()   << ", "     <<
-    pcamera->storevideo()   << ", '"    <<
-    pcamera->codename()     << "' ,"    <<
-    pcamera->hasregion()    << ", "     <<
-    db_coordnates_id        << ", "     <<
-    pcamera->delay()        << ", "     <<
-    pcamera->runatstartup() <<    
-    " WHERE NOT EXISTS (SELECT * FROM recognition_setup WHERE"  <<
-    " name              = '"    << pcamera->name()          << "' AND"  <<
-    " _id_interval      = "     << db_interval_id           << " AND"   <<
-    " _id_day           = "     << db_day_id                << " AND"   <<
-    " _id_camera        = "     << db_camera_id             << " AND"   <<
-    " _id_mat           = "     << pcamera->db_idmat()      << " AND"   <<
-    " storeimage        = "     << pcamera->storeimage()    << " AND"   <<
-    " storevideo        = "     << pcamera->storevideo()    << " AND"   <<
-    " codename          = '"    << pcamera->codename()      <<"' AND"   <<
-    " has_region        = "     << pcamera->hasregion()     <<" AND"   <<
-    " runatstartup      = "     << pcamera->runatstartup()  << ");";
-    std::string sqlrecsetup = sql_recognition_setup.str();
-    //cout << "rec setup sql: " << sqlrecsetup << endl;
-    pthread_mutex_lock(&databaseMutex);
-    db_execute(sqlrecsetup.c_str());
-    pthread_mutex_unlock(&databaseMutex);
-    std::string last_recognition_setup_id_query = "SELECT MAX(_id) FROM recognition_setup";
-    pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > recognition_setup_array = db_select(last_recognition_setup_id_query.c_str(), 1);
-    pthread_mutex_unlock(&databaseMutex);
-    int db_recognition_setup_id = atoi(recognition_setup_array.at(0).at(0).c_str());
-    //cout << "db_recognition_setup_id: " << db_day_id << endl;
-    
-    return db_recognition_setup_id;
-}
-
-int insertIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera)
-{
-    //Alarm Interval Start End
-    stringstream sql_interval;
-    sql_interval <<
-    "INSERT INTO interval (timestart, timeend) " <<
-    "SELECT '" << pcamera->timestart() << "', '" << pcamera->timeend() << "' " << 
-    "WHERE NOT EXISTS (SELECT * FROM interval WHERE timestart = '" << pcamera->timestart() << "' " <<
-    "AND timeend = '" << pcamera->timeend() << "');";
-    pthread_mutex_lock(&databaseMutex);
-    db_execute(sql_interval.str().c_str());
-    pthread_mutex_unlock(&databaseMutex);
-     
-    std::string last_interval_id_query = "SELECT MAX(_id) FROM interval";
-    pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > interval_array = db_select(last_interval_id_query.c_str(), 1);
-    pthread_mutex_unlock(&databaseMutex);
-    int db_interval_id = atoi(interval_array.at(0).at(0).c_str());
-    cout << "db_interval_id: " << db_interval_id << endl;
-    
-    return db_interval_id;
-}
-
-int insertDayIntoDatabase(std::string str_day, std::string XML_FILE, std::string xml_path, int db_month_id)
-{
-    
-    vector<vector<string> > day_array;
-    //Day database.
-    stringstream sql_day;
-    sql_day <<
-    "INSERT INTO day (label, xmlfile, xmlfilepath) " <<
-    "SELECT '" << str_day << "', '" << XML_FILE << "', '" << xml_path   << "' " <<
-    "WHERE NOT EXISTS (SELECT * FROM day WHERE label = '" << str_day    << "' " <<
-    "AND xmlfile        = '" << XML_FILE << "' " <<
-    "AND xmlfilepath    = '" << xml_path << "');";
-    pthread_mutex_lock(&databaseMutex);
-    db_execute(sql_day.str().c_str());
-    pthread_mutex_unlock(&databaseMutex);
-    std::string last_day_id_query = "SELECT MAX(_id) FROM day";
-    pthread_mutex_lock(&databaseMutex);
-    day_array = db_select(last_day_id_query.c_str(), 1);
-    pthread_mutex_unlock(&databaseMutex);
-    int db_day_id = atoi(day_array.at(0).at(0).c_str());
-    //cout << "db_day_id: " << db_day_id << endl;
-     
-    //Rel day month.
-    stringstream sql_rel_day_month;
-    sql_rel_day_month <<
-    "INSERT INTO rel_month_day (_id_month, _id_day) " <<
-    "SELECT " << db_month_id << ", " << db_day_id << 
-    " WHERE NOT EXISTS (SELECT * FROM rel_month_day WHERE _id_month = " << db_month_id <<
-    " AND _id_day = " << db_day_id << ");";
-    pthread_mutex_lock(&databaseMutex);
-    db_execute(sql_rel_day_month.str().c_str());
-    pthread_mutex_unlock(&databaseMutex);
-    
-    return db_day_id;
-}
-
-int insertRegionIntoDatabase(std::string rcoords)
-{
-    std::replace( rcoords.begin(), rcoords.end(), '\n', ' ');
-    stringstream sql_coord;
-    sql_coord <<
-    "INSERT INTO coordinates (coordinates) " <<
-    "VALUES ('" << rcoords    << "');";
-    pthread_mutex_lock(&databaseMutex);
-    db_execute(sql_coord.str().c_str());
-    std::string last_coordinates_query = "SELECT MAX(_id) FROM coordinates";
-    vector<vector<string> > coords_array = db_select(last_coordinates_query.c_str(), 1);
-    pthread_mutex_unlock(&databaseMutex);
-    cout << "coords_array: " << endl;
-    int db_coordnates_id = atoi(coords_array.at(0).at(0).c_str());
-    cout << "db_coordnates_id: " << db_coordnates_id << endl;
-    return db_coordnates_id;
-}
-
-int insertMonthIntoDatabase(std::string str_month, int db_camera_id)
-{
-    //month database.
-        stringstream sql_month;
-        sql_month <<
-        "INSERT INTO month (label) "       <<
-        "SELECT '" << str_month << "' "  <<
-        "WHERE NOT EXISTS (SELECT * FROM month WHERE label = '" + str_month + "');";
-        db_execute(sql_month.str().c_str());
-        std::string last_month_id_query = "SELECT MAX(_id) FROM month";
-        pthread_mutex_lock(&databaseMutex);
-        vector<vector<string> > month_array = db_select(last_month_id_query.c_str(), 1);
-        pthread_mutex_unlock(&databaseMutex);
-        int db_month_id = atoi(month_array.at(0).at(0).c_str());
-        cout << "db_month_id: " << db_month_id << endl;
-
-        //rel_camera_month.
-        stringstream sql_rel_camera_month;
-        sql_rel_camera_month <<
-        "INSERT INTO rel_camera_month (_id_camera, _id_month) "       <<
-        "SELECT " << db_camera_id << ", "  << db_month_id <<
-        " WHERE NOT EXISTS (SELECT * FROM rel_camera_month WHERE _id_camera = " << db_camera_id <<
-        " AND _id_month = " << db_month_id << ");";
-        pthread_mutex_lock(&databaseMutex);
-        db_execute(sql_rel_camera_month.str().c_str());
-        pthread_mutex_unlock(&databaseMutex); 
-        // get rel id.
-        std::string last_rel_camera_month_query = "SELECT MAX(_id) FROM rel_camera_month";
-        pthread_mutex_lock(&databaseMutex);
-        vector<vector<string> > rel_camera_month_array = db_select(last_rel_camera_month_query.c_str(), 1);
-        pthread_mutex_unlock(&databaseMutex);
-        int db_rel_camera_month_id = atoi(rel_camera_month_array.at(0).at(0).c_str());
-        cout << "db_rel_camera_month_id: " << db_rel_camera_month_id << endl;
-        
-        return db_month_id;
-}
 
 
  

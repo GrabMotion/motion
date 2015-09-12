@@ -45,6 +45,7 @@ extern std::string getGlobalIntToString(int id);
 extern bool checkFile(const std::string &file);
 extern std::string get_file_contents(std::string filename);
 extern pthread_mutex_t databaseMutex;
+extern std::string getXMLFilePathAndName(int cam, std::string recname, std::string currday, std::string curmonth, std::string name);
 
 extern bool to_bool(std::string const& s);
 
@@ -59,3 +60,14 @@ vector<string> startIfNotRunningQuery(std::string camera, char * time);
 
 extern std::string getCurrentDayLabel();
 extern std::string getCurrentMonthLabel();
+
+int insertMonthIntoDatabase(std::string str_month, int db_camera_id);
+void updateRegionIntoDatabase(std::string rcoords, int recognitionid);
+int insertRegionIntoDatabase(std::string rcoords);
+int insertDayIntoDatabase(std::string str_day, std::string XML_FILE, std::string xml_path, int db_month_id);
+int insertIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera);
+void updateIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera);
+int insertIntoRecognitionSetup(motion::Message::MotionCamera * pcamera, int db_interval_id, int db_day_id, int db_camera_id, int db_coordnates_id);
+void updateRecognitionSetup(motion::Message::MotionCamera * pcamera, motion::Message::MotionDay * pday);
+void insertIntoCameraMonth(char * time_rasp, int db_recognition_setup_id, int db_camera_id );
+void updateCameraMonth(char * time_rasp, int db_recognitionsetupid);
