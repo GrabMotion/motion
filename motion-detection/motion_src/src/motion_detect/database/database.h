@@ -45,7 +45,7 @@ extern std::string getGlobalIntToString(int id);
 extern bool checkFile(const std::string &file);
 extern std::string get_file_contents(std::string filename);
 extern pthread_mutex_t databaseMutex;
-extern std::string getXMLFilePathAndName(int cam, std::string recname, std::string currday, std::string curmonth, std::string name);
+extern std::string getXMLFilePathAndName(int cam, std::string recname, std::string currday, std::string name);
 
 extern bool to_bool(std::string const& s);
 

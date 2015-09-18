@@ -112,7 +112,7 @@ void updateCameraDB(int status, char * time, int camera)
     sql_updatecameras <<
     "UPDATE cameras set recognizing = " << status << ", since = '" << time << "' "  <<
     "WHERE number = " << camera << ";";
-    cout << "sql_updatecameras: " << sql_updatecameras.str() << endl;
+    //cout << "sql_updatecameras: " << sql_updatecameras.str() << endl;
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_updatecameras.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
@@ -422,7 +422,7 @@ bool loadStartQuery(std::string camera, std::string recname)
     
     std::string XML_FILE = "<import>session"; 
     
-    std::string xml_path = getXMLFilePathAndName(camnum, recname, _month, _day, XML_FILE);
+    std::string xml_path = getXMLFilePathAndName(camnum, recname, _day, XML_FILE);
   
     int db_dayid = insertDayIntoDatabase(_day, XML_FILE, xml_path, db_monthid);
     
@@ -457,7 +457,8 @@ bool loadStartQuery(std::string camera, std::string recname)
     "I._id AS instanceid, " << // 18
     "D._id, "               << // 19
     "MO._id, "              << // 20
-    "D.xmlfilepath "        << // 21
+    "D.xmlfilepath, "       << // 21
+    "RC.speed "             << // 22
     "FROM recognition_setup RC "                                << 
     "JOIN coordinates AS CO ON RC._id_coordinates = CO._id "    <<
     "JOIN interval AS I ON RC._id_interval = I._id "            <<
@@ -469,7 +470,7 @@ bool loadStartQuery(std::string camera, std::string recname)
     "WHERE C.number = " << camera << " AND RC.name = '" << recname << "';";
     cout << "sql_load_recognition: " << sql_load_recognition.str() << endl;
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > start_array = db_select(sql_load_recognition.str().c_str(), 22);
+    vector<vector<string> > start_array = db_select(sql_load_recognition.str().c_str(), 23);
     pthread_mutex_unlock(&databaseMutex);
     int size = start_array.size();
     if (size>0)
@@ -547,6 +548,9 @@ bool loadStartQuery(std::string camera, std::string recname)
         mcamera->set_db_idmonth(dbidmonth);
         
         mcamera->set_xmlfilepath(rows.at(21));
+        
+        google::protobuf::int32 speed = atoi(rows.at(22).c_str());
+        mcamera->set_speed(speed);
         
         PROTO.Clear();
         PROTO = m;
@@ -748,6 +752,7 @@ int insertIntoRecognitionSetup(
             "has_region, "      <<
             "_id_coordinates, " <<
             "delay, "           <<
+            "speed, "           <<
             "runatstartup) "    <<
     "SELECT "               << "'"      << 
     pcamera->recname()         << "', "    <<
@@ -761,6 +766,7 @@ int insertIntoRecognitionSetup(
     pcamera->hasregion()    << ", "     <<
     db_coordnates_id        << ", "     <<
     pcamera->delay()        << ", "     <<
+    pcamera->speed()        << ", "     <<
     pcamera->runatstartup() <<    
     " WHERE NOT EXISTS (SELECT * FROM recognition_setup WHERE"  <<
     " name              = '"    << pcamera->recname()          << "' AND"  <<
@@ -771,7 +777,8 @@ int insertIntoRecognitionSetup(
     " storeimage        = "     << pcamera->storeimage()    << " AND"   <<
     " storevideo        = "     << pcamera->storevideo()    << " AND"   <<
     " codename          = '"    << pcamera->codename()      <<"' AND"   <<
-    " has_region        = "     << pcamera->hasregion()     <<" AND"   <<
+    " has_region        = "     << pcamera->hasregion()     <<" AND"    <<
+    " speed             = "     << pcamera->speed()         <<" AND"    <<
     " runatstartup      = "     << pcamera->runatstartup()  << ");";
     std::string sqlrecsetup = sql_recognition_setup.str();
     cout << "rec setup sql: " << sqlrecsetup << endl;

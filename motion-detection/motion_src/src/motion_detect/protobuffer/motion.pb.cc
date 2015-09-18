@@ -91,7 +91,7 @@ void protobuf_AssignDesc_motion_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Message));
   Message_MotionCamera_descriptor_ = Message_descriptor_->nested_type(0);
-  static const int Message_MotionCamera_offsets_[35] = {
+  static const int Message_MotionCamera_offsets_[36] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, motionmonth_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, motionrec_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, cameraid_),
@@ -127,6 +127,7 @@ void protobuf_AssignDesc_motion_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, db_idmonth_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, db_idday_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, xmlfilepath_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, speed_),
   };
   Message_MotionCamera_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -328,7 +329,7 @@ void protobuf_AddDesc_motion_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014motion.proto\022\006motion\"\277\026\n\007Message\022\021\n\tac"
+    "\n\014motion.proto\022\006motion\"\316\026\n\007Message\022\021\n\tac"
     "tivecam\030\001 \001(\005\0220\n\004type\030\002 \002(\0162\032.motion.Mes"
     "sage.ActionType:\006ENGAGE\022\014\n\004time\030\003 \001(\t\022\014\n"
     "\004data\030\004 \001(\014\022\023\n\013data_amount\030\005 \001(\005\022\022\n\ndata"
@@ -338,7 +339,7 @@ void protobuf_AddDesc_motion_2eproto() {
     "amera\022\021\n\tcurrmonth\030\013 \001(\t\022\017\n\007currday\030\014 \001("
     "\t\022\017\n\007currcam\030\r \001(\005\022\023\n\013packagesize\030\016 \001(\005\022"
     "\025\n\rimagefilepath\030\017 \001(\t\022\025\n\rvideofilepath\030"
-    "\020 \001(\t\032\214\006\n\014MotionCamera\0220\n\013motionmonth\030\001 "
+    "\020 \001(\t\032\233\006\n\014MotionCamera\0220\n\013motionmonth\030\001 "
     "\003(\0132\033.motion.Message.MotionMonth\0224\n\tmoti"
     "onrec\030\002 \003(\0132!.motion.Message.MotionRecog"
     "nition\022\023\n\010cameraid\030\003 \001(\005:\0010\022\024\n\014cameranum"
@@ -357,50 +358,50 @@ void protobuf_AddDesc_motion_2eproto() {
     "ws\030\035 \001(\005\022\020\n\010matwidth\030\036 \001(\005\022\021\n\tmatheight\030"
     "\037 \001(\005\022\024\n\014fromdatabase\030  \001(\010\022\024\n\014lastinsta"
     "nce\030! \001(\t\022\022\n\ndb_idmonth\030\" \001(\005\022\020\n\010db_idda"
-    "y\030# \001(\005\022\023\n\013xmlfilepath\030$ \001(\t\0323\n\021MotionRe"
-    "cognition\022\014\n\004name\030\001 \001(\t\022\020\n\010db_idrec\030\002 \001("
-    "\005\032c\n\013MotionMonth\022,\n\tmotionday\030\001 \003(\0132\031.mo"
-    "tion.Message.MotionDay\022\022\n\nmonthlabel\030\002 \001"
-    "(\t\022\022\n\ndb_monthid\030\003 \001(\005\032\217\001\n\tMotionDay\022*\n\010"
-    "instance\030\001 \003(\0132\030.motion.Message.Instance"
-    "\022\020\n\010daylabel\030\002 \001(\t\022\020\n\010db_dayid\030\003 \001(\005\022\035\n\025"
-    "db_recognitionsetupid\030\004 \001(\005\022\023\n\013xmlfilepa"
-    "th\030\005 \001(\t\032\316\001\n\010Instance\022\022\n\nidinstance\030\001 \002("
-    "\005\022\025\n\rinstancestart\030\002 \001(\t\022\023\n\013instanceend\030"
-    "\003 \001(\t\022\022\n\nfileformat\030\004 \001(\t\022$\n\005image\030\005 \003(\013"
-    "2\025.motion.Message.Image\022\"\n\004crop\030\006 \003(\0132\024."
-    "motion.Message.Crop\022$\n\005video\030\007 \001(\0132\025.mot"
-    "ion.Message.Video\032G\n\005Image\022\014\n\004path\030\001 \001(\t"
-    "\022\014\n\004name\030\002 \001(\t\022\024\n\014imagechanges\030\003 \001(\005\022\014\n\004"
-    "time\030\004 \001(\t\032.\n\004Crop\022\014\n\004rect\030\001 \001(\t\022\030\n\020db_i"
-    "magefatherid\030\002 \001(\005\032;\n\005Video\022\014\n\004path\030\001 \001("
-    "\t\022\014\n\004name\030\002 \001(\t\022\026\n\016instancefolder\030\003 \001(\t\""
-    "\356\003\n\nActionType\022\013\n\006ENGAGE\020\350\007\022\016\n\tREC_START"
-    "\020\352\007\022\020\n\013REC_RUNNING\020\353\007\022\r\n\010REC_STOP\020\354\007\022\r\n\010"
-    "UNENGAGE\020\355\007\022\r\n\010GET_TIME\020\356\007\022\r\n\010SET_TIME\020\357"
-    "\007\022\r\n\010TIME_SET\020\360\007\022\017\n\nSTRM_START\020\361\007\022\016\n\tSTR"
-    "M_STOP\020\362\007\022\021\n\014TAKE_PICTURE\020\363\007\022\020\n\013DISSCONN"
-    "ECT\020\364\007\022\014\n\007REFRESH\020\365\007\022\014\n\007GET_XML\020\366\007\022\016\n\tGE"
-    "T_IMAGE\020\367\007\022\016\n\tGET_VIDEO\020\370\007\022\t\n\004SAVE\020\371\007\022\t\n"
-    "\004OPEN\020\372\007\022\013\n\006UPDATE\020\373\007\022\014\n\007SAVE_OK\020\374\007\022\016\n\tU"
-    "PDATE_OK\020\375\007\022\020\n\013RESPONSE_OK\020\320\017\022\022\n\rRESPONS"
-    "E_NEXT\020\332\017\022\021\n\014RESPONSE_END\020\344\017\022\024\n\017RESPONSE"
-    "_FINISH\020\356\017\022\024\n\017REC_HAS_CHANGES\020\370\017\022\025\n\020REC_"
-    "HAS_INSTANCE\020\202\020\022\023\n\016PROTO_HAS_FILE\020\326\027\022\022\n\r"
-    "PROTO_NO_FILE\020\327\027\"\254\003\n\nSocketType\022\031\n\025SOCKE"
-    "T_PROTO_TOSTRING\020\n\022\030\n\024SOCKET_PROTO_TOARR"
-    "AY\020\013\022\025\n\021SOCKET_PLAIN_TEXT\020\014\022\024\n\020SPLITTED_"
-    "MESSAGE\020\r\022\022\n\016SINGLE_MESSAGE\020\016\022\034\n\027SOCKET_"
-    "BUFFER_NANO_SIZE\020\200\010\022\034\n\027SOCKET_BUFFER_MIN"
-    "I_SIZE\020\200\020\022\035\n\030SOCKET_BUFFER_MICRO_SIZE\020\200 "
-    "\022\035\n\030SOCKET_BUFFER_SMALL_SIZE\020\204@\022 \n\032SOCKE"
-    "T_BUFFER_REGULAR_SIZE\020\210\200\001\022\037\n\031SOCKET_BUFF"
-    "ER_MEDIUM_SIZE\020\220\200\002\022\034\n\026SOCKET_BUFFER_BIG_"
-    "SIZE\020\240\200\004\022\022\n\rTCP_ECHO_PORT\020\222\'\022\027\n\022TCP_STRE"
-    "AMING_PORT\020\234\'\022\r\n\010UDP_PORT\020\246\'\022\021\n\014TCP_MSG_"
-    "PORT\020\260\'\"_\n\013ProcessType\022\031\n\024PROCESS_PEOPLE"
-    "_COUNT\020\241\037\022\030\n\023PROCESS_FACE_DETECT\020\242\037\022\033\n\026P"
-    "ROCESS_WALK_DIRECTION\020\243\037", 2904);
+    "y\030# \001(\005\022\023\n\013xmlfilepath\030$ \001(\t\022\r\n\005speed\030% "
+    "\001(\005\0323\n\021MotionRecognition\022\014\n\004name\030\001 \001(\t\022\020"
+    "\n\010db_idrec\030\002 \001(\005\032c\n\013MotionMonth\022,\n\tmotio"
+    "nday\030\001 \003(\0132\031.motion.Message.MotionDay\022\022\n"
+    "\nmonthlabel\030\002 \001(\t\022\022\n\ndb_monthid\030\003 \001(\005\032\217\001"
+    "\n\tMotionDay\022*\n\010instance\030\001 \003(\0132\030.motion.M"
+    "essage.Instance\022\020\n\010daylabel\030\002 \001(\t\022\020\n\010db_"
+    "dayid\030\003 \001(\005\022\035\n\025db_recognitionsetupid\030\004 \001"
+    "(\005\022\023\n\013xmlfilepath\030\005 \001(\t\032\316\001\n\010Instance\022\022\n\n"
+    "idinstance\030\001 \002(\005\022\025\n\rinstancestart\030\002 \001(\t\022"
+    "\023\n\013instanceend\030\003 \001(\t\022\022\n\nfileformat\030\004 \001(\t"
+    "\022$\n\005image\030\005 \003(\0132\025.motion.Message.Image\022\""
+    "\n\004crop\030\006 \003(\0132\024.motion.Message.Crop\022$\n\005vi"
+    "deo\030\007 \001(\0132\025.motion.Message.Video\032G\n\005Imag"
+    "e\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\024\n\014imagech"
+    "anges\030\003 \001(\005\022\014\n\004time\030\004 \001(\t\032.\n\004Crop\022\014\n\004rec"
+    "t\030\001 \001(\t\022\030\n\020db_imagefatherid\030\002 \001(\005\032;\n\005Vid"
+    "eo\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\026\n\016instan"
+    "cefolder\030\003 \001(\t\"\356\003\n\nActionType\022\013\n\006ENGAGE\020"
+    "\350\007\022\016\n\tREC_START\020\352\007\022\020\n\013REC_RUNNING\020\353\007\022\r\n\010"
+    "REC_STOP\020\354\007\022\r\n\010UNENGAGE\020\355\007\022\r\n\010GET_TIME\020\356"
+    "\007\022\r\n\010SET_TIME\020\357\007\022\r\n\010TIME_SET\020\360\007\022\017\n\nSTRM_"
+    "START\020\361\007\022\016\n\tSTRM_STOP\020\362\007\022\021\n\014TAKE_PICTURE"
+    "\020\363\007\022\020\n\013DISSCONNECT\020\364\007\022\014\n\007REFRESH\020\365\007\022\014\n\007G"
+    "ET_XML\020\366\007\022\016\n\tGET_IMAGE\020\367\007\022\016\n\tGET_VIDEO\020\370"
+    "\007\022\t\n\004SAVE\020\371\007\022\t\n\004OPEN\020\372\007\022\013\n\006UPDATE\020\373\007\022\014\n\007"
+    "SAVE_OK\020\374\007\022\016\n\tUPDATE_OK\020\375\007\022\020\n\013RESPONSE_O"
+    "K\020\320\017\022\022\n\rRESPONSE_NEXT\020\332\017\022\021\n\014RESPONSE_END"
+    "\020\344\017\022\024\n\017RESPONSE_FINISH\020\356\017\022\024\n\017REC_HAS_CHA"
+    "NGES\020\370\017\022\025\n\020REC_HAS_INSTANCE\020\202\020\022\023\n\016PROTO_"
+    "HAS_FILE\020\326\027\022\022\n\rPROTO_NO_FILE\020\327\027\"\254\003\n\nSock"
+    "etType\022\031\n\025SOCKET_PROTO_TOSTRING\020\n\022\030\n\024SOC"
+    "KET_PROTO_TOARRAY\020\013\022\025\n\021SOCKET_PLAIN_TEXT"
+    "\020\014\022\024\n\020SPLITTED_MESSAGE\020\r\022\022\n\016SINGLE_MESSA"
+    "GE\020\016\022\034\n\027SOCKET_BUFFER_NANO_SIZE\020\200\010\022\034\n\027SO"
+    "CKET_BUFFER_MINI_SIZE\020\200\020\022\035\n\030SOCKET_BUFFE"
+    "R_MICRO_SIZE\020\200 \022\035\n\030SOCKET_BUFFER_SMALL_S"
+    "IZE\020\204@\022 \n\032SOCKET_BUFFER_REGULAR_SIZE\020\210\200\001"
+    "\022\037\n\031SOCKET_BUFFER_MEDIUM_SIZE\020\220\200\002\022\034\n\026SOC"
+    "KET_BUFFER_BIG_SIZE\020\240\200\004\022\022\n\rTCP_ECHO_PORT"
+    "\020\222\'\022\027\n\022TCP_STREAMING_PORT\020\234\'\022\r\n\010UDP_PORT"
+    "\020\246\'\022\021\n\014TCP_MSG_PORT\020\260\'\"_\n\013ProcessType\022\031\n"
+    "\024PROCESS_PEOPLE_COUNT\020\241\037\022\030\n\023PROCESS_FACE"
+    "_DETECT\020\242\037\022\033\n\026PROCESS_WALK_DIRECTION\020\243\037", 2919);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "motion.proto", &protobuf_RegisterTypes);
   Message::default_instance_ = new Message();
@@ -616,6 +617,7 @@ const int Message_MotionCamera::kLastinstanceFieldNumber;
 const int Message_MotionCamera::kDbIdmonthFieldNumber;
 const int Message_MotionCamera::kDbIddayFieldNumber;
 const int Message_MotionCamera::kXmlfilepathFieldNumber;
+const int Message_MotionCamera::kSpeedFieldNumber;
 #endif  // !_MSC_VER
 
 Message_MotionCamera::Message_MotionCamera()
@@ -670,6 +672,7 @@ void Message_MotionCamera::SharedCtor() {
   db_idmonth_ = 0;
   db_idday_ = 0;
   xmlfilepath_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  speed_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -815,13 +818,14 @@ void Message_MotionCamera::Clear() {
       }
     }
   }
-  if (_has_bits_[32 / 32] & 7) {
+  if (_has_bits_[32 / 32] & 15) {
     ZR_(db_idmonth_, db_idday_);
     if (has_xmlfilepath()) {
       if (xmlfilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         xmlfilepath_->clear();
       }
     }
+    speed_ = 0;
   }
 
 #undef OFFSET_OF_FIELD_
@@ -1384,6 +1388,21 @@ bool Message_MotionCamera::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(296)) goto parse_speed;
+        break;
+      }
+
+      // optional int32 speed = 37;
+      case 37: {
+        if (tag == 296) {
+         parse_speed:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &speed_)));
+          set_has_speed();
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -1645,6 +1664,11 @@ void Message_MotionCamera::SerializeWithCachedSizes(
       36, this->xmlfilepath(), output);
   }
 
+  // optional int32 speed = 37;
+  if (has_speed()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(37, this->speed(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1900,6 +1924,11 @@ void Message_MotionCamera::SerializeWithCachedSizes(
         36, this->xmlfilepath(), target);
   }
 
+  // optional int32 speed = 37;
+  if (has_speed()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(37, this->speed(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -2135,6 +2164,13 @@ int Message_MotionCamera::ByteSize() const {
           this->xmlfilepath());
     }
 
+    // optional int32 speed = 37;
+    if (has_speed()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->speed());
+    }
+
   }
   // repeated .motion.Message.MotionMonth motionmonth = 1;
   total_size += 1 * this->motionmonth_size();
@@ -2287,6 +2323,9 @@ void Message_MotionCamera::MergeFrom(const Message_MotionCamera& from) {
     if (from.has_xmlfilepath()) {
       set_xmlfilepath(from.xmlfilepath());
     }
+    if (from.has_speed()) {
+      set_speed(from.speed());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -2346,6 +2385,7 @@ void Message_MotionCamera::Swap(Message_MotionCamera* other) {
     std::swap(db_idmonth_, other->db_idmonth_);
     std::swap(db_idday_, other->db_idday_);
     std::swap(xmlfilepath_, other->xmlfilepath_);
+    std::swap(speed_, other->speed_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     std::swap(_has_bits_[1], other->_has_bits_[1]);
     _unknown_fields_.Swap(&other->_unknown_fields_);

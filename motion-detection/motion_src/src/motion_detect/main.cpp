@@ -176,6 +176,17 @@ char * setMessageValueBody(int value, std::string body);
 bool checkFile(const std::string &file);
 std::string exec_command(char* cmd);
 
+inline bool file_exists (const std::string& name) {
+    ifstream f(name.c_str());
+    if (f.good()) {
+        f.close();
+        return true;
+    } else {
+        f.close();
+        return false;
+    }   
+}
+
 std::string exec_command(char* cmd)
 {
     FILE* pipe = popen(cmd, "r");
@@ -731,12 +742,15 @@ motion::Message getLocalPtoro()
 
 }
 
-motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(
-                motion::Message::MotionMonth * mmonth,   
+motion::Message::MotionCamera * getMonthByCameraIdMonthAndDate(
+                motion::Message::MotionCamera * mcam,   
                 std::string camid, 
                 std::string month, 
                 std::string day)
 {
+    
+    motion::Message::MotionMonth * mmonth = mcam->add_motionmonth();
+    
     stringstream sql_month;
     sql_month               <<
     "SELECT "               <<  
@@ -785,7 +799,9 @@ motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(
         
         google::protobuf::int32 dayid = atoi(rowc.at(0).c_str());
         mday->set_db_dayid(dayid);
-        mday->set_xmlfilepath(rowc.at(2).c_str());
+        std::string xmlpath = rowc.at(2).c_str();
+        mcam->set_xmlfilepath(xmlpath);
+        mday->set_xmlfilepath(xmlpath);
       
         int instancecounter = 0;
         motion::Message::Instance * minstance;
@@ -828,9 +844,10 @@ motion::Message::MotionMonth * getMonthByCameraIdMonthAndDate(
            
         }
     }
+    return mcam;
 }
 
-std::string getXMLFilePathAndName(int cam, std::string recname, std::string currday, std::string curmonth, std::string name)
+std::string getXMLFilePathAndName(int cam, std::string recname, std::string currday, std::string name)
 {
     stringstream DIR;
     DIR << sourcepath << "motion_web/pics/" << "camera" << cam << "/" << recname << "/" << currday << "/";
@@ -980,8 +997,7 @@ motion::Message getRefreshProto(motion::Message m)
             mcam->set_recname(rows.at(15));
             cout << "Month: "   << m.currmonth() << endl;
             cout << "Day: "     << m.currday()  << endl;
-            motion::Message::MotionMonth * mmonth = mcam->add_motionmonth();
-            getMonthByCameraIdMonthAndDate(mmonth, rows.at(0), m.currmonth(), m.currday());
+            mcam = getMonthByCameraIdMonthAndDate(mcam, rows.at(0), m.currmonth(), m.currday());
         }
         
     }
@@ -1018,7 +1034,7 @@ void updateRecognition(motion::Message m)
      
     google::protobuf::uint32 activecam = R_PROTO.activecam();
     
-    std::string xml_path = getXMLFilePathAndName(activecam, pcamera->recname(), str_month, str_day, XML_FILE);
+    std::string xml_path = getXMLFilePathAndName(activecam, pcamera->recname(), str_day, XML_FILE);
     
      //time
     struct timeval tr;
@@ -1081,11 +1097,10 @@ void saveRecognition(motion::Message m)
         str_day = m.currday();
     }
     
-    motion::Message::MotionDay * pday = pmonth->mutable_motionday(0);
-       
+      
     google::protobuf::uint32 activecam = R_PROTO.activecam();
     
-    std::string xml_path = getXMLFilePathAndName(activecam, pcamera->recname(), str_month, str_day, XML_FILE);
+    std::string xml_path = getXMLFilePathAndName(activecam, pcamera->recname(), str_day, XML_FILE);
     
      //time
     struct timeval tr;
@@ -1199,21 +1214,22 @@ motion::Message runCommand(motion::Message m)
             std::string str_month = m.currmonth();
             std::string str_day = m.currday();
             
-    
             motion::Message::MotionCamera * pcamera = m.mutable_motioncamera(0);   
-            motion::Message::MotionMonth * pmonth = pcamera->mutable_motionmonth(0);
-            motion::Message::MotionDay * pday = pmonth->mutable_motionday(0);
-   
+            
             std::string recname = pcamera->recname();  
             
-      
-            std::string xml_path = getXMLFilePathAndName(cam, recname, str_month, str_day, XML_FILE);
+            std::string xml_path = pcamera->xmlfilepath(); //getXMLFilePathAndName(cam, recname, str_day, XML_FILE);
             
-            string xml_loaded = get_file_contents(xml_path);
-            std:string encoded_xml = base64_encode(reinterpret_cast<const unsigned char*>(xml_loaded.c_str()),xml_loaded.length());
+            bool xmlexist = file_exists(xml_path);
+            
+            if (xmlexist)
+            {
+                string xml_loaded = get_file_contents(xml_path);
+                std:string encoded_xml = base64_encode(reinterpret_cast<const unsigned char*>(xml_loaded.c_str()),xml_loaded.length());
+                m.set_data(encoded_xml.c_str());
+            }
             m.set_type(motion::Message::GET_XML);
-            m.set_data(encoded_xml.c_str());
-            
+           
         }
         break;
         
@@ -1314,14 +1330,14 @@ motion::Message runCommand(motion::Message m)
         {
             cout << "motion::Message::REC_STOP" << endl;
             is_recognizing = false;
+            if (camera)
+                cvReleaseCapture(&camera);
+            
             pthread_cancel(thread_recognition);
             int cam = m.activecam();
             motion::Message::MotionCamera * mcam = m.add_motioncamera(); //.mutable_motioncamera(cam);
             mcam->set_recognizing(false);
-     
-            if (camera)
-                cvReleaseCapture(&camera);
-            
+    
             struct timeval tr;
             struct tm* ptmr;
             char time_rasp[40];

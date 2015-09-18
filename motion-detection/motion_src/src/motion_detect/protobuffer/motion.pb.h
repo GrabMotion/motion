@@ -508,6 +508,13 @@ class Message_MotionCamera : public ::google::protobuf::Message {
   inline ::std::string* release_xmlfilepath();
   inline void set_allocated_xmlfilepath(::std::string* xmlfilepath);
 
+  // optional int32 speed = 37;
+  inline bool has_speed() const;
+  inline void clear_speed();
+  static const int kSpeedFieldNumber = 37;
+  inline ::google::protobuf::int32 speed() const;
+  inline void set_speed(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:motion.Message.MotionCamera)
  private:
   inline void set_has_cameraid();
@@ -576,6 +583,8 @@ class Message_MotionCamera : public ::google::protobuf::Message {
   inline void clear_has_db_idday();
   inline void set_has_xmlfilepath();
   inline void clear_has_xmlfilepath();
+  inline void set_has_speed();
+  inline void clear_has_speed();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -615,6 +624,7 @@ class Message_MotionCamera : public ::google::protobuf::Message {
   ::google::protobuf::int32 db_idmonth_;
   ::google::protobuf::int32 db_idday_;
   ::std::string* xmlfilepath_;
+  ::google::protobuf::int32 speed_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
@@ -3279,6 +3289,30 @@ inline void Message_MotionCamera::set_allocated_xmlfilepath(::std::string* xmlfi
     xmlfilepath_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionCamera.xmlfilepath)
+}
+
+// optional int32 speed = 37;
+inline bool Message_MotionCamera::has_speed() const {
+  return (_has_bits_[1] & 0x00000008u) != 0;
+}
+inline void Message_MotionCamera::set_has_speed() {
+  _has_bits_[1] |= 0x00000008u;
+}
+inline void Message_MotionCamera::clear_has_speed() {
+  _has_bits_[1] &= ~0x00000008u;
+}
+inline void Message_MotionCamera::clear_speed() {
+  speed_ = 0;
+  clear_has_speed();
+}
+inline ::google::protobuf::int32 Message_MotionCamera::speed() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionCamera.speed)
+  return speed_;
+}
+inline void Message_MotionCamera::set_speed(::google::protobuf::int32 value) {
+  set_has_speed();
+  speed_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionCamera.speed)
 }
 
 // -------------------------------------------------------------------
