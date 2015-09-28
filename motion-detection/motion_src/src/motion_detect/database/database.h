@@ -51,7 +51,7 @@ extern bool to_bool(std::string const& s);
 
 extern motion::Message PROTO, R_PROTO;
 
-void updateCameraDB(int status, char * time, int camera);
+void updateRecStatus(int status, int camera, std::string recname);
 static int callback(void *ptr, int argc, char* argv[], char* cols[] );
 int db_cpuinfo();
 std::vector<int> db_cams(std::vector<int> cams);
@@ -64,10 +64,11 @@ extern std::string getCurrentMonthLabel();
 int insertMonthIntoDatabase(std::string str_month, int db_camera_id);
 void updateRegionIntoDatabase(std::string rcoords, int recognitionid);
 int insertRegionIntoDatabase(std::string rcoords);
-int insertDayIntoDatabase(std::string str_day, std::string XML_FILE, std::string xml_path, int db_month_id);
+int insertDayIntoDatabase(std::string str_day, int db_month_id);
 int insertIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera);
 void updateIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera);
-int insertIntoRecognitionSetup(motion::Message::MotionCamera * pcamera, int db_interval_id, int db_day_id, int db_camera_id, int db_coordnates_id);
+int insertIntoRecognitionSetup(motion::Message::MotionCamera * pcamera, int db_interval_id, int db_day_id, int db_camera_id, int db_coordnates_id, std::string xmlfilepath);
 void updateRecognitionSetup(motion::Message::MotionCamera * pcamera, motion::Message::MotionDay * pday);
-void insertIntoCameraMonth(char * time_rasp, int db_recognition_setup_id, int db_camera_id );
+void insertIntoCameraMonth(char * time_rasp, int db_recognitionsetup_id, int db_camera_id );
 void updateCameraMonth(char * time_rasp, int db_recognitionsetupid);
+

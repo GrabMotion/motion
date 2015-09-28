@@ -19,6 +19,7 @@ extern cv::VideoCapture * videocam;
 
 //Observer Recogition
 extern bool is_recognizing;
+extern bool is_recognizing_flag;
 extern int resutl_watch_detected;
 extern std::string startrecognitiontime;
 extern void directoryExistsOrCreate(const char* pzPath);

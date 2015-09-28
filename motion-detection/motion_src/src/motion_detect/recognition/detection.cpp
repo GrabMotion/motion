@@ -42,6 +42,8 @@
 #include <cstring>
 #include <algorithm>
 #include <new>
+
+#include <signal.h>
   
 #include <sys/time.h>
   
@@ -61,10 +63,16 @@ motion::Message::Instance * pinstance;
 cv::VideoWriter * videout;
 //CvVideoWriter * cvvideout;
 
+int db_recognition_setup_id;
+
 int matrows = 0;
 int matcols = 0;
 
 pthread_t thread_store_instance, thread_image;
+extern pthread_t thread_recognition;
+
+volatile int running_image_threads = 0;
+pthread_mutex_t running_image_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int there_is_motion;
 pthread_t thread_store;
@@ -250,7 +258,11 @@ inline void directoryExistsOrCreate(const char* pzPath)
 void * storeimage(void * args)
 {
     struct image_args *arg = (struct image_args *) args;
+    pthread_mutex_lock(&running_image_mutex);
     imwrite(arg->path, arg->mat);
+    running_image_threads--;
+    pthread_mutex_unlock(&running_image_mutex);
+    
 }
   
 // When motion is detected we write the image to disk
@@ -296,6 +308,11 @@ inline string saveImg(
 
         ImageArgs.mat = image;
         ImageArgs.path = image_file;
+        
+        pthread_mutex_lock(&running_image_mutex);
+        running_image_threads++;
+        pthread_mutex_unlock(&running_image_mutex);
+        
         pthread_create(&thread_image, NULL, storeimage, &ImageArgs);
 
         //imwrite(image_file, image);
@@ -561,9 +578,7 @@ void * startRecognition(void * arg)
     cout << "START RECOGNITION." << endl;
       
     pthread_detach(pthread_self());
-     
-    is_recognizing = false;
-     
+      
     R_PROTO.Clear();
     R_PROTO = PROTO;
      
@@ -796,11 +811,10 @@ void * startRecognition(void * arg)
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     
     int db_interval_id = pcamera->db_intervalid();
-    int db_recognition_setup_id = pday->db_recognitionsetupid();
+    db_recognition_setup_id = pcamera->db_recognitionsetupid();
    
     pthread_mutex_lock(&protoMutex);
     pday->set_db_dayid(db_dayid);
-    pday->set_db_recognitionsetupid(db_recognition_setup_id);
     pthread_mutex_unlock(&protoMutex);
      
     //Camera dir.
@@ -820,15 +834,14 @@ void * startRecognition(void * arg)
     //Create rec name directory
     directoryExistsOrCreate(reddir.str().c_str());
      
-    const string DIR        = reddir.str();          // directory where the images will be stored
-    //const string REGION     = sourcepath + "motion_web/pics/region/";   // directory where the regios are stored
-    const string EXT        = ".jpg";                           // extension of the images
-    const string EXT_DATA   = ".xml";                           // extension of the data
-    const int DELAY         = 50; //500;                              // in mseconds, take a picture every 1/2 second
-    const string LOG        = sourcepath + "/motion_web/log";           // log for the export
+    const string DIR        = reddir.str();                                 // directory where the images will be stored
+    //const string REGION     = sourcepath + "motion_web/pics/region/";     // directory where the regios are stored
+    const string EXT        = ".jpg";                                       // extension of the images
+    const string EXT_DATA   = ".xml";                                       // extension of the data
+    const int DELAY         = 50; //500;                                    // in mseconds, take a picture every 1/2 second
+    const string LOG        = sourcepath + "/motion_web/log";               // log for the export
     const string LOGCLEAR = LOG + "/log_remove";
-    // region vector storing xml region
-   
+  
     // start and end times
     time_t start, end;
       
@@ -905,13 +918,16 @@ void * startRecognition(void * arg)
     double init_time, begin_time, end_time;
     //Directory Tree
     stringstream directoryTree;
+    
     // Instance counter
     int instance_counter = 0;
-        
     string instance;
-    
     if (pcamera->has_lastinstance())
-        instance = pcamera->lastinstance();
+    {
+        std::string instcounter = pcamera->lastinstance();
+        instance_counter = atoi(instcounter.c_str());
+        instance = instcounter;
+    }
      
     init_time = clock();
     
@@ -932,12 +948,45 @@ void * startRecognition(void * arg)
         try
         {
             
-            is_recognizing = true;
+            if (!pcamera->recognizing())
+            {
+                
+                while (running_image_threads > 0)
+                {
+                   cout << "running_image_threads: " << running_image_threads << endl; 
+                   sleep(1);
+                }
+                running_image_threads = 0;
+                
+                if (camera)
+                    cvReleaseCapture(&camera);
+                
+                std::cout << ":::::::::::: DUMP INSTANCE FINISH "<< instance << "  :::::::::::" << std::endl;
+                    
+                has_instance_directory = false;
+                init_motion = false;
 
-            pthread_mutex_lock(&protoMutex);
-            pcamera->set_recognizing(true);
-            pthread_mutex_unlock(&protoMutex);
+                end = clock();
 
+                ProtoArgs.pinstance     = pinstance; //pday->mutable_instance(0);
+                ProtoArgs.DIR           = DIR;
+                ProtoArgs.XML_FILE      = XML_FILE;
+                ProtoArgs.EXT_DATA      = EXT_DATA;
+                ProtoArgs.init_time     = init_time;
+                ProtoArgs.begin_time    = begin_time;
+                ProtoArgs.end_time      = end_time;
+                ProtoArgs.end           = end; 
+                ProtoArgs.instance      = instance;
+                
+                cout << "pthread_create" << endl;
+                int runb = pthread_create(&thread_store, NULL, storeproto, &ProtoArgs);
+                pthread_join(thread_store,  (void**) &runb);
+               
+                pthread_cancel(thread_recognition); 
+                 
+            }
+
+          
             // Take a new image
             prev_frame = current_frame;
             current_frame = next_frame;
@@ -1133,13 +1182,13 @@ void * startRecognition(void * arg)
                 if ( seconds_since_start > delay & init_motion )
                 {
 
+                    std::cout << ":::::::::::: DUMP INSTANCE "<< instance << "  :::::::::::" << std::endl;
+                    
                     has_instance_directory = false;
                     init_motion = false;
-
-                    std::cout << ":::::::::::: DUMP INSTANCE "<< instance << "  :::::::::::" << std::endl;
-
+                    
                     end = clock();
-
+                    
                     ProtoArgs.pinstance     = pinstance; //pday->mutable_instance(0);
                     ProtoArgs.DIR           = DIR;
                     ProtoArgs.XML_FILE      = XML_FILE;
@@ -1149,14 +1198,10 @@ void * startRecognition(void * arg)
                     ProtoArgs.end_time      = end_time;
                     ProtoArgs.end           = end; 
                     ProtoArgs.instance      = instance;
+
                     cout << "pthread_create" << endl;
                     int runb = pthread_create(&thread_store, NULL, storeproto, &ProtoArgs);
-                    //cout << "pthread_join" << endl;
-                    //pthread_join(thread_store,  (void**) &runb);
-                    //cout << "pthread_cancel" << endl;
-
-                    //pinstance->Clear();
-
+                    
                 }
 
                 // XML Instance
@@ -1181,13 +1226,8 @@ void * startRecognition(void * arg)
         //cvWaitKey (DELAY);
     }
      
-    pthread_mutex_lock(&protoMutex);
-    pcamera->set_recognizing(false);
-    pthread_mutex_unlock(&protoMutex);
-    
     return 0;
 }
-
 
 
 void * storeproto(void * args)
@@ -1309,16 +1349,17 @@ void insertIntoInstance(std::string number, motion::Message::Instance * pinstanc
         //Instance.
         stringstream sql_rel_day_instance;
         sql_rel_day_instance <<
-        "INSERT INTO rel_day_instance (_id_day, _id_instance, time) " <<
-        "SELECT "  << dayid    <<
-        ", "       << db_instance_id    <<
+        "INSERT INTO rel_day_instance_recognition_setup (_id_day, _id_instance, _id_recognition_setup, time) " <<
+        "SELECT "  << dayid                     <<
+        ", "       << db_instance_id            <<
+        ", "       << db_recognition_setup_id   <<
         ", '"       << time_info         << "'" <<
-        " WHERE NOT EXISTS (SELECT * FROM rel_day_instance WHERE _id_day = " << dayid << 
-        " AND _id_instance = " << db_instance_id << ");";
+        " WHERE NOT EXISTS (SELECT * FROM rel_day_instance_recognition_setup WHERE _id_day = " << dayid << 
+        " AND _id_instance = " << db_instance_id << " AND _id_recognition_setup = " << db_recognition_setup_id << ");";
         pthread_mutex_lock(&databaseMutex);
         db_execute(sql_rel_day_instance.str().c_str());
         pthread_mutex_unlock(&databaseMutex);
-             
+         
 }
 
 
