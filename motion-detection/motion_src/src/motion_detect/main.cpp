@@ -861,7 +861,7 @@ motion::Message getRefreshProto(motion::Message m)
     vector<vector<string> > cameras_array = db_select(sql_cameras.str().c_str(), 4);
     pthread_mutex_unlock(&databaseMutex);
      
-    for (int i=0; i<cameras_array.size(); i++ )
+    for (int i=0; i<cameras_array.size(); i++)
     {
         vector<string> rowc = cameras_array.at(i);
         motion::Message::MotionCamera * mcam = m.add_motioncamera();
@@ -949,7 +949,8 @@ motion::Message getRefreshProto(motion::Message m)
         "RS.name, "                     << // 14
         "RS.xmlfilepath, "              << // 15
         "IFNULL(RS.recognizing,0), "    << // 16
-        "RS.since "                     << // 17
+        "RS.since, "                    << // 17
+        "RS.speed "                     << // 18
         "FROM rel_day_instance_recognition_setup AS RDIR "                                                          <<
         "JOIN rel_camera_recognition_setup AS RCRS ON RDIR._id_recognition_setup = RCRS._id_recognition_setup "     <<
         "JOIN recognition_setup AS RS ON RDIR._id_recognition_setup = RS._id "                                      <<
@@ -964,7 +965,7 @@ motion::Message getRefreshProto(motion::Message m)
         cout << "sqlcamstr: " << sqlcamstr << endl;
        
         pthread_mutex_lock(&databaseMutex);
-        vector<vector<string> > crs_array = db_select(sqlcamstr.c_str(), 18);
+        vector<vector<string> > crs_array = db_select(sqlcamstr.c_str(), 19);
         pthread_mutex_unlock(&databaseMutex);
         
         int size = crs_array.size();
@@ -972,9 +973,9 @@ motion::Message getRefreshProto(motion::Message m)
         if (size>0)
         {
             
-            for (int i=0; i<crs_array.size(); i++ )
-            {
-                vector<string> rows = crs_array.at(i);    
+            //for (int i=0; i<crs_array.size(); i++ )
+            //{
+                vector<string> rows = crs_array.at(0);    
 
                 bool hasrecjob = true;
                 mcam->set_hasrecjob(hasrecjob);
@@ -1006,11 +1007,13 @@ motion::Message getRefreshProto(motion::Message m)
                 google::protobuf::int32 rec = atoi(rows.at(16).c_str());
                 mcam->set_recognizing(rec);
                 mcam->set_camerasince(rows.at(17));
+                google::protobuf::int32 speed = atoi(rows.at(18).c_str());
+                mcam->set_speed(speed);
                 cout << "Month: "   << m.currmonth() << endl;
                 cout << "Day: "     << m.currday()  << endl;
                 mcam = getMonthByCameraIdMonthAndDate(mcam, rows.at(0), m.currmonth(), m.currday(), recname);
                 
-            }
+            //}
         }
         else 
         {
@@ -1083,38 +1086,40 @@ motion::Message getRefreshProto(motion::Message m)
                             "MA.matfile, "                  <<  // 2
                             "CO.coordinates, "              <<  // 3
                             "IFNULL(RS.recognizing,0), "    <<  // 4
-                            "RS.storeimage, "                <<  // 5
-                            "RS.storevideo, "                <<  // 6
-                            "RS.codename, "                  <<  // 7
-                            "RS.has_region, "                <<  // 8
-                            "RS.delay, "                     <<  // 9      
+                            "RS.storeimage, "               <<  // 5
+                            "RS.storevideo, "               <<  // 6
+                            "RS.codename, "                 <<  // 7
+                            "RS.has_region, "               <<  // 8
+                            "RS.delay, "                    <<  // 9      
                             "RCRS.start_rec_time, "         <<  // 10
                             "RCRS._id_recognition_setup, "  <<  // 11
-                            "RS.runatstartup, "              <<  // 12
-                            "RS.xmlfilepath "               <<   // 13
+                            "RS.runatstartup, "             <<  // 12
+                            "RS.xmlfilepath, "              <<   // 13
+                            "RS.speed "                     <<   // 14        
                             "FROM recognition_setup AS RS "                             <<
                             "JOIN day AS D on RS._id_day = D._id "                      <<
                             "JOIN cameras AS C ON RS._id_camera = C._id "               <<
                             "JOIN mat AS MA ON RS._id_mat = MA._id "                    <<
                             "JOIN coordinates AS CO ON RS._id_coordinates = CO._id "    <<
                             "JOIN rel_camera_recognition_setup AS RCRS ON RS._id = RCRS._id_recognition_setup "     <<
-                            "WHERE RS._id_camera = " << camera <<  
+                            "WHERE RS._id_camera = " << camera  <<  
+                            " AND RS.name = '" << recname << "'" <<        
                             " AND D.label = '" << day << "';";
 
                             std::string sqlred =  sql_rec.str();
                             cout << "sqlred: " << sqlred << endl;
 
                             pthread_mutex_lock(&databaseMutex);
-                            vector<vector<string> > rec_array = db_select(sqlred.c_str(), 14);
+                            vector<vector<string> > rec_array = db_select(sqlred.c_str(), 15);
                             pthread_mutex_unlock(&databaseMutex);
 
                             int sizer = rec_array.size();
 
                             if (sizer>0)
                             {
-                                for (int t=0; t<rec_array.size(); t++ )
-                                {    
-                                    vector<string> rowr = rec_array.at(t);
+                                //for (int t=0; t<rec_array.size(); t++ )
+                                //{    
+                                    vector<string> rowr = rec_array.at(0);
                                     mcam->set_db_idcamera(camid);
                                     std::string recname = rowr.at(1);
                                     mcam->set_recname(recname);
@@ -1137,8 +1142,9 @@ motion::Message getRefreshProto(motion::Message m)
                                     mcam->set_runatstartup(to_bool(rowr.at(12)));
                                     std::string xmlpath = rowr.at(13).c_str();
                                     mcam->set_xmlfilepath(xmlpath);
-                                    
-                                }
+                                    google::protobuf::int32 speed = atoi(rowr.at(14).c_str());
+                                    mcam->set_speed(speed);
+                                //}
                             }
                         }
                     }
@@ -1375,8 +1381,17 @@ motion::Message runCommand(motion::Message m)
             if (xmlexist)
             {
                 string xml_loaded = get_file_contents(xml_path);
+                cout << "xml_loaded: " << xml_loaded << endl;
                 std:string encoded_xml = base64_encode(reinterpret_cast<const unsigned char*>(xml_loaded.c_str()),xml_loaded.length());
                 m.set_data(encoded_xml.c_str());
+                
+                std::string strdecoded = base64_decode(encoded_xml);
+                
+                std::string path =  basepath + "/xml.txt";
+                std::ofstream outxml;
+                outxml.open (path.c_str());
+                outxml << strdecoded << "\n";
+                outxml.close();
             }
             m.set_type(motion::Message::GET_XML);
            
@@ -1863,18 +1878,7 @@ try
           
       }
       
-        //if (PROTO.type()==motion::Message::TAKE_PICTURE)
-        //{
-            //std::string basefile = "data/PROTO_";
-            //stringstream rr;
-            //rr << basefile << count_sent__split << ".txt";
-            //std::ofstream out;
-            //out.open (rr.str().c_str());
-            //out << msg << "\n";
-            //out.close();
-        //}
-
-        
+      
         ms.Clear();
         //google::protobuf::ShutdownProtobufLibrary();
     

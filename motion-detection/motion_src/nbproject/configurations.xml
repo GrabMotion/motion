@@ -12,6 +12,9 @@
           <df name="database">
             <in>database.cpp</in>
           </df>
+          <df name="http">
+            <in>httppost.c</in>
+          </df>
           <df name="ntp">
             <in>hwclock.c</in>
             <in>ndp_client.cpp</in>
@@ -22,9 +25,11 @@
           </df>
           <df name="protobuffer">
             <in>motion.pb.cc</in>
+            <in>server.pb.cc</in>
           </df>
           <df name="recognition">
             <in>detection.cpp</in>
+            <in>detection_mal.cpp</in>
           </df>
           <df name="socket">
             <in>netcvc.cpp</in>
@@ -48,15 +53,6 @@
         </df>
       </df>
     </df>
-    <df root="." name="1">
-    </df>
-    <logicalFolder name="ExternalFiles"
-                   displayName="Important Files"
-                   projectFiles="false"
-                   kind="IMPORTANT_FILES_FOLDER">
-      <itemPath>CMakeLists.txt</itemPath>
-      <itemPath>Makefile</itemPath>
-    </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false"
@@ -67,7 +63,6 @@
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
-    <Elem>.</Elem>
     <Elem>.</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
@@ -99,6 +94,8 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="src/motion_detect/http/httppost.c" ex="false" tool="0" flavor2="0">
+      </item>
       <item path="src/motion_detect/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/motion_detect/ntp/hwclock.c" ex="false" tool="0" flavor2="0">
@@ -123,7 +120,17 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="src/motion_detect/protobuffer/server.pb.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="src/motion_detect/recognition/detection.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/motion_detect/recognition/detection_mal.cpp"
             ex="false"
             tool="1"
             flavor2="0">

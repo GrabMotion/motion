@@ -86,6 +86,7 @@ struct proto_args
     std::string EXT_DATA;
     time_t end, begin_time, end_time, init_time;
     std::string instance;
+    std::string instancecode;
 };
 struct proto_args ProtoArgs;
 
@@ -197,18 +198,20 @@ inline void writeXMLInstance (
                               string XMLFILE,
                               string time_start,
                               string time_end,
-                              string instance
+                              string instance,
+                              string instancecode
                               )
 {
      
     TiXmlDocument doc( XMLFILE.c_str() );
-    if ( doc.LoadFile() ){
+    if ( doc.LoadFile() )
+    {
          
         TiXmlElement* file = doc.FirstChildElement();
          
         TiXmlElement* session_info = file->FirstChildElement();
          
-        TiXmlElement* all_instances = session_info->NextSiblingElement();;
+        TiXmlElement* all_instances = session_info->NextSiblingElement();
          
         TiXmlElement * ID = new TiXmlElement( "ID" );
         TiXmlText * text_ID = new TiXmlText( instance.c_str() );
@@ -223,7 +226,7 @@ inline void writeXMLInstance (
         end->LinkEndChild(text_end);
          
         TiXmlElement * code = new TiXmlElement( "code" );
-        TiXmlText * text_code = new TiXmlText( "Prueba" );
+        TiXmlText * text_code = new TiXmlText( instancecode.c_str() );
         code->LinkEndChild(text_code);
          
         TiXmlElement * instance = new TiXmlElement( "instance" );
@@ -977,6 +980,7 @@ void * startRecognition(void * arg)
                 ProtoArgs.end_time      = end_time;
                 ProtoArgs.end           = end; 
                 ProtoArgs.instance      = instance;
+                ProtoArgs.instancecode  = instancecode;
                 
                 cout << "pthread_create" << endl;
                 int runb = pthread_create(&thread_store, NULL, storeproto, &ProtoArgs);
@@ -1252,7 +1256,7 @@ void * storeproto(void * args)
     begin << (arg->begin_time - arg->init_time) / CLOCKS_PER_SEC;
     std::ostringstream end;
     end << (arg->end_time - arg->init_time) / CLOCKS_PER_SEC;
-    writeXMLInstance(XMLFILE.c_str(), begin.str(), end.str(), arg->instance);
+    writeXMLInstance(XMLFILE.c_str(), begin.str(), end.str(), arg->instance, arg->instancecode);
     
     motion::Message::Instance * pinstance = arg->pinstance;
     

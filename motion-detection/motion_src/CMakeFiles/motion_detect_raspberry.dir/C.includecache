@@ -6,3 +6,25 @@
 
 #IncludeRegexTransform: 
 
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/../b64/cdecode.h
+
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/../b64/cencode.h
+
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/cdecode.c
+../b64/cdecode.h
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/../b64/cdecode.h
+
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/cencode.c
+../b64/cencode.h
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/../b64/cencode.h
+
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/http/httppost.c
+stdio.h
+-
+string.h
+-
+curl/curl.h
+-
+
+/home/pi/motion/motion-detection/motion_src/src/motion_detect/ntp/hwclock.c
+
