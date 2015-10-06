@@ -1202,6 +1202,7 @@ void * startRecognition(void * arg)
                     ProtoArgs.end_time      = end_time;
                     ProtoArgs.end           = end; 
                     ProtoArgs.instance      = instance;
+                    ProtoArgs.instancecode  = instancecode;
 
                     cout << "pthread_create" << endl;
                     int runb = pthread_create(&thread_store, NULL, storeproto, &ProtoArgs);
