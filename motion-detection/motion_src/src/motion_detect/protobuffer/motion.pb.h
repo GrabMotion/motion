@@ -36,6 +36,7 @@ void protobuf_ShutdownFile_motion_2eproto();
 
 class Message;
 class Message_MotionCamera;
+class Message_MotionCron;
 class Message_MotionRecognition;
 class Message_MotionMonth;
 class Message_MotionDay;
@@ -522,6 +523,25 @@ class Message_MotionCamera : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 db_recognitionsetupid() const;
   inline void set_db_recognitionsetupid(::google::protobuf::int32 value);
 
+  // optional bool hascron = 39;
+  inline bool has_hascron() const;
+  inline void clear_hascron();
+  static const int kHascronFieldNumber = 39;
+  inline bool hascron() const;
+  inline void set_hascron(bool value);
+
+  // repeated .motion.Message.MotionCron motioncron = 40;
+  inline int motioncron_size() const;
+  inline void clear_motioncron();
+  static const int kMotioncronFieldNumber = 40;
+  inline const ::motion::Message_MotionCron& motioncron(int index) const;
+  inline ::motion::Message_MotionCron* mutable_motioncron(int index);
+  inline ::motion::Message_MotionCron* add_motioncron();
+  inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCron >&
+      motioncron() const;
+  inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCron >*
+      mutable_motioncron();
+
   // @@protoc_insertion_point(class_scope:motion.Message.MotionCamera)
  private:
   inline void set_has_cameraid();
@@ -594,6 +614,8 @@ class Message_MotionCamera : public ::google::protobuf::Message {
   inline void clear_has_speed();
   inline void set_has_db_recognitionsetupid();
   inline void clear_has_db_recognitionsetupid();
+  inline void set_has_hascron();
+  inline void clear_has_hascron();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -635,6 +657,8 @@ class Message_MotionCamera : public ::google::protobuf::Message {
   ::std::string* xmlfilepath_;
   ::google::protobuf::int32 speed_;
   ::google::protobuf::int32 db_recognitionsetupid_;
+  ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCron > motioncron_;
+  bool hascron_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
@@ -642,6 +666,105 @@ class Message_MotionCamera : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Message_MotionCamera* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Message_MotionCron : public ::google::protobuf::Message {
+ public:
+  Message_MotionCron();
+  virtual ~Message_MotionCron();
+
+  Message_MotionCron(const Message_MotionCron& from);
+
+  inline Message_MotionCron& operator=(const Message_MotionCron& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Message_MotionCron& default_instance();
+
+  void Swap(Message_MotionCron* other);
+
+  // implements Message ----------------------------------------------
+
+  Message_MotionCron* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Message_MotionCron& from);
+  void MergeFrom(const Message_MotionCron& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string command = 1;
+  inline bool has_command() const;
+  inline void clear_command();
+  static const int kCommandFieldNumber = 1;
+  inline const ::std::string& command() const;
+  inline void set_command(const ::std::string& value);
+  inline void set_command(const char* value);
+  inline void set_command(const char* value, size_t size);
+  inline ::std::string* mutable_command();
+  inline ::std::string* release_command();
+  inline void set_allocated_command(::std::string* command);
+
+  // optional string program = 2;
+  inline bool has_program() const;
+  inline void clear_program();
+  static const int kProgramFieldNumber = 2;
+  inline const ::std::string& program() const;
+  inline void set_program(const ::std::string& value);
+  inline void set_program(const char* value);
+  inline void set_program(const char* value, size_t size);
+  inline ::std::string* mutable_program();
+  inline ::std::string* release_program();
+  inline void set_allocated_program(::std::string* program);
+
+  // @@protoc_insertion_point(class_scope:motion.Message.MotionCron)
+ private:
+  inline void set_has_command();
+  inline void clear_has_command();
+  inline void set_has_program();
+  inline void clear_has_program();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::std::string* command_;
+  ::std::string* program_;
+  friend void  protobuf_AddDesc_motion_2eproto();
+  friend void protobuf_AssignDesc_motion_2eproto();
+  friend void protobuf_ShutdownFile_motion_2eproto();
+
+  void InitAsDefaultInstance();
+  static Message_MotionCron* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -1028,10 +1151,17 @@ class Message_Instance : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 idinstance() const;
   inline void set_idinstance(::google::protobuf::int32 value);
 
-  // optional string instancestart = 2;
+  // optional int32 number = 2;
+  inline bool has_number() const;
+  inline void clear_number();
+  static const int kNumberFieldNumber = 2;
+  inline ::google::protobuf::int32 number() const;
+  inline void set_number(::google::protobuf::int32 value);
+
+  // optional string instancestart = 3;
   inline bool has_instancestart() const;
   inline void clear_instancestart();
-  static const int kInstancestartFieldNumber = 2;
+  static const int kInstancestartFieldNumber = 3;
   inline const ::std::string& instancestart() const;
   inline void set_instancestart(const ::std::string& value);
   inline void set_instancestart(const char* value);
@@ -1040,10 +1170,10 @@ class Message_Instance : public ::google::protobuf::Message {
   inline ::std::string* release_instancestart();
   inline void set_allocated_instancestart(::std::string* instancestart);
 
-  // optional string instanceend = 3;
+  // optional string instanceend = 4;
   inline bool has_instanceend() const;
   inline void clear_instanceend();
-  static const int kInstanceendFieldNumber = 3;
+  static const int kInstanceendFieldNumber = 4;
   inline const ::std::string& instanceend() const;
   inline void set_instanceend(const ::std::string& value);
   inline void set_instanceend(const char* value);
@@ -1052,10 +1182,10 @@ class Message_Instance : public ::google::protobuf::Message {
   inline ::std::string* release_instanceend();
   inline void set_allocated_instanceend(::std::string* instanceend);
 
-  // optional string fileformat = 4;
+  // optional string fileformat = 5;
   inline bool has_fileformat() const;
   inline void clear_fileformat();
-  static const int kFileformatFieldNumber = 4;
+  static const int kFileformatFieldNumber = 5;
   inline const ::std::string& fileformat() const;
   inline void set_fileformat(const ::std::string& value);
   inline void set_fileformat(const char* value);
@@ -1064,10 +1194,10 @@ class Message_Instance : public ::google::protobuf::Message {
   inline ::std::string* release_fileformat();
   inline void set_allocated_fileformat(::std::string* fileformat);
 
-  // repeated .motion.Message.Image image = 5;
+  // repeated .motion.Message.Image image = 6;
   inline int image_size() const;
   inline void clear_image();
-  static const int kImageFieldNumber = 5;
+  static const int kImageFieldNumber = 6;
   inline const ::motion::Message_Image& image(int index) const;
   inline ::motion::Message_Image* mutable_image(int index);
   inline ::motion::Message_Image* add_image();
@@ -1076,10 +1206,10 @@ class Message_Instance : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::motion::Message_Image >*
       mutable_image();
 
-  // repeated .motion.Message.Crop crop = 6;
+  // repeated .motion.Message.Crop crop = 7;
   inline int crop_size() const;
   inline void clear_crop();
-  static const int kCropFieldNumber = 6;
+  static const int kCropFieldNumber = 7;
   inline const ::motion::Message_Crop& crop(int index) const;
   inline ::motion::Message_Crop* mutable_crop(int index);
   inline ::motion::Message_Crop* add_crop();
@@ -1088,10 +1218,10 @@ class Message_Instance : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::motion::Message_Crop >*
       mutable_crop();
 
-  // optional .motion.Message.Video video = 7;
+  // optional .motion.Message.Video video = 8;
   inline bool has_video() const;
   inline void clear_video();
-  static const int kVideoFieldNumber = 7;
+  static const int kVideoFieldNumber = 8;
   inline const ::motion::Message_Video& video() const;
   inline ::motion::Message_Video* mutable_video();
   inline ::motion::Message_Video* release_video();
@@ -1101,6 +1231,8 @@ class Message_Instance : public ::google::protobuf::Message {
  private:
   inline void set_has_idinstance();
   inline void clear_has_idinstance();
+  inline void set_has_number();
+  inline void clear_has_number();
   inline void set_has_instancestart();
   inline void clear_has_instancestart();
   inline void set_has_instanceend();
@@ -1114,13 +1246,14 @@ class Message_Instance : public ::google::protobuf::Message {
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
+  ::google::protobuf::int32 idinstance_;
+  ::google::protobuf::int32 number_;
   ::std::string* instancestart_;
   ::std::string* instanceend_;
   ::std::string* fileformat_;
   ::google::protobuf::RepeatedPtrField< ::motion::Message_Image > image_;
   ::google::protobuf::RepeatedPtrField< ::motion::Message_Crop > crop_;
   ::motion::Message_Video* video_;
-  ::google::protobuf::int32 idinstance_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -1514,6 +1647,7 @@ class Message : public ::google::protobuf::Message {
   // nested types ----------------------------------------------------
 
   typedef Message_MotionCamera MotionCamera;
+  typedef Message_MotionCron MotionCron;
   typedef Message_MotionRecognition MotionRecognition;
   typedef Message_MotionMonth MotionMonth;
   typedef Message_MotionDay MotionDay;
@@ -3354,6 +3488,216 @@ inline void Message_MotionCamera::set_db_recognitionsetupid(::google::protobuf::
   // @@protoc_insertion_point(field_set:motion.Message.MotionCamera.db_recognitionsetupid)
 }
 
+// optional bool hascron = 39;
+inline bool Message_MotionCamera::has_hascron() const {
+  return (_has_bits_[1] & 0x00000020u) != 0;
+}
+inline void Message_MotionCamera::set_has_hascron() {
+  _has_bits_[1] |= 0x00000020u;
+}
+inline void Message_MotionCamera::clear_has_hascron() {
+  _has_bits_[1] &= ~0x00000020u;
+}
+inline void Message_MotionCamera::clear_hascron() {
+  hascron_ = false;
+  clear_has_hascron();
+}
+inline bool Message_MotionCamera::hascron() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionCamera.hascron)
+  return hascron_;
+}
+inline void Message_MotionCamera::set_hascron(bool value) {
+  set_has_hascron();
+  hascron_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionCamera.hascron)
+}
+
+// repeated .motion.Message.MotionCron motioncron = 40;
+inline int Message_MotionCamera::motioncron_size() const {
+  return motioncron_.size();
+}
+inline void Message_MotionCamera::clear_motioncron() {
+  motioncron_.Clear();
+}
+inline const ::motion::Message_MotionCron& Message_MotionCamera::motioncron(int index) const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionCamera.motioncron)
+  return motioncron_.Get(index);
+}
+inline ::motion::Message_MotionCron* Message_MotionCamera::mutable_motioncron(int index) {
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionCamera.motioncron)
+  return motioncron_.Mutable(index);
+}
+inline ::motion::Message_MotionCron* Message_MotionCamera::add_motioncron() {
+  // @@protoc_insertion_point(field_add:motion.Message.MotionCamera.motioncron)
+  return motioncron_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCron >&
+Message_MotionCamera::motioncron() const {
+  // @@protoc_insertion_point(field_list:motion.Message.MotionCamera.motioncron)
+  return motioncron_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCron >*
+Message_MotionCamera::mutable_motioncron() {
+  // @@protoc_insertion_point(field_mutable_list:motion.Message.MotionCamera.motioncron)
+  return &motioncron_;
+}
+
+// -------------------------------------------------------------------
+
+// Message_MotionCron
+
+// optional string command = 1;
+inline bool Message_MotionCron::has_command() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Message_MotionCron::set_has_command() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Message_MotionCron::clear_has_command() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Message_MotionCron::clear_command() {
+  if (command_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    command_->clear();
+  }
+  clear_has_command();
+}
+inline const ::std::string& Message_MotionCron::command() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionCron.command)
+  return *command_;
+}
+inline void Message_MotionCron::set_command(const ::std::string& value) {
+  set_has_command();
+  if (command_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    command_ = new ::std::string;
+  }
+  command_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionCron.command)
+}
+inline void Message_MotionCron::set_command(const char* value) {
+  set_has_command();
+  if (command_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    command_ = new ::std::string;
+  }
+  command_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionCron.command)
+}
+inline void Message_MotionCron::set_command(const char* value, size_t size) {
+  set_has_command();
+  if (command_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    command_ = new ::std::string;
+  }
+  command_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionCron.command)
+}
+inline ::std::string* Message_MotionCron::mutable_command() {
+  set_has_command();
+  if (command_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    command_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionCron.command)
+  return command_;
+}
+inline ::std::string* Message_MotionCron::release_command() {
+  clear_has_command();
+  if (command_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = command_;
+    command_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionCron::set_allocated_command(::std::string* command) {
+  if (command_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete command_;
+  }
+  if (command) {
+    set_has_command();
+    command_ = command;
+  } else {
+    clear_has_command();
+    command_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionCron.command)
+}
+
+// optional string program = 2;
+inline bool Message_MotionCron::has_program() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Message_MotionCron::set_has_program() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Message_MotionCron::clear_has_program() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void Message_MotionCron::clear_program() {
+  if (program_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    program_->clear();
+  }
+  clear_has_program();
+}
+inline const ::std::string& Message_MotionCron::program() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionCron.program)
+  return *program_;
+}
+inline void Message_MotionCron::set_program(const ::std::string& value) {
+  set_has_program();
+  if (program_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    program_ = new ::std::string;
+  }
+  program_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionCron.program)
+}
+inline void Message_MotionCron::set_program(const char* value) {
+  set_has_program();
+  if (program_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    program_ = new ::std::string;
+  }
+  program_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionCron.program)
+}
+inline void Message_MotionCron::set_program(const char* value, size_t size) {
+  set_has_program();
+  if (program_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    program_ = new ::std::string;
+  }
+  program_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionCron.program)
+}
+inline ::std::string* Message_MotionCron::mutable_program() {
+  set_has_program();
+  if (program_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    program_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionCron.program)
+  return program_;
+}
+inline ::std::string* Message_MotionCron::release_program() {
+  clear_has_program();
+  if (program_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = program_;
+    program_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionCron::set_allocated_program(::std::string* program) {
+  if (program_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete program_;
+  }
+  if (program) {
+    set_has_program();
+    program_ = program;
+  } else {
+    clear_has_program();
+    program_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionCron.program)
+}
+
 // -------------------------------------------------------------------
 
 // Message_MotionRecognition
@@ -3830,15 +4174,39 @@ inline void Message_Instance::set_idinstance(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.Instance.idinstance)
 }
 
-// optional string instancestart = 2;
-inline bool Message_Instance::has_instancestart() const {
+// optional int32 number = 2;
+inline bool Message_Instance::has_number() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Message_Instance::set_has_instancestart() {
+inline void Message_Instance::set_has_number() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Message_Instance::clear_has_instancestart() {
+inline void Message_Instance::clear_has_number() {
   _has_bits_[0] &= ~0x00000002u;
+}
+inline void Message_Instance::clear_number() {
+  number_ = 0;
+  clear_has_number();
+}
+inline ::google::protobuf::int32 Message_Instance::number() const {
+  // @@protoc_insertion_point(field_get:motion.Message.Instance.number)
+  return number_;
+}
+inline void Message_Instance::set_number(::google::protobuf::int32 value) {
+  set_has_number();
+  number_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.Instance.number)
+}
+
+// optional string instancestart = 3;
+inline bool Message_Instance::has_instancestart() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Message_Instance::set_has_instancestart() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Message_Instance::clear_has_instancestart() {
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void Message_Instance::clear_instancestart() {
   if (instancestart_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3906,15 +4274,15 @@ inline void Message_Instance::set_allocated_instancestart(::std::string* instanc
   // @@protoc_insertion_point(field_set_allocated:motion.Message.Instance.instancestart)
 }
 
-// optional string instanceend = 3;
+// optional string instanceend = 4;
 inline bool Message_Instance::has_instanceend() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void Message_Instance::set_has_instanceend() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void Message_Instance::clear_has_instanceend() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void Message_Instance::clear_instanceend() {
   if (instanceend_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3982,15 +4350,15 @@ inline void Message_Instance::set_allocated_instanceend(::std::string* instancee
   // @@protoc_insertion_point(field_set_allocated:motion.Message.Instance.instanceend)
 }
 
-// optional string fileformat = 4;
+// optional string fileformat = 5;
 inline bool Message_Instance::has_fileformat() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void Message_Instance::set_has_fileformat() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void Message_Instance::clear_has_fileformat() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void Message_Instance::clear_fileformat() {
   if (fileformat_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -4058,7 +4426,7 @@ inline void Message_Instance::set_allocated_fileformat(::std::string* fileformat
   // @@protoc_insertion_point(field_set_allocated:motion.Message.Instance.fileformat)
 }
 
-// repeated .motion.Message.Image image = 5;
+// repeated .motion.Message.Image image = 6;
 inline int Message_Instance::image_size() const {
   return image_.size();
 }
@@ -4088,7 +4456,7 @@ Message_Instance::mutable_image() {
   return &image_;
 }
 
-// repeated .motion.Message.Crop crop = 6;
+// repeated .motion.Message.Crop crop = 7;
 inline int Message_Instance::crop_size() const {
   return crop_.size();
 }
@@ -4118,15 +4486,15 @@ Message_Instance::mutable_crop() {
   return &crop_;
 }
 
-// optional .motion.Message.Video video = 7;
+// optional .motion.Message.Video video = 8;
 inline bool Message_Instance::has_video() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void Message_Instance::set_has_video() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void Message_Instance::clear_has_video() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void Message_Instance::clear_video() {
   if (video_ != NULL) video_->::motion::Message_Video::Clear();

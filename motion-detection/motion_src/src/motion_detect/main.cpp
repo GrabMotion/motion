@@ -757,7 +757,8 @@ motion::Message::MotionCamera * getMonthByCameraIdMonthAndDate(
     "I.number, "                <<  //9
     "I._id AS instanceid, "     <<  //10
     "V.name, "                  <<  //11
-    "V.path "                   <<  //12
+    "V.path, "                  <<  //12
+    "I.number "                 <<  //13
     "FROM rel_day_instance_recognition_setup AS RDIR " <<
     "JOIN day AS D ON RDIR._id_day = D._id " << 
     "JOIN recognition_setup AS RS ON RDIR._id_recognition_setup = RS._id " << 
@@ -773,7 +774,7 @@ motion::Message::MotionCamera * getMonthByCameraIdMonthAndDate(
     std::string sql_monthstr = sql_month.str();
     cout << "sql_monthstr: " << sql_monthstr << endl;
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > rcm_array = db_select(sql_monthstr.c_str(), 13);
+    vector<vector<string> > rcm_array = db_select(sql_monthstr.c_str(), 14);
     pthread_mutex_unlock(&databaseMutex);
     
     if (rcm_array.size()>0)
@@ -808,6 +809,10 @@ motion::Message::MotionCamera * getMonthByCameraIdMonthAndDate(
                 google::protobuf::int32 idinstance = atoi(last.c_str());
                 minstance->set_idinstance(idinstance);
                 instancecounter = instanceid;
+                
+                std::string number = rowi.at(13).c_str();
+                google::protobuf::int32 instancenumber = atoi(number.c_str());
+                minstance->set_number(instancenumber);
 
                 motion::Message::Video * mvideo = minstance->mutable_video();
                 std::string vname = rowi.at(11);
@@ -908,14 +913,16 @@ motion::Message getRefreshProto(motion::Message m)
        
         stringstream sql_last_instance;
         sql_last_instance   <<
-        "SELECT coalesce( MAX(I._id), 0) FROM instance AS I "                                   <<
+        "SELECT coalesce( MAX(I.number), 0) FROM instance AS I "                                   <<
         "JOIN rel_day_instance_recognition_setup AS RDI ON I._id = RDI._id_instance "           <<
+        "JOIN recognition_setup AS RS ON RDI._id_recognition_setup = RS._id "                   <<
         "JOIN rel_month_day AS RMD ON RDI._id_day = RMD._id_day "           <<
         "JOIN day as D ON RMD._id_day = D._id "                             <<
         "JOIN month AS M ON RMD._id_month = M._id "                         <<
         "JOIN rel_camera_month AS RCM ON RMD._id_month = RMD._id_month "    <<
         "JOIN cameras AS C ON RCM._id_camera = C._id "                      <<
-        "WHERE C.number = " << camnum << " AND D.label = '" << m.currday()  << "';";
+        "WHERE C.number = " << camnum << " AND D.label = '" << m.currday()  << "' " <<
+        "AND RS.name = '" << recname << "';";
         std::string sqllaststd = sql_last_instance.str();
         cout << "sqllaststd: " << sqllaststd << endl;
         pthread_mutex_lock(&databaseMutex);
@@ -925,12 +932,17 @@ motion::Message getRefreshProto(motion::Message m)
         std::string last = lastinstance_array.at(0).at(0).c_str();
         int ln = atoi(last.c_str());
         if (ln>0)
+        {
             mcam->set_lastinstance(last);
+        } else 
+        {
+            mcam->set_lastinstance("0");
+        }
         
         string camera = rowc.at(0);
         
         stringstream sql_cam_req_setup;
-        sql_cam_req_setup               <<
+        sql_cam_req_setup               <<   
         "SELECT "                       <<
         "RS.storeimage, "               << // 0
         "RS.storevideo, "               << // 1
@@ -950,7 +962,8 @@ motion::Message getRefreshProto(motion::Message m)
         "RS.xmlfilepath, "              << // 15
         "IFNULL(RS.recognizing,0), "    << // 16
         "RS.since, "                    << // 17
-        "RS.speed "                     << // 18
+        "RS.speed, "                    << // 18
+        "RS.has_cron "                  << // 19
         "FROM rel_day_instance_recognition_setup AS RDIR "                                                          <<
         "JOIN rel_camera_recognition_setup AS RCRS ON RDIR._id_recognition_setup = RCRS._id_recognition_setup "     <<
         "JOIN recognition_setup AS RS ON RDIR._id_recognition_setup = RS._id "                                      <<
@@ -965,7 +978,7 @@ motion::Message getRefreshProto(motion::Message m)
         cout << "sqlcamstr: " << sqlcamstr << endl;
        
         pthread_mutex_lock(&databaseMutex);
-        vector<vector<string> > crs_array = db_select(sqlcamstr.c_str(), 19);
+        vector<vector<string> > crs_array = db_select(sqlcamstr.c_str(), 20);
         pthread_mutex_unlock(&databaseMutex);
         
         int size = crs_array.size();
@@ -1009,6 +1022,26 @@ motion::Message getRefreshProto(motion::Message m)
                 mcam->set_camerasince(rows.at(17));
                 google::protobuf::int32 speed = atoi(rows.at(18).c_str());
                 mcam->set_speed(speed);
+                bool hascron = to_bool(rows.at(19));
+                if (hascron)
+                {
+                    vector<string> intervalse  = getIntervalsByCamberaAndRec(camera, recname);
+                    if (intervalse.size()>0)
+                    {
+                        std::string timestart   = intervalse.at(0);
+                        mcam->set_timestart(timestart);
+                        std::string timeend     = intervalse.at(1);
+                        mcam->set_timeend(timeend);
+                        mcam->set_hascron(true);
+                    } else 
+                    {
+                        mcam->set_hascron(false);
+                    }
+                    
+                } else 
+                {
+                    mcam->set_hascron(false);
+                }
                 cout << "Month: "   << m.currmonth() << endl;
                 cout << "Day: "     << m.currday()  << endl;
                 mcam = getMonthByCameraIdMonthAndDate(mcam, rows.at(0), m.currmonth(), m.currday(), recname);
@@ -1095,7 +1128,8 @@ motion::Message getRefreshProto(motion::Message m)
                             "RCRS._id_recognition_setup, "  <<  // 11
                             "RS.runatstartup, "             <<  // 12
                             "RS.xmlfilepath, "              <<   // 13
-                            "RS.speed "                     <<   // 14        
+                            "RS.speed, "                    <<   // 14        
+                            "RS.has_cron "                  <<   // 15
                             "FROM recognition_setup AS RS "                             <<
                             "JOIN day AS D on RS._id_day = D._id "                      <<
                             "JOIN cameras AS C ON RS._id_camera = C._id "               <<
@@ -1110,7 +1144,7 @@ motion::Message getRefreshProto(motion::Message m)
                             cout << "sqlred: " << sqlred << endl;
 
                             pthread_mutex_lock(&databaseMutex);
-                            vector<vector<string> > rec_array = db_select(sqlred.c_str(), 15);
+                            vector<vector<string> > rec_array = db_select(sqlred.c_str(), 16);
                             pthread_mutex_unlock(&databaseMutex);
 
                             int sizer = rec_array.size();
@@ -1144,6 +1178,25 @@ motion::Message getRefreshProto(motion::Message m)
                                     mcam->set_xmlfilepath(xmlpath);
                                     google::protobuf::int32 speed = atoi(rowr.at(14).c_str());
                                     mcam->set_speed(speed);
+                                    bool hascron = to_bool(rowr.at(15));
+                                    if (hascron)
+                                    {
+                                        vector<string> intervalse  = getIntervalsByCamberaAndRec(camera, recname);
+                                        if (intervalse.size()>0)
+                                        {
+                                            std::string timestart   = intervalse.at(0);
+                                            mcam->set_timestart(timestart);
+                                            std::string timeend     = intervalse.at(1);
+                                            mcam->set_timeend(timeend);
+                                        } else 
+                                        {
+                                            mcam->set_hascron(false);
+                                        }
+
+                                    } else 
+                                    {
+                                        mcam->set_hascron(false);
+                                    }   
                                 //}
                             }
                         }
@@ -1195,7 +1248,7 @@ void updateRecognition(motion::Message m)
     ptmr = localtime (&tr.tv_sec);
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     
-    updateIntervalsIntoDatabase(pcamera);
+    //insertIntervalCrontabIntoDatabase(pcamera);
     updateRecognitionSetup(pcamera, pday);
     updateCameraMonth(time_rasp, pcamera->db_recognitionsetupid());
     
@@ -1265,12 +1318,15 @@ motion::Message saveRecognition(motion::Message m)
     int db_recognition_setupid;
    
     db_dayid = insertDayIntoDatabase(str_day, db_month_id);
-    int db_intervalid = insertIntervalsIntoDatabase(pcamera);
-    int db_recognitionsetup_id = insertIntoRecognitionSetup(pcamera, db_intervalid, db_dayid, db_camera_id, db_coordnatesid, xml_path);
+    int db_recognitionsetup_id = insertIntoRecognitionSetup(pcamera, db_dayid, db_camera_id, db_coordnatesid, xml_path);
     
-    
-    insertIntoCameraMonth(time_rasp, db_recognitionsetup_id, db_camera_id);
-    
+    int db_camera_recognition_setupl_array = insertIntoRelCameraRecognitionSetup(time_rasp, db_recognitionsetup_id, db_camera_id);
+  
+    if (pcamera->hascron())
+    {
+        insertIntervalCrontabIntoDatabase(pcamera, db_camera_recognition_setupl_array); 
+    } 
+   
     return m;
    
 }
@@ -2240,6 +2296,13 @@ int main (int argc, char * const av[])
         db_execute(insert_rel_hardcamsta_query.str().c_str());
     }
     
+    
+    //Reset to recognizing = 0 to all jobs
+    stringstream sql_update_recognizing;
+    sql_update_recognizing <<
+    "UPDATE recognition_setup SET recognizing = 0;";
+    db_execute(sql_update_recognizing.str().c_str());
+    
     starttime = time_rasp;
 
     std::string secdatafile = basepath + "data/data";
@@ -2251,7 +2314,7 @@ int main (int argc, char * const av[])
     if ( argc >= 2 ) 
     {
         std::string doparam = argv[1];
-        std::string param = argv[2];
+        //std::string param = argv[2];
         if (doparam=="-status")
         {
             status();

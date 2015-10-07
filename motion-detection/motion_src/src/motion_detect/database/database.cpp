@@ -1,3 +1,4 @@
+
 /*
  * File:   database.cpp
  * Author: jose
@@ -345,7 +346,7 @@ std::vector<int> db_cams(std::vector<int> cams)
 void status()
 {
  
-    stringstream sql_status;
+    /*stringstream sql_status;
     sql_status << "SELECT "     <<
     "RC.codename, "             << // 0
     "RC.recognizing, "          << // 1
@@ -356,8 +357,24 @@ void status()
     "RC.since "                 << // 6
     "FROM recognition_setup RC "<< 
     "JOIN interval AS I ON RC._id_interval = I._id " << 
-    "JOIN cameras AS C ON RC._id_camera = C._id;";  
-    std::string last_har_cam_id_query = "SELECT MAX(_id) FROM rel_hardware_camera";
+    "JOIN cameras AS C ON RC._id_camera = C._id;"; */
+    
+    stringstream sql_status;
+    sql_status << "SELECT " <<
+    "RS.codename, "         << // 0   
+    "RS.recognizing, "      << // 1
+    "C.number, "            << // 2
+    "C.name, "              << // 3
+    "INT.timestart, "       << // 4   
+    "INT.timeend, "         << // 5
+    "RS.since "             << // 6
+    "FROM interval AS INT " <<
+    "JOIN rel_interval_crontab AS RIC ON RIC._id_interval = INT._id "                                           <<          
+    "JOIN rel_camera_recognition_setup_interval_crontab RCRSIC ON RIC._id = RCRSIC._id_rel_interval_crontab "   <<
+    "JOIN rel_camera_recognition_setup AS RCRS ON RCRS._id = RCRSIC._id_rel_camera_recognition_setup "          <<
+    "JOIN recognition_setup AS RS ON RCRS._id_recognition_setup = RS._id "                                      <<
+    "JOIN cameras AS C ON RCRS._id_camera = C._id "                                                             <<
+    "GROUP BY INT._id AND RS._id;";
     pthread_mutex_lock(&databaseMutex);
     vector<vector<string> > status_array = db_select(sql_status.str().c_str(), 7);
     pthread_mutex_unlock(&databaseMutex);
@@ -455,22 +472,18 @@ bool loadStartQuery(std::string camera, std::string recname)
     "C._id, "               << // 8
     "C.name, "              << // 9
     "C.number, "            << // 10
-    "I.timestart, "         << // 11
-    "I.timeend, "           << // 12
-    "RC.name, "             << // 13
-    "M.matcols, "           << // 14 
-    "M.matrows, "           << // 15 
-    "M.matwidth, "          << // 16
-    "M.matheight, "         << // 17
-    "I._id AS instanceid, " << // 18
-    "D._id, "               << // 19
-    "MO._id, "              << // 20
-    "RC.speed, "            <<  // 21           	
-    "RC._id, "              <<  // 22             	
-    "RC.xmlfilepath "       <<  // 23                   
+    "RC.name, "             << // 11
+    "M.matcols, "           << // 12 
+    "M.matrows, "           << // 13 
+    "M.matwidth, "          << // 14
+    "M.matheight, "         << // 15
+    "D._id, "               << // 16
+    "MO._id, "              << // 17
+    "RC.speed, "            << // 18           	
+    "RC._id, "              << // 19             	
+    "RC.xmlfilepath "       << // 20  
     "FROM recognition_setup RC "                                << 
     "JOIN coordinates AS CO ON RC._id_coordinates = CO._id "    <<
-    "JOIN interval AS I ON RC._id_interval = I._id "            <<
     "JOIN cameras AS C ON RC._id_camera = C._id "               <<
     "JOIN mat AS M ON RC._id_mat = M._id "                      <<
     "JOIN day AS D ON RC._id_day = D._id "                      <<
@@ -480,7 +493,7 @@ bool loadStartQuery(std::string camera, std::string recname)
 
     cout << "sql_load_recognition: " << sql_load_recognition.str() << endl;
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > start_array = db_select(sql_load_recognition.str().c_str(), 24);
+    vector<vector<string> > start_array = db_select(sql_load_recognition.str().c_str(), 21);
     pthread_mutex_unlock(&databaseMutex);
     int size = start_array.size();
     if (size>0)
@@ -533,16 +546,13 @@ bool loadStartQuery(std::string camera, std::string recname)
         
         google::protobuf::int32 camnum = atoi(rows.at(10).c_str());
         mcamera->set_cameranumber(camnum);
-
-        mcamera->set_timestart(rows.at(11));
-        mcamera->set_timeend(rows.at(12));
-
-        mcamera->set_recname(rows.at(13));
         
-        google::protobuf::int32 matcols = atoi(rows.at(14).c_str());
+        mcamera->set_recname(rows.at(11));
+        
+        google::protobuf::int32 matcols = atoi(rows.at(12).c_str());
         mcamera->set_matcols(matcols);
         
-        google::protobuf::int32 matrows = atoi(rows.at(15).c_str());
+        google::protobuf::int32 matrows = atoi(rows.at(13).c_str());
         mcamera->set_matrows(matrows);
      
         std::string _day = getCurrentDayLabel();
@@ -551,46 +561,46 @@ bool loadStartQuery(std::string camera, std::string recname)
         std::string _month = getCurrentMonthLabel();
         m.set_currmonth(_month);
         
-        google::protobuf::int32 dbidday = atoi(rows.at(19).c_str());
+        google::protobuf::int32 dbidday = atoi(rows.at(16).c_str());
         mcamera->set_db_idday(dbidday);
         
-        google::protobuf::int32 dbidmonth = atoi(rows.at(20).c_str());
+        google::protobuf::int32 dbidmonth = atoi(rows.at(17).c_str());
         mcamera->set_db_idmonth(dbidmonth);
         
-        google::protobuf::int32 speed = atoi(rows.at(21).c_str());
+        google::protobuf::int32 speed = atoi(rows.at(18).c_str());
         mcamera->set_speed(speed);
         
-        google::protobuf::int32 recid = atoi(rows.at(22).c_str());
+        google::protobuf::int32 recid = atoi(rows.at(19).c_str());
         mcamera->set_db_recognitionsetupid(recid);
         
-        mcamera->set_xmlfilepath(rows.at(23).c_str());
+        mcamera->set_xmlfilepath(rows.at(20).c_str());
         
-        stringstream last_recid_query;
-        last_recid_query    << 
-        "SELECT "           <<   
-        "IFNULL (MAX(number), 0) AS Last, "     <<
-        "CASE WHEN EXISTS (SELECT _id FROM instance WHERE RDI._id_instance = I._id) " <<
-        "THEN 1 "           <<
-        "ELSE 0 "           <<
-        "END AS ExistInstance "     << 
-        "FROM instance AS I "       <<
-        "JOIN rel_day_instance_recognition_setup AS RDI ON I._id = RDI._id_instance "       <<
-        "JOIN day AS D ON RDI._id_day = D._id "                                             <<
-        "JOIN recognition_setup AS RS ON  D._id = RS._id_day "                              <<
-        "WHERE RS._id = " << recid << ";";                 
-        cout << "last_recid_query: " << last_recid_query.str() << endl;
-        vector<vector<string> > recid_array = db_select(last_recid_query.str().c_str(), 2);
-        int has_instance = atoi(recid_array.at(0).at(1).c_str());
-        if (has_instance)
+        stringstream sql_last_instance;
+        sql_last_instance   <<
+        "SELECT coalesce( MAX(I.number), 0) FROM instance AS I "                                <<
+        "JOIN rel_day_instance_recognition_setup AS RDI ON I._id = RDI._id_instance "           <<
+        "JOIN recognition_setup AS RS ON RDI._id_recognition_setup = RS._id "                   <<
+        "JOIN rel_month_day AS RMD ON RDI._id_day = RMD._id_day "           <<
+        "JOIN day as D ON RMD._id_day = D._id "                             <<
+        "JOIN month AS M ON RMD._id_month = M._id "                         <<
+        "JOIN rel_camera_month AS RCM ON RMD._id_month = RMD._id_month "    <<
+        "JOIN cameras AS C ON RCM._id_camera = C._id "                      <<
+        "WHERE C.number = " << camnum << " AND D.label = '" << m.currday()  << "' " <<
+        "AND RS.name = '" << recname << "';";
+        std::string sqllaststd = sql_last_instance.str();
+        cout << "sqllaststd: " << sqllaststd << endl;
+        pthread_mutex_lock(&databaseMutex);
+        vector<vector<string> > lastinstance_array = db_select(sqllaststd.c_str(), 1);
+        pthread_mutex_unlock(&databaseMutex);
+        
+        std::string last = lastinstance_array.at(0).at(0).c_str();
+        int ln = atoi(last.c_str());
+        if (ln>0)
         {
-            int db_instance_id = atoi(recid_array.at(0).at(0).c_str());
-            cout << "db_instance_id: " << db_instance_id << endl;
-            stringstream li;
-            li << db_instance_id;
-            mcamera->set_lastinstance(li.str());
-        } else
+            mcamera->set_lastinstance(last);
+        } else 
         {
-           mcamera->set_lastinstance("0"); 
+            mcamera->set_lastinstance("0");
         }
         
         PROTO.Clear();
@@ -786,7 +796,7 @@ int insertDayIntoDatabase(std::string str_day, int db_month_id)
     return db_day_id;
 }
 
-int insertIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera)
+int insertIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera, int camera_recognition_setupl_array)
 {
     //Alarm Interval Start End
     stringstream sql_interval;
@@ -798,18 +808,77 @@ int insertIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera)
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_interval.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
-     
+    
+    vector<vector<string> > interval_array;
     std::string last_interval_id_query = "SELECT MAX(_id) FROM interval";
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > interval_array = db_select(last_interval_id_query.c_str(), 1);
+    interval_array = db_select(last_interval_id_query.c_str(), 1);
     pthread_mutex_unlock(&databaseMutex);
     int db_interval_id = atoi(interval_array.at(0).at(0).c_str());
-    cout << "db_interval_id: " << db_interval_id << endl;
     
-    return db_interval_id;
+    int cronsize = pcamera->motioncron_size();
+    
+    for (int i = 0; i < cronsize; i++)
+    {
+        motion::Message::MotionCron * pcronstart = pcamera->mutable_motioncron(i);
+        
+        stringstream sql_interval;
+        sql_interval <<
+        "INSERT INTO crontab (command, program) " <<
+        "SELECT '" << pcronstart->command() << "', '" << pcronstart->program() << "' " << 
+        "WHERE NOT EXISTS (SELECT * FROM crontab WHERE command = '" << pcronstart->command() << "' " <<
+        "AND program = '" << pcronstart->program() << "');";
+        cout << "sql_interval: " << sql_interval.str() << endl;
+        pthread_mutex_lock(&databaseMutex);
+        db_execute(sql_interval.str().c_str());
+        pthread_mutex_unlock(&databaseMutex);
+       
+        stringstream command;
+        command <<
+        "crontab -l ; echo '" << pcronstart->command() << " " << pcronstart->program()<<  "' | crontab -";
+        cout << "command: " << command.str() << endl;
+        char *cstr = new char[command.str().length() + 1];
+        strcpy(cstr, command.str().c_str());
+        exec_command(cstr);
+        
+        vector<vector<string> > crontab_array;
+        std::string last_crontab_id_query = "SELECT MAX(_id) FROM crontab";
+        pthread_mutex_lock(&databaseMutex);
+        crontab_array = db_select(last_crontab_id_query.c_str(), 1);
+        pthread_mutex_unlock(&databaseMutex);
+        int db_crontab_id = atoi(crontab_array.at(0).at(0).c_str());
+        
+        stringstream sql_interval_crontab;
+        sql_interval_crontab <<
+        "INSERT INTO rel_interval_crontab (_id_interval, _id_crontab) " <<
+        "SELECT " << db_interval_id << ", " << db_crontab_id << " " << 
+        "WHERE NOT EXISTS (SELECT * FROM rel_interval_crontab WHERE _id_interval = " << db_interval_id << " " <<
+        "AND _id_crontab = " << db_crontab_id << ");";
+        pthread_mutex_lock(&databaseMutex);
+        db_execute(sql_interval_crontab.str().c_str());
+        pthread_mutex_unlock(&databaseMutex);
+        
+        vector<vector<string> > interval_crontab_array;
+        std::string last_interval_crontab_id_query = "SELECT MAX(_id) FROM rel_interval_crontab";
+        pthread_mutex_lock(&databaseMutex);
+        interval_crontab_array = db_select(last_interval_crontab_id_query.c_str(), 1);
+        pthread_mutex_unlock(&databaseMutex);
+        int db_rel_interval_crontab = atoi(interval_crontab_array.at(0).at(0).c_str());
+        
+        stringstream sql_camera_recognition_setup_interval_crontab;
+        sql_camera_recognition_setup_interval_crontab <<
+        "INSERT INTO rel_camera_recognition_setup_interval_crontab (_id_rel_interval_crontab, _id_rel_camera_recognition_setup) " <<
+        "SELECT " << db_rel_interval_crontab << ", " << camera_recognition_setupl_array << " " << 
+        "WHERE NOT EXISTS (SELECT * FROM rel_camera_recognition_setup_interval_crontab WHERE _id_rel_interval_crontab = " << db_rel_interval_crontab << " " <<
+        "AND _id_rel_camera_recognition_setup = " << camera_recognition_setupl_array << ");";
+        pthread_mutex_lock(&databaseMutex);
+        db_execute(sql_camera_recognition_setup_interval_crontab.str().c_str());
+        pthread_mutex_unlock(&databaseMutex);
+      
+    }
 }
 
-void updateIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera)
+/*void updateIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera)
 {
     stringstream sql_interval_update;
     sql_interval_update <<
@@ -819,11 +888,10 @@ void updateIntervalsIntoDatabase(motion::Message::MotionCamera * pcamera)
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_interval_update.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
-}
+}*/
 
 int insertIntoRecognitionSetup(
         motion::Message::MotionCamera * pcamera, 
-        int db_interval_id,
         int db_day_id,
         int db_camera_id,
         int db_coordnates_id,
@@ -834,7 +902,6 @@ int insertIntoRecognitionSetup(
     sql_recognition_setup <<
     "INSERT INTO recognition_setup " <<
     "(name, "                   <<
-            "_id_interval, "    <<
             "_id_day, "         <<
             "_id_camera, "      <<
             "_id_mat, "         <<
@@ -842,14 +909,14 @@ int insertIntoRecognitionSetup(
             "storevideo, "      <<
             "codename, "        <<
             "has_region, "      <<
+            "has_cron, "        <<
             "_id_coordinates, " <<
             "delay, "           <<
             "speed, "           <<
             "xmlfilepath, "     <<
             "runatstartup) "    <<
     "SELECT "               << "'"      << 
-    pcamera->recname()         << "', " <<
-    db_interval_id          << ", "     <<
+    pcamera->recname()      << "', "    <<
     db_day_id               << ", "     <<
     db_camera_id            << ", "     <<
     pcamera->db_idmat()     << ", "     <<
@@ -857,14 +924,14 @@ int insertIntoRecognitionSetup(
     pcamera->storevideo()   << ", '"    <<
     pcamera->codename()     << "' ,"    <<
     pcamera->hasregion()    << ", "     <<
+    pcamera->hascron()      << ", "     <<        
     db_coordnates_id        << ", "     <<
     pcamera->delay()        << ", "     <<
     pcamera->speed()        << ", '"    <<
-    xmlfilepath             << "', "     <<        
+    xmlfilepath             << "', "    <<        
     pcamera->runatstartup() <<    
     " WHERE NOT EXISTS (SELECT * FROM recognition_setup WHERE"  <<
-    " name              = '"    << pcamera->recname()          << "' AND"  <<
-    " _id_interval      = "     << db_interval_id           << " AND"   <<
+    " name              = '"    << pcamera->recname()       << "' AND"  <<
     " _id_day           = "     << db_day_id                << " AND"   <<
     " _id_camera        = "     << db_camera_id             << " AND"   <<
     " _id_mat           = "     << pcamera->db_idmat()      << " AND"   <<
@@ -872,6 +939,7 @@ int insertIntoRecognitionSetup(
     " storevideo        = "     << pcamera->storevideo()    << " AND"   <<
     " codename          = '"    << pcamera->codename()      << "' AND"  <<
     " has_region        = "     << pcamera->hasregion()     << " AND"   <<
+    " has_cron          = "     << pcamera->hascron()       << " AND"   <<
     " speed             = "     << pcamera->speed()         << " AND"   <<
     " xmlfilepath       = '"    << xmlfilepath              << "' AND"  <<
     " runatstartup      = "     << pcamera->runatstartup()  << ");";
@@ -895,7 +963,6 @@ void updateRecognitionSetup(motion::Message::MotionCamera * pcamera, motion::Mes
     sql_recognition_setup <<
     "UPDATE recognition_setup set "                     <<
     "name = '"          << pcamera->recname()           << "', "    <<
-    "_id_interval = "   << pcamera->db_intervalid()     << ", "     <<
     "_id_day = "        << pday->db_dayid()             << ", "     <<
     "_id_camera = "     << pcamera->db_idcamera()       << ", "     <<        
     "_id_mat = "        << pcamera->db_idmat()          << ", "     <<
@@ -912,19 +979,28 @@ void updateRecognitionSetup(motion::Message::MotionCamera * pcamera, motion::Mes
     pthread_mutex_unlock(&databaseMutex);    
 }
 
-void insertIntoCameraMonth(char * time_rasp, int db_recognitionsetup_id, int db_camera_id)
+int insertIntoRelCameraRecognitionSetup(char * time_rasp, int db_recognitionsetup_id, int db_camera_id)
 {
     //rel_camera_month.
     stringstream sql_rel_camera_recognition_setup;
     sql_rel_camera_recognition_setup <<
     "INSERT INTO rel_camera_recognition_setup (_id_camera, _id_recognition_setup, start_rec_time) " <<
-    "SELECT " << db_camera_id << ", "  << db_recognitionsetup_id << ", '" << time_rasp << "' "
+    "SELECT " << db_camera_id << ", "  << db_recognitionsetup_id << ", '" << time_rasp << "' " << 
     " WHERE NOT EXISTS (SELECT * FROM rel_camera_recognition_setup WHERE _id_camera = " << db_camera_id <<
     " AND _id_recognition_setup = " << db_recognitionsetup_id << ");";
     //cout << "sql_rel_camera_recognition_setup: " << sql_rel_camera_recognition_setup.str() << endl;
     pthread_mutex_lock(&databaseMutex); 
     db_execute(sql_rel_camera_recognition_setup.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
+    
+    std::string last_rel_camera_recognition_setup = "SELECT MAX(_id) FROM rel_camera_recognition_setup";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > camera_recognition_setupl_array = db_select(last_rel_camera_recognition_setup.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_camera_recognition_setupl_array = atoi(camera_recognition_setupl_array.at(0).at(0).c_str());
+    cout << "db_camera_recognition_setupl_array: " << db_camera_recognition_setupl_array << endl;
+    
+    return db_camera_recognition_setupl_array;
 }
 
 void updateCameraMonth(char * time_rasp, int db_recognitionsetupid)
@@ -937,4 +1013,30 @@ void updateCameraMonth(char * time_rasp, int db_recognitionsetupid)
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_cameramonth_update.str().c_str());
     pthread_mutex_unlock(&databaseMutex);    
+}
+
+vector<string> getIntervalsByCamberaAndRec(std::string camera, std::string recname)
+{
+    vector<string> intervals;
+    stringstream sql_intervals;
+    sql_intervals       <<   
+    "SELECT "               <<
+    "INT.timestart, "       <<
+    "INT.timeend "          <<
+    "FROM interval AS INT " <<
+    "JOIN rel_interval_crontab AS RIC ON RIC._id_interval = INT._id "                                           <<
+    "JOIN rel_camera_recognition_setup_interval_crontab RCRSIC ON RIC._id = RCRSIC._id_rel_interval_crontab "   <<
+    "JOIN rel_camera_recognition_setup AS RCRS ON RCRS._id = RCRSIC._id_rel_camera_recognition_setup "          <<
+    "JOIN recognition_setup AS RS ON RCRS._id_recognition_setup = RS._id "                                      <<
+    "JOIN cameras AS C ON RCRS._id_camera = C._id "                                                             <<
+    "WHERE C._id = " << camera << " AND RS.name = '" << recname << "' "                                         << 
+    "GROUP BY INT._id;";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > interval_array = db_select(sql_intervals.str().c_str(), 2);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    intervals.push_back(interval_array.at(0).at(0));
+    intervals.push_back(interval_array.at(0).at(1));
+    
+    return intervals;
 }
