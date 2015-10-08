@@ -343,7 +343,7 @@ std::vector<int> db_cams(std::vector<int> cams)
     return camsarray;
 }
 
-void status()
+void status()  
 {
  
     /*stringstream sql_status;

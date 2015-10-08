@@ -969,7 +969,8 @@ void * startRecognition(void * arg)
                 has_instance_directory = false;
                 init_motion = false;
 
-                end = clock();
+                //end = clock();
+                end_time = clock();
 
                 ProtoArgs.pinstance     = pinstance; //pday->mutable_instance(0);
                 ProtoArgs.DIR           = DIR;
@@ -978,7 +979,6 @@ void * startRecognition(void * arg)
                 ProtoArgs.init_time     = init_time;
                 ProtoArgs.begin_time    = begin_time;
                 ProtoArgs.end_time      = end_time;
-                ProtoArgs.end           = end; 
                 ProtoArgs.instance      = instance;
                 ProtoArgs.instancecode  = instancecode;
                 
@@ -1200,7 +1200,6 @@ void * startRecognition(void * arg)
                     ProtoArgs.init_time     = init_time;
                     ProtoArgs.begin_time    = begin_time;
                     ProtoArgs.end_time      = end_time;
-                    ProtoArgs.end           = end; 
                     ProtoArgs.instance      = instance;
                     ProtoArgs.instancecode  = instancecode;
 

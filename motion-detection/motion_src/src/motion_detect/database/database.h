@@ -81,3 +81,4 @@ void updateCameraMonth(char * time_rasp, int db_recognitionsetupid);
 
 vector<string> getIntervalsByCamberaAndRec(std::string camera, std::string recname);
 
+    

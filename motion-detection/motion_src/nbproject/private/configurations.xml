@@ -35,9 +35,7 @@
             </df>
           </df>
         </df>
-      </df>
-      <df name="data">
-        <df name="mat">
+        <df name="Progress">
         </df>
       </df>
       <df name="src">
@@ -129,34 +127,8 @@
           </df>
           <df name="pics">
             <df name="camera0">
-              <df name="JOSE">
-                <df name="07Oct2015">
-                  <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="xml">
-                  </df>
-                </df>
-              </df>
-              <df name="LIVING">
-                <df name="06Oct2015">
-                  <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="3">
-                  </df>
-                  <df name="4">
-                  </df>
-                  <df name="5">
-                  </df>
-                  <df name="xml">
-                  </df>
-                </df>
-              </df>
-              <df name="TELE">
-                <df name="06Oct2015">
+              <df name="CARA">
+                <df name="08Oct2015">
                   <df name="1">
                   </df>
                   <df name="2">

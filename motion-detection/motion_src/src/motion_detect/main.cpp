@@ -896,7 +896,11 @@ motion::Message getRefreshProto(motion::Message m)
         if (m.has_recname())
         {
            recname = m.recname();
+        } else
+        {
+            m.set_recname(recname);
         }
+        
         
         google::protobuf::int32 camid = atoi(rowc.at(0).c_str());
         mcam->set_cameraid(camid);
@@ -1024,7 +1028,7 @@ motion::Message getRefreshProto(motion::Message m)
                 mcam->set_speed(speed);
                 bool hascron = to_bool(rows.at(19));
                 if (hascron)
-                {
+                {  
                     vector<string> intervalse  = getIntervalsByCamberaAndRec(camera, recname);
                     if (intervalse.size()>0)
                     {
