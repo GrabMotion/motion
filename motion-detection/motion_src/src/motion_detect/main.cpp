@@ -1456,19 +1456,19 @@ motion::Message runCommand(motion::Message m)
 
             std::string::size_type i = videofilepath.find(s);
 
-            if (i != std::string::npos)
-                videofilepath.erase(0, s.size());
+            //if (i != std::string::npos)
+            //    videofilepath.erase(0, s.size());
             
-            stringstream strmpath;
-            strmpath << sourcepath << videofilepath;
+            //stringstream strmpath;
+            //strmpath << sourcepath << videofilepath;
 
-            std::string path = strmpath.str();
+            //std::string path = strmpath.str();
             
             string filename = m.data();
         
             std::string command;
             command += "cat ";
-            command += path;
+            command += videofilepath; //path;
             command += "*.jpg | ffmpeg -framerate 20  -f image2pipe -c:v mjpeg -i - ";
             command += filename;
             cout << "command: " << command << endl;
@@ -2110,6 +2110,13 @@ int main (int argc, char * const av[])
         basepath    = "src/motion_detect/";
         sourcepath  = "src/";
     }
+    
+    cout << "+++++++++++++++++++++++++++++++++++++++++++" << endl;
+    cout << "runparam: " << runparam << endl;
+    cout << "+++++++++++++++++++++++++++++++++++++++++++" << endl;
+    cout << "basepath: " << basepath << endl;
+    cout << "sourcepath: " << sourcepath << endl;
+    cout << "+++++++++++++++++++++++++++++++++++++++++++" << endl;
     
     //Create database.
     //db_create();
