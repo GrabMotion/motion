@@ -1,25 +1,37 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <file>
     <SESSION_INFO>
-        <start_time>2015-10-08 17:33:53 +0000</start_time>
+        <start_time>2015-10-10 00:42:49 +0000</start_time>
     </SESSION_INFO>
     <ALL_INSTANCES>
         <instance>
             <ID>1</ID>
             <start>8</start>
-            <end>10</end>
+            <end>9</end>
             <code>test</code>
         </instance>
         <instance>
             <ID>2</ID>
-            <start>14</start>
-            <end>21</end>
+            <start>23</start>
+            <end>26</end>
             <code>test</code>
         </instance>
         <instance>
             <ID>3</ID>
-            <start>25</start>
-            <end>30</end>
+            <start>34</start>
+            <end>35</end>
+            <code>test</code>
+        </instance>
+        <instance>
+            <ID>4</ID>
+            <start>53</start>
+            <end>53</end>
+            <code>test</code>
+        </instance>
+        <instance>
+            <ID>5</ID>
+            <start>63</start>
+            <end>69</end>
             <code>test</code>
         </instance>
     </ALL_INSTANCES>

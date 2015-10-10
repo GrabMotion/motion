@@ -56,15 +56,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: CMakeFiles/moti
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/main.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o.requires
@@ -79,15 +79,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o: src/motion_detect/socket/streamlistener.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/streamlistener.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/streamlistener.cpp
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/streamlistener.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/streamlistener.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/streamlistener.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/streamlistener.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/streamlistener.o.requires
@@ -102,15 +102,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSock
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.o: src/motion_detect/practical/PracticalSocket.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.cpp
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.o.requires
@@ -125,15 +125,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o: src/motion_detect/recognition/detection.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o.requires
@@ -148,15 +148,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.o: CMak
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.o: src/motion_detect/tinyxml/tinystr.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_5)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinystr.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinystr.cpp
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinystr.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinystr.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinystr.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinystr.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinystr.o.requires
@@ -171,15 +171,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.o: CMak
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.o: src/motion_detect/tinyxml/tinyxml.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_6)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxml.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxml.cpp
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxml.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxml.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxml.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxml.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.o.requires
@@ -194,15 +194,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.o:
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.o: src/motion_detect/tinyxml/tinyxmlerror.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_7)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlerror.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlerror.cpp
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlerror.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlerror.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlerror.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlerror.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.o.requires
@@ -217,15 +217,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o: src/motion_detect/tinyxml/tinyxmlparser.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_8)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlparser.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlparser.cpp
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlparser.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlparser.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlparser.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlparser.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o.requires
@@ -263,15 +263,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o: src/motion_detect/protobuffer/motion.pb.cc
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_10)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.cc
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.cc
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.cc > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.cc > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.cc -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.cc -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o.requires
@@ -332,15 +332,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o: CMakeFile
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o: src/motion_detect/b64/base64.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_13)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/base64.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/base64.cpp
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/base64.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/base64.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/base64.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/base64.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o.requires
@@ -355,15 +355,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o: CMakeF
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o: src/motion_detect/socket/netcvc.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_14)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.cpp
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o.requires
@@ -378,15 +378,15 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o: CM
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o: src/motion_detect/database/database.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/motion/motion-detection/motion_src/CMakeFiles $(CMAKE_PROGRESS_15)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o"
-	/usr/bin/g++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o -c /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.i"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp > CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.i
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.s"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp -o CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.s
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o.requires:
 .PHONY : CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o.requires

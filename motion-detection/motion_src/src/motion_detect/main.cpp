@@ -140,21 +140,6 @@ int resutl_watch_detected;
 std::string startrecognitiontime;
 string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
 
-//Database ids
-/*int db_hardware_id;
-int db_camera_id;
-int db_rel_hardware_camera_id;
-int db_status_id;
-int db_month_id;
-int db_day_id;
-int db_rel_camera_month_id;
-int db_coordnates_id;
-int db_recognition_setup_id;
-int db_mats_id;
-int db_interval_id;
-int db_image_id;
-int db_crop_id;*/
-
 //UDP
 int udpsend(motion::Message m);
 
@@ -2134,6 +2119,12 @@ int main (int argc, char * const av[])
     
     //Rasp Variables.
     std::vector<int> cams = getCameras();
+    if (cams.size()==0)
+    {
+        cout << "NO CAMERA IDENTIFIED!" << endl;
+        cout << "QUITTING PROGRAM....." << endl;
+        return 0;
+    }
     stringstream ss;
     copy( cams.begin(), cams.end(), ostream_iterator<int>(ss, " "));
     std::string cameras = ss.str();
@@ -2230,6 +2221,7 @@ int main (int argc, char * const av[])
     ", '"       << publicip        << "' "
     "WHERE NOT EXISTS (SELECT * FROM network WHERE ipnumber = '"<< local_ip << "' " <<
     "AND ippublic = '" << publicip << "');";
+    cout << "sql_network: " << sql_network.str() << endl;
     db_execute(sql_network.str().c_str());
     
     if(!(in = popen("uptime", "r"))){
@@ -2252,6 +2244,7 @@ int main (int argc, char * const av[])
     ", '"       << time_rasp        << "' "
     "WHERE NOT EXISTS (SELECT * FROM status WHERE uptime = '"<< uptime << "' " <<
     "AND starttime = '" << time_rasp << "');";
+    cout << "sql_status: " << sql_status.str() << endl;
     db_execute(sql_status.str().c_str());
     
     std::string last_status_id_query = "SELECT MAX(_id) FROM status";
@@ -2265,6 +2258,7 @@ int main (int argc, char * const av[])
     "uptime = '"    << uptime << "',"
     "starttime = '" << time_rasp << "' "
     "WHERE _id = " << db_status_id << ";";
+    cout << "sql_status_update: " << sql_status_update.str() << endl;
     db_execute(sql_status_update.str().c_str());
     
     cout << "Getting hard info." << endl;
@@ -2277,6 +2271,7 @@ int main (int argc, char * const av[])
         "SELECT " << db_hardware_id << "," << camsarray.at(i) <<
         " WHERE NOT EXISTS (SELECT * FROM rel_hardware_camera WHERE _id_hardware = "
         << camera << " AND _id_camera = " << camsarray.at(i) << ");";
+        cout << "insert_camera_query: " << insert_camera_query.str() << endl;
         db_execute(insert_camera_query.str().c_str());
             
         std::string last_har_cam_id_query = "SELECT MAX(_id) FROM rel_hardware_camera";
@@ -2297,6 +2292,7 @@ int main (int argc, char * const av[])
         "SELECT " << camhard.at(i) << "," << db_status_id <<
         " WHERE NOT EXISTS (SELECT * FROM rel_hardware_camera_status WHERE _id_hardware_camera = "
         << camhard.at(i) << " AND _id_status = " << db_status_id << ");";
+        cout << "insert_rel_hardcamsta_query: " << insert_rel_hardcamsta_query.str() << endl;
         db_execute(insert_rel_hardcamsta_query.str().c_str());
     }
     
