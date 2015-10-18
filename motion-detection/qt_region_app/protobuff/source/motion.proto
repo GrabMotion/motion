@@ -19,6 +19,7 @@ message Message
 	optional int32 packagesize 			= 14;	
 	optional string imagefilepath 			= 15; 
 	optional string videofilepath 			= 16;
+	optional string recname 			= 17;
 	
 
 	enum ActionType 
@@ -42,6 +43,8 @@ message Message
 		 SAVE				= 1017;
 		 OPEN				= 1018;
 		 UPDATE				= 1019;
+		 SAVE_OK			= 1020;
+	         UPDATE_OK			= 1021; 
 		 RESPONSE_OK			= 2000;
 		 RESPONSE_NEXT			= 2010;
 		 RESPONSE_END			= 2020;
@@ -81,43 +84,102 @@ message Message
 
 	message MotionCamera
 	{
-		repeated MotionMonth motionmonth    	= 1;
-		repeated MotionRecognition motionrec    = 2;
-		optional int32 cameraid   		= 3 [default = 0];
-		optional int32 cameranumber   		= 4;
-		optional string cameraname   		= 5;
-		optional string timestart		= 6;
-		optional string timeend			= 7;
-		optional string name 			= 8;
-		optional bool recognizing           	= 9;
-		optional string camerasince   		= 10;	 
-		optional bool storeimage 		= 11;
-		optional bool storevideo 		= 12;
-		optional string codename        	= 14;
-		optional bool hasregion		    	= 15;
-		optional string coordinates		= 16;
-		optional int32 delay			= 17;
-		optional string startrectime 		= 18;
-		optional string stoprectime 		= 19;
-		optional bool	runatstartup		= 20;
-		optional int32 activemat		= 21;
-		optional bool recognizing_flag  	= 22;
-		optional int32 db_idcamera 		= 23;
-		optional int32 db_idmat 		= 24;
-		optional int32 db_idcoordinates 	= 25;
-		optional int32 db_intervalid		= 26;
-		optional int32 	matcols			= 27;
-		optional int32 	matrows 		= 28;
-		optional int32 	matwidth		= 29;
-		optional int32 	matheight 		= 30;
-		optional bool fromdatabase		= 31;
-		optional string lastinstance		= 32;
+		repeated MotionMonth motionmonth    		= 1;
+		repeated MotionRecognition motionrecognition    = 2;
+		repeated MotionRec motionrec		    	= 3;
+		optional int32 cameraid   			= 4 [default = 0];
+		optional int32 cameranumber   			= 5;
+		optional string cameraname   			= 6;
+
+		//optional string timestart		= 6;
+		//optional string timeend		= 7;
+		//optional string recname 		= 8;
+
+		optional bool hasrecjob           	= 7;
+		optional bool recognizing           	= 8;
+
+		//optional string camerasince   	= 12;	 
+		//optional bool storeimage 		= 13;
+		//optional bool storevideo 		= 14;
+		//optional string codename        	= 15;
+		//optional bool hasregion		= 16;
+		//optional string coordinates		= 17;
+		//optional int32 delay			= 18;
+		//optional string startrectime 		= 19;
+		//optional string stoprectime 		= 20;
+		//optional bool	runatstartup		= 21;
+		//optional int32 activemat		= 22;
+
+		optional bool recognizing_flag  	= 9;
+		optional int32 db_idcamera 		= 10;
+
+		//optional int32 db_idmat 		= 25;
+		//optional int32 db_idcoordinates 	= 26;
+		//optional int32 db_intervalid		= 27;
+		//optional int32 	matcols		= 28;
+		//optional int32 	matrows 	= 29;
+		//optional int32 	matwidth	= 30;
+		//optional int32 	matheight 	= 31;
+
+		optional bool fromdatabase		= 11;
+
+		//optional string lastinstance		= 33;
+		//optional int32 db_idmonth 		= 34;
+		//optional int32 db_idday 		= 35;
+		//optional string xmlfilepath		= 36;
+
+		optional int32 speed 			= 12;
+
+		//optional int32 db_recognitionsetupid  = 38;
+		//optional bool hascron    		= 39;
+		//repeated MotionCron motioncron	= 40;
+
+	}
+
+	message MotionRec
+	{
+		optional string name			= 1;
+		optional int32 	db_idrec 		= 2;
+		optional string timestart		= 3;
+		optional string timeend			= 4;
+		optional string recname 		= 5;
+		optional string camerasince   		= 6;	 
+		optional bool storeimage 		= 7;
+		optional bool storevideo 		= 8;
+		optional string codename        	= 9;
+		optional bool hasregion			= 10;
+		optional string coordinates		= 11;
+		optional int32 delay			= 12;
+		optional string startrectime 		= 13;
+		optional string stoprectime 		= 14;
+		optional bool	runatstartup		= 15;
+		optional int32 activemat		= 16;
+		optional int32 db_idmat 		= 17;
+		optional int32 db_idcoordinates 	= 18;
+		optional int32 db_intervalid		= 19;
+		optional int32 	matcols			= 20;
+		optional int32 	matrows 		= 21;
+		optional int32 	matwidth		= 22;
+		optional int32 	matheight 		= 23;
+		optional string lastinstance		= 24;
+		optional int32 db_idmonth 		= 25;
+		optional int32 db_idday 		= 26;
+		optional string xmlfilepath		= 27;
+		optional int32 db_recognitionsetupid  	= 28;
+		optional bool hascron    		= 29;
+		repeated MotionCron motioncron		= 30;
 	}
 
 	message MotionRecognition
 	{
 		optional string name			= 1;
 		optional int32 	db_idrec 		= 2;
+	}
+
+	message MotionCron
+	{
+		optional string command			= 1;
+		optional string program 		= 2;
 	}	
 	
 	message MotionMonth
@@ -132,20 +194,19 @@ message Message
 		repeated Instance instance      		= 1;
 		optional string daylabel			= 2;
 		optional int32 db_dayid 			= 3;
-		optional int32 db_recognitionsetupid    	= 4;
-		optional string xmlfilename			= 5;
-		optional string xmlfilepath			= 6; 
+		optional string xmlfilepath			= 4; 
 	}
 	
 	message Instance
 	{
 		required int32 		idinstance 		= 1;
-		optional string 	instancestart   	= 2;	
-		optional string 	instanceend	    	= 3;
-		optional string 	fileformat		= 4;
-		repeated Image 		image      	    	= 5;
-		repeated Crop 		crop      	   	= 6;		
-		optional Video 		video      	    	= 7;
+		optional int32 		number 			= 2;
+		optional string 	instancestart   	= 3;	
+		optional string 	instanceend	    	= 4;
+		optional string 	fileformat		= 5;
+		repeated Image 		image      	    	= 6;
+		repeated Crop 		crop      	   	= 7;		
+		optional Video 		video      	    	= 8;
 	}
 	
 	message Image
