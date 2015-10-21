@@ -471,13 +471,23 @@ void MainWindow::on_getxml_clicked()
     m.set_activecam(index);
 
     motion::Message::MotionCamera * mcamera = m.add_motioncamera();
-
     motion::Message::MotionCamera * mprotocam = PROTO.mutable_motioncamera(index);
-    std::string xmlpath = mprotocam->xmlfilepath();
-    mcamera->set_xmlfilepath(xmlpath);
 
+    int recsize = mprotocam->motionrec_size();
     QString qt_name = ui->rec_name->text();
-    mcamera->set_recname(qt_name.toStdString());
+
+    for (int i=0; i<recsize; i++)
+    {
+        motion::Message::MotionRec * mprotorec = mprotocam->mutable_motionrec(i);
+        std::string recnameproto = mprotorec->name();
+        std::string recname = qt_name.toStdString();
+        if (recnameproto.compare(recname) == 0)
+        {
+            std::string xmlpath = mprotorec->xmlfilepath();
+            mprotorec->set_xmlfilepath(xmlpath);
+            mprotorec->set_recname(qt_name.toStdString());
+        }
+    }
 
     setMessageBodyAndSend(m);
     google::protobuf::ShutdownProtobufLibrary();
@@ -731,10 +741,12 @@ void MainWindow::on_start_recognition_toggled(bool checked)
     mcamera->set_cameraname(cameraname.toStdString());
 
     QString qt_name = ui->rec_name->text();
-    mcamera->set_recname(qt_name.toStdString());
 
-    motion::Message::MotionRecognition * mrec = mcamera->add_motionrec();
-    mrec->set_name(qt_name.toStdString());
+    motion::Message::MotionRec * mrec = mcamera->add_motionrec();
+    mrec->set_recname(qt_name.toStdString());
+
+    motion::Message::MotionRecName * mrecname = mcamera->add_motionrecname();
+    mrecname->set_name(qt_name.toStdString());
 
     QVariant dbname = ui->rec->itemData(ui->rec->currentIndex());
     google::protobuf::int32 nameid = static_cast<int>(dbname.toFloat());
@@ -756,8 +768,10 @@ void MainWindow::on_save_rec_clicked()
 
     QString vspeed = ui->speedcombo->currentText();
 
+    motion::Message::MotionRec * mrec = mcamera->add_motionrec();
+
     int speed = vspeed.toInt();
-    mcamera->set_speed(speed);
+    mrec->set_speed(speed);
 
     std::string _month = getCurrentMonthLabel();
     m.set_currmonth(_month);
@@ -768,34 +782,71 @@ void MainWindow::on_save_rec_clicked()
     std::string _day = getCurrentDayLabel();
     m.set_currday(_day);
 
-    mcamera->set_hasregion(region);
+    mrec->set_hasregion(region);
     if (region)
     {
         std::string res = region_resutl;
         std::string resencoded = base64_encode(reinterpret_cast<const unsigned char*>(res.c_str()), res.length());
-        mcamera->set_coordinates(resencoded.c_str());
+        mrec->set_coordinates(resencoded.c_str());
     }
 
     QString cname = ui->codename->text();
     std::string code = cname.toStdString();
     cout << "CODENAME: " << code << endl;
-    mcamera->set_codename(code);
+    mrec->set_codename(code);
 
     QString dlay = ui->delay->currentText();
     google::protobuf::uint32 delay = dlay.toInt();
-    mcamera->set_delay(delay);
+    mrec->set_delay(delay);
 
-    mcamera->set_storevideo(true);
+    mrec->set_storevideo(true);
 
     if (ui->has_images->isChecked())
     {
-        mcamera->set_storeimage(true);
+        mrec->set_storeimage(true);
     } else
     {
-        mcamera->set_storeimage(false);
+        mrec->set_storeimage(false);
     }
 
     motion::Message::MotionCamera * mprotocam = PROTO.mutable_motioncamera(index);
+
+    int recsize = mprotocam->motionrec_size();
+    QString qt_name = ui->rec_name->text();
+
+    for (int i=0; i<recsize; i++)
+    {
+        motion::Message::MotionRec * mprotorec = mprotocam->mutable_motionrec(i);
+        if (mprotorec->activerec())
+        {
+            std::string xmlpath = mprotorec->xmlfilepath();
+            mprotorec->set_xmlfilepath(xmlpath);
+            mprotorec->set_recname(qt_name.toStdString());
+
+            google::protobuf::uint32 mrows = mprotorec->matrows();
+            mrec->set_matrows(mrows);
+
+            google::protobuf::uint32 mcols = mprotorec->matcols();
+            mrec->set_matcols(mcols);
+
+            google::protobuf::uint32 mwidth = mprotorec->matheight();
+            mrec->set_matheight(mwidth);
+
+            google::protobuf::uint32 mheight = mprotorec->matwidth();
+            mrec->set_matwidth(mheight);
+
+            if (mprotorec->has_lastinstance())
+            {
+                std::string last = mprotorec->lastinstance();
+                mrec->set_lastinstance(last);
+            }
+
+            int dbmat = mprotorec->db_idmat();
+            mrec->set_db_idmat(dbmat);
+
+            mrec->set_activerec(true);
+        }
+    }
 
     int db_idcamera = mprotocam->db_idcamera();
     mcamera->set_db_idcamera(db_idcamera);
@@ -807,34 +858,22 @@ void MainWindow::on_save_rec_clicked()
     float camnum = number.toFloat();
     mcamera->set_cameranumber(camnum);
 
-    google::protobuf::uint32 mrows = mprotocam->matrows();
-    mcamera->set_matrows(mrows);
-
-    google::protobuf::uint32 mcols = mprotocam->matcols();
-    mcamera->set_matcols(mcols);
-
-    google::protobuf::uint32 mwidth = mprotocam->matheight();
-    mcamera->set_matheight(mwidth);
-
-    google::protobuf::uint32 mheight = mprotocam->matwidth();
-    mcamera->set_matwidth(mheight);
-
     mcamera->set_fromdatabase(false);
 
     //Name
     QString name = ui->rec_name->text();
-    mcamera->set_recname(name.toStdString());
+    mrec->set_recname(name.toStdString());
 
     if (ui->between->isChecked())
     {
 
-        mcamera->set_hascron(true);
+        mrec->set_hascron(true);
         char spacer = ' ';
 
         //Times start-end
         QTime starttime = ui->time_from->time();
         QString times = starttime.toString();
-        mcamera->set_timestart(times.toStdString());
+        mrec->set_timestart(times.toStdString());
 
         vector<string> startsplit = MainWindow::splitString(times.toStdString(), ":");
         int starthour   = atoi(startsplit.at(0).c_str());
@@ -850,7 +889,7 @@ void MainWindow::on_save_rec_clicked()
         }
         startcron << starthour << " * * *";
 
-        motion::Message::MotionCron * mcronstart = mcamera->add_motioncron();
+        motion::Message::MotionCron * mcronstart = mrec->add_motioncron();
         mcronstart->set_command(startcron.str());
 
         stringstream startprogram;
@@ -861,7 +900,7 @@ void MainWindow::on_save_rec_clicked()
 
         QTime endtime = ui->time_to->time();
         QString timee = endtime.toString();
-        mcamera->set_timeend(timee.toStdString());
+        mrec->set_timeend(timee.toStdString());
 
         vector<string> stopsplit = MainWindow::splitString(timee.toStdString(), ":");
         int endstarthour   = atoi(stopsplit.at(0).c_str());
@@ -877,7 +916,7 @@ void MainWindow::on_save_rec_clicked()
         }
         endcron << endstarthour << " * * *";
 
-        motion::Message::MotionCron * mcronstop = mcamera->add_motioncron();
+        motion::Message::MotionCron * mcronstop = mrec->add_motioncron();
         mcronstop->set_command(endcron.str());
         stringstream stopprogram;
         stopprogram <<
@@ -887,27 +926,16 @@ void MainWindow::on_save_rec_clicked()
 
     } else
     {
-        mcamera->set_hascron(false);
+        mrec->set_hascron(false);
     }
-
-    int dbmat = mprotocam->db_idmat();
-    mcamera->set_db_idmat(dbmat);
-
-
 
     bool startup = ui->startup->isChecked();
     if (startup)
     {
-        mcamera->set_runatstartup(true);
+        mrec->set_runatstartup(true);
     } else
     {
-        mcamera->set_runatstartup(false);
-    }
-
-    if (mprotocam->has_lastinstance())
-    {
-        std::string last = mprotocam->lastinstance();
-        mcamera->set_lastinstance(last);
+        mrec->set_runatstartup(false);
     }
 
     setMessageBodyAndSend(m);
@@ -1305,7 +1333,7 @@ void MainWindow::saveMat(std::string encodedmat, google::protobuf::uint32 file)
 
 }
 
-void MainWindow::loadMat(google::protobuf::uint32 file)
+void MainWindow::loadMat(const motion::Message::MotionRec * mrec)
 {
 
     QString qt_ip = ui->ips_combo->currentText();
@@ -1313,18 +1341,31 @@ void MainWindow::loadMat(google::protobuf::uint32 file)
     std::string qt_ip_str = qt_ip.toUtf8().constData();
     std::string matfolder = folder_paths.at(1);
 
+    google::protobuf::uint32 file = mrec->activemat();
+
     std::string basefile = matfolder + "/" + std::to_string(file) + ".mat";
 
     cout << "basefile: " << basefile << endl;
 
-    string loadedmat = MainWindow::get_file_contents(basefile);
+    QString mat_file = QString::fromStdString(basefile);
 
-    main_mat = MainWindow::extractMat(loadedmat);
+    if (QFile(mat_file).exists())
+    {
+        string loadedmat = MainWindow::get_file_contents(basefile);
 
-    //Render image.
-    //imwrite("/jose/repos/image_2.jpg", main_mat);
-    QImage frame = Mat2QImage(main_mat);
-    ui->output->setPixmap(QPixmap::fromImage(frame));
+        main_mat = MainWindow::extractMat(loadedmat);
+
+        //Render image.
+        //imwrite("/jose/repos/image_2.jpg", main_mat);
+        QImage frame = Mat2QImage(main_mat);
+        ui->output->setPixmap(QPixmap::fromImage(frame));
+
+    } else
+    {
+        MainWindow::get_mat();
+        cout << "basefile: " << basefile << endl;
+    }
+
 
 }
 
@@ -1997,13 +2038,27 @@ void MainWindow::remoteProto(motion::Message remote)
         }
         break;
         case motion::Message::TAKE_PICTURE:
+        case motion::Message::GET_MAT:
         {
             motion::Message::MotionCamera * mcamp = PROTO.mutable_motioncamera(PROTO.activecam());
-            google::protobuf::uint32 matfile = mcamp->activemat();
-            motion::Message::MotionCamera * mccamproto = PROTO.mutable_motioncamera(PROTO.activecam());
-            mccamproto->set_activemat(matfile);
-            MainWindow::saveMat(PROTO.data(), matfile);
-            MainWindow::loadMat(matfile);
+            int sizerec = mcamp->motionrec_size();
+            int activerec=0;
+            if (sizerec>0)
+            {
+                for (int l = 0; l < sizerec; l++)
+                {
+                    motion::Message::MotionRec * mrec = mcamp->mutable_motionrec(l);
+                    if(mrec->activerec())
+                    {
+                        google::protobuf::uint32 matfile = mrec->activemat();
+                        mrec->set_activemat(matfile);
+                        MainWindow::saveMat(PROTO.data(), matfile);
+                        MainWindow::loadMat(mrec);
+                        int db_idmat = mrec->db_idmat();
+                        mrec->set_db_idmat(db_idmat);
+                    }
+                }
+            }
         }
         break;
         case motion::Message::GET_XML:
@@ -2132,7 +2187,7 @@ void MainWindow::engage_refresh(bool engage)
     }
 
     int activecam = PROTO.activecam();
-    const motion::Message::MotionCamera * mcam = PROTO.mutable_motioncamera(activecam);
+    motion::Message::MotionCamera * mcam = PROTO.mutable_motioncamera(activecam);
 
     int sizee = mcam->motionmonth_size();
     if (sizee>0)
@@ -2150,51 +2205,79 @@ void MainWindow::engage_refresh(bool engage)
 
     if (mcam->motionrec_size()>0)
     {
-        MainWindow::populateRecCombo(mcam);
-    }
-
-    std::string recname;
-    if (mcam->has_recname())
-    {
-        recname = mcam->recname();
-        ui->rec_name->setText(recname.c_str());
-
-        int indexn = ui->rec->findText(recname.c_str());
-        if (indexn != -1)
+        int activerec = 0;
+        int sizerec = mcam->motionrec_size();
+        if (sizerec>0)
         {
-            ui->delay->setCurrentIndex(indexn);
-            ui->delay->setCurrentText(recname.c_str());
+            ui->rec->setEnabled(true);
+            for (int l = 0; l < sizerec; l++)
+            {
+
+                QString activerec;
+                motion::Message::MotionRec * mrec = mcam->mutable_motionrec(l);
+                if (mrec->activerec())
+                {
+                    std::string recname;
+                    if (mrec->has_recname())
+                    {
+
+                        activerec = QString::number(l);
+                        recname = mrec->recname();
+                        ui->rec_name->setText(recname.c_str());
+
+                        int indexn = ui->rec->findText(recname.c_str());
+                        if (indexn != -1)
+                        {
+                            ui->delay->setCurrentIndex(indexn);
+                            ui->delay->setCurrentText(recname.c_str());
+                        }
+                    }
+                    MainWindow::loadRecData(mrec);
+                }
+                const motion::Message::MotionRecName & mrecname = mmactivecam->motionrecname(l);
+                QString ccombo = mrecname.name().c_str();
+                int indexr = ui->rec->findText(ccombo);
+                if (indexr == -1)
+                {
+                    ui->rec->addItem(ccombo);
+                    int itemdata = mrecname.db_idrec();
+                    ui->rec->itemData(itemdata);
+                    int isrec = QString::compare(ccombo, activerec, Qt::CaseInsensitive);
+                    if (isrec==0)
+                    {
+                        ui->rec->setCurrentIndex(indexr);
+                        ui->rec->setCurrentText(ccombo);
+                    }
+                }
+            }
         }
     }
 
     MainWindow::getTerminalFolder(PROTO);
-    MainWindow::loadRecData(mcam);
     MainWindow::enableStartButton(mcam);
 
     i_spinner->stop();
-
 }
 
-
-void MainWindow::loadRecData(const motion::Message::MotionCamera * mcam)
+void MainWindow::loadRecData(const motion::Message::MotionRec * mrec)
 {
 
-    QString speed = QString::number(mcam->speed());
+    QString speed = QString::number(mrec->speed());
     int indexspeed = ui->speedcombo->findText(speed);
     if (indexspeed != -1)
     {
         ui->speedcombo->setCurrentIndex(indexspeed);
     }
 
-    if (mcam->hascron())
+    if (mrec->hascron())
     {
         ui->between->setChecked(true);
         ui->time_from->setEnabled(true);
         ui->time_to->setEnabled(true);
 
-        QTime timestart(QTime::fromString(mcam->timestart().c_str(), "hh:mm:ss"));
+        QTime timestart(QTime::fromString(mrec->timestart().c_str(), "hh:mm:ss"));
         ui->time_from->setTime(timestart);
-        QTime timestop(QTime::fromString(mcam->timeend().c_str(), "hh:mm:ss"));
+        QTime timestop(QTime::fromString(mrec->timeend().c_str(), "hh:mm:ss"));
         ui->time_to->setTime(timestop);
     } else
     {
@@ -2209,8 +2292,8 @@ void MainWindow::loadRecData(const motion::Message::MotionCamera * mcam)
     else
         ui->status_label->setText("N/A");
 
-    std::string start = mcam->startrectime();
-    if (mcam->has_startrectime())
+    std::string start = mrec->startrectime();
+    if (mrec->has_startrectime())
         ui->instance_started->setText(start.c_str());
     else
         ui->instance_started->setText("N/A");
@@ -2220,53 +2303,53 @@ void MainWindow::loadRecData(const motion::Message::MotionCamera * mcam)
     //else
         //ui->has_images->setChecked(false);
 
-    if (mcam->has_runatstartup())
+    if (mrec->has_runatstartup())
     {
-        ui->startup->setChecked(mcam->runatstartup());
+        ui->startup->setChecked(mrec->runatstartup());
     }
 
-    if (mcam->has_codename())
-        ui->codename->setText(mcam->codename().c_str());
+    if (mrec->has_codename())
+        ui->codename->setText(mrec->codename().c_str());
     else
         ui->codename->setText("test");
-    if (mcam->has_delay())
-        ui->delay->setCurrentIndex(mcam->delay()-1);
+    if (mrec->has_delay())
+        ui->delay->setCurrentIndex(mrec->delay()-1);
     else
         ui->delay->setCurrentIndex(1);
 
-    if (mcam->has_activemat())
+    if (mrec->has_activemat())
     {
-        google::protobuf::uint32 matint =  mcam->activemat();
+        google::protobuf::uint32 matint =  mrec->activemat();
         if (matint>0)
-            MainWindow::loadMat(matint);
+            MainWindow::loadMat(mrec);
     }
 
-    if (mcam->has_coordinates())
+    if (mrec->has_coordinates())
     {
-        std::string coords = mcam->coordinates();
+        std::string coords = mrec->coordinates();
         vector<Point2f> scorrd = MainWindow::stringToVectorPoint2f(coords);
         ui->qt_drawing_output->drawLinesSlot(scorrd);
     }
 
-    if (mcam->has_lastinstance())
+    if (mrec->has_lastinstance())
     {
-        std::string last = mcam->lastinstance();
+        std::string last = mrec->lastinstance();
     }
 
-    if(mcam->has_timestart())
+    if(mrec->has_timestart())
     {
-        QString timef = mcam->timestart().c_str();
+        QString timef = mrec->timestart().c_str();
         QTime tf = QTime::fromString(timef);
         ui->time_from->setTime(tf);
-     } else
+    } else
     {
         QTime timefrom(9, 0);
         ui->time_from->setTime(timefrom);
     }
 
-    if(mcam->has_timeend())
+    if(mrec->has_timeend())
     {
-        QString timet = mcam->timeend().c_str();
+        QString timet = mrec->timeend().c_str();
         QTime tt = QTime::fromString(timet);
         ui->time_to->setTime(tt);
 
@@ -2276,7 +2359,7 @@ void MainWindow::loadRecData(const motion::Message::MotionCamera * mcam)
         ui->time_to->setTime(timeto);
     }
 
-    MainWindow::enableStartButton(mcam);
+    //MainWindow::enableStartButton(mcam);
 
     ui->engage_button->setDisabled(true);
 
@@ -2288,7 +2371,7 @@ void MainWindow::loadRecData(const motion::Message::MotionCamera * mcam)
 
 }
 
-void MainWindow::populateRecCombo(const motion::Message::MotionCamera * mmactivecam)
+void MainWindow::populateRecCombo(motion::Message::MotionCamera * mmactivecam, QString activerec)
 {
     if (mmactivecam)
     {
@@ -2298,16 +2381,15 @@ void MainWindow::populateRecCombo(const motion::Message::MotionCamera * mmactive
             ui->rec->setEnabled(true);
             for (int l = 0; l < sizerec; l++)
             {
-                const motion::Message::MotionRecognition & mrec = mmactivecam->motionrec(l);
-                QString ccombo = mrec.name().c_str();
+                const motion::Message::MotionRecName & mrecname = mmactivecam->motionrecname(l);
+                QString ccombo = mrecname.name().c_str();
                 int indexr = ui->rec->findText(ccombo);
                 if (indexr == -1)
                 {
                     ui->rec->addItem(ccombo);
-                    int itemdata = mrec.db_idrec();
+                    int itemdata = mrecname.db_idrec();
                     ui->rec->itemData(itemdata);
-                    QString rec = mmactivecam->recname().c_str();
-                    int isrec = QString::compare(ccombo, rec, Qt::CaseInsensitive);
+                    int isrec = QString::compare(ccombo, activerec, Qt::CaseInsensitive);
                     if (isrec==0)
                     {
                         ui->rec->setCurrentIndex(indexr);
@@ -2427,6 +2509,7 @@ void MainWindow::resutlEcho(string str)
            }
            break;
            case motion::Message::GET_IMAGE:
+           case motion::Message::GET_MAT:
            case motion::Message::ENGAGE:
            case motion::Message::REFRESH:
            case motion::Message::GET_XML:
@@ -2571,6 +2654,35 @@ void MainWindow::on_watch_image_clicked()
     motion::Message m;
     m.set_imagefilepath(imagepath);
     m.set_type(motion::Message::ActionType::Message_ActionType_GET_IMAGE);
+    setMessageBodyAndSend(m);
+    google::protobuf::ShutdownProtobufLibrary();
+}
+
+void MainWindow::get_mat()
+{
+    motion::Message m;
+    int activecam = PROTO.activecam();
+    motion::Message::MotionCamera * mcam = PROTO.mutable_motioncamera(activecam);
+    if (mcam->motionrec_size()>0)
+    {
+        int activerec = 0;
+        int sizerec = mcam->motionrec_size();
+        if (sizerec>0)
+        {
+            ui->rec->setEnabled(true);
+            for (int l = 0; l < sizerec; l++)
+            {
+
+                QString activerec;
+                motion::Message::MotionRec * mrec = mcam->mutable_motionrec(l);
+                if (mrec->activerec())
+                {
+                    m.set_imagefilepath(mrec->matbasefile());
+                }
+            }
+        }
+    }
+    m.set_type(motion::Message::ActionType::Message_ActionType_GET_MAT);
     setMessageBodyAndSend(m);
     google::protobuf::ShutdownProtobufLibrary();
 }

@@ -154,7 +154,7 @@ private:
     bool finished=false;
 
     void saveMat(std::string encodedmat, google::protobuf::uint32 file);
-    void loadMat(google::protobuf::uint32 file);
+    void loadMat(const motion::Message::MotionRec * mrec);
     cv::Mat extractMat(string loadedmat);
     void saveImage(std::string oridecoded, std::string file);
 
@@ -186,10 +186,10 @@ private:
     std::string imagepath;
 
     void engage_refresh(bool engage);
-    void populateRecCombo(const motion::Message::MotionCamera * mmactivecam);
+    void populateRecCombo(motion::Message::MotionCamera * mmactivecam, QString activerec);
     void enableStartButton(const motion::Message::MotionCamera * mcam);
 
-    void loadRecData(const motion::Message::MotionCamera * mcam);
+    void loadRecData(const motion::Message::MotionRec * mrec);
 
 public:
     Q_SLOT void setremoteProto(motion::Message payload)
@@ -259,6 +259,8 @@ private slots:
     void on_between_clicked(bool checked);
 
     void on_cameracombo_activated(const QString &arg1);
+
+    void get_mat();
 
 signals:
     void drawLinesSignal(std::vector<cv::Point2f> lines);
