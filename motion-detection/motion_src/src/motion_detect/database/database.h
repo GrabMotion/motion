@@ -67,15 +67,15 @@ void updateRegionIntoDatabase(std::string rcoords, int recognitionid);
 int insertRegionIntoDatabase(std::string rcoords);
 
 int insertDayIntoDatabase(std::string str_day, int db_month_id);
-int insertIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera, int db_camera_recognition_setupl_array);
+int insertIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera, motion::Message::MotionRec * prec, int db_camera_recognition_setupl_array);
 
 //int updateIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera);
 
-int insertIntoRecognitionSetup(motion::Message::MotionCamera * pcamera, int db_day_id, int db_camera_id, int db_coordnates_id, std::string xmlfilepath);
+int insertIntoRecognitionSetup(motion::Message::MotionRec * prec, int db_day_id, int db_camera_id, int db_coordnates_id, std::string xmlfilepath);
 
 int insertIntoRelCameraRecognitionSetup(char * time_rasp, int db_recognitionsetup_id, int db_camera_id);
 
-void updateRecognitionSetup(motion::Message::MotionCamera * pcamera, motion::Message::MotionDay * pday);
+void updateRecognitionSetup(int db_idcamera, motion::Message::MotionRec * prec, motion::Message::MotionDay * pday);
 void insertIntoCameraMonth(char * time_rasp, int db_recognitionsetup_id, int db_camera_id );
 void updateCameraMonth(char * time_rasp, int db_recognitionsetupid);
 

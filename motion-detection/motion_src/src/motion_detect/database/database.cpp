@@ -513,31 +513,33 @@ bool loadStartQuery(std::string camera, std::string recname)
         
         mcamera->set_recognizing(true);
 
+        motion::Message::MotionRec * mrec = mcamera->mutable_motionrec(0);
+        
         bool hasregion = to_bool(rows.at(1));
-        mcamera->set_hasregion(hasregion);
+        mrec->set_hasregion(hasregion);
         if (hasregion)
         {
             std::string res = rows.at(7);
             std::string resencoded = base64_encode(reinterpret_cast<const unsigned char*>(res.c_str()), res.length());
-            mcamera->set_coordinates(resencoded.c_str());
+            mrec->set_coordinates(resencoded.c_str());
         }
         
         std::string codename = rows.at(0);
-        mcamera->set_codename(codename);
+        mrec->set_codename(codename);
         
         mcamera->set_fromdatabase(true);
         
-        mcamera->set_runatstartup(to_bool(rows.at(2)));
+        mrec->set_runatstartup(to_bool(rows.at(2)));
         
         google::protobuf::int32 delay = atoi(rows.at(3).c_str());
-        mcamera->set_delay(delay);
+        mrec->set_delay(delay);
         
-        mcamera->set_storeimage(to_bool(rows.at(4)));
+        mrec->set_storeimage(to_bool(rows.at(4)));
         
-        mcamera->set_storevideo(to_bool(rows.at(5)));
+        mrec->set_storevideo(to_bool(rows.at(5)));
         
         google::protobuf::int32 dbmat = atoi(rows.at(11).c_str());
-        mcamera->set_db_idmat(dbmat);
+        mrec->set_db_idmat(dbmat);
         
         google::protobuf::int32 dbidcamera = atoi(rows.at(8).c_str());
         mcamera->set_db_idcamera(dbidcamera);
@@ -547,13 +549,13 @@ bool loadStartQuery(std::string camera, std::string recname)
         google::protobuf::int32 camnum = atoi(rows.at(10).c_str());
         mcamera->set_cameranumber(camnum);
         
-        mcamera->set_recname(rows.at(11));
+        mrec->set_recname(rows.at(11));
         
         google::protobuf::int32 matcols = atoi(rows.at(12).c_str());
-        mcamera->set_matcols(matcols);
+        mrec->set_matcols(matcols);
         
         google::protobuf::int32 matrows = atoi(rows.at(13).c_str());
-        mcamera->set_matrows(matrows);
+        mrec->set_matrows(matrows);
      
         std::string _day = getCurrentDayLabel();
         m.set_currday(_day);
@@ -562,18 +564,18 @@ bool loadStartQuery(std::string camera, std::string recname)
         m.set_currmonth(_month);
         
         google::protobuf::int32 dbidday = atoi(rows.at(16).c_str());
-        mcamera->set_db_idday(dbidday);
+        mrec->set_db_idday(dbidday);
         
         google::protobuf::int32 dbidmonth = atoi(rows.at(17).c_str());
-        mcamera->set_db_idmonth(dbidmonth);
+        mrec->set_db_idmonth(dbidmonth);
         
         google::protobuf::int32 speed = atoi(rows.at(18).c_str());
-        mcamera->set_speed(speed);
+        mrec->set_speed(speed);
         
         google::protobuf::int32 recid = atoi(rows.at(19).c_str());
-        mcamera->set_db_recognitionsetupid(recid);
+        mrec->set_db_recognitionsetupid(recid);
         
-        mcamera->set_xmlfilepath(rows.at(20).c_str());
+        mrec->set_xmlfilepath(rows.at(20).c_str());
         
         stringstream sql_last_instance;
         sql_last_instance   <<
@@ -597,10 +599,10 @@ bool loadStartQuery(std::string camera, std::string recname)
         int ln = atoi(last.c_str());
         if (ln>0)
         {
-            mcamera->set_lastinstance(last);
+            mrec->set_lastinstance(last);
         } else 
         {
-            mcamera->set_lastinstance("0");
+            mrec->set_lastinstance("0");
         }
         
         PROTO.Clear();
@@ -796,15 +798,16 @@ int insertDayIntoDatabase(std::string str_day, int db_month_id)
     return db_day_id;
 }
 
-int insertIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera, int camera_recognition_setupl_array)
+int insertIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera, motion::Message::MotionRec * prec, int camera_recognition_setupl_array)
 {
     //Alarm Interval Start End
     stringstream sql_interval;
     sql_interval <<
     "INSERT INTO interval (timestart, timeend) " <<
-    "SELECT '" << pcamera->timestart() << "', '" << pcamera->timeend() << "' " << 
-    "WHERE NOT EXISTS (SELECT * FROM interval WHERE timestart = '" << pcamera->timestart() << "' " <<
-    "AND timeend = '" << pcamera->timeend() << "');";
+    "SELECT '" << prec->timestart() << "', '" << prec->timeend() << "' " << 
+    "WHERE NOT EXISTS (SELECT * FROM interval WHERE timestart = '" << prec->timestart() << "' " <<
+    "AND timeend = '" << prec->timeend() << "');";
+    
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_interval.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
@@ -816,11 +819,11 @@ int insertIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera, i
     pthread_mutex_unlock(&databaseMutex);
     int db_interval_id = atoi(interval_array.at(0).at(0).c_str());
     
-    int cronsize = pcamera->motioncron_size();
+    int cronsize = prec->motioncron_size();
     
     for (int i = 0; i < cronsize; i++)
     {
-        motion::Message::MotionCron * pcronstart = pcamera->mutable_motioncron(i);
+        motion::Message::MotionCron * pcronstart = prec->mutable_motioncron(i);
         
         stringstream sql_interval;
         sql_interval <<
@@ -891,17 +894,26 @@ int insertIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera, i
 }*/
 
 int insertIntoRecognitionSetup(
-        motion::Message::MotionCamera * pcamera, 
+        motion::Message::MotionRec * prec, 
         int db_day_id,
         int db_camera_id,
         int db_coordnates_id,
         std::string xmlfilepath)
 {
+    
+    stringstream sql_recognition_setup_active_update;
+    sql_recognition_setup_active_update <<
+    "UPDATE recognition_setup set activerec = 0;";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_recognition_setup_active_update.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);    
+    
     //recognition_setup database.
     stringstream sql_recognition_setup;
     sql_recognition_setup <<
     "INSERT INTO recognition_setup " <<
     "(name, "                   <<
+            "activerec, "       <<
             "_id_day, "         <<
             "_id_camera, "      <<
             "_id_mat, "         <<
@@ -915,34 +927,36 @@ int insertIntoRecognitionSetup(
             "speed, "           <<
             "xmlfilepath, "     <<
             "runatstartup) "    <<
-    "SELECT "               << "'"      << 
-    pcamera->recname()      << "', "    <<
-    db_day_id               << ", "     <<
-    db_camera_id            << ", "     <<
-    pcamera->db_idmat()     << ", "     <<
-    pcamera->storeimage()   << ", "     <<
-    pcamera->storevideo()   << ", '"    <<
-    pcamera->codename()     << "' ,"    <<
-    pcamera->hasregion()    << ", "     <<
-    pcamera->hascron()      << ", "     <<        
-    db_coordnates_id        << ", "     <<
-    pcamera->delay()        << ", "     <<
-    pcamera->speed()        << ", '"    <<
-    xmlfilepath             << "', "    <<        
-    pcamera->runatstartup() <<    
-    " WHERE NOT EXISTS (SELECT * FROM recognition_setup WHERE"  <<
-    " name              = '"    << pcamera->recname()       << "' AND"  <<
-    " _id_day           = "     << db_day_id                << " AND"   <<
-    " _id_camera        = "     << db_camera_id             << " AND"   <<
-    " _id_mat           = "     << pcamera->db_idmat()      << " AND"   <<
-    " storeimage        = "     << pcamera->storeimage()    << " AND"   <<
-    " storevideo        = "     << pcamera->storevideo()    << " AND"   <<
-    " codename          = '"    << pcamera->codename()      << "' AND"  <<
-    " has_region        = "     << pcamera->hasregion()     << " AND"   <<
-    " has_cron          = "     << pcamera->hascron()       << " AND"   <<
-    " speed             = "     << pcamera->speed()         << " AND"   <<
-    " xmlfilepath       = '"    << xmlfilepath              << "' AND"  <<
-    " runatstartup      = "     << pcamera->runatstartup()  << ");";
+    "SELECT "            << "'"      << 
+    prec->recname()      << "', "    <<
+    prec->activerec()    << ", "     <<        
+    db_day_id            << ", "     <<
+    db_camera_id         << ", "     <<
+    prec->db_idmat()     << ", "     <<
+    prec->storeimage()   << ", "     <<
+    prec->storevideo()   << ", '"    <<
+    prec->codename()     << "' ,"    <<
+    prec->hasregion()    << ", "     <<
+    prec->hascron()      << ", "     <<        
+    db_coordnates_id     << ", "     <<
+    prec->delay()        << ", "     <<
+    prec->speed()        << ", '"    <<
+    xmlfilepath          << "', "    <<        
+    prec->runatstartup() <<    
+    " WHERE NOT EXISTS (SELECT * FROM recognition_setup WHERE"       <<
+    " name              = '"    << prec->recname()       << "' AND"  <<
+    " activerec         = "     << prec->activerec()     << " AND"   <<
+    " _id_day           = "     << db_day_id             << " AND"   <<
+    " _id_camera        = "     << db_camera_id          << " AND"   <<
+    " _id_mat           = "     << prec->db_idmat()      << " AND"   <<
+    " storeimage        = "     << prec->storeimage()    << " AND"   <<
+    " storevideo        = "     << prec->storevideo()    << " AND"   <<
+    " codename          = '"    << prec->codename()      << "' AND"  <<
+    " has_region        = "     << prec->hasregion()     << " AND"   <<
+    " has_cron          = "     << prec->hascron()       << " AND"   <<
+    " speed             = "     << prec->speed()         << " AND"   <<
+    " xmlfilepath       = '"    << xmlfilepath           << "' AND"  <<
+    " runatstartup      = "     << prec->runatstartup()  << ");";
     std::string sqlrecsetup = sql_recognition_setup.str();
     cout << "rec setup sql: " << sqlrecsetup << endl;
     pthread_mutex_lock(&databaseMutex);
@@ -957,23 +971,23 @@ int insertIntoRecognitionSetup(
     return db_recognition_setup_id;
 }
 
-void updateRecognitionSetup(motion::Message::MotionCamera * pcamera, motion::Message::MotionDay * pday)
+void updateRecognitionSetup(int db_idcamera, motion::Message::MotionRec * prec, motion::Message::MotionDay * pday)
 {
     stringstream sql_recognition_setup;
     sql_recognition_setup <<
-    "UPDATE recognition_setup set "                     <<
-    "name = '"          << pcamera->recname()           << "', "    <<
-    "_id_day = "        << pday->db_dayid()             << ", "     <<
-    "_id_camera = "     << pcamera->db_idcamera()       << ", "     <<        
-    "_id_mat = "        << pcamera->db_idmat()          << ", "     <<
-    "storeimage = "     << pcamera->storeimage()        << ", "     <<
-    "storevideo = "     << pcamera->storevideo()        << ", "     <<
-    "codename = '"      << pcamera->codename()          << "', "    <<       
-    "has_region = "     << pcamera->hasregion()         << ", "     <<
-    "_id_coordinates = "<< pcamera->db_idcoordinates()  << ", "     <<
-    "delay = "          << pcamera->delay()             << ", "     <<        
-    "runatstartup = "   << pcamera->runatstartup()      << ", "     <<        
-    "WHERE _id = "      << pcamera->db_recognitionsetupid()         << ";";                
+    "UPDATE recognition_setup set "                  <<
+    "name = '"          << prec->recname()           << "', "    <<
+    "_id_day = "        << pday->db_dayid()          << ", "     <<
+    "_id_camera = "     << db_idcamera               << ", "     <<        
+    "_id_mat = "        << prec->db_idmat()          << ", "     <<
+    "storeimage = "     << prec->storeimage()        << ", "     <<
+    "storevideo = "     << prec->storevideo()        << ", "     <<
+    "codename = '"      << prec->codename()          << "', "    <<          
+    "has_region = "     << prec->hasregion()         << ", "     <<
+    "_id_coordinates = "<< prec->db_idcoordinates()  << ", "     <<
+    "delay = "          << prec->delay()             << ", "     <<        
+    "runatstartup = "   << prec->runatstartup()      << ", "     <<        
+    "WHERE _id = "      << prec->db_recognitionsetupid()         << ";";                
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_recognition_setup.str().c_str());
     pthread_mutex_unlock(&databaseMutex);    
@@ -988,7 +1002,7 @@ int insertIntoRelCameraRecognitionSetup(char * time_rasp, int db_recognitionsetu
     "SELECT " << db_camera_id << ", "  << db_recognitionsetup_id << ", '" << time_rasp << "' " << 
     " WHERE NOT EXISTS (SELECT * FROM rel_camera_recognition_setup WHERE _id_camera = " << db_camera_id <<
     " AND _id_recognition_setup = " << db_recognitionsetup_id << ");";
-    //cout << "sql_rel_camera_recognition_setup: " << sql_rel_camera_recognition_setup.str() << endl;
+    cout << "sql_rel_camera_recognition_setup: " << sql_rel_camera_recognition_setup.str() << endl;
     pthread_mutex_lock(&databaseMutex); 
     db_execute(sql_rel_camera_recognition_setup.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
