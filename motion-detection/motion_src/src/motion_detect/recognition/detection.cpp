@@ -661,8 +661,10 @@ void * startRecognition(void * arg)
     if (pcamera->has_cameraname())
         cout << "pcamera->cameraname(): "   << pcamera->cameraname()    << endl;
      
-    if (pcamera->has_hasregion())
-        cout << "pcamera->hasregion(): "   << pcamera->has_hasregion()    << endl;
+    motion::Message::MotionRec * mrec = pcamera->mutable_motionrec(0);
+    
+    if (mrec->has_hasregion())
+        cout << "pcamera->hasregion(): "   << mrec->has_hasregion()    << endl;
     
     bool fromcamera = false;
     if (pcamera->has_fromdatabase())
@@ -674,17 +676,17 @@ void * startRecognition(void * arg)
     bool has_region;
     std::vector<cv::Point2f> region;
     std::string rcoords;
-    if (pcamera->hasregion())
+    if (mrec->hasregion())
     {
-        std::string rc = pcamera->coordinates(); 
+        std::string rc = mrec->coordinates(); 
         rcoords = base64_decode(rc);
         cout << "rcoords." << rcoords << endl;
          
-        if (pcamera->has_matrows())
-               matrows = pcamera->matrows();
+        if (mrec->has_matrows())
+               matrows = mrec->matrows();
         
-        if (pcamera->has_matcols())
-            matcols = pcamera->matcols();
+        if (mrec->has_matcols())
+            matcols = mrec->matcols();
         
         region = processRegionString(rcoords);
         
@@ -699,21 +701,21 @@ void * startRecognition(void * arg)
         has_region = false;
     }
      
-    int db_idcoordnates = pcamera->db_idcoordinates();
+    int db_idcoordnates = mrec->db_idcoordinates();
      
     std::string instancecode;
-    if (pcamera->has_codename())
+    if (mrec->has_codename())
     {
         cout << "Has codename." << endl;
-        instancecode = pcamera->codename();
+        instancecode = mrec->codename();
     }
     if (instancecode.empty())
         instancecode = "Prueba";
      
     google::protobuf::uint32 delay = 0;
-    if (pcamera->has_delay())
+    if (mrec->has_delay())
     {
-        delay = pcamera->delay();
+        delay = mrec->delay();
     }
     
     time_t delaymark;
@@ -749,7 +751,7 @@ void * startRecognition(void * arg)
         pthread_mutex_lock(&protoMutex);
         pmonth = pcamera->add_motionmonth();
         pmonth->set_monthlabel(str_month);
-        pmonth->set_db_monthid(pcamera->db_idmonth());
+        pmonth->set_db_monthid(mrec->db_idmonth());
         pthread_mutex_unlock(&protoMutex);
         cout << "sigo" << endl;
     }
@@ -784,7 +786,7 @@ void * startRecognition(void * arg)
         pthread_mutex_lock(&protoMutex);
         pday = pmonth->add_motionday();
         pday->set_daylabel(str_day);
-        pday->set_db_dayid(pcamera->db_idday());
+        pday->set_db_dayid(mrec->db_idday());
         pthread_mutex_unlock(&protoMutex);
         cout << "sigo" << endl;
     }
@@ -792,13 +794,13 @@ void * startRecognition(void * arg)
     int db_dayid = pday->db_dayid();
     
     std::string XML_FILE;
-    if (pcamera->has_xmlfilepath())
+    if (mrec->has_xmlfilepath())
     { 
-        XML_FILE = pcamera->xmlfilepath();  
+        XML_FILE = mrec->xmlfilepath();  
     }
      
-    bool writeImages = pcamera->storeimage();
-    bool writeVideo  = pcamera->storevideo();
+    bool writeImages = mrec->storeimage();
+    bool writeVideo  = mrec->storevideo();
     bool send_number_detected = true;
      
     std::cout << "writeImages: " << writeImages << endl;
@@ -813,8 +815,8 @@ void * startRecognition(void * arg)
     ptmr = localtime (&tr.tv_sec);
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     
-    int db_interval_id = pcamera->db_intervalid();
-    db_recognition_setup_id = pcamera->db_recognitionsetupid();
+    int db_interval_id = mrec->db_intervalid();
+    db_recognition_setup_id = mrec->db_recognitionsetupid();
    
     pthread_mutex_lock(&protoMutex);
     pday->set_db_dayid(db_dayid);
@@ -827,7 +829,7 @@ void * startRecognition(void * arg)
     // Create camera directory
     directoryExistsOrCreate(camdir.str().c_str());
     
-    std::string name = pcamera->recname();
+    std::string name = mrec->recname();
     std::transform(name.begin(), name.end(), name.begin(), ::toupper);
     
     // Rec dir.
@@ -925,9 +927,9 @@ void * startRecognition(void * arg)
     // Instance counter
     int instance_counter = 0;
     string instance;
-    if (pcamera->has_lastinstance())
+    if (mrec->has_lastinstance())
     {
-        std::string instcounter = pcamera->lastinstance();
+        std::string instcounter = mrec->lastinstance();
         instance_counter = atoi(instcounter.c_str());
         instance = instcounter;
     }
@@ -935,7 +937,7 @@ void * startRecognition(void * arg)
     init_time = clock();
     
     pthread_mutex_lock(&protoMutex);
-    pcamera->set_startrectime(time_rasp);
+    mrec->set_startrectime(time_rasp);
     pthread_mutex_unlock(&protoMutex);
     
     startrecognitiontime = time_rasp;
