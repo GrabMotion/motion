@@ -1,0 +1,27 @@
+package print;  
+  
+message Order 
+{    
+	optional int32 dining_table_id 			= 1;
+	required ActionType type 			= 2 [default = PRINT];
+
+	optional string time 				= 3;  
+	repeated PrintOrder printorder  		= 4;
+	
+	enum ActionType 
+	{
+		PRINT	                 	  = 999;	 
+		ENGAGE	                 	  = 1000;
+		GET_TIME                          = 1001;
+	}
+
+	message PrintOrder
+	{
+		optional int32 	id				= 1;
+		optional string menu_item_name   		= 2;
+		optional string quantity			= 3;
+		optional string timeend				= 4;
+	}
+	
+}  
+

@@ -1,0 +1,6 @@
+protoc.exe -I=source --cpp_out=protobuffer source/motion.proto
+
+protoc.exe -I=source --cpp_out=protobuffer source/server.proto
+
+
+/usr/local/bin/protoc -I=source --cpp_out=protobuffer source/motion.proto
