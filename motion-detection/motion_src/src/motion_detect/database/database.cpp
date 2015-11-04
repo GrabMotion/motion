@@ -345,20 +345,7 @@ std::vector<int> db_cams(std::vector<int> cams)
 
 void status()  
 {
- 
-    /*stringstream sql_status;
-    sql_status << "SELECT "     <<
-    "RC.codename, "             << // 0
-    "RC.recognizing, "          << // 1
-    "C.number, "                << // 2
-    "C.name, "                  << // 3
-    "I.timestart, "             << // 4 
-    "I.timeend, "               << // 5
-    "RC.since "                 << // 6
-    "FROM recognition_setup RC "<< 
-    "JOIN interval AS I ON RC._id_interval = I._id " << 
-    "JOIN cameras AS C ON RC._id_camera = C._id;"; */
-    
+     
     stringstream sql_status;
     sql_status << "SELECT " <<
     "RS.codename, "         << // 0   
@@ -513,7 +500,7 @@ bool loadStartQuery(std::string camera, std::string recname)
         
         mcamera->set_recognizing(true);
 
-        motion::Message::MotionRec * mrec = mcamera->mutable_motionrec(0);
+        motion::Message::MotionRec * mrec = mcamera->add_motionrec();
         
         bool hasregion = to_bool(rows.at(1));
         mrec->set_hasregion(hasregion);
@@ -617,7 +604,91 @@ bool loadStartQuery(std::string camera, std::string recname)
     }
 }
 
- vector<string> startIfNotRunningQuery(std::string camera, char * time)
+vector<string> getMaxImageByPath(google::protobuf::int32 instanceid)
+{
+    vector<string> maximage;
+    
+    stringstream check_images;
+    check_images <<
+    "SELECT "                   <<
+    "MAX(I.imagechanges), "     <<
+    "I.path, "                  <<
+    "I.name, "                  <<
+    "D.label, "                 <<
+    "RS.name, "                 << 
+    "I.time "                   <<
+    "FROM instance AS INS "     <<
+    "JOIN rel_instance_image AS RII ON INS._id = RII._id_instance " <<
+    "JOIN image AS I ON RII._id_image = I._id "                     <<
+    "JOIN rel_day_instance_recognition_setup AS RDIRS ON RII._id_instance = RDIRS._id_instance "    <<
+    "JOIN day AS D ON RDIRS._id_day = D._id "                                                       <<
+    "JOIN recognition_setup AS RS ON RDIRS._id_recognition_setup = RS._id "                         <<  
+    "WHERE INS._id = " << instanceid << ";";        
+                
+    cout << "check_images: " << check_images.str() << endl;
+    
+    vector<vector<string> > image_array = db_select(check_images.str().c_str(), 6);
+    if (image_array.size()>0)
+    {
+        std::string path = image_array.at(0).at(1);
+        maximage.push_back(path);
+        std::string name = image_array.at(0).at(2);
+        maximage.push_back(name);
+        std::string day = image_array.at(0).at(3);
+        maximage.push_back(day);
+        std::string rec = image_array.at(0).at(4);
+        maximage.push_back(rec);
+        std::string time = image_array.at(0).at(5);
+        maximage.push_back(time);   
+    }
+    return maximage;  
+}
+
+void insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idmedia, int db_srv_idpost)
+{
+    stringstream sql_insert_tracking;
+    sql_insert_tracking <<
+    "INSERT INTO tracking (_id_db_instance, imagepath, _id_dbsrv_media, _id_dbsrv_post) "   <<
+    "SELECT " << db_instance_id << ",'"  << maximagepath << "', " << db_srv_idmedia << ", " << db_srv_idpost <<
+    " WHERE NOT EXISTS (SELECT * FROM tracking WHERE _id_db_instance = " << db_instance_id  << ");";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_insert_tracking.str().c_str());
+    pthread_mutex_unlock(&databaseMutex); 
+}
+
+vector<string> getImageByPath(std::string path)
+{
+    vector<string> rows;
+     
+    stringstream check_image;
+    check_image         <<
+    "SELECT "           <<
+    "I.name, "          <<
+    "I.imagechanges, "  <<
+    "I.time, "          <<
+    "C.rect, "          <<
+    "M.matrows, "       <<
+    "M.matcols, "       <<
+    "CA.name "          <<        
+    "FROM image I "     <<
+    "JOIN rel_instance_image AS RII ON I._id = RII._id_image " <<
+    "JOIN rel_day_instance_recognition_setup AS RDIRS ON RII._id_instance = RII._id_instance " <<
+    "JOIN recognition_setup AS RS ON RDIRS._id_recognition_setup = RS._id " <<
+    "JOIN crop AS C ON I._id = C._id_image_father " <<
+    "JOIN mat as M ON RS._id_mat = M._id "          <<    
+    "JOIN cameras AS CA ON RS._id_camera = CA._id " <<       
+    "WHERE I.path = '" << path << "' GROUP BY I.imagechanges;";        
+            
+    cout << "check_image: " << check_image.str() << endl;
+    vector<vector<string> > run_array = db_select(check_image.str().c_str(), 7);
+    if (run_array.size()>0)
+    {
+        rows = run_array.at(0);
+    }
+    return rows;
+}
+
+vector<string> startIfNotRunningQuery(std::string camera, char * time)
 {
     vector<string> rows;
      
@@ -906,7 +977,9 @@ int insertIntoRecognitionSetup(
     "UPDATE recognition_setup set activerec = 0;";
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_recognition_setup_active_update.str().c_str());
-    pthread_mutex_unlock(&databaseMutex);    
+    pthread_mutex_unlock(&databaseMutex);   
+    
+    cout << "id_mat: " << prec->db_idmat() << endl;
     
     //recognition_setup database.
     stringstream sql_recognition_setup;
@@ -1053,4 +1126,26 @@ vector<string> getIntervalsByCamberaAndRec(std::string camera, std::string recna
     intervals.push_back(interval_array.at(0).at(1));
     
     return intervals;
+}
+
+
+void insertIntoHost(std::string publicip, std::string hostname, std::string city, std::string region, std::string country, std::string loc, std::string org)
+{
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    
+    //rel_camera_month.
+    stringstream sql_host;
+    sql_host <<
+    "INSERT INTO host (publicip, hostname, city, region, country, location, organization, time) " <<
+    "SELECT '" << publicip << "', '"  << hostname << "', '" << city << "' " << region << "' " << country << "' " << loc << "' " << org << "'" << time_rasp << "'" << 
+    " WHERE NOT EXISTS (SELECT * FROM host WHERE publicip = '" << publicip << "');";
+    cout << "sql_host: " << sql_host.str() << endl;
+    pthread_mutex_lock(&databaseMutex); 
+    db_execute(sql_host.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
 }

@@ -64,6 +64,10 @@
 
 #include <curl/curl.h>
 
+#include <json/json.h>
+#include <stdio.h>
+
+
 using namespace google::protobuf::io;
 
 using namespace std;
@@ -80,14 +84,20 @@ void * watch_amount (void * t);
 std::string getXMLFilePathAndName(int cam, std::string recname, std::string currday, std::string curmonth, std::string name);
 void directoryExistsOrCreate(const char* pzPath);
 void startMainRecognition();
-
+Mat getImageWithTextByPath(std::string imagefilepath);
+std::string getMediaIdFromJSON(std::string message);
+void * postImage(void * args);
+void split(const string& s, char c, vector<string>& v);
+int post_command_to_wp(std::string command);
+void insertHost(char *cstr);
+        
 //xml
 std::string XML_FILE = "<import>session";
 
 // Threading
 pthread_t thread_broadcast, thread_echo, thread_socket,
 thread_message, thread_recognition, thread_wait_echo,
-thread_observer, thread_send_echo;
+thread_observer, thread_send_echo, thread_postimage;
 
 //Threads
 int runt, runb, runs, runr, runl, runm, runw, runss, runo, ruse;
@@ -158,6 +168,7 @@ int getGlobalStringToInt(std::string id);
 char * setMessageValueBody(int value, std::string body);
 bool checkFile(const std::string &file);
 std::string exec_command(char* cmd);
+void insertHost(char *cstr);
 
 inline bool file_exists (const std::string& name) {
     ifstream f(name.c_str());
@@ -169,6 +180,37 @@ inline bool file_exists (const std::string& name) {
         return false;
     }   
 }
+
+int post_command_to_wp(std::string command)
+{
+    int id = 0;
+    
+    FILE* pipe = popen(command.c_str(), "r");
+    int size = sizeof(pipe);
+    char buffer[128];
+    std::string result = "";
+    
+    while(!feof(pipe)) 
+    {
+    	if(fgets(buffer, sizeof(buffer), pipe) != NULL)
+        {
+            std::string idstd;
+            char * token;
+            token = strtok( strtok (buffer,","), ":");
+            int i=0;
+            while( token != NULL ) 
+            {
+                token = strtok(NULL, ":");
+                idstd = token;
+                id = atoi(idstd.c_str());
+                break;
+            }
+            break;
+        }
+    }
+    return id;
+}
+
 
 std::string exec_command(char* cmd)
 {
@@ -456,6 +498,30 @@ motion::Message serializeMediaToProto(motion::Message m, Mat mat)
     return m;
 }
 
+Mat getImageWithTextByPath(std::string imagefilepath)
+{
+    Mat mat = imread(imagefilepath);
+    
+    vector<string> array_image = getImageByPath(imagefilepath);
+            
+    std::string name = array_image.at(0);
+    std::string imagechanges = array_image.at(1);
+    std::string time = array_image.at(2);
+    std::string rect = array_image.at(3);
+
+    int matrows = atoi(array_image.at(4).c_str());
+    int matcols = atoi(array_image.at(5).c_str());
+
+    std::string camera = array_image.at(6);
+
+    putText(mat, name,          Point(30, 50),  FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+    putText(mat, time,          Point(30, 150), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+    putText(mat, imagechanges,  Point(30, 200), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+    putText(mat, camera,        Point(30, 300), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+    
+    return mat;
+}
+
 motion::Message takePictureToProto(motion::Message m)
 {
     
@@ -467,7 +533,6 @@ motion::Message takePictureToProto(motion::Message m)
     if (capture == NULL)
     {
         std::cout << "No cam found." << std::endl;
-
     }
     
     int w = 640; //1280; //320;
@@ -646,9 +711,75 @@ void * sendEcho(motion::Message m)
     }
 }
 
+struct post_args
+{
+    int db_instance_id;
+};
+struct post_args PostArgs;
+
+void * postImage(void * args)
+{
+    
+    struct post_args *arg = (struct post_args *) args;
+    
+    int db_instance_id = arg->db_instance_id;
+    
+    vector<string> max_image = getMaxImageByPath(db_instance_id);
+    std::string maxpath = max_image.at(0);
+    std::string maxname = max_image.at(1);
+    std::string maxday = max_image.at(2);
+    std::string maxrec = max_image.at(3);
+    std::string maxtime = max_image.at(4);
+
+    Mat mat = getImageWithTextByPath(maxpath);
+    std::string trackdatafile = basepath + "data/tracking"; 
+    directoryExistsOrCreate(trackdatafile.c_str());
+    std::string dayname = trackdatafile + "/" + maxday;
+    directoryExistsOrCreate(dayname.c_str());
+    std::string recname = dayname + "/" + maxrec;
+    directoryExistsOrCreate(recname.c_str());
+    
+    vector<string> name_vector;
+    split(maxname.c_str(), '/', name_vector);
+    
+    std::string fineandextension = name_vector.at(2) + ".jpg";
+    std::string maximagepath = recname + "/" + fineandextension;
+    imwrite(maximagepath, mat);
+
+    std::stringstream media;
+    media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << "' --data-binary @'"<< maximagepath << "' -d title='" << maxtime << "' -H \"Expect: \" http://dev.uimove.com/wp-json/wp/v2/media";
+
+    int idmedia = post_command_to_wp(media.str());
+    
+    if (idmedia)
+    {
+        
+        std::stringstream post;
+        post << "curl -X POST -d '{\"title\":\"" << maxtime << "\",\"content_raw\":\"Content\",\"content\":\"This is the content\",\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\",\"featured_image\":" << idmedia << "}' -H \"Content-Type:application/json\" --user jose:joselon http://dev.uimove.com/wp-json/wp/v2/posts";
+
+        int idpost = post_command_to_wp(post.str());
+           
+        if (idpost>0)
+        {
+            insertTracking(db_instance_id, maximagepath, idmedia, idpost);
+            return (void *) 1;
+        } else 
+        {
+            return (void *) 0;
+        }
+    
+    } else 
+    {
+        return (void *) 0;
+    }
+
+}
+
+
 void * startObserver(void * arg)
 {
     cout << "startObserver" << endl;
+    bool onlyonce = false;
     while (true)
     {
         int sizec = R_PROTO.motioncamera_size();
@@ -667,6 +798,31 @@ void * startObserver(void * arg)
                         mcamera->set_recognizing_flag(true);
                         pthread_mutex_unlock(&protoMutex);
                     }
+                    
+                    int track_amount = mcamera->motiontrack_size();
+                    if (track_amount>0)
+                    {
+                        for (int j = 0; j < track_amount; j++)
+                        {
+                            motion::Message::MotionTrack * mtrack = mcamera->mutable_motiontrack(j);
+                            int db_instance_id = mtrack->db_idinstance();
+                         
+                            PostArgs.db_instance_id = db_instance_id;
+                            
+                            if (!onlyonce)
+                            {
+                                void *result;
+                                pthread_create(&thread_postimage, NULL, postImage, &PostArgs);
+                                pthread_join(thread_postimage, &result);
+                                if (result>0)
+                                {
+                                    mtrack->Clear();
+                                }
+                                onlyonce=true;
+                            }
+                        }
+                    }
+                    
                 } else
                 {
                     if (mcamera->recognizing_flag())
@@ -675,7 +831,7 @@ void * startObserver(void * arg)
                         pthread_mutex_lock(&protoMutex);
                         mcamera->set_recognizing_flag(false);
                         pthread_mutex_unlock(&protoMutex);
-                    }
+                    }              
                 }
             }
             catch (std::bad_alloc& ba)
@@ -887,12 +1043,9 @@ motion::Message getRefreshProto(motion::Message m)
             for (int q=0; q<rec_setup_array.size(); q++ )
             {
                 vector<string> rows = rec_setup_array.at(q);
-                
-                motion::Message::MotionRecName * mrecname = mcam->add_motionrecname();
+               
                 google::protobuf::int32 recid = atoi(rows.at(0).c_str());
-                mrecname->set_db_idrec(recid);
                 recname = rows.at(1);
-                mrecname->set_name(recname);
                 
                 bool active = to_bool(rowc.at(3));
                 if (active)
@@ -919,8 +1072,9 @@ motion::Message getRefreshProto(motion::Message m)
                 pthread_mutex_unlock(&databaseMutex);
                 
                 motion::Message::MotionRec * mrec = mcam->add_motionrec();
+                mrec->set_name(recname);
                 
-                 if (m.has_recname())
+                if (m.has_recname())
                 {
                    recname = m.recname();
                 } else
@@ -1198,7 +1352,7 @@ motion::Message getRefreshProto(motion::Message m)
                                         }   
                                         google::protobuf::int32 activerec = atoi(rowr.at(16).c_str());
                                         mrec->set_activerec(activerec);
-                                        mrec->set_matbasefile(rows.at(17));
+                                        mrec->set_matbasefile(rowr.at(17));
                                     }
                                 }
                             }
@@ -1512,7 +1666,9 @@ motion::Message runCommand(motion::Message m)
         {
             cout << "motion::Message::GET_IMAGE" << endl;
             std::string imagefilepath = m.imagefilepath();
-            Mat mat = imread(imagefilepath);
+            
+            Mat mat = getImageWithTextByPath(imagefilepath);
+            
             m = serializeMediaToProto(m, mat);
             m.set_type(motion::Message::GET_IMAGE);
             m.set_activecam(m.activecam());
@@ -1547,9 +1703,7 @@ motion::Message runCommand(motion::Message m)
             stringstream camera;
             camera << mcamera->cameranumber();
            
-            motion::Message::MotionRecName * mrecname = mcamera->mutable_motionrecname(0);
-           
-            std::string rname = mrecname->name();
+            std::string rname = mrec->name();
             int db_idrec = mrec->db_idrec();
             
             if (loadStartQuery(camera.str(), name))
@@ -2100,7 +2254,56 @@ void directoryExistsOrCreate(const char* pzPath)
         (void) closedir (pDir);
 }
 
-
+void insertHost(const char *cstr)
+{
+    json_object * jobj = json_tokener_parse(cstr);
+    
+    std::string publicip; 
+    std::string hostname;
+    std::string city;
+    std::string region;
+    std::string country;
+    std::string loc;
+    std::string org;
+        
+    enum json_type type;
+    json_object_object_foreach(jobj, key, val)
+    {
+        printf("type: ",type);
+        type = json_object_get_type(val);
+        
+        if ( strcmp( key, "ip" ) == 0 )
+        {
+            publicip = json_object_get_string(val);
+        }
+        else if ( strcmp( key, "hostname" ) == 0 )
+        {
+            hostname = json_object_get_string(val);
+        }
+        else if ( strcmp( key, "city" ) == 0 )
+        {
+            city = json_object_get_string(val);
+        }
+        else if ( strcmp( key, "region" ) == 0 )
+        {
+            region = json_object_get_string(val);
+        }
+        else if ( strcmp( key, "country" ) == 0 )
+        {
+            country = json_object_get_string(val);
+        }
+        else if ( strcmp( key, "loc" ) == 0 )
+        {
+            loc = json_object_get_string(val);
+        }
+        else if ( strcmp( key, "org" ) == 0 )
+        {
+            org = json_object_get_string(val);
+        }
+    }
+    
+    insertIntoHost(publicip, hostname, city, region, country, loc, org);
+}
 
 int main (int argc, char * const av[])
 {
@@ -2140,10 +2343,10 @@ int main (int argc, char * const av[])
     }
     
     cout << "+++++++++++++++++++++++++++++++++++++++++++" << endl;
-    cout << "runparam: " << runparam << endl;
+    cout << "runparam: "    << runparam     << endl;
     cout << "+++++++++++++++++++++++++++++++++++++++++++" << endl;
-    cout << "basepath: " << basepath << endl;
-    cout << "sourcepath: " << sourcepath << endl;
+    cout << "basepath: "    << basepath     << endl;
+    cout << "sourcepath: "  << sourcepath   << endl;
     cout << "+++++++++++++++++++++++++++++++++++++++++++" << endl;
     
     //Create database.
@@ -2230,20 +2433,33 @@ int main (int argc, char * const av[])
         }
     }
     
-    FILE *in;
-    char buff[512];
-
-    //if(!(in = popen("curl ifconfig.me", "r"))){
-    //        return 1;
-    //}
-
-    std::string publicip= "200.200.200.222";
-    //while(fgets(buff, sizeof(buff), in)!=NULL)
-    //{
-    //    stringstream bus;
-    //    bus << buff;
-    //    publicip = bus.str();
-   // }
+    FILE *inip;
+    char buffip[512];
+    std::string publicip = "190.177.218.76"; //= "200.200.200.222";
+    /*if(!(inip = popen("curl ifconfig.me", "r")))
+    {
+        return 1;
+    }
+    stringstream busip; 
+    while(fgets(buffip, sizeof(buffip), inip)!=NULL)
+    {
+        busip << buffip;
+        publicip = busip.str();
+    }*/
+    
+    FILE *inloc;
+    char buffloc[512];
+    std::string location = "curl ipinfo.io/ 190.177.218.76";
+    if(!(inloc = popen(location.c_str(), "r")))
+    {
+       return 1;
+    }
+    stringstream busloc; 
+    while(fgets(buffloc, sizeof(buffloc), inloc)!=NULL)
+    {
+        busloc << buffloc;
+    }
+    insertHost(busloc.str().c_str());
     
     cout << "ipnumber: " << NETWORK_IP << endl;
     cout << "publicip: " << publicip << endl;
@@ -2259,15 +2475,18 @@ int main (int argc, char * const av[])
     cout << "sql_network: " << sql_network.str() << endl;
     db_execute(sql_network.str().c_str());
     
-    if(!(in = popen("uptime", "r"))){
-            return 1;
+    FILE *intime;
+    char bufftime[512];
+    if(!(intime = popen("uptime", "r")))
+    {
+        return 1;
     }
 
     std::string uptime;
-    while(fgets(buff, sizeof(buff), in)!=NULL)
+    while(fgets(bufftime, sizeof(bufftime), intime)!=NULL)
     {
         stringstream bus;
-        bus << buff;
+        bus << bufftime;
         uptime = bus.str();
     }
     
@@ -2344,6 +2563,8 @@ int main (int argc, char * const av[])
     directoryExistsOrCreate(secdatafile.c_str());
     std::string matdatafile = basepath + "data/mat";
     directoryExistsOrCreate(matdatafile.c_str());
+    std::string trackdatafile = basepath + "data/tracking";
+    directoryExistsOrCreate(trackdatafile.c_str());
     
     //Params
     if ( argc >= 2 ) 

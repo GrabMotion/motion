@@ -66,7 +66,7 @@ ADD_EXECUTABLE(motion_detect_raspberry
         src/motion_detect/http/httppost.c
 )
 
-TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lcurl -lpthread -lm -ldl ${PROTOBUF_LIBRARIES} -lsqlite3 -lusb)
+TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lcurl -lpthread -ljson -lm -ldl ${PROTOBUF_LIBRARIES} -lsqlite3 -lusb)
 
 SET(CMAKE_BUILD_TYPE Debug)
 

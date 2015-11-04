@@ -59,6 +59,12 @@
             </df>
             <df name="mat">
             </df>
+            <df name="tracking">
+              <df name="03Nov2015">
+                <df name="TELE">
+                </df>
+              </df>
+            </df>
           </df>
           <df name="database">
             <in>database.cpp</in>
@@ -129,11 +135,29 @@
           </df>
           <df name="pics">
             <df name="camera0">
-              <df name="GUIDO">
-                <df name="05Oct2015">
+              <df name="TELE">
+                <df name="03Nov2015">
+                  <df name="1">
+                  </df>
                   <df name="10">
                   </df>
                   <df name="11">
+                  </df>
+                  <df name="12">
+                  </df>
+                  <df name="13">
+                  </df>
+                  <df name="14">
+                  </df>
+                  <df name="15">
+                  </df>
+                  <df name="16">
+                  </df>
+                  <df name="2">
+                  </df>
+                  <df name="3">
+                  </df>
+                  <df name="4">
                   </df>
                   <df name="5">
                   </df>
@@ -144,86 +168,6 @@
                   <df name="8">
                   </df>
                   <df name="9">
-                  </df>
-                  <df name="xml">
-                  </df>
-                </df>
-              </df>
-              <df name="JOSE">
-                <df name="07Oct2015">
-                  <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="3">
-                  </df>
-                  <df name="4">
-                  </df>
-                  <df name="xml">
-                  </df>
-                </df>
-              </df>
-              <df name="LIVING">
-                <df name="06Oct2015">
-                  <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="3">
-                  </df>
-                  <df name="4">
-                  </df>
-                  <df name="5">
-                  </df>
-                  <df name="xml">
-                  </df>
-                </df>
-              </df>
-              <df name="PARED">
-                <df name="07Oct2015">
-                  <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="3">
-                  </df>
-                  <df name="4">
-                  </df>
-                  <df name="xml">
-                  </df>
-                </df>
-              </df>
-              <df name="SANTI">
-                <df name="08Oct2015">
-                  <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="3">
-                  </df>
-                  <df name="xml">
-                  </df>
-                </df>
-              </df>
-              <df name="SANTIAGO">
-                <df name="05Oct2015">
-                  <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="3">
-                  </df>
-                  <df name="4">
-                  </df>
-                  <df name="xml">
-                  </df>
-                </df>
-              </df>
-              <df name="TELE">
-                <df name="06Oct2015">
-                  <df name="1">
-                  </df>
-                  <df name="2">
                   </df>
                   <df name="xml">
                   </df>

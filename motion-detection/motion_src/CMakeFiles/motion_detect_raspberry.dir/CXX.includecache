@@ -231,6 +231,10 @@ usb.h
 -
 curl/curl.h
 -
+json/json.h
+-
+stdio.h
+-
 
 /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.cpp
 PracticalSocket.h

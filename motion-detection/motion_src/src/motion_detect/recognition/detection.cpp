@@ -54,7 +54,7 @@ using namespace cv;
 int insertIntoIMage(const motion::Message::Image & img);
 void insertIntoCrop(const motion::Message::Crop & crop, int db_image_id);
 int insertIntoVideo(motion::Message::Video dvideo);
-void insertIntoInstance(std::string number, motion::Message::Instance * pinstance, char * time_info, int db_video_id, vector<int> images);
+int insertIntoInstance(std::string number, motion::Message::Instance * pinstance, char * time_info, int db_video_id, vector<int> images);
   
 motion::Message::MotionCamera * pcamera;
 motion::Message::MotionMonth * pmonth;
@@ -265,7 +265,6 @@ void * storeimage(void * args)
     imwrite(arg->path, arg->mat);
     running_image_threads--;
     pthread_mutex_unlock(&running_image_mutex);
-    
 }
   
 // When motion is detected we write the image to disk
@@ -304,9 +303,11 @@ inline string saveImg(
 
         // Create name for the image
         strftime (TIME,80,FILE_FORMAT,timeinfo);
-        //if(incr < 100) incr++; // quick fix for when delay < 1s && > 10ms, (when delay <= 10ms, images are overwritten)
-        //else incr = 0;
-        ss << DIRECTORY << TIME << static_cast<int>(incr) << n_file << EXTENSION;
+        
+        stringstream imagename;
+        imagename << TIME << static_cast<int>(incr) << n_file;
+        ss << DIRECTORY << imagename.str() << EXTENSION;
+        
         image_file = ss.str().c_str();
 
         ImageArgs.mat = image;
@@ -317,8 +318,6 @@ inline string saveImg(
         pthread_mutex_unlock(&running_image_mutex);
         
         pthread_create(&thread_image, NULL, storeimage, &ImageArgs);
-
-        //imwrite(image_file, image);
 
         struct timeval tr;
         struct tm* ptmr;
@@ -335,7 +334,7 @@ inline string saveImg(
         pthread_mutex_lock(&protoMutex);
         motion::Message::Image * pimage = pinstance->add_image();
         pimage->set_path(image_file.c_str());
-        pimage->set_name(n_str_file);
+        pimage->set_name(imagename.str());
         pimage->set_imagechanges(n_o_changes.at(0));
         pimage->set_time(time_info);
         motion::Message::Crop * pcrop = pinstance->add_crop();
@@ -1292,7 +1291,7 @@ void * storeproto(void * args)
 
     motion::Message::Video dvideo = pinstance->video();
     int db_video_id = insertIntoVideo(dvideo);
-    insertIntoInstance(arg->instance, pinstance, time_info, db_video_id, images);
+    int db_instance_id = insertIntoInstance(arg->instance, pinstance, time_info, db_video_id, images);
     
     pinstance->Clear();
     arg->pinstance->Clear();
@@ -1300,11 +1299,14 @@ void * storeproto(void * args)
     
     cout << "INSTANCE CLEANED: " << endl; 
     pthread_cancel(thread_store);
+    
+    motion::Message::MotionTrack * mtrack = pcamera->add_motiontrack();
+    mtrack->set_db_idinstance(db_instance_id);
                 
 }
 
 
-void insertIntoInstance(std::string number, motion::Message::Instance * pinstance, char * time_info, int db_video_id, vector<int> images)
+int insertIntoInstance(std::string number, motion::Message::Instance * pinstance, char * time_info, int db_video_id, vector<int> images)
 {
                 
         std::string instancestart   = pinstance->instancestart();
@@ -1365,6 +1367,8 @@ void insertIntoInstance(std::string number, motion::Message::Instance * pinstanc
         pthread_mutex_lock(&databaseMutex);
         db_execute(sql_rel_day_instance.str().c_str());
         pthread_mutex_unlock(&databaseMutex);
+        
+        return db_instance_id;
          
 }
 
