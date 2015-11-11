@@ -84,6 +84,7 @@ vector<string> getIntervalsByCamberaAndRec(std::string camera, std::string recna
 vector<string> getMaxImageByPath(google::protobuf::int32 imageid);
 vector<string> getImageByPath(std::string path);
 void insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idmedia, int db_srv_idpost);
+vector<vector<string> > getNotTrackedInstance();
 
 void insertIntoHost(std::string publicip, std::string hostname, std::string city, std::string region, std::string country, std::string loc, std::string org);
     

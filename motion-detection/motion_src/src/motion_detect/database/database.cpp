@@ -608,38 +608,53 @@ vector<string> getMaxImageByPath(google::protobuf::int32 instanceid)
 {
     vector<string> maximage;
     
-    stringstream check_images;
-    check_images <<
-    "SELECT "                   <<
-    "MAX(I.imagechanges), "     <<
-    "I.path, "                  <<
-    "I.name, "                  <<
-    "D.label, "                 <<
-    "RS.name, "                 << 
-    "I.time "                   <<
-    "FROM instance AS INS "     <<
-    "JOIN rel_instance_image AS RII ON INS._id = RII._id_instance " <<
-    "JOIN image AS I ON RII._id_image = I._id "                     <<
-    "JOIN rel_day_instance_recognition_setup AS RDIRS ON RII._id_instance = RDIRS._id_instance "    <<
-    "JOIN day AS D ON RDIRS._id_day = D._id "                                                       <<
-    "JOIN recognition_setup AS RS ON RDIRS._id_recognition_setup = RS._id "                         <<  
-    "WHERE INS._id = " << instanceid << ";";        
-                
-    cout << "check_images: " << check_images.str() << endl;
+    stringstream check_rel_day_instance_recognition_setup;
+    check_rel_day_instance_recognition_setup <<
+    "SELECT _id FROM rel_day_instance_recognition_setup WHERE _id_instance = " << instanceid << ";";
     
-    vector<vector<string> > image_array = db_select(check_images.str().c_str(), 6);
-    if (image_array.size()>0)
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > rel_day_instance_recognition_setup_array = db_select(check_rel_day_instance_recognition_setup.str().c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (rel_day_instance_recognition_setup_array.size()>0)
     {
-        std::string path = image_array.at(0).at(1);
-        maximage.push_back(path);
-        std::string name = image_array.at(0).at(2);
-        maximage.push_back(name);
-        std::string day = image_array.at(0).at(3);
-        maximage.push_back(day);
-        std::string rec = image_array.at(0).at(4);
-        maximage.push_back(rec);
-        std::string time = image_array.at(0).at(5);
-        maximage.push_back(time);   
+    
+        stringstream check_istances;
+        check_istances <<
+        "SELECT "                   <<
+        "MAX(I.imagechanges), "     <<
+        "I.path, "                  <<
+        "I.name, "                  <<
+        "D.label, "                 <<
+        "RS.name, "                 << 
+        "I.time "                   <<
+        "FROM instance AS INS "     <<
+        "JOIN rel_instance_image AS RII ON INS._id = RII._id_instance " <<
+        "JOIN image AS I ON RII._id_image = I._id "                     <<
+        "JOIN rel_day_instance_recognition_setup AS RDIRS ON RII._id_instance = RDIRS._id_instance "    <<
+        "JOIN day AS D ON RDIRS._id_day = D._id "                                                       <<
+        "JOIN recognition_setup AS RS ON RDIRS._id_recognition_setup = RS._id "                         <<  
+        "WHERE INS._id = " << instanceid << ";";        
+
+        cout << "check_istances: " << check_istances.str() << endl;
+
+        pthread_mutex_lock(&databaseMutex);
+        vector<vector<string> > image_array = db_select(check_istances.str().c_str(), 6);
+        pthread_mutex_unlock(&databaseMutex); 
+
+        if (image_array.size()>0)
+        {
+            std::string path = image_array.at(0).at(1);
+            maximage.push_back(path);
+            std::string name = image_array.at(0).at(2);
+            maximage.push_back(name);
+            std::string day = image_array.at(0).at(3);
+            maximage.push_back(day);
+            std::string rec = image_array.at(0).at(4);
+            maximage.push_back(rec);
+            std::string time = image_array.at(0).at(5);
+            maximage.push_back(time);   
+        }
     }
     return maximage;  
 }
@@ -654,6 +669,24 @@ void insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idm
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_insert_tracking.str().c_str());
     pthread_mutex_unlock(&databaseMutex); 
+    
+    stringstream sql_update_instance;
+    sql_update_instance <<
+    "UPDATE instance SET tracked = 1 " <<
+    "WHERE _id = " << db_instance_id << ";";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_update_instance.str().c_str());
+    pthread_mutex_unlock(&databaseMutex); 
+    
+}
+
+vector<vector<string> > getNotTrackedInstance()
+{
+    std::string not_tracker_instance = "SELECT _id FROM instance WHERE tracked =0;";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > not_tracker_instance_array = db_select(not_tracker_instance.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    return not_tracker_instance_array;
 }
 
 vector<string> getImageByPath(std::string path)

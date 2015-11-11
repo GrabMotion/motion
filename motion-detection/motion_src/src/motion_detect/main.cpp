@@ -97,7 +97,7 @@ std::string XML_FILE = "<import>session";
 // Threading
 pthread_t thread_broadcast, thread_echo, thread_socket,
 thread_message, thread_recognition, thread_wait_echo,
-thread_observer, thread_send_echo, thread_postimage;
+/*thread_observer,*/ thread_send_echo, thread_postimage;
 
 //Threads
 int runt, runb, runs, runr, runl, runm, runw, runss, runo, ruse;
@@ -307,7 +307,9 @@ struct arg_struct
     motion::Message message;
 };
 void * startRecognition(void * arg);
-void * startObserver(void * arg);
+//void * startObserver(void * arg);
+void Observer();
+void pushDataToServer();
 motion::Message runCommand(motion::Message m);
 int getGlobalStringToInt(std::string id)
 {
@@ -423,7 +425,8 @@ int udpsend(motion::Message m)
     memset((char *) &remaddr, 0, sizeof(remaddr));
     remaddr.sin_family = AF_INET;
     remaddr.sin_port = htons(SERVICE_PORT);
-    if (inet_aton(server, &remaddr.sin_addr)==0) {
+    if (inet_aton(server, &remaddr.sin_addr)==0) 
+    {
         fprintf(stderr, "inet_aton() failed\n");
         exit(1);
     }
@@ -725,6 +728,9 @@ void * postImage(void * args)
     int db_instance_id = arg->db_instance_id;
     
     vector<string> max_image = getMaxImageByPath(db_instance_id);
+    if (max_image.size()==0)
+        return (void *) 0;
+    
     std::string maxpath = max_image.at(0);
     std::string maxname = max_image.at(1);
     std::string maxday = max_image.at(2);
@@ -739,6 +745,8 @@ void * postImage(void * args)
     std::string recname = dayname + "/" + maxrec;
     directoryExistsOrCreate(recname.c_str());
     
+    cout << "files and forlders created" << endl;
+    
     vector<string> name_vector;
     split(maxname.c_str(), '/', name_vector);
     
@@ -746,6 +754,8 @@ void * postImage(void * args)
     std::string maximagepath = recname + "/" + fineandextension;
     imwrite(maximagepath, mat);
 
+    cout << "posting: " << fineandextension << endl;
+    
     std::stringstream media;
     media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << "' --data-binary @'"<< maximagepath << "' -d title='" << maxtime << "' -H \"Expect: \" http://dev.uimove.com/wp-json/wp/v2/media";
 
@@ -755,7 +765,7 @@ void * postImage(void * args)
     {
         
         std::stringstream post;
-        post << "curl -X POST -d '{\"title\":\"" << maxtime << "\",\"content_raw\":\"Content\",\"content\":\"This is the content\",\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\",\"featured_image\":" << idmedia << "}' -H \"Content-Type:application/json\" --user jose:joselon http://dev.uimove.com/wp-json/wp/v2/posts";
+        post << "curl -X POST -d '{\"title\":\"" << maxtime << "\",\"content_raw\":\"Content\",\"content\":\"This is the content\",\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\",\"featured_image\":" << idmedia << ",\"category_name\":\"00000000db47b6ce\"}' -H \"Content-Type:application/json\" --user jose:joselon http://dev.uimove.com/wp-json/wp/v2/posts";
 
         int idpost = post_command_to_wp(post.str());
            
@@ -775,74 +785,60 @@ void * postImage(void * args)
 
 }
 
-
-void * startObserver(void * arg)
+void pushDataToServer()
 {
-    cout << "startObserver" << endl;
-    bool onlyonce = false;
-    while (true)
+    vector<vector<string> > ntinstances = getNotTrackedInstance();
+    int ntinsize = ntinstances.size();
+    if (ntinsize>0)
     {
-        int sizec = R_PROTO.motioncamera_size();
-        for (int i = 0; i < sizec; i++)
+        for (int i = 0; i < ntinsize; i++)
         {
-            try
-            {
-                motion::Message::MotionCamera * mcamera = R_PROTO.mutable_motioncamera(i);
-                if (mcamera->recognizing())
-                {
-                    std::cout << "number_of_changes = " << resutl_watch_detected << std::endl;
-                    if (!mcamera->recognizing_flag())
-                    {
-                        //updateCameraDB(1, mcamera->cameranumber());
-                        pthread_mutex_lock(&protoMutex);
-                        mcamera->set_recognizing_flag(true);
-                        pthread_mutex_unlock(&protoMutex);
-                    }
-                    
-                    int track_amount = mcamera->motiontrack_size();
-                    if (track_amount>0)
-                    {
-                        for (int j = 0; j < track_amount; j++)
-                        {
-                            motion::Message::MotionTrack * mtrack = mcamera->mutable_motiontrack(j);
-                            int db_instance_id = mtrack->db_idinstance();
-                         
-                            PostArgs.db_instance_id = db_instance_id;
-                            
-                            if (!onlyonce)
-                            {
-                                void *result;
-                                pthread_create(&thread_postimage, NULL, postImage, &PostArgs);
-                                pthread_join(thread_postimage, &result);
-                                if (result>0)
-                                {
-                                    mtrack->Clear();
-                                }
-                                onlyonce=true;
-                            }
-                        }
-                    }
-                    
-                } else
-                {
-                    if (mcamera->recognizing_flag())
-                    {
-                        //updateCameraDB(0, mcamera->cameranumber());
-                        pthread_mutex_lock(&protoMutex);
-                        mcamera->set_recognizing_flag(false);
-                        pthread_mutex_unlock(&protoMutex);
-                    }              
-                }
-            }
-            catch (std::bad_alloc& ba)
-            {
-              std::cerr << "bad_alloc caught startObserver: " << ba.what() << '\n';
-            } 
-            sleep(100);
+            cout << "::POSTING INSTANCE::" << endl;
+            PostArgs.db_instance_id = atoi(ntinstances.at(i).at(0).c_str());
+            void *result;
+            pthread_create(&thread_postimage, NULL, postImage, &PostArgs);
+            //pthread_join(thread_postimage, &result);
         }
+    }
+}
+
+void Observer()
+{
+    int sizec = R_PROTO.motioncamera_size();
+    for (int i = 0; i < sizec; i++)
+    {
+        try
+        {
+            motion::Message::MotionCamera * mcamera = R_PROTO.mutable_motioncamera(i);
+            if (mcamera->recognizing())
+            {
+                std::cout << "number_of_changes = " << resutl_watch_detected << std::endl;
+                if (!mcamera->recognizing_flag())
+                {
+                    //updateCameraDB(1, mcamera->cameranumber());
+                    pthread_mutex_lock(&protoMutex);
+                    mcamera->set_recognizing_flag(true);
+                    pthread_mutex_unlock(&protoMutex);
+                }
+                
+            } else
+            {
+                if (mcamera->recognizing_flag())
+                {
+                    //updateCameraDB(0, mcamera->cameranumber());
+                    pthread_mutex_lock(&protoMutex);
+                    mcamera->set_recognizing_flag(false);
+                    pthread_mutex_unlock(&protoMutex);
+                }              
+            }
+        }
+        catch (std::bad_alloc& ba)
+        {
+          std::cerr << "bad_alloc caught startObserver: " << ba.what() << '\n';
+        } 
         sleep(100);
     }
-    cout << "stopObserver" << endl;
+    sleep(100);
     
 }
 
@@ -2210,9 +2206,11 @@ void * broadcastsender ( void * args )
     int countud;
     for (;;) {
         sock.sendTo(sendString, strlen(sendString), destAddress, destPort);
-        //cout << "UPD Send: " << countud << " " << getShortTimeRasp() << endl;
+        cout << "UPD Send: " << countud << " " << endl;
         countud++;
-        sleep(3);
+        sleep(10);
+        //Observer();
+        pushDataToServer();
     }
     delete [] sendString;
   
@@ -2447,7 +2445,7 @@ int main (int argc, char * const av[])
         publicip = busip.str();
     }*/
     
-    FILE *inloc;
+    /*FILE *inloc;
     char buffloc[512];
     std::string location = "curl ipinfo.io/ 190.177.218.76";
     if(!(inloc = popen(location.c_str(), "r")))
@@ -2459,7 +2457,7 @@ int main (int argc, char * const av[])
     {
         busloc << buffloc;
     }
-    insertHost(busloc.str().c_str());
+    insertHost(busloc.str().c_str());*/
     
     cout << "ipnumber: " << NETWORK_IP << endl;
     cout << "publicip: " << publicip << endl;
@@ -2524,7 +2522,7 @@ int main (int argc, char * const av[])
         "INSERT INTO rel_hardware_camera (_id_hardware, _id_camera) " <<
         "SELECT " << db_hardware_id << "," << camsarray.at(i) <<
         " WHERE NOT EXISTS (SELECT * FROM rel_hardware_camera WHERE _id_hardware = "
-        << camera << " AND _id_camera = " << camsarray.at(i) << ");";
+        << db_hardware_id << " AND _id_camera = " << camsarray.at(i) << ");";
         cout << "insert_camera_query: " << insert_camera_query.str() << endl;
         db_execute(insert_camera_query.str().c_str());
             
@@ -2647,10 +2645,10 @@ int main (int argc, char * const av[])
         cerr << "Unable to create thread" << endl;
     }
     
-    runo = pthread_create(&thread_observer, NULL, startObserver, NULL);
-    if ( runo  != 0) {
-        cerr << "Unable to create thread" << endl;
-    }
+    //runo = pthread_create(&thread_observer, NULL, startObserver, NULL);
+    //if ( runo  != 0) {
+    //    cerr << "Unable to create thread" << endl;
+    //}
     
     //Stream Socket Server.
     //StreamListener * stream_listener = new StreamListener();
@@ -2658,7 +2656,7 @@ int main (int argc, char * const av[])
 
     pthread_join(    thread_broadcast,  (void**) &runb);
     pthread_join(    thread_socket,     (void**) &runs);
-    pthread_join(    thread_observer,   (void**) &runr);
+    //pthread_join(    thread_observer,   (void**) &runr);
     
     cout << "THREAD TERMINATED!!!!!!!!!!!!!!!!!!!!! = " << runs << endl;
     return 0;

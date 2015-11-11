@@ -982,7 +982,7 @@ void * startRecognition(void * arg)
                 ProtoArgs.end_time      = end_time;
                 ProtoArgs.instance      = instance;
                 ProtoArgs.instancecode  = instancecode;
-                
+                            
                 cout << "pthread_create" << endl;
                 int runb = pthread_create(&thread_store, NULL, storeproto, &ProtoArgs);
                 pthread_join(thread_store,  (void**) &runb);
@@ -1203,7 +1203,7 @@ void * startRecognition(void * arg)
                     ProtoArgs.end_time      = end_time;
                     ProtoArgs.instance      = instance;
                     ProtoArgs.instancecode  = instancecode;
-
+                    
                     cout << "pthread_create" << endl;
                     int runb = pthread_create(&thread_store, NULL, storeproto, &ProtoArgs);
                     
@@ -1299,9 +1299,6 @@ void * storeproto(void * args)
     
     cout << "INSTANCE CLEANED: " << endl; 
     pthread_cancel(thread_store);
-    
-    motion::Message::MotionTrack * mtrack = pcamera->add_motiontrack();
-    mtrack->set_db_idinstance(db_instance_id);
                 
 }
 
@@ -1315,17 +1312,19 @@ int insertIntoInstance(std::string number, motion::Message::Instance * pinstance
         //Instance
         stringstream sql_instance;
         sql_instance <<        
-        "INSERT INTO instance (number, instancestart, instanceend, _id_video, time) " <<
+        "INSERT INTO instance (number, instancestart, instanceend, _id_video, time, tracked) " <<
         "SELECT "   << number                   << 
         ",' "       << instancestart            << "'" << 
         ", '"       << instanceend              << "'" <<
         ", "        << db_video_id              <<
         ", '"       << time_info                << "'" << 
+        ", 0 "      <<
         " WHERE NOT EXISTS (SELECT * FROM instance WHERE number = " << number       <<
         " AND instancestart = '"  << pinstance->instancestart()     <<    "'"       <<
         " AND instanceend   = '"  << pinstance->instanceend()       <<    "'"       <<
         " AND _id_video     = "   << db_video_id                    << 
-        " AND time          = '"  << time_info                      <<    "'"       << ");";
+        " AND time          = '"  << time_info                      <<    "'"       
+        " AND tracked       = 0"        << ");";
         std::string sqlinst = sql_instance.str();
         //cout << "sqlinst: " << sqlinst << endl;
         pthread_mutex_lock(&databaseMutex);
@@ -1364,9 +1363,21 @@ int insertIntoInstance(std::string number, motion::Message::Instance * pinstance
         ", '"       << time_info         << "'" <<
         " WHERE NOT EXISTS (SELECT * FROM rel_day_instance_recognition_setup WHERE _id_day = " << dayid << 
         " AND _id_instance = " << db_instance_id << " AND _id_recognition_setup = " << db_recognition_setup_id << ");";
+        cout << "sql_rel_day_instance: " << sql_rel_day_instance << endl;
         pthread_mutex_lock(&databaseMutex);
         db_execute(sql_rel_day_instance.str().c_str());
         pthread_mutex_unlock(&databaseMutex);
+         
+        std::string last_rel_day_instance_recognition_setup_query = "SELECT MAX(_id) FROM rel_day_instance_recognition_setup";
+        pthread_mutex_lock(&databaseMutex);
+        vector<vector<string> > last_rel_day_instance_recognition_setup_array = db_select(last_rel_day_instance_recognition_setup_query.c_str(), 1);
+        pthread_mutex_unlock(&databaseMutex);
+        int db_day_instance_recognition_setup_id = atoi(last_rel_day_instance_recognition_setup_array.at(0).at(0).c_str());
+        
+        if (last_rel_day_instance_recognition_setup_array.size()==0)
+        {
+            cout << "CANNOT SAVE last_rel_day_instance_recognition_setup_array" << endl;
+        }
         
         return db_instance_id;
          
