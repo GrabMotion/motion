@@ -98,7 +98,7 @@ void protobuf_AssignDesc_motion_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Message));
   Message_MotionCamera_descriptor_ = Message_descriptor_->nested_type(0);
-  static const int Message_MotionCamera_offsets_[12] = {
+  static const int Message_MotionCamera_offsets_[18] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, motionmonth_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, motionrec_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, cameraid_),
@@ -111,6 +111,12 @@ void protobuf_AssignDesc_motion_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, db_idrec_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, fromdatabase_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, motiontrack_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, activemat_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, matcols_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, matrows_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, matwidth_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, matheight_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_MotionCamera, db_idmat_),
   };
   Message_MotionCamera_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -237,7 +243,7 @@ void protobuf_AssignDesc_motion_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Message_MotionDay));
   Message_Instance_descriptor_ = Message_descriptor_->nested_type(6);
-  static const int Message_Instance_offsets_[8] = {
+  static const int Message_Instance_offsets_[20] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, idinstance_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, number_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, instancestart_),
@@ -246,6 +252,18 @@ void protobuf_AssignDesc_motion_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, image_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, crop_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, video_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, dir_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, xmlfile_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, extdata_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, end_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, begintime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, endtime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, inittime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, instance_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, instancecode_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, timeinfo_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, db_dayid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Message_Instance, db_recognition_setup_id_),
   };
   Message_Instance_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -382,7 +400,7 @@ void protobuf_AddDesc_motion_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014motion.proto\022\006motion\"\360\030\n\007Message\022\021\n\tac"
+    "\n\014motion.proto\022\006motion\"\273\033\n\007Message\022\021\n\tac"
     "tivecam\030\001 \001(\005\0220\n\004type\030\002 \002(\0162\032.motion.Mes"
     "sage.ActionType:\006ENGAGE\022\014\n\004time\030\003 \001(\t\022\014\n"
     "\004data\030\004 \001(\014\022\023\n\013data_amount\030\005 \001(\005\022\022\n\ndata"
@@ -392,7 +410,7 @@ void protobuf_AddDesc_motion_2eproto() {
     "amera\022\021\n\tcurrmonth\030\013 \001(\t\022\017\n\007currday\030\014 \001("
     "\t\022\017\n\007currcam\030\r \001(\005\022\023\n\013packagesize\030\016 \001(\005\022"
     "\025\n\rimagefilepath\030\017 \001(\t\022\025\n\rvideofilepath\030"
-    "\020 \001(\t\022\017\n\007recname\030\021 \001(\t\032\336\002\n\014MotionCamera\022"
+    "\020 \001(\t\022\017\n\007recname\030\021 \001(\t\032\312\003\n\014MotionCamera\022"
     "0\n\013motionmonth\030\001 \003(\0132\033.motion.Message.Mo"
     "tionMonth\022,\n\tmotionrec\030\002 \003(\0132\031.motion.Me"
     "ssage.MotionRec\022\023\n\010cameraid\030\003 \001(\005:\0010\022\024\n\014"
@@ -401,68 +419,76 @@ void protobuf_AddDesc_motion_2eproto() {
     "\n\020recognizing_flag\030\010 \001(\010\022\023\n\013db_idcamera\030"
     "\t \001(\005\022\020\n\010db_idrec\030\n \001(\005\022\024\n\014fromdatabase\030"
     "\013 \001(\010\0220\n\013motiontrack\030\014 \003(\0132\033.motion.Mess"
-    "age.MotionTrack\032$\n\013MotionTrack\022\025\n\rdb_idi"
-    "nstance\030\001 \001(\005\032\254\005\n\tMotionRec\022\014\n\004name\030\001 \001("
-    "\t\022\020\n\010db_idrec\030\002 \001(\005\022\021\n\ttimestart\030\003 \001(\t\022\017"
-    "\n\007timeend\030\004 \001(\t\022\017\n\007recname\030\005 \001(\t\022\023\n\013came"
-    "rasince\030\006 \001(\t\022\022\n\nstoreimage\030\007 \001(\010\022\022\n\nsto"
-    "revideo\030\010 \001(\010\022\020\n\010codename\030\t \001(\t\022\021\n\thasre"
-    "gion\030\n \001(\010\022\023\n\013coordinates\030\013 \001(\t\022\r\n\005delay"
-    "\030\014 \001(\005\022\024\n\014startrectime\030\r \001(\t\022\023\n\013stoprect"
-    "ime\030\016 \001(\t\022\024\n\014runatstartup\030\017 \001(\010\022\021\n\tactiv"
-    "emat\030\020 \001(\005\022\020\n\010db_idmat\030\021 \001(\005\022\030\n\020db_idcoo"
-    "rdinates\030\022 \001(\005\022\025\n\rdb_intervalid\030\023 \001(\005\022\017\n"
-    "\007matcols\030\024 \001(\005\022\017\n\007matrows\030\025 \001(\005\022\020\n\010matwi"
-    "dth\030\026 \001(\005\022\021\n\tmatheight\030\027 \001(\005\022\024\n\014lastinst"
-    "ance\030\030 \001(\t\022\022\n\ndb_idmonth\030\031 \001(\005\022\020\n\010db_idd"
-    "ay\030\032 \001(\005\022\023\n\013xmlfilepath\030\033 \001(\t\022\035\n\025db_reco"
-    "gnitionsetupid\030\034 \001(\005\022\017\n\007hascron\030\035 \001(\010\022.\n"
-    "\nmotioncron\030\036 \003(\0132\032.motion.Message.Motio"
-    "nCron\022\r\n\005speed\030\037 \001(\005\022\021\n\tactiverec\030  \001(\005\022"
-    "\023\n\013matbasefile\030! \001(\t\032.\n\nMotionCron\022\017\n\007co"
-    "mmand\030\001 \001(\t\022\017\n\007program\030\002 \001(\t\032c\n\013MotionMo"
-    "nth\022,\n\tmotionday\030\001 \003(\0132\031.motion.Message."
-    "MotionDay\022\022\n\nmonthlabel\030\002 \001(\t\022\022\n\ndb_mont"
-    "hid\030\003 \001(\005\032p\n\tMotionDay\022*\n\010instance\030\001 \003(\013"
-    "2\030.motion.Message.Instance\022\020\n\010daylabel\030\002"
-    " \001(\t\022\020\n\010db_dayid\030\003 \001(\005\022\023\n\013xmlfilepath\030\004 "
-    "\001(\t\032\336\001\n\010Instance\022\022\n\nidinstance\030\001 \002(\005\022\016\n\006"
-    "number\030\002 \001(\005\022\025\n\rinstancestart\030\003 \001(\t\022\023\n\013i"
-    "nstanceend\030\004 \001(\t\022\022\n\nfileformat\030\005 \001(\t\022$\n\005"
-    "image\030\006 \003(\0132\025.motion.Message.Image\022\"\n\004cr"
-    "op\030\007 \003(\0132\024.motion.Message.Crop\022$\n\005video\030"
-    "\010 \001(\0132\025.motion.Message.Video\032G\n\005Image\022\014\n"
-    "\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\024\n\014imagechange"
-    "s\030\003 \001(\005\022\014\n\004time\030\004 \001(\t\032.\n\004Crop\022\014\n\004rect\030\001 "
-    "\001(\t\022\030\n\020db_imagefatherid\030\002 \001(\005\032;\n\005Video\022\014"
-    "\n\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\026\n\016instancefo"
-    "lder\030\003 \001(\t\"\374\003\n\nActionType\022\013\n\006ENGAGE\020\350\007\022\016"
-    "\n\tREC_START\020\352\007\022\020\n\013REC_RUNNING\020\353\007\022\r\n\010REC_"
-    "STOP\020\354\007\022\r\n\010UNENGAGE\020\355\007\022\r\n\010GET_TIME\020\356\007\022\r\n"
-    "\010SET_TIME\020\357\007\022\r\n\010TIME_SET\020\360\007\022\017\n\nSTRM_STAR"
-    "T\020\361\007\022\016\n\tSTRM_STOP\020\362\007\022\021\n\014TAKE_PICTURE\020\363\007\022"
-    "\020\n\013DISSCONNECT\020\364\007\022\014\n\007REFRESH\020\365\007\022\014\n\007GET_X"
-    "ML\020\366\007\022\016\n\tGET_IMAGE\020\367\007\022\016\n\tGET_VIDEO\020\370\007\022\t\n"
-    "\004SAVE\020\371\007\022\t\n\004OPEN\020\372\007\022\013\n\006UPDATE\020\373\007\022\014\n\007SAVE"
-    "_OK\020\374\007\022\016\n\tUPDATE_OK\020\375\007\022\014\n\007GET_MAT\020\376\007\022\020\n\013"
-    "RESPONSE_OK\020\320\017\022\022\n\rRESPONSE_NEXT\020\332\017\022\021\n\014RE"
-    "SPONSE_END\020\344\017\022\024\n\017RESPONSE_FINISH\020\356\017\022\024\n\017R"
-    "EC_HAS_CHANGES\020\370\017\022\025\n\020REC_HAS_INSTANCE\020\202\020"
-    "\022\023\n\016PROTO_HAS_FILE\020\326\027\022\022\n\rPROTO_NO_FILE\020\327"
-    "\027\"\254\003\n\nSocketType\022\031\n\025SOCKET_PROTO_TOSTRIN"
-    "G\020\n\022\030\n\024SOCKET_PROTO_TOARRAY\020\013\022\025\n\021SOCKET_"
-    "PLAIN_TEXT\020\014\022\024\n\020SPLITTED_MESSAGE\020\r\022\022\n\016SI"
-    "NGLE_MESSAGE\020\016\022\034\n\027SOCKET_BUFFER_NANO_SIZ"
-    "E\020\200\010\022\034\n\027SOCKET_BUFFER_MINI_SIZE\020\200\020\022\035\n\030SO"
-    "CKET_BUFFER_MICRO_SIZE\020\200 \022\035\n\030SOCKET_BUFF"
-    "ER_SMALL_SIZE\020\204@\022 \n\032SOCKET_BUFFER_REGULA"
-    "R_SIZE\020\210\200\001\022\037\n\031SOCKET_BUFFER_MEDIUM_SIZE\020"
-    "\220\200\002\022\034\n\026SOCKET_BUFFER_BIG_SIZE\020\240\200\004\022\022\n\rTCP"
-    "_ECHO_PORT\020\222\'\022\027\n\022TCP_STREAMING_PORT\020\234\'\022\r"
-    "\n\010UDP_PORT\020\246\'\022\021\n\014TCP_MSG_PORT\020\260\'\"_\n\013Proc"
-    "essType\022\031\n\024PROCESS_PEOPLE_COUNT\020\241\037\022\030\n\023PR"
-    "OCESS_FACE_DETECT\020\242\037\022\033\n\026PROCESS_WALK_DIR"
-    "ECTION\020\243\037", 3209);
+    "age.MotionTrack\022\021\n\tactivemat\030\020 \001(\005\022\017\n\007ma"
+    "tcols\030\024 \001(\005\022\017\n\007matrows\030\025 \001(\005\022\020\n\010matwidth"
+    "\030\026 \001(\005\022\021\n\tmatheight\030\027 \001(\005\022\020\n\010db_idmat\030\021 "
+    "\001(\005\032$\n\013MotionTrack\022\025\n\rdb_idinstance\030\001 \001("
+    "\005\032\254\005\n\tMotionRec\022\014\n\004name\030\001 \001(\t\022\020\n\010db_idre"
+    "c\030\002 \001(\005\022\021\n\ttimestart\030\003 \001(\t\022\017\n\007timeend\030\004 "
+    "\001(\t\022\017\n\007recname\030\005 \001(\t\022\023\n\013camerasince\030\006 \001("
+    "\t\022\022\n\nstoreimage\030\007 \001(\010\022\022\n\nstorevideo\030\010 \001("
+    "\010\022\020\n\010codename\030\t \001(\t\022\021\n\thasregion\030\n \001(\010\022\023"
+    "\n\013coordinates\030\013 \001(\t\022\r\n\005delay\030\014 \001(\005\022\024\n\014st"
+    "artrectime\030\r \001(\t\022\023\n\013stoprectime\030\016 \001(\t\022\024\n"
+    "\014runatstartup\030\017 \001(\010\022\021\n\tactivemat\030\020 \001(\005\022\020"
+    "\n\010db_idmat\030\021 \001(\005\022\030\n\020db_idcoordinates\030\022 \001"
+    "(\005\022\025\n\rdb_intervalid\030\023 \001(\005\022\017\n\007matcols\030\024 \001"
+    "(\005\022\017\n\007matrows\030\025 \001(\005\022\020\n\010matwidth\030\026 \001(\005\022\021\n"
+    "\tmatheight\030\027 \001(\005\022\024\n\014lastinstance\030\030 \001(\t\022\022"
+    "\n\ndb_idmonth\030\031 \001(\005\022\020\n\010db_idday\030\032 \001(\005\022\023\n\013"
+    "xmlfilepath\030\033 \001(\t\022\035\n\025db_recognitionsetup"
+    "id\030\034 \001(\005\022\017\n\007hascron\030\035 \001(\010\022.\n\nmotioncron\030"
+    "\036 \003(\0132\032.motion.Message.MotionCron\022\r\n\005spe"
+    "ed\030\037 \001(\005\022\021\n\tactiverec\030  \001(\005\022\023\n\013matbasefi"
+    "le\030! \001(\t\032.\n\nMotionCron\022\017\n\007command\030\001 \001(\t\022"
+    "\017\n\007program\030\002 \001(\t\032c\n\013MotionMonth\022,\n\tmotio"
+    "nday\030\001 \003(\0132\031.motion.Message.MotionDay\022\022\n"
+    "\nmonthlabel\030\002 \001(\t\022\022\n\ndb_monthid\030\003 \001(\005\032p\n"
+    "\tMotionDay\022*\n\010instance\030\001 \003(\0132\030.motion.Me"
+    "ssage.Instance\022\020\n\010daylabel\030\002 \001(\t\022\020\n\010db_d"
+    "ayid\030\003 \001(\005\022\023\n\013xmlfilepath\030\004 \001(\t\032\275\003\n\010Inst"
+    "ance\022\022\n\nidinstance\030\001 \002(\005\022\016\n\006number\030\002 \001(\005"
+    "\022\025\n\rinstancestart\030\003 \001(\t\022\023\n\013instanceend\030\004"
+    " \001(\t\022\022\n\nfileformat\030\005 \001(\t\022$\n\005image\030\006 \003(\0132"
+    "\025.motion.Message.Image\022\"\n\004crop\030\007 \003(\0132\024.m"
+    "otion.Message.Crop\022$\n\005video\030\010 \001(\0132\025.moti"
+    "on.Message.Video\022\013\n\003dir\030\t \001(\t\022\017\n\007xmlfile"
+    "\030\n \001(\t\022\017\n\007extdata\030\013 \001(\t\022\013\n\003end\030\014 \001(\t\022\021\n\t"
+    "begintime\030\r \001(\005\022\017\n\007endtime\030\016 \001(\005\022\020\n\010init"
+    "time\030\017 \001(\005\022\020\n\010instance\030\020 \001(\t\022\024\n\014instance"
+    "code\030\021 \001(\t\022\020\n\010timeinfo\030\022 \001(\t\022\020\n\010db_dayid"
+    "\030\023 \001(\005\022\037\n\027db_recognition_setup_id\030\024 \001(\005\032"
+    "G\n\005Image\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\024\n\014"
+    "imagechanges\030\003 \001(\005\022\014\n\004time\030\004 \001(\t\032.\n\004Crop"
+    "\022\014\n\004rect\030\001 \001(\t\022\030\n\020db_imagefatherid\030\002 \001(\005"
+    "\032;\n\005Video\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\026\n"
+    "\016instancefolder\030\003 \001(\t\"\374\003\n\nActionType\022\013\n\006"
+    "ENGAGE\020\350\007\022\016\n\tREC_START\020\352\007\022\020\n\013REC_RUNNING"
+    "\020\353\007\022\r\n\010REC_STOP\020\354\007\022\r\n\010UNENGAGE\020\355\007\022\r\n\010GET"
+    "_TIME\020\356\007\022\r\n\010SET_TIME\020\357\007\022\r\n\010TIME_SET\020\360\007\022\017"
+    "\n\nSTRM_START\020\361\007\022\016\n\tSTRM_STOP\020\362\007\022\021\n\014TAKE_"
+    "PICTURE\020\363\007\022\020\n\013DISSCONNECT\020\364\007\022\014\n\007REFRESH\020"
+    "\365\007\022\014\n\007GET_XML\020\366\007\022\016\n\tGET_IMAGE\020\367\007\022\016\n\tGET_"
+    "VIDEO\020\370\007\022\t\n\004SAVE\020\371\007\022\t\n\004OPEN\020\372\007\022\013\n\006UPDATE"
+    "\020\373\007\022\014\n\007SAVE_OK\020\374\007\022\016\n\tUPDATE_OK\020\375\007\022\014\n\007GET"
+    "_MAT\020\376\007\022\020\n\013RESPONSE_OK\020\320\017\022\022\n\rRESPONSE_NE"
+    "XT\020\332\017\022\021\n\014RESPONSE_END\020\344\017\022\024\n\017RESPONSE_FIN"
+    "ISH\020\356\017\022\024\n\017REC_HAS_CHANGES\020\370\017\022\025\n\020REC_HAS_"
+    "INSTANCE\020\202\020\022\023\n\016PROTO_HAS_FILE\020\326\027\022\022\n\rPROT"
+    "O_NO_FILE\020\327\027\"\254\003\n\nSocketType\022\031\n\025SOCKET_PR"
+    "OTO_TOSTRING\020\n\022\030\n\024SOCKET_PROTO_TOARRAY\020\013"
+    "\022\025\n\021SOCKET_PLAIN_TEXT\020\014\022\024\n\020SPLITTED_MESS"
+    "AGE\020\r\022\022\n\016SINGLE_MESSAGE\020\016\022\034\n\027SOCKET_BUFF"
+    "ER_NANO_SIZE\020\200\010\022\034\n\027SOCKET_BUFFER_MINI_SI"
+    "ZE\020\200\020\022\035\n\030SOCKET_BUFFER_MICRO_SIZE\020\200 \022\035\n\030"
+    "SOCKET_BUFFER_SMALL_SIZE\020\204@\022 \n\032SOCKET_BU"
+    "FFER_REGULAR_SIZE\020\210\200\001\022\037\n\031SOCKET_BUFFER_M"
+    "EDIUM_SIZE\020\220\200\002\022\034\n\026SOCKET_BUFFER_BIG_SIZE"
+    "\020\240\200\004\022\022\n\rTCP_ECHO_PORT\020\222\'\022\027\n\022TCP_STREAMIN"
+    "G_PORT\020\234\'\022\r\n\010UDP_PORT\020\246\'\022\021\n\014TCP_MSG_PORT"
+    "\020\260\'\"_\n\013ProcessType\022\031\n\024PROCESS_PEOPLE_COU"
+    "NT\020\241\037\022\030\n\023PROCESS_FACE_DETECT\020\242\037\022\033\n\026PROCE"
+    "SS_WALK_DIRECTION\020\243\037", 3540);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "motion.proto", &protobuf_RegisterTypes);
   Message::default_instance_ = new Message();
@@ -661,6 +687,12 @@ const int Message_MotionCamera::kDbIdcameraFieldNumber;
 const int Message_MotionCamera::kDbIdrecFieldNumber;
 const int Message_MotionCamera::kFromdatabaseFieldNumber;
 const int Message_MotionCamera::kMotiontrackFieldNumber;
+const int Message_MotionCamera::kActivematFieldNumber;
+const int Message_MotionCamera::kMatcolsFieldNumber;
+const int Message_MotionCamera::kMatrowsFieldNumber;
+const int Message_MotionCamera::kMatwidthFieldNumber;
+const int Message_MotionCamera::kMatheightFieldNumber;
+const int Message_MotionCamera::kDbIdmatFieldNumber;
 #endif  // !_MSC_VER
 
 Message_MotionCamera::Message_MotionCamera()
@@ -691,6 +723,12 @@ void Message_MotionCamera::SharedCtor() {
   db_idcamera_ = 0;
   db_idrec_ = 0;
   fromdatabase_ = false;
+  activemat_ = 0;
+  matcols_ = 0;
+  matrows_ = 0;
+  matwidth_ = 0;
+  matheight_ = 0;
+  db_idmat_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -748,10 +786,11 @@ void Message_MotionCamera::Clear() {
       }
     }
   }
-  if (_has_bits_[8 / 32] & 1792) {
-    ZR_(fromdatabase_, db_idcamera_);
-    db_idrec_ = 0;
+  if (_has_bits_[8 / 32] & 63232) {
+    ZR_(fromdatabase_, activemat_);
+    ZR_(matcols_, matwidth_);
   }
+  ZR_(matheight_, db_idmat_);
 
 #undef OFFSET_OF_FIELD_
 #undef ZR_
@@ -769,7 +808,7 @@ bool Message_MotionCamera::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   // @@protoc_insertion_point(parse_start:motion.Message.MotionCamera)
   for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(16383);
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
@@ -948,6 +987,96 @@ bool Message_MotionCamera::MergePartialFromCodedStream(
           goto handle_unusual;
         }
         if (input->ExpectTag(98)) goto parse_motiontrack;
+        if (input->ExpectTag(128)) goto parse_activemat;
+        break;
+      }
+
+      // optional int32 activemat = 16;
+      case 16: {
+        if (tag == 128) {
+         parse_activemat:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &activemat_)));
+          set_has_activemat();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(136)) goto parse_db_idmat;
+        break;
+      }
+
+      // optional int32 db_idmat = 17;
+      case 17: {
+        if (tag == 136) {
+         parse_db_idmat:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &db_idmat_)));
+          set_has_db_idmat();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(160)) goto parse_matcols;
+        break;
+      }
+
+      // optional int32 matcols = 20;
+      case 20: {
+        if (tag == 160) {
+         parse_matcols:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &matcols_)));
+          set_has_matcols();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(168)) goto parse_matrows;
+        break;
+      }
+
+      // optional int32 matrows = 21;
+      case 21: {
+        if (tag == 168) {
+         parse_matrows:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &matrows_)));
+          set_has_matrows();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(176)) goto parse_matwidth;
+        break;
+      }
+
+      // optional int32 matwidth = 22;
+      case 22: {
+        if (tag == 176) {
+         parse_matwidth:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &matwidth_)));
+          set_has_matwidth();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(184)) goto parse_matheight;
+        break;
+      }
+
+      // optional int32 matheight = 23;
+      case 23: {
+        if (tag == 184) {
+         parse_matheight:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &matheight_)));
+          set_has_matheight();
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -1045,6 +1174,36 @@ void Message_MotionCamera::SerializeWithCachedSizes(
       12, this->motiontrack(i), output);
   }
 
+  // optional int32 activemat = 16;
+  if (has_activemat()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(16, this->activemat(), output);
+  }
+
+  // optional int32 db_idmat = 17;
+  if (has_db_idmat()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(17, this->db_idmat(), output);
+  }
+
+  // optional int32 matcols = 20;
+  if (has_matcols()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(20, this->matcols(), output);
+  }
+
+  // optional int32 matrows = 21;
+  if (has_matrows()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(21, this->matrows(), output);
+  }
+
+  // optional int32 matwidth = 22;
+  if (has_matwidth()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(22, this->matwidth(), output);
+  }
+
+  // optional int32 matheight = 23;
+  if (has_matheight()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(23, this->matheight(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1127,6 +1286,36 @@ void Message_MotionCamera::SerializeWithCachedSizes(
         12, this->motiontrack(i), target);
   }
 
+  // optional int32 activemat = 16;
+  if (has_activemat()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(16, this->activemat(), target);
+  }
+
+  // optional int32 db_idmat = 17;
+  if (has_db_idmat()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(17, this->db_idmat(), target);
+  }
+
+  // optional int32 matcols = 20;
+  if (has_matcols()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(20, this->matcols(), target);
+  }
+
+  // optional int32 matrows = 21;
+  if (has_matrows()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(21, this->matrows(), target);
+  }
+
+  // optional int32 matwidth = 22;
+  if (has_matwidth()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(22, this->matwidth(), target);
+  }
+
+  // optional int32 matheight = 23;
+  if (has_matheight()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(23, this->matheight(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -1194,6 +1383,50 @@ int Message_MotionCamera::ByteSize() const {
     // optional bool fromdatabase = 11;
     if (has_fromdatabase()) {
       total_size += 1 + 1;
+    }
+
+    // optional int32 activemat = 16;
+    if (has_activemat()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->activemat());
+    }
+
+    // optional int32 matcols = 20;
+    if (has_matcols()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->matcols());
+    }
+
+    // optional int32 matrows = 21;
+    if (has_matrows()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->matrows());
+    }
+
+    // optional int32 matwidth = 22;
+    if (has_matwidth()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->matwidth());
+    }
+
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    // optional int32 matheight = 23;
+    if (has_matheight()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->matheight());
+    }
+
+    // optional int32 db_idmat = 17;
+    if (has_db_idmat()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->db_idmat());
     }
 
   }
@@ -1279,6 +1512,26 @@ void Message_MotionCamera::MergeFrom(const Message_MotionCamera& from) {
     if (from.has_fromdatabase()) {
       set_fromdatabase(from.fromdatabase());
     }
+    if (from.has_activemat()) {
+      set_activemat(from.activemat());
+    }
+    if (from.has_matcols()) {
+      set_matcols(from.matcols());
+    }
+    if (from.has_matrows()) {
+      set_matrows(from.matrows());
+    }
+    if (from.has_matwidth()) {
+      set_matwidth(from.matwidth());
+    }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    if (from.has_matheight()) {
+      set_matheight(from.matheight());
+    }
+    if (from.has_db_idmat()) {
+      set_db_idmat(from.db_idmat());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -1315,6 +1568,12 @@ void Message_MotionCamera::Swap(Message_MotionCamera* other) {
     std::swap(db_idrec_, other->db_idrec_);
     std::swap(fromdatabase_, other->fromdatabase_);
     motiontrack_.Swap(&other->motiontrack_);
+    std::swap(activemat_, other->activemat_);
+    std::swap(matcols_, other->matcols_);
+    std::swap(matrows_, other->matrows_);
+    std::swap(matwidth_, other->matwidth_);
+    std::swap(matheight_, other->matheight_);
+    std::swap(db_idmat_, other->db_idmat_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -4305,6 +4564,18 @@ const int Message_Instance::kFileformatFieldNumber;
 const int Message_Instance::kImageFieldNumber;
 const int Message_Instance::kCropFieldNumber;
 const int Message_Instance::kVideoFieldNumber;
+const int Message_Instance::kDirFieldNumber;
+const int Message_Instance::kXmlfileFieldNumber;
+const int Message_Instance::kExtdataFieldNumber;
+const int Message_Instance::kEndFieldNumber;
+const int Message_Instance::kBegintimeFieldNumber;
+const int Message_Instance::kEndtimeFieldNumber;
+const int Message_Instance::kInittimeFieldNumber;
+const int Message_Instance::kInstanceFieldNumber;
+const int Message_Instance::kInstancecodeFieldNumber;
+const int Message_Instance::kTimeinfoFieldNumber;
+const int Message_Instance::kDbDayidFieldNumber;
+const int Message_Instance::kDbRecognitionSetupIdFieldNumber;
 #endif  // !_MSC_VER
 
 Message_Instance::Message_Instance()
@@ -4333,6 +4604,18 @@ void Message_Instance::SharedCtor() {
   instanceend_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   fileformat_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   video_ = NULL;
+  dir_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  xmlfile_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  extdata_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  end_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  begintime_ = 0;
+  endtime_ = 0;
+  inittime_ = 0;
+  instance_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  instancecode_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  timeinfo_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  db_dayid_ = 0;
+  db_recognition_setup_id_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -4350,6 +4633,27 @@ void Message_Instance::SharedDtor() {
   }
   if (fileformat_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete fileformat_;
+  }
+  if (dir_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete dir_;
+  }
+  if (xmlfile_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete xmlfile_;
+  }
+  if (extdata_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete extdata_;
+  }
+  if (end_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete end_;
+  }
+  if (instance_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete instance_;
+  }
+  if (instancecode_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete instancecode_;
+  }
+  if (timeinfo_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete timeinfo_;
   }
   if (this != default_instance_) {
     delete video_;
@@ -4409,6 +4713,49 @@ void Message_Instance::Clear() {
       if (video_ != NULL) video_->::motion::Message_Video::Clear();
     }
   }
+  if (_has_bits_[8 / 32] & 65280) {
+    ZR_(begintime_, endtime_);
+    if (has_dir()) {
+      if (dir_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        dir_->clear();
+      }
+    }
+    if (has_xmlfile()) {
+      if (xmlfile_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        xmlfile_->clear();
+      }
+    }
+    if (has_extdata()) {
+      if (extdata_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        extdata_->clear();
+      }
+    }
+    if (has_end()) {
+      if (end_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        end_->clear();
+      }
+    }
+    inittime_ = 0;
+    if (has_instance()) {
+      if (instance_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        instance_->clear();
+      }
+    }
+  }
+  if (_has_bits_[16 / 32] & 983040) {
+    if (has_instancecode()) {
+      if (instancecode_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        instancecode_->clear();
+      }
+    }
+    if (has_timeinfo()) {
+      if (timeinfo_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        timeinfo_->clear();
+      }
+    }
+    db_dayid_ = 0;
+    db_recognition_setup_id_ = 0;
+  }
 
 #undef OFFSET_OF_FIELD_
 #undef ZR_
@@ -4425,7 +4772,7 @@ bool Message_Instance::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   // @@protoc_insertion_point(parse_start:motion.Message.Instance)
   for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(16383);
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
@@ -4546,6 +4893,200 @@ bool Message_Instance::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(74)) goto parse_dir;
+        break;
+      }
+
+      // optional string dir = 9;
+      case 9: {
+        if (tag == 74) {
+         parse_dir:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_dir()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->dir().data(), this->dir().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "dir");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(82)) goto parse_xmlfile;
+        break;
+      }
+
+      // optional string xmlfile = 10;
+      case 10: {
+        if (tag == 82) {
+         parse_xmlfile:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_xmlfile()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->xmlfile().data(), this->xmlfile().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "xmlfile");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(90)) goto parse_extdata;
+        break;
+      }
+
+      // optional string extdata = 11;
+      case 11: {
+        if (tag == 90) {
+         parse_extdata:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_extdata()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->extdata().data(), this->extdata().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "extdata");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(98)) goto parse_end;
+        break;
+      }
+
+      // optional string end = 12;
+      case 12: {
+        if (tag == 98) {
+         parse_end:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_end()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->end().data(), this->end().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "end");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(104)) goto parse_begintime;
+        break;
+      }
+
+      // optional int32 begintime = 13;
+      case 13: {
+        if (tag == 104) {
+         parse_begintime:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &begintime_)));
+          set_has_begintime();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(112)) goto parse_endtime;
+        break;
+      }
+
+      // optional int32 endtime = 14;
+      case 14: {
+        if (tag == 112) {
+         parse_endtime:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &endtime_)));
+          set_has_endtime();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(120)) goto parse_inittime;
+        break;
+      }
+
+      // optional int32 inittime = 15;
+      case 15: {
+        if (tag == 120) {
+         parse_inittime:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &inittime_)));
+          set_has_inittime();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(130)) goto parse_instance;
+        break;
+      }
+
+      // optional string instance = 16;
+      case 16: {
+        if (tag == 130) {
+         parse_instance:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_instance()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->instance().data(), this->instance().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "instance");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(138)) goto parse_instancecode;
+        break;
+      }
+
+      // optional string instancecode = 17;
+      case 17: {
+        if (tag == 138) {
+         parse_instancecode:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_instancecode()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->instancecode().data(), this->instancecode().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "instancecode");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(146)) goto parse_timeinfo;
+        break;
+      }
+
+      // optional string timeinfo = 18;
+      case 18: {
+        if (tag == 146) {
+         parse_timeinfo:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_timeinfo()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->timeinfo().data(), this->timeinfo().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "timeinfo");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(152)) goto parse_db_dayid;
+        break;
+      }
+
+      // optional int32 db_dayid = 19;
+      case 19: {
+        if (tag == 152) {
+         parse_db_dayid:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &db_dayid_)));
+          set_has_db_dayid();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(160)) goto parse_db_recognition_setup_id;
+        break;
+      }
+
+      // optional int32 db_recognition_setup_id = 20;
+      case 20: {
+        if (tag == 160) {
+         parse_db_recognition_setup_id:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &db_recognition_setup_id_)));
+          set_has_db_recognition_setup_id();
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -4633,6 +5174,101 @@ void Message_Instance::SerializeWithCachedSizes(
       8, this->video(), output);
   }
 
+  // optional string dir = 9;
+  if (has_dir()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->dir().data(), this->dir().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "dir");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      9, this->dir(), output);
+  }
+
+  // optional string xmlfile = 10;
+  if (has_xmlfile()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->xmlfile().data(), this->xmlfile().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "xmlfile");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      10, this->xmlfile(), output);
+  }
+
+  // optional string extdata = 11;
+  if (has_extdata()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->extdata().data(), this->extdata().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "extdata");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      11, this->extdata(), output);
+  }
+
+  // optional string end = 12;
+  if (has_end()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->end().data(), this->end().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "end");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      12, this->end(), output);
+  }
+
+  // optional int32 begintime = 13;
+  if (has_begintime()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(13, this->begintime(), output);
+  }
+
+  // optional int32 endtime = 14;
+  if (has_endtime()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(14, this->endtime(), output);
+  }
+
+  // optional int32 inittime = 15;
+  if (has_inittime()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(15, this->inittime(), output);
+  }
+
+  // optional string instance = 16;
+  if (has_instance()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->instance().data(), this->instance().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "instance");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      16, this->instance(), output);
+  }
+
+  // optional string instancecode = 17;
+  if (has_instancecode()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->instancecode().data(), this->instancecode().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "instancecode");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      17, this->instancecode(), output);
+  }
+
+  // optional string timeinfo = 18;
+  if (has_timeinfo()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->timeinfo().data(), this->timeinfo().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "timeinfo");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      18, this->timeinfo(), output);
+  }
+
+  // optional int32 db_dayid = 19;
+  if (has_db_dayid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(19, this->db_dayid(), output);
+  }
+
+  // optional int32 db_recognition_setup_id = 20;
+  if (has_db_recognition_setup_id()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(20, this->db_recognition_setup_id(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -4707,6 +5343,108 @@ void Message_Instance::SerializeWithCachedSizes(
         8, this->video(), target);
   }
 
+  // optional string dir = 9;
+  if (has_dir()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->dir().data(), this->dir().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "dir");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        9, this->dir(), target);
+  }
+
+  // optional string xmlfile = 10;
+  if (has_xmlfile()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->xmlfile().data(), this->xmlfile().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "xmlfile");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        10, this->xmlfile(), target);
+  }
+
+  // optional string extdata = 11;
+  if (has_extdata()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->extdata().data(), this->extdata().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "extdata");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        11, this->extdata(), target);
+  }
+
+  // optional string end = 12;
+  if (has_end()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->end().data(), this->end().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "end");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        12, this->end(), target);
+  }
+
+  // optional int32 begintime = 13;
+  if (has_begintime()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(13, this->begintime(), target);
+  }
+
+  // optional int32 endtime = 14;
+  if (has_endtime()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(14, this->endtime(), target);
+  }
+
+  // optional int32 inittime = 15;
+  if (has_inittime()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(15, this->inittime(), target);
+  }
+
+  // optional string instance = 16;
+  if (has_instance()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->instance().data(), this->instance().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "instance");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        16, this->instance(), target);
+  }
+
+  // optional string instancecode = 17;
+  if (has_instancecode()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->instancecode().data(), this->instancecode().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "instancecode");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        17, this->instancecode(), target);
+  }
+
+  // optional string timeinfo = 18;
+  if (has_timeinfo()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->timeinfo().data(), this->timeinfo().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "timeinfo");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        18, this->timeinfo(), target);
+  }
+
+  // optional int32 db_dayid = 19;
+  if (has_db_dayid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(19, this->db_dayid(), target);
+  }
+
+  // optional int32 db_recognition_setup_id = 20;
+  if (has_db_recognition_setup_id()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(20, this->db_recognition_setup_id(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -4759,6 +5497,94 @@ int Message_Instance::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->video());
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional string dir = 9;
+    if (has_dir()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->dir());
+    }
+
+    // optional string xmlfile = 10;
+    if (has_xmlfile()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->xmlfile());
+    }
+
+    // optional string extdata = 11;
+    if (has_extdata()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->extdata());
+    }
+
+    // optional string end = 12;
+    if (has_end()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->end());
+    }
+
+    // optional int32 begintime = 13;
+    if (has_begintime()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->begintime());
+    }
+
+    // optional int32 endtime = 14;
+    if (has_endtime()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->endtime());
+    }
+
+    // optional int32 inittime = 15;
+    if (has_inittime()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->inittime());
+    }
+
+    // optional string instance = 16;
+    if (has_instance()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->instance());
+    }
+
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    // optional string instancecode = 17;
+    if (has_instancecode()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->instancecode());
+    }
+
+    // optional string timeinfo = 18;
+    if (has_timeinfo()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->timeinfo());
+    }
+
+    // optional int32 db_dayid = 19;
+    if (has_db_dayid()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->db_dayid());
+    }
+
+    // optional int32 db_recognition_setup_id = 20;
+    if (has_db_recognition_setup_id()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->db_recognition_setup_id());
     }
 
   }
@@ -4825,6 +5651,46 @@ void Message_Instance::MergeFrom(const Message_Instance& from) {
       mutable_video()->::motion::Message_Video::MergeFrom(from.video());
     }
   }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_dir()) {
+      set_dir(from.dir());
+    }
+    if (from.has_xmlfile()) {
+      set_xmlfile(from.xmlfile());
+    }
+    if (from.has_extdata()) {
+      set_extdata(from.extdata());
+    }
+    if (from.has_end()) {
+      set_end(from.end());
+    }
+    if (from.has_begintime()) {
+      set_begintime(from.begintime());
+    }
+    if (from.has_endtime()) {
+      set_endtime(from.endtime());
+    }
+    if (from.has_inittime()) {
+      set_inittime(from.inittime());
+    }
+    if (from.has_instance()) {
+      set_instance(from.instance());
+    }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    if (from.has_instancecode()) {
+      set_instancecode(from.instancecode());
+    }
+    if (from.has_timeinfo()) {
+      set_timeinfo(from.timeinfo());
+    }
+    if (from.has_db_dayid()) {
+      set_db_dayid(from.db_dayid());
+    }
+    if (from.has_db_recognition_setup_id()) {
+      set_db_recognition_setup_id(from.db_recognition_setup_id());
+    }
+  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -4856,6 +5722,18 @@ void Message_Instance::Swap(Message_Instance* other) {
     image_.Swap(&other->image_);
     crop_.Swap(&other->crop_);
     std::swap(video_, other->video_);
+    std::swap(dir_, other->dir_);
+    std::swap(xmlfile_, other->xmlfile_);
+    std::swap(extdata_, other->extdata_);
+    std::swap(end_, other->end_);
+    std::swap(begintime_, other->begintime_);
+    std::swap(endtime_, other->endtime_);
+    std::swap(inittime_, other->inittime_);
+    std::swap(instance_, other->instance_);
+    std::swap(instancecode_, other->instancecode_);
+    std::swap(timeinfo_, other->timeinfo_);
+    std::swap(db_dayid_, other->db_dayid_);
+    std::swap(db_recognition_setup_id_, other->db_recognition_setup_id_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

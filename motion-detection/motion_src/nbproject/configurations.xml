@@ -29,7 +29,6 @@
           </df>
           <df name="recognition">
             <in>detection.cpp</in>
-            <in>detection_mal.cpp</in>
           </df>
           <df name="socket">
             <in>netcvc.cpp</in>
@@ -126,11 +125,6 @@
             flavor2="0">
       </item>
       <item path="src/motion_detect/recognition/detection.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="src/motion_detect/recognition/detection_mal.cpp"
             ex="false"
             tool="1"
             flavor2="0">

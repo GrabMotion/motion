@@ -13,6 +13,7 @@
             <file>rfs://root@192.168.1.41:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.h</file>
             <file>rfs://root@192.168.1.41:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp</file>
             <file>rfs://root@192.168.1.41:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp</file>
+            <file>rfs://root@192.168.1.41:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.h</file>
             <file>rfs://root@192.168.1.41:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp</file>
         </group>
     </open-files>

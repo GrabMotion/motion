@@ -659,7 +659,7 @@ vector<string> getMaxImageByPath(google::protobuf::int32 instanceid)
     return maximage;  
 }
 
-void insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idmedia, int db_srv_idpost)
+int insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idmedia, int db_srv_idpost)
 {
     stringstream sql_insert_tracking;
     sql_insert_tracking <<
@@ -677,6 +677,22 @@ void insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idm
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_update_instance.str().c_str());
     pthread_mutex_unlock(&databaseMutex); 
+    
+    std::stringstream last_tracking_query;
+    last_tracking_query << "SELECT _id FROM tracking WHERE _id_db_instance = " << db_instance_id << ";";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > tracking_array = db_select(last_tracking_query.str().c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_tracking_id;
+    if (tracking_array.size()>0)
+    {
+        db_tracking_id= atoi(tracking_array.at(0).at(0).c_str());
+        cout << "db_tracking_id: " << db_tracking_id << endl;
+    } else 
+    {
+        db_tracking_id = 0;
+    }
+    return db_tracking_id;
     
 }
 
@@ -757,8 +773,10 @@ int insertMonthIntoDatabase(std::string str_month, int db_camera_id)
     
     stringstream sql_exist_month;
     sql_exist_month <<
-    "SELECT CASE WHEN EXISTS (SELECT * FROM [month] WHERE label = '" << str_month << "') " <<
-    "THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END";
+    "SELECT CASE WHEN EXISTS "      <<
+    "(SELECT * FROM month AS M JOIN rel_camera_month RCM ON M._id = RCM._id_month WHERE label = '" << str_month << "' AND RCM._id_camera = " << db_camera_id << " ) " <<
+    "THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END;";  
+    cout << "sql_exist_month: " << sql_exist_month.str() << endl;
     pthread_mutex_lock(&databaseMutex);
     vector<vector<string> > month_array = db_select(sql_exist_month.str().c_str(), 1);
     pthread_mutex_unlock(&databaseMutex);
@@ -1007,7 +1025,7 @@ int insertIntoRecognitionSetup(
     
     stringstream sql_recognition_setup_active_update;
     sql_recognition_setup_active_update <<
-    "UPDATE recognition_setup set activerec = 0;";
+    "UPDATE recognition_setup set activerec = 0 WHERE _id_camera = " << db_camera_id << ";";
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_recognition_setup_active_update.str().c_str());
     pthread_mutex_unlock(&databaseMutex);   
@@ -1181,4 +1199,264 @@ void insertIntoHost(std::string publicip, std::string hostname, std::string city
     pthread_mutex_lock(&databaseMutex); 
     db_execute(sql_host.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
+}
+
+
+// INSTANCE 
+
+int insertIntoInstance(std::string number, motion::Message::Instance * pinstance, const char * time_info, int db_video_id, vector<int> images)
+{
+                
+        std::string instancestart   = pinstance->instancestart();
+        std::string instanceend     = pinstance->instanceend();
+
+        //Instance
+        stringstream sql_instance;
+        sql_instance <<        
+        "INSERT INTO instance (number, instancestart, instanceend, _id_video, time, tracked) " <<
+        "SELECT "   << number                   << 
+        ",' "       << instancestart            << "'" << 
+        ", '"       << instanceend              << "'" <<
+        ", "        << db_video_id              <<
+        ", '"       << time_info                << "'" << 
+        ", 0 "      <<
+        " WHERE NOT EXISTS (SELECT * FROM instance WHERE number = " << number       <<
+        " AND instancestart = '"  << pinstance->instancestart()     <<    "'"       <<
+        " AND instanceend   = '"  << pinstance->instanceend()       <<    "'"       <<
+        " AND _id_video     = "   << db_video_id                    << 
+        " AND time          = '"  << time_info                      <<    "'"       
+        " AND tracked       = 0"        << ");";
+        std::string sqlinst = sql_instance.str();
+        //cout << "sqlinst: " << sqlinst << endl;
+        pthread_mutex_lock(&databaseMutex);
+        db_execute(sqlinst.c_str());
+        std::string last_instance_query = "SELECT MAX(_id) FROM instance";
+        vector<vector<string> > instance_array = db_select(last_instance_query.c_str(), 1);
+        pthread_mutex_unlock(&databaseMutex);
+        int db_instance_id = atoi(instance_array.at(0).at(0).c_str());
+        //cout << "db_instance_id: " << db_instance_id << endl;
+        
+        for (int t=0; t<images.size(); t++)
+        {
+            //Rel Instance Image.
+            int db_image_id = images.at(t);
+            stringstream sql_rel_instance_image;
+            sql_rel_instance_image <<
+            "INSERT INTO rel_instance_image (_id_instance, _id_image) " <<
+            "SELECT "  << db_instance_id    <<
+            ", "       << db_image_id       <<
+            " WHERE NOT EXISTS (SELECT * FROM rel_instance_image WHERE _id_instance = " << db_instance_id << 
+            " AND _id_image = " << db_image_id << ");";
+            pthread_mutex_lock(&databaseMutex);
+            db_execute(sql_rel_instance_image.str().c_str());
+            pthread_mutex_unlock(&databaseMutex);
+        }
+
+        int dayid = pinstance->db_dayid();
+        int db_recognition_setup_id = pinstance->db_recognition_setup_id();
+        
+        //Instance.
+        stringstream sql_rel_day_instance;
+        sql_rel_day_instance <<
+        "INSERT INTO rel_day_instance_recognition_setup (_id_day, _id_instance, _id_recognition_setup, time) " <<
+        "SELECT "  << dayid                     <<
+        ", "       << db_instance_id            <<
+        ", "       << db_recognition_setup_id   <<
+        ", '"       << time_info         << "'" <<
+        " WHERE NOT EXISTS (SELECT * FROM rel_day_instance_recognition_setup WHERE _id_day = " << dayid << 
+        " AND _id_instance = " << db_instance_id << " AND _id_recognition_setup = " << db_recognition_setup_id << ");";
+        cout << "sql_rel_day_instance: " << sql_rel_day_instance << endl;
+        pthread_mutex_lock(&databaseMutex);
+        db_execute(sql_rel_day_instance.str().c_str());
+        pthread_mutex_unlock(&databaseMutex);
+         
+        std::string last_rel_day_instance_recognition_setup_query = "SELECT MAX(_id) FROM rel_day_instance_recognition_setup";
+        pthread_mutex_lock(&databaseMutex);
+        vector<vector<string> > last_rel_day_instance_recognition_setup_array = db_select(last_rel_day_instance_recognition_setup_query.c_str(), 1);
+        pthread_mutex_unlock(&databaseMutex);
+        int db_day_instance_recognition_setup_id = atoi(last_rel_day_instance_recognition_setup_array.at(0).at(0).c_str());
+        
+        if (last_rel_day_instance_recognition_setup_array.size()==0)
+        {
+            cout << "CANNOT SAVE last_rel_day_instance_recognition_setup_array" << endl;
+        }
+        
+        return db_instance_id;
+         
+}
+
+
+int insertIntoVideo(motion::Message::Video dvideo)
+{      
+    
+    std::string name = dvideo.name();
+    std::string path = dvideo.path();
+    
+    stringstream sql_video;
+    sql_video <<
+    "INSERT INTO video (path, name) " <<
+    "SELECT '"  << path << "'" <<
+    ", '"       << name << "'" <<
+    " WHERE NOT EXISTS (SELECT * FROM video WHERE path = '" << path << "'" <<
+    " AND name = '" << name << "');";
+
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_video.str().c_str());
+    std::string last_video_query = "SELECT MAX(_id) FROM video";
+    vector<vector<string> > video_array = db_select(last_video_query.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_video_id = atoi(video_array.at(0).at(0).c_str());
+    //cout << "db_video_id: " << db_video_id << endl;
+    
+    return db_video_id;
+}
+
+void insertIntoCrop(const motion::Message::Crop & crop, int db_image_id)
+{
+     //Crop
+    int db_crop_id;
+    stringstream sql_crop;
+    sql_crop <<
+    "INSERT INTO crop (rect, _id_image_father) " <<
+    "SELECT '"  << crop.rect()    <<
+    "', "       << db_image_id      <<
+    " WHERE NOT EXISTS (SELECT * FROM crop WHERE rect = '"    << crop.rect() << "'" <<
+    " AND _id_image_father = "      << db_image_id              << ");";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_crop.str().c_str());
+    std::string last_crop_query = "SELECT MAX(_id) FROM crop";
+    vector<vector<string> > crop_array = db_select(last_crop_query.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    db_crop_id = atoi(crop_array.at(0).at(0).c_str());
+    //cout << "db_crop_id: " << db_crop_id << endl;
+    
+}
+    
+
+int insertIntoIMage(const motion::Message::Image & img)
+{
+    
+    stringstream sql_img;
+    sql_img <<
+    "INSERT INTO image (path, name, imagechanges, time) " <<
+    "SELECT '"  << img.path()           <<
+    "', '"      << img.name()           <<
+    "', "       << img.imagechanges()   <<
+    ",'"       <<  img.time()           << "'"
+    " WHERE NOT EXISTS (SELECT * FROM image WHERE path = '" << img.path() << "'" <<
+    " AND name = '" << img.name() << "'" <<
+    " AND imagechanges = " << img.imagechanges() << ");";
+    std::string sql_imgstd = sql_img.str();
+    //cout << "sql_imgstd: " << sql_imgstd;
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_imgstd.c_str());
+    std::string last_image_query = "SELECT MAX(_id) FROM image";
+    vector<vector<string> > image_array = db_select(last_image_query.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_image_id = atoi(image_array.at(0).at(0).c_str());
+    //cout << "db_image_id: " << db_image_id << endl;
+    return db_image_id;
+}
+
+
+
+// Create initial XML file
+void build_xml(const char * xmlPath)
+{
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       secs[80];
+    tstruct = *localtime(&now);
+    //strftime(secs, sizeof(secs), "%Y:%m:%d %X", &tstruct);
+    strftime(secs, sizeof(secs), "%Y-%m-%d %H:%M:%S %z", &tstruct);
+     
+    char result[100];   // array to hold the result.
+     
+    strcpy(result, secs); // copy string one into the result.
+     
+    TiXmlDocument doc;
+    TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "utf-8", "");
+    TiXmlElement * file = new TiXmlElement( "file" );
+    TiXmlElement * session_info = new TiXmlElement( "SESSION_INFO" );
+    TiXmlElement * start_time = new TiXmlElement( "start_time" );
+    TiXmlText * text_start_time = new TiXmlText( result );
+    TiXmlElement * all_instances = new TiXmlElement( "ALL_INSTANCES" );
+     
+    start_time->LinkEndChild( text_start_time );
+    session_info->LinkEndChild(start_time);
+    file->LinkEndChild(session_info);
+    file->LinkEndChild(all_instances);
+    doc.LinkEndChild( decl );
+    doc.LinkEndChild( file );
+    doc.SaveFile( xmlPath );
+}
+  
+  
+// Write XML file
+// Check if the xml file exists, if not create it
+// Write  the log for the motion detected.
+void writeXMLInstance (
+                              std::string XMLFILE,
+                              std::string time_start,
+                              std::string time_end,
+                              std::string instance,
+                              std::string instancecode
+                              )
+{
+     
+    TiXmlDocument doc( XMLFILE.c_str() );
+    if ( doc.LoadFile() )
+    {
+         
+        TiXmlElement* file = doc.FirstChildElement();
+         
+        TiXmlElement* session_info = file->FirstChildElement();
+         
+        TiXmlElement* all_instances = session_info->NextSiblingElement();
+         
+        TiXmlElement * ID = new TiXmlElement( "ID" );
+        TiXmlText * text_ID = new TiXmlText( instance.c_str() );
+        ID->LinkEndChild(text_ID);
+         
+        TiXmlElement * start = new TiXmlElement( "start" );
+        TiXmlText * text_start = new TiXmlText( time_start.c_str()  );
+        start->LinkEndChild(text_start);
+         
+        TiXmlElement * end = new TiXmlElement( "end" );
+        TiXmlText * text_end = new TiXmlText( time_end.c_str() );
+        end->LinkEndChild(text_end);
+         
+        TiXmlElement * code = new TiXmlElement( "code" );
+        TiXmlText * text_code = new TiXmlText( instancecode.c_str() );
+        code->LinkEndChild(text_code);
+         
+        TiXmlElement * instance = new TiXmlElement( "instance" );
+        instance->LinkEndChild(ID);
+        instance->LinkEndChild(start);
+        instance->LinkEndChild(end);
+        instance->LinkEndChild(code);
+         
+        all_instances->LinkEndChild(instance);
+         
+        doc.SaveFile( XMLFILE.c_str() );
+         
+    }
+}
+
+void setActiveCam(int activecam)
+{
+    stringstream sql_active_cams_update;
+    sql_active_cams_update <<
+    "UPDATE cameras set active = 0;";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_active_cams_update.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+    
+    stringstream sql_active_cam_update;
+    sql_active_cam_update <<
+    "UPDATE cameras set active = 1 WHERE number = " << activecam << ";";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_active_cam_update.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+         
 }

@@ -21,6 +21,8 @@
 
 #include <sys/time.h>
 
+#include "../tinyxml/tinyxml.h"
+#include "../tinyxml/tinystr.h"
 
 #include "../protobuffer/motion.pb.h"
 #include "../b64/base64.h"
@@ -83,8 +85,18 @@ vector<string> getIntervalsByCamberaAndRec(std::string camera, std::string recna
 
 vector<string> getMaxImageByPath(google::protobuf::int32 imageid);
 vector<string> getImageByPath(std::string path);
-void insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idmedia, int db_srv_idpost);
+int insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idmedia, int db_srv_idpost);
 vector<vector<string> > getNotTrackedInstance();
 
 void insertIntoHost(std::string publicip, std::string hostname, std::string city, std::string region, std::string country, std::string loc, std::string org);
     
+//database
+int insertIntoIMage(const motion::Message::Image & img);
+void insertIntoCrop(const motion::Message::Crop & crop, int db_image_id);
+int insertIntoVideo(motion::Message::Video dvideo);
+int insertIntoInstance(std::string number, motion::Message::Instance * pinstance, const char * time_info, int db_video_id, vector<int> images);
+//Dump xml
+void build_xml(const char * xmlPath);
+void writeXMLInstance (std::string XMLFILE, std::string time_start, std::string time_end, std::string instance, std::string instancecode);
+
+void setActiveCam(int activecam);

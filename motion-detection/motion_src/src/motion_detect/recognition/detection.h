@@ -18,6 +18,7 @@ extern CvCapture * camera;
 extern cv::VideoCapture * videocam;
 
 //Observer Recogition
+extern std::string basepath;
 extern bool is_recognizing;
 extern bool is_recognizing_flag;
 extern int resutl_watch_detected;
@@ -38,5 +39,16 @@ void * startRecognition(void * args);
 //XML Region
 std::vector<cv::Point2f> stringToVectorPoint2f(std::string storedcoord);
 std::vector<cv::Point2f> processRegionString(std::string coordstring);
+
+void dumpInstance(motion::Message::Instance * pinstance, 
+        std::string DIR, 
+        std::string XML_FILE, 
+        std::string EXT_DATA, 
+        time_t init_time, 
+        time_t begin_time, 
+        time_t end_time, 
+        std::string instance, 
+        std::string instancecode,
+        std::string dumpfilename);
 
 #endif	/* DETECTION_H */

@@ -36,10 +36,6 @@
           </df>
         </df>
       </df>
-      <df name="data">
-        <df name="mat">
-        </df>
-      </df>
       <df name="src">
         <df name="motion_cron">
         </df>
@@ -57,13 +53,15 @@
           <df name="data">
             <df name="data">
             </df>
+            <df name="instances">
+              <df name="camera0">
+              </df>
+              <df name="camera1">
+              </df>
+            </df>
             <df name="mat">
             </df>
             <df name="tracking">
-              <df name="09Nov2015">
-                <df name="VEREDA">
-                </df>
-              </df>
             </df>
           </df>
           <df name="database">
@@ -92,7 +90,6 @@
           <df name="recognition">
             <in>detection.cpp</in>
             <in>detection.h</in>
-            <in>detection_mal.cpp</in>
           </df>
           <df name="socket">
             <in>netcvc.cpp</in>
@@ -134,42 +131,6 @@
           <df name="log">
           </df>
           <df name="pics">
-            <df name="camera0">
-              <df name="CALLE">
-                <df name="09Nov2015">
-                  <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="3">
-                  </df>
-                  <df name="4">
-                  </df>
-                  <df name="xml">
-                  </df>
-                </df>
-              </df>
-              <df name="VEREDA">
-                <df name="09Nov2015">
-                  <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="3">
-                  </df>
-                  <df name="4">
-                  </df>
-                  <df name="5">
-                  </df>
-                  <df name="6">
-                  </df>
-                  <df name="7">
-                  </df>
-                  <df name="xml">
-                  </df>
-                </df>
-              </df>
-            </df>
             <df name="region">
             </df>
             <df name="screenshots">
@@ -208,6 +169,8 @@
         <gdb_interceptlist>
           <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
         </gdb_interceptlist>
+        <gdb_signals>
+        </gdb_signals>
         <gdb_options>
           <DebugOptions>
           </DebugOptions>
