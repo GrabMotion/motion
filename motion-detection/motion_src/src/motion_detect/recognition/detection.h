@@ -40,7 +40,8 @@ void * startRecognition(void * args);
 std::vector<cv::Point2f> stringToVectorPoint2f(std::string storedcoord);
 std::vector<cv::Point2f> processRegionString(std::string coordstring);
 
-void dumpInstance(motion::Message::Instance * pinstance, 
+void dumpInstance(int activecamnum,
+        motion::Message::Instance * pinstance, 
         std::string DIR, 
         std::string XML_FILE, 
         std::string EXT_DATA, 
@@ -49,6 +50,8 @@ void dumpInstance(motion::Message::Instance * pinstance,
         time_t end_time, 
         std::string instance, 
         std::string instancecode,
-        std::string dumpfilename);
+        std::string dumpfilename,
+        std::string recname,
+        std::string camera);
 
 #endif	/* DETECTION_H */

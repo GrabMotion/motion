@@ -48,10 +48,10 @@
 using namespace std;
 using namespace cv;
 
-motion::Message::MotionCamera * pcamera;
+/*motion::Message::MotionCamera * pcamera;
 motion::Message::MotionMonth * pmonth;
 motion::Message::MotionDay * pday;
-motion::Message::Instance * pinstance;
+motion::Message::Instance * pinstance;*/
 cv::VideoWriter * videout;
 //CvVideoWriter * cvvideout;
 
@@ -185,7 +185,9 @@ inline string saveImg(
                       const string EXTENSION,
                       const char * DIR_FORMAT,
                       const char * FILE_FORMAT,
-                      vector<int> n_o_changes)
+                      vector<int> n_o_changes,
+                      motion::Message::Image * pimage,
+                      motion::Message::Crop * pcrop)
 {
     
     string image_file;
@@ -240,12 +242,10 @@ inline string saveImg(
         //cout << "rct: " << rct.str() << endl; 
 
         pthread_mutex_lock(&protoMutex);
-        motion::Message::Image * pimage = pinstance->add_image();
         pimage->set_path(image_file.c_str());
         pimage->set_name(imagename.str());
         pimage->set_imagechanges(n_o_changes.at(0));
         pimage->set_time(time_info);
-        motion::Message::Crop * pcrop = pinstance->add_crop();
         pcrop->set_rect(rct.str());
         pthread_mutex_unlock(&protoMutex);
     
@@ -422,7 +422,9 @@ inline vector<int> detectMotionRegion(const cv::Mat & motionmat,
                 changes.push_back(max_y);
                 //Mat cropped = result(rect);
                 //cropped.copyTo(result_cropped);
-                rectangle(result,rect,color,1);
+                
+                //Draw_rectangle
+                //rectangle(result,rect,color,1);
             }
             
         }    
@@ -485,93 +487,52 @@ double getFramesPerSecond(CvCapture *capture)
 void * startRecognition(void * arg)
 {
      
-    cout << "START RECOGNITION." << endl;
-      
     pthread_detach(pthread_self());
-      
-    R_PROTO.Clear();
-    R_PROTO = PROTO;
      
-    //Camera.
-    int cam = R_PROTO.activecam();
-     
-    //Get Month abr.
-    struct timeval tm;
-    struct tm* ptm;
-    char month_rasp[3];
-    gettimeofday (&tm, NULL);
-    ptm = localtime (&tm.tv_sec);
-    strftime (month_rasp, sizeof (month_rasp), "%h", ptm);
-     
-    vector<vector<string> > camera_array;
-    //database camera id.
-    stringstream camera_id_query;
-    camera_id_query <<
-    "SELECT _id, name, number FROM cameras where number = " << cam << ";";
-    cout << " camera_id_query " << camera_id_query.str() << endl;
-    pthread_mutex_lock(&databaseMutex);
-    camera_array = db_select(camera_id_query.str().c_str(), 3);
-    pthread_mutex_unlock(&databaseMutex);
+    motion::Message::MotionCamera * pcamera;
+    motion::Message::MotionMonth * pmonth;
+    motion::Message::MotionDay * pday;
+    motion::Message::Instance * pinstance;
     
-    int db_camera_id        = atoi(camera_array.at(0).at(0).c_str());
-    string str_camera   = camera_array.at(0).at(1);
-    int number          = atoi(camera_array.at(0).at(2).c_str());
-    cout << "str_camera: "      << str_camera << endl;
-    cout << "db_camera_id: "    << db_camera_id << endl;
-    cout << "number: "          << number << endl;
-  
-    //Check if exist month on proto or else add it.
-    int sizec = R_PROTO.motioncamera_size();
-    cout << "sizec: " << sizec << endl;
+    int activecamnum = R_PROTO.activecamnum();
+    cout << "START RECOGNITION CAMERA" << activecamnum << endl;
+    
     bool cameraexist = false;
+    int sizec = R_PROTO.motioncamera_size();
     for (int i = 0; i < sizec; i++)
     {
-        //cout << "entra" << endl;
-        motion::Message::MotionCamera * mcamera = R_PROTO.mutable_motioncamera(i);
-        if (mcamera->has_db_idcamera())
-        {
-            //std::string camera = mcamera->cameraname();
-            cout << "camera: " << camera << endl;
-            cout << "mcamera->cameranumber(): " << mcamera->cameranumber() << endl;
-             
-            //std::replace( camera.begin(),       camera.end(),       '\n', ' ');
-            //std::replace( str_camera.begin(),   str_camera.end(),   '\n', ' ');
-             
-            if (number==mcamera->cameranumber())
+        if (R_PROTO.mutable_motioncamera(i)->has_db_idcamera())
+        { 
+            if (activecamnum==R_PROTO.mutable_motioncamera(i)->cameranumber())
             {
-                cout << "has camera" << endl;
                 pcamera = R_PROTO.mutable_motioncamera(i);
                 cameraexist=true;
             }
         }
     }
-    if(!cameraexist)
+    
+    if (!cameraexist)
     {
-        cout << "!cameraexist" << endl;
-        //Add proto camera.
-        pthread_mutex_lock(&protoMutex);
-        pcamera = R_PROTO.add_motioncamera();
-        pcamera->set_cameraname(str_camera);
-        pthread_mutex_unlock(&protoMutex);
-        cout << "sigo" << endl;
+        cout << "NO PROTO CAMERA!!" << endl;
+        exit(0);
     }
     
     if (pcamera->has_fromdatabase())
         cout << "pcamera->has_fromdatabase(): "     << pcamera->has_fromdatabase() << endl;
     
     if (pcamera->has_cameraid())
-        cout << "pcamera->cameraid(): "     << pcamera->cameraid()      << endl;
+        cout << "pcamera->cameraid(): "             << pcamera->cameraid()      << endl;
      
     if (pcamera->has_cameranumber())
-        cout << "pcamera->cameranumber(): " << pcamera->cameranumber()  << endl;
+        cout << "pcamera->cameranumber(): "         << pcamera->cameranumber()  << endl;
      
     if (pcamera->has_cameraname())
-        cout << "pcamera->cameraname(): "   << pcamera->cameraname()    << endl;
+        cout << "pcamera->cameraname(): "           << pcamera->cameraname()    << endl;
      
     motion::Message::MotionRec * mrec = pcamera->mutable_motionrec(0);
     
     if (mrec->has_hasregion())
-        cout << "pcamera->hasregion(): "   << mrec->has_hasregion()    << endl;
+        cout << "pcamera->hasregion(): "            << mrec->has_hasregion()    << endl;
     
     bool fromcamera = false;
     if (pcamera->has_fromdatabase())
@@ -636,33 +597,29 @@ void * startRecognition(void * arg)
     cout << "str_month: " << str_month << endl;
      
     //Check if exist month on proto or else add it.
-    //int sizem = R_PROTO.motionmonth_size();
-    //cout << "sizem: " << sizem << endl;
     bool monthexist = false;
-    cout << "pcamera->motionmonth_size(): " << pcamera->motionmonth_size() << endl;
     for (int i = 0; i < pcamera->motionmonth_size(); i++)
     {
         std::string mlabel = pcamera->motionmonth(i).monthlabel();
-        cout << "mlabel: " << str_month << endl;
         if (str_month.find(mlabel))
         {
-            cout << "has month" << endl;
             pmonth = pcamera->mutable_motionmonth(i);
+            pmonth->Clear();
             monthexist=true;
         }
     }
     if(!monthexist)
     {
-        cout << "!monthexist" << endl;
-        //Add proto month.
         pthread_mutex_lock(&protoMutex);
         pmonth = pcamera->add_motionmonth();
-        pmonth->set_monthlabel(str_month);
-        pmonth->set_db_monthid(mrec->db_idmonth());
         pthread_mutex_unlock(&protoMutex);
-        cout << "sigo" << endl;
     }
      
+    pthread_mutex_lock(&protoMutex);
+    pmonth->set_monthlabel(str_month);
+    pmonth->set_db_monthid(mrec->db_idmonth());
+    pthread_mutex_unlock(&protoMutex);
+    
     int db_monthid = pmonth->db_monthid();
    
     //Day.
@@ -731,7 +688,7 @@ void * startRecognition(void * arg)
      
     //Camera dir.
     std::stringstream camdir;
-    camdir << sourcepath << "motion_web/pics/" << "camera" << cam; 
+    camdir << sourcepath << "motion_web/pics/" << "camera" << activecamnum; 
     
     // Create camera directory
     directoryExistsOrCreate(camdir.str().c_str());
@@ -744,7 +701,7 @@ void * startRecognition(void * arg)
     reddir << camdir.str() << "/" << name << "/"; 
     
     std::stringstream dumpfilename; 
-    dumpfilename << cam << name;
+    dumpfilename << activecamnum << name;
     
     //Create rec name directory
     directoryExistsOrCreate(reddir.str().c_str());
@@ -780,7 +737,7 @@ void * startRecognition(void * arg)
     std::string image_file_recognized;
      
     // Set up camera
-    camera = cvCaptureFromCAM(cam); //CV_CAP_ANY);
+    CvCapture * camera = cvCaptureFromCAM(activecamnum); //CV_CAP_ANY);
     //double fps = getFramesPerSecond(camera);
     
     int matwidth = 640; //1280
@@ -852,7 +809,7 @@ void * startRecognition(void * arg)
     
     startrecognitiontime = time_rasp;
      
-    cout << "TIME STARTED: " << time_rasp << endl;
+    cout << "CAM " << activecamnum << " TIME STARTED: " << time_rasp << endl;
     
     writeVideo = true;
       
@@ -876,14 +833,14 @@ void * startRecognition(void * arg)
                 if (camera)
                     cvReleaseCapture(&camera);
                 
-                std::cout << ":::::::::::: DUMP INSTANCE FINISH "<< instance << "  :::::::::::" << std::endl;
+                std::cout << ":::::::::::: CAM" << activecamnum << "DUMP INSTANCE FINISH "<< instance << "  :::::::::::" << std::endl;
                     
                 has_instance_directory = false;
                 init_motion = false;
 
                 end_time = clock();
 
-                dumpInstance(pinstance, DIR, XML_FILE, EXT_DATA, init_time, begin_time, end_time, instance, instancecode, dumpfilename.str());
+                dumpInstance(activecamnum, pinstance, DIR, XML_FILE, EXT_DATA, init_time, begin_time, end_time, instance, instancecode, dumpfilename.str(), mrec->name(), pcamera->cameraname());
                 
                 pinstance->Clear();
            
@@ -929,7 +886,7 @@ void * startRecognition(void * arg)
             
             try
             {
-                cout << "resutl_watch_detected: " << resutl_watch_detected << endl;
+                cout << "cam" << activecamnum << " resutl detected: " << resutl_watch_detected << endl;
                 //cout << "number_of_sequence:: " << number_of_sequence << endl;
 
                 if(number_of_sequence>0 & number_of_changes.size()>1)
@@ -958,7 +915,7 @@ void * startRecognition(void * arg)
                             instance = id.str();
 
                             //Add proto instance.
-                            cout << ":::::::::::  ADD  INSTANCE " << instance << "  ::::::::::::"  << endl;
+                            cout << ":::::::::::  CAM" << activecamnum << " ADD  INSTANCE " << instance << "  ::::::::::::"  << endl;
                             pthread_mutex_lock(&protoMutex);
                             pinstance = pday->add_instance();
                             pinstance->set_idinstance(std::atoi(instance.c_str()));
@@ -991,7 +948,9 @@ void * startRecognition(void * arg)
 
                     if (writeImages)
                     {
-                        image_file_recognized = saveImg (result, DIR, EXT, DIR_FORMAT.c_str(), FILE_FORMAT.c_str(), number_of_changes);
+                        motion::Message::Image * pimage = pinstance->add_image();
+                        motion::Message::Crop * pcrop = pinstance->add_crop();
+                        image_file_recognized = saveImg (result, DIR, EXT, DIR_FORMAT.c_str(), FILE_FORMAT.c_str(), number_of_changes, pimage, pcrop);
                     }
                     
                 }
@@ -1017,14 +976,14 @@ void * startRecognition(void * arg)
                 if ( seconds_since_start > delay & init_motion )
                 {
 
-                    std::cout << ":::::::::::: DUMP INSTANCE "<< instance << "  :::::::::::" << std::endl;
+                    std::cout << ":::::::::::: CAM" << activecamnum << " DUMP INSTANCE "<< instance << "  :::::::::::" << std::endl;
                     
                     has_instance_directory = false;
                     init_motion = false;
                     
                     end_time = clock();
                     
-                    dumpInstance(pinstance, DIR, XML_FILE, EXT_DATA, init_time, begin_time, end_time, instance, instancecode, dumpfilename.str());
+                    dumpInstance(activecamnum, pinstance, DIR, XML_FILE, EXT_DATA, init_time, begin_time, end_time, instance, instancecode, dumpfilename.str(), mrec->name(), pcamera->cameraname());
                     
                     pinstance->Clear();
                  
@@ -1046,6 +1005,8 @@ void * startRecognition(void * arg)
             }
         }
         
+        //cv::imshow(pcamera->cameraname().c_str(), current_frame);
+        
         // Delay, wait a 1/2 second.
         cvWaitKey (DELAY);
     }
@@ -1053,7 +1014,8 @@ void * startRecognition(void * arg)
     return 0;
 }
 
-void dumpInstance(motion::Message::Instance * pinstance, 
+void dumpInstance(int activecamnum,
+        motion::Message::Instance * pinstance, 
         std::string DIR, 
         std::string XML_FILE, 
         std::string EXT_DATA, 
@@ -1062,7 +1024,9 @@ void dumpInstance(motion::Message::Instance * pinstance,
         time_t end_time, 
         std::string instance, 
         std::string instancecode,
-        std::string dumpfilename)
+        std::string dumpfilename,
+        std::string recname,
+        std::string camera)
 {
     
     pinstance->set_dir(DIR);
@@ -1080,7 +1044,12 @@ void dumpInstance(motion::Message::Instance * pinstance,
     
     pinstance->set_instance(instance);
     pinstance->set_instancecode(instancecode);
+    
+    pinstance->set_recname(recname);
 
+    pinstance->set_camera(camera);
+    pinstance->set_cameranumber(activecamnum);
+    
     struct timeval tr;
     struct tm* ptmr;
     char time_info[40];
@@ -1101,7 +1070,7 @@ void dumpInstance(motion::Message::Instance * pinstance,
     std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(datasend),sizeof(datasend));
 
     std::stringstream dumpfile;
-    dumpfile << basepath << "data/instances/camera" << pcamera->has_cameranumber() << "/" << dumpfilename << "-" << instance << ".dat";
+    dumpfile << basepath << "data/instances/camera" << activecamnum << "/" << dumpfilename << "-" << instance << ".dat";
     std::ofstream out;
     out.open (dumpfile.str().c_str());
     out << encoded_proto << "\n";

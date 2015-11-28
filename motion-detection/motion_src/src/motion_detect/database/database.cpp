@@ -417,14 +417,17 @@ void getCamerasQuery()
 bool loadStartQuery(std::string camera, std::string recname)
 {
     
+    setActiveCam(atoi(camera.c_str()));
+    
     stringstream sql_db_cam;
     sql_db_cam      << 
-    "SELECT RS._id_camera, C.number FROM recognition_setup AS RS JOIN cameras AS C ON RS._id_camera = C._id WHERE RS.name = '" << recname << "';";
+    "SELECT RS._id_camera, C.number, C.name FROM recognition_setup AS RS JOIN cameras AS C ON RS._id_camera = C._id WHERE RS.name = '" << recname << "';";
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > db_cam_array = db_select(sql_db_cam.str().c_str(), 2);
+    vector<vector<string> > db_cam_array = db_select(sql_db_cam.str().c_str(), 3);
     pthread_mutex_unlock(&databaseMutex);
     int db_cam_id = atoi(db_cam_array.at(0).at(0).c_str());
     int camnum = atoi(db_cam_array.at(0).at(1).c_str());
+    std::string cameraname = db_cam_array.at(0).at(2);
     cout << "db_cam_id: " << db_cam_id << endl;
     
     std::string _month = getCurrentMonthLabel();
@@ -482,87 +485,98 @@ bool loadStartQuery(std::string camera, std::string recname)
     pthread_mutex_lock(&databaseMutex);
     vector<vector<string> > start_array = db_select(sql_load_recognition.str().c_str(), 21);
     pthread_mutex_unlock(&databaseMutex);
+    
+    google::protobuf::int32 activecam; 
+    google::protobuf::int32 activecamnum;
+    
+    motion::Message::MotionCamera * mcamera;
+    
     int size = start_array.size();
     if (size>0)
     {
         vector<string> rows = start_array.at(0);
 
-        motion::Message m;
+        activecam = atoi(rows.at(8).c_str());
+        activecamnum = atoi(rows.at(10).c_str());
+    
+        bool cameraexist = false;
+        int sizer = R_PROTO.motioncamera_size();
+        for (int i = 0; i < sizer; i++)
+        {
+            if (mcamera->has_db_idcamera())
+            {
+                if (activecamnum == R_PROTO.mutable_motioncamera(i)->cameranumber())
+                {
+                    mcamera = R_PROTO.mutable_motioncamera(i);
+                    mcamera->Clear();
+                    cameraexist=true;
+                }
+            }
+        }
+        if(!cameraexist)
+        {
+            pthread_mutex_lock(&protoMutex);
+            mcamera = R_PROTO.add_motioncamera();
+            pthread_mutex_unlock(&protoMutex);
+        }
         
-        google::protobuf::int32 activecam = atoi(rows.at(8).c_str());
-        m.set_activecam(activecam);
+        int sizer2 = R_PROTO.motioncamera_size();
         
-        google::protobuf::int32 cam32 = atoi(camera.c_str());
-        m.set_activecam(cam32);
-
-        m.set_type(motion::Message_ActionType_REC_START);
-        motion::Message::MotionCamera * mcamera = m.add_motioncamera();
+        motion::Message::MotionRec * mrec;
         
+        pthread_mutex_lock(&protoMutex);
+        R_PROTO.set_activecam(activecam);
+        R_PROTO.set_activecamnum(activecamnum);
+        R_PROTO.set_type(motion::Message_ActionType_REC_START);
+        mcamera->set_cameraname(cameraname);
         mcamera->set_recognizing(true);
-
-        motion::Message::MotionRec * mrec = mcamera->add_motionrec();
+        mrec = mcamera->add_motionrec();
+        pthread_mutex_unlock(&protoMutex);
         
         bool hasregion = to_bool(rows.at(1));
-        mrec->set_hasregion(hasregion);
+        std::string resencoded;
         if (hasregion)
         {
             std::string res = rows.at(7);
-            std::string resencoded = base64_encode(reinterpret_cast<const unsigned char*>(res.c_str()), res.length());
-            mrec->set_coordinates(resencoded.c_str());
+            resencoded = base64_encode(reinterpret_cast<const unsigned char*>(res.c_str()), res.length());
         }
         
         std::string codename = rows.at(0);
-        mrec->set_codename(codename);
-        
-        mcamera->set_fromdatabase(true);
-        
-        mrec->set_runatstartup(to_bool(rows.at(2)));
-        
         google::protobuf::int32 delay = atoi(rows.at(3).c_str());
-        mrec->set_delay(delay);
-        
-        mrec->set_storeimage(to_bool(rows.at(4)));
-        
-        mrec->set_storevideo(to_bool(rows.at(5)));
-        
         google::protobuf::int32 dbmat = atoi(rows.at(11).c_str());
-        mrec->set_db_idmat(dbmat);
-        
         google::protobuf::int32 dbidcamera = atoi(rows.at(8).c_str());
-        mcamera->set_db_idcamera(dbidcamera);
-
-        mcamera->set_cameraname(rows.at(9));
-        
-        google::protobuf::int32 camnum = atoi(rows.at(10).c_str());
-        mcamera->set_cameranumber(camnum);
-        
-        mrec->set_recname(rows.at(11));
-        
         google::protobuf::int32 matcols = atoi(rows.at(12).c_str());
-        mrec->set_matcols(matcols);
-        
         google::protobuf::int32 matrows = atoi(rows.at(13).c_str());
-        mrec->set_matrows(matrows);
-     
         std::string _day = getCurrentDayLabel();
-        m.set_currday(_day);
-        
         std::string _month = getCurrentMonthLabel();
-        m.set_currmonth(_month);
-        
         google::protobuf::int32 dbidday = atoi(rows.at(16).c_str());
-        mrec->set_db_idday(dbidday);
-        
         google::protobuf::int32 dbidmonth = atoi(rows.at(17).c_str());
-        mrec->set_db_idmonth(dbidmonth);
-        
         google::protobuf::int32 speed = atoi(rows.at(18).c_str());
-        mrec->set_speed(speed);
-        
         google::protobuf::int32 recid = atoi(rows.at(19).c_str());
-        mrec->set_db_recognitionsetupid(recid);
         
+        pthread_mutex_lock(&protoMutex);
+        mrec->set_hasregion(hasregion);
+        mrec->set_coordinates(resencoded.c_str());
+        mrec->set_codename(codename);
+        mrec->set_runatstartup(to_bool(rows.at(2)));
+        mrec->set_delay(delay);
+        mrec->set_storeimage(to_bool(rows.at(4)));
+        mrec->set_storevideo(to_bool(rows.at(5)));
+        mrec->set_db_idmat(dbmat);
+        mcamera->set_db_idcamera(dbidcamera);
+        mcamera->set_cameraname(rows.at(9));
+        mcamera->set_cameranumber(atoi(rows.at(10).c_str()));
+        mrec->set_recname(rows.at(11));
+        mrec->set_matcols(matcols);
+        mrec->set_matrows(matrows);
+        R_PROTO.set_currday(_day);
+        R_PROTO.set_currmonth(_month);
+        mrec->set_db_idday(dbidday);
+        mrec->set_db_idmonth(dbidmonth);
+        mrec->set_speed(speed);
+        mrec->set_db_recognitionsetupid(recid);
         mrec->set_xmlfilepath(rows.at(20).c_str());
+        pthread_mutex_unlock(&protoMutex);
         
         stringstream sql_last_instance;
         sql_last_instance   <<
@@ -574,7 +588,7 @@ bool loadStartQuery(std::string camera, std::string recname)
         "JOIN month AS M ON RMD._id_month = M._id "                         <<
         "JOIN rel_camera_month AS RCM ON RMD._id_month = RMD._id_month "    <<
         "JOIN cameras AS C ON RCM._id_camera = C._id "                      <<
-        "WHERE C.number = " << camnum << " AND D.label = '" << m.currday()  << "' " <<
+        "WHERE C.number = " << camnum << " AND D.label = '" << R_PROTO.currday()  << "' " <<
         "AND RS.name = '" << recname << "';";
         std::string sqllaststd = sql_last_instance.str();
         cout << "sqllaststd: " << sqllaststd << endl;
@@ -582,18 +596,19 @@ bool loadStartQuery(std::string camera, std::string recname)
         vector<vector<string> > lastinstance_array = db_select(sqllaststd.c_str(), 1);
         pthread_mutex_unlock(&databaseMutex);
         
-        std::string last = lastinstance_array.at(0).at(0).c_str();
+        std::string last;
         int ln = atoi(last.c_str());
         if (ln>0)
         {
-            mrec->set_lastinstance(last);
+            last = lastinstance_array.at(0).at(0).c_str();
         } else 
         {
-            mrec->set_lastinstance("0");
+            last = "0";
         }
-        
-        PROTO.Clear();
-        PROTO = m;
+          
+        pthread_mutex_lock(&protoMutex);
+        mrec->set_lastinstance(last);
+        pthread_mutex_unlock(&protoMutex);
         
         return true;
     

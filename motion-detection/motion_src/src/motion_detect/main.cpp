@@ -141,12 +141,12 @@ void * sendEcho(motion::Message m);
 motion::Message PROTO;
 motion::Message R_PROTO;
 motion::Message T_PROTO;
-motion::Message takePictureToProto(motion::Message);
+motion::Message::MotionCamera * takePictureToProto(int camera, motion::Message::MotionCamera * mcam);
 std::string starttime;
 
 //Recognition
-CvCapture * camera;
-VideoCapture * videocam;
+//CvCapture * camera;
+//VideoCapture * videocam;
 bool stop_capture;
 cv::Mat picture;
 //bool stop_recognizing;
@@ -189,6 +189,8 @@ inline bool file_exists (const std::string& name) {
 int post_command_to_wp(std::string command)
 {
     int id = 0;
+    
+    cout << "post_command: " << command << endl;
     
     FILE* pipe = popen(command.c_str(), "r");
     int size = sizeof(pipe);
@@ -530,12 +532,10 @@ Mat getImageWithTextByPath(std::string imagefilepath)
     return mat;
 }
 
-motion::Message takePictureToProto(motion::Message m)
+motion::Message::MotionCamera * takePictureToProto(int camera, motion::Message::MotionCamera * mcam)
 {
     
     cout << "CAPTURING !!!!!!!!!!!!!" << endl;
-    
-    int camera = m.activecam();
     
     CvCapture* capture = cvCreateCameraCapture(camera);
     if (capture == NULL)
@@ -566,10 +566,6 @@ motion::Message takePictureToProto(motion::Message m)
     
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     
-    m.set_type(motion::Message::TAKE_PICTURE);
-    m.set_serverip(PROTO.serverip());
-    m.set_time(getTimeRasp());
-    
     // We will need to also serialize the width, height, type and size of the matrix
     int width_s     = mat.cols;
     int height_s    = mat.rows;
@@ -594,7 +590,7 @@ motion::Message takePictureToProto(motion::Message m)
     std::string oriencoded = base64_encode(reinterpret_cast<const unsigned char*>(ssstring.c_str()), ssstring.length());
     
     //Store into proto
-    m.set_data(oriencoded.c_str());
+    mcam->set_tempdata(oriencoded.c_str());
       
     std::time_t t = std::time(0);
     stringstream tst;
@@ -603,8 +599,6 @@ motion::Message takePictureToProto(motion::Message m)
 
     cout << "activemat::::: " << activemat << endl; 
     
-    motion::Message::MotionCamera * mcam = m.add_motioncamera();
-    
     mcam->set_activemat(activemat);
     mcam->set_matrows(height_s);
     mcam->set_matcols(width_s);
@@ -612,7 +606,7 @@ motion::Message takePictureToProto(motion::Message m)
     mcam->set_matwidth(w);
    
     // Initialize a stringstream and write the data
-    int size_init = m.ByteSize();
+    //int size_init = m.ByteSize();
     
     cout << "mcam->db_idcamera::" << mcam->db_idcamera() << endl;
     
@@ -621,13 +615,13 @@ motion::Message takePictureToProto(motion::Message m)
     
     std::ofstream out;
     out.open (basefile.c_str());
-    out << m.data() << "\n";
+    out << mcam->tempdata() << "\n";
     out.close();
     
     stringstream insert_mats_query;
     insert_mats_query <<
     "INSERT INTO mat (matcols, matrows, matwidth, matheight, matfile, basefile, data) " <<
-    "SELECT " << width_s << ", " << height_s << ", " << w << ", " << h << ", " << activemat << ",'" << basefile << "','" << m.data() << "'"
+    "SELECT " << width_s << ", " << height_s << ", " << w << ", " << h << ", " << activemat << ",'" << basefile << "','" << mcam->tempdata() << "'"
     " WHERE NOT EXISTS (SELECT * FROM mat WHERE matfile = " << activemat << ");";
     db_execute(insert_mats_query.str().c_str());
     std::string last_mats_query = "SELECT MAX(_id) FROM mat";
@@ -644,12 +638,10 @@ motion::Message takePictureToProto(motion::Message m)
     " WHERE NOT EXISTS (SELECT * FROM rel_camera_mat WHERE _id_camera = "
     << mcam->db_idcamera() << " AND _id_mat = " << db_mats_id << ");";
     db_execute(insert_rel_cameras_mats_query.str().c_str());
-
-    cout << "ByteSize: " << size_init <<  endl;
     
     cvReleaseCapture(&capture);
     
-    return m;
+    return mcam;
 }
 
 void * sendProto (void * arg)
@@ -717,7 +709,7 @@ struct post_args
 };
 struct post_args PostArgs;
 
-int postImage(int db_instance_id)
+int postImage(int db_instance_id, std::string content)
 {
     
     vector<string> max_image = getMaxImageByPath(db_instance_id);
@@ -758,12 +750,10 @@ int postImage(int db_instance_id)
     {
         
         std::stringstream post;
-        post << "curl -X POST -d '{\"title\":\"" << maxtime << "\",\"content_raw\":\"Content\",\"content\":\"This is the content\",\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\",\"featured_image\":" << 
+        post << "curl -X POST -d '{\"title\":\"" << maxtime << "\",\"content_raw\":\"Content\",\"content\":\"" << content << "\",\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\",\"featured_image\":" << 
         
         idmedia << ",\"terms\":{\"category\":{\"ID\":2,\"name\":\"00000000db47b6ce\",\"parent\":1}}' " <<  
            
-                //",\"category_name\":\"00000000db47b6ce\"}' "
-                
         "-H \"Content-Type:application/json\" --user jose:joselon http://dev.uimove.com/wp-json/wp/v2/posts";
         
         cout << "post_curl: " << post.str() << endl;
@@ -797,10 +787,10 @@ void * startObserver(void * arg)
         
         observer_running = true; 
         
-        std::cout << ":::OBSERVE " <<  observe << ":::" << std::endl;
-        
         for (int k=0; k< cams.size(); k++)
         {
+            
+            std::cout << "::: CAM " << k << " OBSERVE " << observe << " :::" << std::endl;
             
             std::stringstream dumpcamera;
             dumpcamera << dumpinstancefolder << "/camera" << cams.at(k);
@@ -843,25 +833,8 @@ void * startObserver(void * arg)
                             build_xml(XMLFILE.c_str());
                         }
 
-                        //const char * time_begin_details = pinstance.begintime().c_str();
-                        //struct tm tmbegin;
-                        //strptime(time_begin_details, "%Y-%m-%d %H:%M:%S %z", &tmbegin);
-                        //time_t tbegin = mktime(&tmbegin); 
-                        
                         time_t tbegin = pinstance.begintime();
-
-                        //const char * time_init_details = pinstance.inittime();
-                        //struct tm tmimit;
-                        //strptime(time_init_details, "%Y-%m-%d %H:%M:%S %z", &tmimit);
-                        //time_t tinit = mktime(&tmimit); 
-                        
                         time_t tinit = pinstance.inittime();
-
-                        //const char * time_end_details = pinstance.endtime().c_str();
-                        //struct tm tmend;
-                        //strptime(time_end_details, "%Y-%m-%d %H:%M:%S %z", &tmend);
-                        //time_t tend = mktime(&tmend); 
-
                         time_t tend = pinstance.endtime();
                         
                         time_t begin_t = (tbegin - tinit) / CLOCKS_PER_SEC;
@@ -899,7 +872,16 @@ void * startObserver(void * arg)
                         int db_video_id = insertIntoVideo(dvideo);
                         int db_instance_id = insertIntoInstance(pinstance.instance(), &pinstance, endtimechar, db_video_id, images);
 
-                        int post = 1; //postImage(db_instance_id);
+                        std::stringstream postcontent;
+                        postcontent << 
+                        "<p>Camera name:</p> " << pinstance.camera()            << "\n" << 
+                        "<p>Camera number:</p> " << pinstance.cameranumber()    << "\n" << 
+                        "<p>Recognition Job:</p> " << pinstance.recname()       << "\n" << 
+                        "<p>Instance:</p> " << pinstance.instance()             << "\n\n" <<   
+                        "<p>Begin time:</p> " << pinstance.begintime()          << "\n" <<           
+                        "<p>End time:</p> " << pinstance.endtime()              << "\n";           
+                        
+                        int post = postImage(db_instance_id, postcontent.str());
 
                         if (post)
                         {
@@ -1105,6 +1087,7 @@ motion::Message getRefreshProto(motion::Message m)
         cout << "q: " <<  q << endl;
         
         vector<string> rowc = cameras_array.at(q);
+        int mcamsize = m.motioncamera_size();
         motion::Message::MotionCamera * mcam = m.add_motioncamera();
         
         google::protobuf::int32 camid = atoi(rowc.at(0).c_str());
@@ -1113,17 +1096,19 @@ motion::Message getRefreshProto(motion::Message m)
         mcam->set_cameranumber(camnum);
         std::string cameraname = rowc.at(2);
         mcam->set_cameraname(cameraname);
+        
+        int takepicture = motion::Message::TAKE_PICTURE;
+        if ((m.type() == takepicture) && (activecam==q))
+        {
+            mcam = takePictureToProto(activecam, mcam);
+            m.set_data(mcam->tempdata());
+            mcam->clear_tempdata();
+        }
+        
         bool active = to_bool(rowc.at(3));
         if (active)
         {
             m.set_activecam(camnum);
-        }
-        
-        motion::Message::MotionCamera * mcampicture = m.mutable_motioncamera(0);
-        if (mcampicture->has_db_idmat())
-        {
-            int idmat = mcam->db_idmat(); 
-            mcam->set_db_idmat(idmat);
         }
         
         stringstream sql_rec_setup;
@@ -1473,7 +1458,6 @@ motion::Message getRefreshProto(motion::Message m)
                                 }
                             }
                         }
-                    
                     }
                 }    
             }
@@ -1863,31 +1847,47 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::REC_START:
         {
             cout << "motion::Message::REC_START" << endl;
-             
+               
             motion::Message::MotionCamera * mcamera = m.mutable_motioncamera(0);
             motion::Message::MotionRec * mrec = mcamera->mutable_motionrec(0);
             
             std::string name = mrec->recname();
             stringstream camera;
             camera << mcamera->cameranumber();
-           
-            std::string rname = mrec->name();
-            int db_idrec = mrec->db_idrec();
             
-            if (loadStartQuery(camera.str(), name))
+            int activecam = m.activecam();
+            
+            bool load = loadStartQuery(camera.str(), name);
+            
+            if (load)
             {
                 startMainRecognition();
             } else 
             {
                 cout << "No matching values for the current arguments." << endl; 
             }
-           
+            
             updateRecStatus(1, mcamera->cameranumber(), mrec->recname());
             
-            m = getRefreshProto(m);
+            m.Clear();
             
-            m.set_type(motion::Message::REC_START);
+            motion::Message ms;
             
+            std::string _month = getCurrentMonthLabel();
+            std::string _day = getCurrentDayLabel();
+            
+            cout << "_month: " << _month << " _day: " << _day << endl; 
+            
+            ms.set_type(motion::Message::REC_START);
+            ms.set_activecam(activecam);
+            m.set_currmonth(_month);
+            m.set_currday(_day);
+            
+            m = getRefreshProto(ms);
+            
+            int camsize = m.motioncamera_size();
+            cout << "camsize: " << camsize << endl;
+        
         }
         break;
         
@@ -1905,6 +1905,9 @@ motion::Message runCommand(motion::Message m)
                 
             updateRecStatus(0, mcamera->cameranumber(), mrec->recname());
             
+            mcamera->Clear();
+            mrec->Clear();
+            
             m = getRefreshProto(m);
             
             m.set_type(motion::Message::REC_STOP);
@@ -1915,7 +1918,12 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::TAKE_PICTURE:
         {
             cout << "motion::Message::TAKE_PICTURE" << endl;
-            m = takePictureToProto(m);
+            
+            m.set_type(motion::Message::TAKE_PICTURE);
+            m.set_serverip(PROTO.serverip());
+            m.set_time(getTimeRasp());
+            
+            m = getRefreshProto(m);
             
             struct timeval tr;
             struct tm* ptmr;
@@ -1923,8 +1931,6 @@ motion::Message runCommand(motion::Message m)
             gettimeofday (&tr, NULL);
             ptmr = localtime (&tr.tv_sec);
             strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
-            
-            m = getRefreshProto(m);
             
             m.set_time(time_rasp);
             m.set_type(motion::Message::TAKE_PICTURE);
@@ -2083,13 +2089,13 @@ try
       strdecoded.clear();
       strdecoded = base64_decode(strproto);
       
-      cout << "RECEIVE" << endl;
+      //cout << "RECEIVE" << endl;
       
       GOOGLE_PROTOBUF_VERIFY_VERSION;
       motion::Message ms;
       ms.ParseFromArray(strdecoded.c_str(), strdecoded.size());
       
-      cout << "PARSE" << endl;
+      //cout << "PARSE" << endl;
       
       int camamounts = ms.motioncamera_size();
         
@@ -2102,11 +2108,11 @@ try
       if (ms.has_serverip())
         T_PROTO.set_serverip(ms.serverip());
         
-      cout << "value:: " << value << endl;
+      //cout << "value:: " << value << endl;
     
       if ( ms.type()==motion::Message::RESPONSE_OK || ms.type()==motion::Message::RESPONSE_END )
       {
-          cout << "response : " <<  ms.type() << endl;
+          //cout << "response : " <<  ms.type() << endl;
           count_sent__split = 0;
           
           google::protobuf::ShutdownProtobufLibrary();
@@ -2129,24 +2135,13 @@ try
           
           msg = header + payspl;
 
-          cout << "header 2 : " << header << endl;
-          cout << "size: " << msg.size() << endl;
-          cout << "..........................................." << endl;
+          //cout << "header 2 : " << header << endl;
+          //cout << "size: " << msg.size() << endl;
+          //cout << "..........................................." << endl;
           //cout << msg << endl;
           //cout << "..........................................." << endl;
           
           totalsSocket();
-          
-          //if (PROTO.type()==motion::Message::TAKE_PICTURE)
-          //{
-              //std::string basefile = "data/data/MAT_";
-              //stringstream rr;
-              //rr << basefile << count_sent__split << ".txt";
-              //std::ofstream out;
-              //out.open (rr.str().c_str());
-              //out << msg << "\n";
-              //out.close();
-          //}
           
           sock->send(msg.c_str(), msg.size());
           
@@ -2161,7 +2156,7 @@ try
       //Run Command.
       m = runCommand(ms);
         
-      cout << "Serializing proto response." << endl;
+      //cout << "Serializing proto response." << endl;
       
       int m_amounts = m.motioncamera_size();
       
@@ -2171,11 +2166,11 @@ try
       {
           
           datafile = "PROFILE" + m.data();
-          cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
-          cout << "m size 1: " << m.ByteSize() << endl;
+          //cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
+          //cout << "m size 1: " << m.ByteSize() << endl;
           m.clear_data();
-          cout << "m size 2: " << m.ByteSize() << endl;
-          cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
+          //cout << "m size 2: " << m.ByteSize() << endl;
+          //cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
           protofile = motion::Message::PROTO_HAS_FILE;
           
       } else
@@ -2188,14 +2183,14 @@ try
         
       char dataresponse[size];
     
-      cout << "Proto size   : " << size << endl;
+      //cout << "Proto size   : " << size << endl;
       
-      cout << "active cam: " << m.activecam() << endl;
-      cout << "type: " << m.type() << endl;
+      //cout << "active cam: " << m.activecam() << endl;
+      //cout << "type: " << m.type() << endl;
 
       m.SerializeToArray(&dataresponse, size);
      
-      cout << "Encoding." << endl;
+      //cout << "Encoding." << endl;
         
       std::string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(dataresponse),sizeof(dataresponse));
         
@@ -2203,12 +2198,12 @@ try
         
       if (protofile == motion::Message::PROTO_HAS_FILE)
       {
-          cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
+          //cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
           ssenc << encoded_proto;
-          cout << "encoded_proto size ::1::  " << ssenc.str().size() << endl;
+          //cout << "encoded_proto size ::1::  " << ssenc.str().size() << endl;
           ssenc << datafile;
-          cout << "encoded_proto size ::2::  " << ssenc.str().size() << endl;
-          cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
+          //cout << "encoded_proto size ::2::  " << ssenc.str().size() << endl;
+          //cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
       }
       else
       {
@@ -2241,9 +2236,9 @@ try
           "PROSTO";
           msg = header + payspl;
 
-          cout << "header 1 : " << header << endl;
-          cout << "size: " << msg.size() << endl;
-          cout << "..........................................." << endl;
+          //cout << "header 1 : " << header << endl;
+          //cout << "size: " << msg.size() << endl;
+          //cout << "..........................................." << endl;
           //cout << msg << endl;
           //cout << "..........................................." << endl;
 
@@ -2268,9 +2263,9 @@ try
           
           count_vector_size = 0;
           
-          cout << "header 0 : " << header << endl;
-          cout << "size: " << msg.size() << endl;
-          cout << "..........................................." << endl;
+          //cout << "header 0 : " << header << endl;
+          //cout << "size: " << msg.size() << endl;
+          //cout << "..........................................." << endl;
           
           //cout << msg << endl;
           //cout << "..........................................." << endl;
@@ -2283,7 +2278,7 @@ try
     
         totalsSocket();
         
-        cout << "Socket Sent Size: " << msg.size() << endl;
+        //cout << "Socket Sent Size: " << msg.size() << endl;
         
         sock->send(msg.c_str(), msg.size());
         
@@ -2322,14 +2317,15 @@ void * socketThread (void * args)
         {
             TCPSocket *clntSock = servSock.accept();
             runt =  pthread_create(&thread_echo, NULL, ThreadMain, (void *) clntSock);
-            if ( runt  != 0)
+            if (runt  != 0)
             {
                 cerr << "Unable to create ThreadMain thread" << endl;
                 exit(1);
             }
             pthread_join(    thread_echo,               (void**) &runt);
         }
-    } catch (SocketException &e) {
+    } catch (SocketException &e) 
+    {
         cerr << e.what() << endl;
         exit(1);
     }
@@ -2764,7 +2760,8 @@ int main (int argc, char * const av[])
             std::string param_camera = argv[2];
             std::string param_name   = argv[3];
             
-            if (loadStartQuery(param_camera, param_name))
+            bool load = loadStartQuery(param_camera, param_name); 
+            if (load)
             {
                 startMainRecognition();
             } else 
