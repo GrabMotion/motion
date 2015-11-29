@@ -239,8 +239,8 @@ int db_cpuinfo()
         "UPDATE hardware SET " <<
         "disktotal = "      << result.at(1)     << ", "
         "diskused = "       << result.at(2)     << ", "
-        "diskailable = "    << result.at(3)     << ", "
-        "disktotal = '"      << result.at(4)     << "' "
+        "diskavailable = "  << result.at(3)     << ", "
+        "diskper = '"       << result.at(4)     << "' "
         "WHERE _id  = " << db_hardware_id    << ";";
         std::string stdhardquery = sql_update_hard.str().c_str();
         pthread_mutex_lock(&databaseMutex);
@@ -248,8 +248,7 @@ int db_cpuinfo()
         pthread_mutex_unlock(&databaseMutex);
        
     return db_hardware_id;
-    
-    
+   
 }
 
 
@@ -678,7 +677,7 @@ int insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idme
 {
     stringstream sql_insert_tracking;
     sql_insert_tracking <<
-    "INSERT INTO tracking (_id_db_instance, imagepath, _id_dbsrv_media, _id_dbsrv_post) "   <<
+    "INSERT INTO track_instances (_id_db_instance, imagepath, _id_dbsrv_media, _id_dbsrv_post) "   <<
     "SELECT " << db_instance_id << ",'"  << maximagepath << "', " << db_srv_idmedia << ", " << db_srv_idpost <<
     " WHERE NOT EXISTS (SELECT * FROM tracking WHERE _id_db_instance = " << db_instance_id  << ");";
     pthread_mutex_lock(&databaseMutex);
@@ -1208,12 +1207,32 @@ void insertIntoHost(std::string publicip, std::string hostname, std::string city
     stringstream sql_host;
     sql_host <<
     "INSERT INTO host (publicip, hostname, city, region, country, location, organization, time) " <<
-    "SELECT '" << publicip << "', '"  << hostname << "', '" << city << "' " << region << "' " << country << "' " << loc << "' " << org << "'" << time_rasp << "'" << 
+    "SELECT '" << publicip << "', '"  << hostname << "', '" << city << "', '" << region << "', '" << country << "', '" << loc << "', '" << org << "', '" << time_rasp << "'" << 
     " WHERE NOT EXISTS (SELECT * FROM host WHERE publicip = '" << publicip << "');";
     cout << "sql_host: " << sql_host.str() << endl;
     pthread_mutex_lock(&databaseMutex); 
     db_execute(sql_host.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
+}
+
+vector<std::string> getIpInfo()
+{
+    vector<std::string> info;
+    
+    std::stringstream ipinfo;
+    ipinfo << "SELECT publicip, time FROM host;";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > ipinfo_array = db_select(ipinfo.str().c_str(), 2);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (ipinfo_array.size()>0)
+    {
+        info.push_back(ipinfo_array.at(0).at(0));
+        info.push_back(ipinfo_array.at(0).at(1));
+    } 
+    
+    return info;
+    
 }
 
 
@@ -1474,4 +1493,71 @@ void setActiveCam(int activecam)
     db_execute(sql_active_cam_update.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
          
+}
+
+vector<std::string> getTerminalInfo()
+{
+    
+    vector<std::string> terminal;
+
+    std::string sql_network = "SELECT * FROM network;";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > network_array = db_select(sql_network.c_str(), 4);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (network_array.size()>0)
+    {
+        std::string ipnumber = network_array.at(0).at(1);
+        terminal.push_back(ipnumber);                       //ipnumber              0
+        std::string ippublic = network_array.at(0).at(2);
+        terminal.push_back(ippublic);                       //ippublic              1
+        std::string macaddress = network_array.at(0).at(3);
+        terminal.push_back(macaddress);                     //macaddress            2
+    }
+    
+    std::stringstream sql_host;
+    sql_host << "SELECT * " <<
+    "FROM host WHERE _id = (SELECT MAX(_id) FROM host);";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > host_array = db_select(sql_host.str().c_str(), 9);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (host_array.size()>0)
+    {
+        terminal.push_back(host_array.at(0).at(2)); //hostname              3
+        terminal.push_back(host_array.at(0).at(3)); //city                  4
+        terminal.push_back(host_array.at(0).at(5)); //country               5
+        terminal.push_back(host_array.at(0).at(6)); //location              6
+        terminal.push_back(host_array.at(0).at(7)); //network_provider      7
+    }
+    
+    std::string sql_status = "SELECT * FROM status;";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > status_array = db_select(sql_status.c_str(), 3);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (status_array.size()>0)
+    {
+        terminal.push_back(status_array.at(0).at(1)); //uptime              8
+        terminal.push_back(status_array.at(0).at(2)); //starttime           9
+    }
+    
+    std::string sql_hardware = "SELECT * FROM hardware;";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > hardware_array = db_select(sql_hardware.c_str(), 9);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (hardware_array.size()>0)
+    {
+        terminal.push_back(hardware_array.at(0).at(1)); //model                 10
+        terminal.push_back(hardware_array.at(0).at(2)); //hardware              11
+        terminal.push_back(hardware_array.at(0).at(3)); //serial                12
+        terminal.push_back(hardware_array.at(0).at(5)); //disktotal             13
+        terminal.push_back(hardware_array.at(0).at(6)); //diskused              14
+        terminal.push_back(hardware_array.at(0).at(7)); //diskavailable         15
+        terminal.push_back(hardware_array.at(0).at(8)); //disk_percentage_used  16
+    }
+    
+    return terminal;
+    
 }

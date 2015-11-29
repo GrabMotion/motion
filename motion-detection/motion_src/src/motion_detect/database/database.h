@@ -100,3 +100,6 @@ void build_xml(const char * xmlPath);
 void writeXMLInstance (std::string XMLFILE, std::string time_start, std::string time_end, std::string instance, std::string instancecode);
 
 void setActiveCam(int activecam);
+
+vector<std::string> getIpInfo();
+vector<std::string> getTerminalInfo();

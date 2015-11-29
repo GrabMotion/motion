@@ -94,6 +94,7 @@ void insertHost(char *cstr);
 std::string dumpinstancefolder;
 std::vector<int> cams;
 bool isRecognizing();
+std::string public_ip;
         
 //xml
 std::string XML_FILE = "<import>session";
@@ -2424,7 +2425,7 @@ void directoryExistsOrCreate(const char* pzPath)
         (void) closedir (pDir);
 }
 
-void insertHost(const char *cstr)
+std::string insertHost(const char *cstr)
 {
     json_object * jobj = json_tokener_parse(cstr);
     
@@ -2473,6 +2474,28 @@ void insertHost(const char *cstr)
     }
     
     insertIntoHost(publicip, hostname, city, region, country, loc, org);
+    
+    return publicip;
+}
+
+std::string escapeJsonString(const std::string& input) {
+    std::ostringstream ss;
+    //for (auto iter = input.cbegin(); iter != input.cend(); iter++) {
+    //C++98/03:
+    for (std::string::const_iterator iter = input.begin(); iter != input.end(); iter++) {
+        switch (*iter) {
+            case '\\': ss << "\\\\"; break;
+            case '"': ss << "\\\""; break;
+            case '/': ss << "\\/"; break;
+            case '\b': ss << "\\b"; break;
+            case '\f': ss << "\\f"; break;
+            case '\n': ss << "\\n"; break;
+            case '\r': ss << "\\r"; break;
+            case '\t': ss << "\\t"; break;
+            default: ss << *iter; break;
+        }
+    }
+    return ss.str();
 }
 
 int main (int argc, char * const av[])
@@ -2603,47 +2626,88 @@ int main (int argc, char * const av[])
         }
     }
     
-    FILE *inip;
-    char buffip[512];
-    std::string publicip = "190.177.218.76"; //= "200.200.200.222";
-    /*if(!(inip = popen("curl ifconfig.me", "r")))
+    vector<std::string> ipinfo;
+    ipinfo = getIpInfo();
+    bool callip = false;
+    if (ipinfo.size()>0)
     {
-        return 1;
+        public_ip = ipinfo.at(0);
+        
+        const char *time_details = ipinfo.at(1).c_str();
+        struct tm tm;
+        strptime(time_details, "%Y-%m-%d %H:%M:%S %z", &tm);
+        time_t last = mktime(&tm); 
+        
+        time_t now;
+        time(&now); 
+        
+        double seconds_since_start = difftime(now, last);
+        
+        double timecount = 60 * 60 * 24;
+        
+        if (seconds_since_start>timecount)
+        {
+            callip = true;
+        }
+        
+    } else 
+    {
+        callip = true;
     }
-    stringstream busip; 
-    while(fgets(buffip, sizeof(buffip), inip)!=NULL)
-    {
-        busip << buffip;
-        publicip = busip.str();
-    }*/
-    
-    /*FILE *inloc;
-    char buffloc[512];
-    std::string location = "curl ipinfo.io/ 190.177.218.76";
-    if(!(inloc = popen(location.c_str(), "r")))
-    {
-       return 1;
+        
+    if (callip)
+    {    
+        /*FILE *inip;
+        char buffip[512];
+        if(!(inip = popen("curl ifconfig.me", "r")))
+        {
+            return 1;
+        }
+        stringstream busip; 
+        while(fgets(buffip, sizeof(buffip), inip)!=NULL)
+        {
+            busip << buffip;
+            public_ip = busip.str();
+        }
+        
+        cout << "ipnumber: " << NETWORK_IP << endl;
+        cout << "publicip: " << public_ip << endl;*/
+        
+        FILE *inloc;
+        char buffloc[512];
+        std::string location = "curl ipinfo.io"; // 190.177.218.76";
+        cout << "location: " << location << endl;
+        if(!(inloc = popen(location.c_str(), "r")))
+        {
+           return 1;
+        }
+        stringstream busloc; 
+        while(fgets(buffloc, sizeof(buffloc), inloc)!=NULL)
+        {
+            busloc << buffloc;
+        }
+        public_ip = insertHost(busloc.str().c_str());
+        
+        std::string maccheck = "cat /sys/class/net/eth0/address";
+        char *cestrmac = new char[maccheck.length() + 1];
+        strcpy(cestrmac, maccheck.c_str());
+        std::string resutl_mac = exec_command(cestrmac);
+        resutl_mac.erase(std::remove(resutl_eth0.begin(), resutl_eth0.end(), '\n'), resutl_eth0.end());
+
+         //Status
+        stringstream sql_network;
+        sql_network <<
+        "INSERT INTO network (ipnumber, ippublic, macaddress) " <<
+        "SELECT '"  << local_ip        << "'"
+        ", '"       << public_ip       << "' " << 
+        ", '"       << resutl_mac      << "' " << 
+        "WHERE NOT EXISTS (SELECT * FROM network WHERE ipnumber = '"<< local_ip << "' " <<
+        "AND ippublic = '"      << public_ip    << "' " <<
+        "AND macaddress = '"    << resutl_mac   << "');";
+        cout << "sql_network: " << sql_network.str() << endl;
+        db_execute(sql_network.str().c_str());
+        
     }
-    stringstream busloc; 
-    while(fgets(buffloc, sizeof(buffloc), inloc)!=NULL)
-    {
-        busloc << buffloc;
-    }
-    insertHost(busloc.str().c_str());*/
-    
-    cout << "ipnumber: " << NETWORK_IP << endl;
-    cout << "publicip: " << publicip << endl;
-    
-     //Status
-    stringstream sql_network;
-    sql_network <<
-    "INSERT INTO network (ipnumber, ippublic) " <<
-    "SELECT '"  << local_ip        << "'"
-    ", '"       << publicip        << "' "
-    "WHERE NOT EXISTS (SELECT * FROM network WHERE ipnumber = '"<< local_ip << "' " <<
-    "AND ippublic = '" << publicip << "');";
-    cout << "sql_network: " << sql_network.str() << endl;
-    db_execute(sql_network.str().c_str());
     
     FILE *intime;
     char bufftime[512];
@@ -2837,11 +2901,84 @@ int main (int argc, char * const av[])
     //StreamListener * stream_listener = new StreamListener();
     //stream_listener->startListening();
 
-    pthread_join(    thread_broadcast,  (void**) &runb);
-    pthread_join(    thread_socket,     (void**) &runs);
+    //pthread_join(    thread_broadcast,  (void**) &runb);
+    //pthread_join(    thread_socket,     (void**) &runs);
     //pthread_join(    thread_observer,   (void**) &runr);
     
-    cout << "THREAD TERMINATED!!!!!!!!!!!!!!!!!!!!! = " << runs << endl;
+    //cout << "THREAD TERMINATED!!!!!!!!!!!!!!!!!!!!! = " << runs << endl;
+    
+    for (;;)
+    {
+        
+        vector<std::string> terminal_info = getTerminalInfo();
+       
+        std::string command = "cat cat /var/log/dmesg"; ///var/log/syslog";
+        
+        char *cstr = new char[command.length() + 1];
+        strcpy(cstr, command.c_str());
+        std::string syslog_commnd = exec_command(cstr);
+        delete [] cstr;
+        
+        std::string syslog = "syslog"; // escapeJsonString(syslog_commnd);
+        
+        std::string ipnumber            = terminal_info.at(0);
+        std::string ippublic            = terminal_info.at(1);
+        std::string macaddress          = escapeJsonString(terminal_info.at(2));
+        std::string hostname            = escapeJsonString(terminal_info.at(3));
+        std::string city                = terminal_info.at(4);
+        std::string country             = terminal_info.at(5);
+        std::string location            = terminal_info.at(6);
+        std::string network_provider    = terminal_info.at(7);
+        std::string uptime              = escapeJsonString(terminal_info.at(8));
+        std::string starttime           = terminal_info.at(9);
+        std::string model               = escapeJsonString(terminal_info.at(10));
+        std::string hardware            = terminal_info.at(11);
+        std::string serial              = terminal_info.at(12);
+        std::string disktotal           = terminal_info.at(13);
+        std::string diskused            = terminal_info.at(14);
+        std::string diskavailable       = terminal_info.at(15);
+        std::string disk_percentage_used= terminal_info.at(16);
+        
+        struct timeval tr;
+        struct tm* ptmr;
+        char time_rasp[40];
+        gettimeofday (&tr, NULL);
+        ptmr = localtime (&tr.tv_sec);
+        strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+         
+        std::stringstream terminal_post;
+        terminal_post << "curl --user jose:joselon -X POST -d " << 
+        "'{\"title\":\""            << hardware     <<  "\","   <<
+        "\"content_raw\":\"Content\",\"content\":\""<< syslog   <<  "\","               <<
+        "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
+        "\"ipnumber\":\""           << ipnumber     <<  "\","   <<
+        "\"public_ipnumber\":\""    << ippublic     <<  "\","   <<        
+        "\"macaddress\":\""         << macaddress   <<  "\","   <<        
+        "\"hostname\":\""           << hostname     <<  "\","   <<                
+        "\"city\":\""               << city         <<  "\","   <<                        
+        "\"country\":\""            << country      <<  "\","   <<                        
+        "\"location\":\""           << location     <<  "\","   <<                        
+        "\"network_provider\":\""   << network_provider         <<  "\","               <<                        
+        "\"uptime\":\""             << uptime       <<  "\","   <<                        
+        "\"starttime\":\""          << starttime    <<  "\","   <<                        
+        "\"model\":\""              << model        <<  "\","   <<                        
+        "\"hardware\":\""           << hardware     <<  "\","   <<                        
+        "\"serial\":\""             << serial       <<  "\","   <<                        
+        "\"disk_total\":\""         << disktotal    <<  "\","   <<                        
+        "\"disk_used\":\""          << diskused     <<  "\","   <<                        
+        "\"disk_available\":\""     << diskavailable<<  "\","   <<                        
+        "\"disk_percentage_used\":\""               << disk_percentage_used <<  "\","   <<                        
+        "\"keepalive_time\":\""     << time_rasp    <<  "\"}'"   <<   
+        " -H \"Content-Type:application/json\""      <<
+        " http://dev.uimove.com/wp-json/wp/v2/terminals";
+        
+        cout << "terminal_post: " << terminal_post.str() << endl;
+        
+        int idpostterminal = post_command_to_wp(terminal_post.str());
+        
+        sleep(20);
+    }
+    
     return 0;
     
 }
