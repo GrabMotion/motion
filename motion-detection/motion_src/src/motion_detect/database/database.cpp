@@ -289,7 +289,6 @@ std::vector<int> db_cams(std::vector<int> cams)
         
         stringstream nfile;
         nfile << basepath << "data/camera_" << cams.at(i) << ".txt";
-        //nfile << "data/camera_" << cams.at(i) << ".txt";
         string newfile = nfile.str();
         
         std::ifstream  src(file.c_str(), std::ios::binary);
@@ -641,19 +640,21 @@ vector<string> getMaxImageByPath(google::protobuf::int32 instanceid)
         "I.name, "                  <<
         "D.label, "                 <<
         "RS.name, "                 << 
-        "I.time "                   <<
+        "I.time, "                  <<
+        "C.coordinates "            <<
         "FROM instance AS INS "     <<
         "JOIN rel_instance_image AS RII ON INS._id = RII._id_instance " <<
         "JOIN image AS I ON RII._id_image = I._id "                     <<
         "JOIN rel_day_instance_recognition_setup AS RDIRS ON RII._id_instance = RDIRS._id_instance "    <<
         "JOIN day AS D ON RDIRS._id_day = D._id "                                                       <<
         "JOIN recognition_setup AS RS ON RDIRS._id_recognition_setup = RS._id "                         <<  
+        "JOIN coordinates AS C ON RII._id_coordinates = C._id "        
         "WHERE INS._id = " << instanceid << ";";        
 
         cout << "check_istances: " << check_istances.str() << endl;
 
         pthread_mutex_lock(&databaseMutex);
-        vector<vector<string> > image_array = db_select(check_istances.str().c_str(), 6);
+        vector<vector<string> > image_array = db_select(check_istances.str().c_str(), 7);
         pthread_mutex_unlock(&databaseMutex); 
 
         if (image_array.size()>0)
@@ -668,6 +669,8 @@ vector<string> getMaxImageByPath(google::protobuf::int32 instanceid)
             maximage.push_back(rec);
             std::string time = image_array.at(0).at(5);
             maximage.push_back(time);   
+            std::string coords = image_array.at(0).at(6);
+            maximage.push_back(coords);   
         }
     }
     return maximage;  
@@ -1215,6 +1218,118 @@ void insertIntoHost(std::string publicip, std::string hostname, std::string city
     pthread_mutex_unlock(&databaseMutex);
 }
 
+int insertIntoPosts(std::string id, std::string date, std::string modified, std::string slug, std::string type, std::string link, std::string api_link, std::string featured_image)
+{
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    
+    //rel_camera_month.
+    stringstream sql_posts;
+    sql_posts <<
+    "INSERT INTO track_posts (id, date, modified, slug, type, link, api_link, featured_image, count_update, time_rasp) " <<
+    "SELECT " << id << ", '"  << date << "', '" << modified << "', '" << slug << "', '" << type << "', '" << link << "', '" << api_link << "', '" << featured_image << "', 0, '" << time_rasp << "'" << 
+    " WHERE NOT EXISTS (SELECT * FROM track_posts WHERE id = " << id << ");";
+    cout << "sql_posts: " << sql_posts.str() << endl;
+    pthread_mutex_lock(&databaseMutex); 
+    db_execute(sql_posts.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+    
+    vector<vector<string> > track_posts_array;
+    std::string track_posts_sql_last = "SELECT MAX(_id) FROM track_posts";
+    pthread_mutex_lock(&databaseMutex);
+    track_posts_array = db_select(track_posts_sql_last.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_track_posts_id = atoi(track_posts_array.at(0).at(0).c_str());
+    
+    return db_track_posts_id;
+}
+
+void updateIntoPost (std::string id, std::string date, std::string modified)
+{
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    
+    vector<vector<string> > track_posts_update_array;
+    std::stringstream track_posts_update_count_sql;
+    track_posts_update_count_sql << "SELECT count_update FROM track_posts WHERE id = " << id << ";";
+    pthread_mutex_lock(&databaseMutex);
+    track_posts_update_array = db_select(track_posts_update_count_sql.str().c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    int db_track_posts_update_count = atoi(track_posts_update_array.at(0).at(0).c_str());
+    
+    db_track_posts_update_count++;
+    
+    stringstream sql_post_update;
+    sql_post_update <<
+    "UPDATE track_posts SET date = '" << date << "', modified = '" << modified << "', time_rasp = '" << time_rasp << "', count_update = " << db_track_posts_update_count << "  WHERE id = " << id << ";";
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_post_update.str().c_str());
+    pthread_mutex_unlock(&databaseMutex);
+    
+}
+
+
+
+vector<std::string> getTrackPostByType(std::string type)
+{
+    vector<std::string> info;
+    
+    std::stringstream typeinfo;
+    typeinfo << "SELECT * FROM track_posts WHERE type ='" << type << "' AND _id = (SELECT MAX(_id) FROM track_posts);";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > typeinfo_array = db_select(typeinfo.str().c_str(), 11);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (typeinfo_array.size()>0)
+    {
+        info.push_back(typeinfo_array.at(0).at(0));
+        info.push_back(typeinfo_array.at(0).at(1));
+        info.push_back(typeinfo_array.at(0).at(2));
+        info.push_back(typeinfo_array.at(0).at(3));
+        info.push_back(typeinfo_array.at(0).at(4));
+        info.push_back(typeinfo_array.at(0).at(5));
+        info.push_back(typeinfo_array.at(0).at(6));
+        info.push_back(typeinfo_array.at(0).at(7));
+        info.push_back(typeinfo_array.at(0).at(8));
+        info.push_back(typeinfo_array.at(0).at(9));
+        info.push_back(typeinfo_array.at(0).at(10));
+    } 
+    
+    return info;
+    
+}
+
+time_t getLastPostTime(std::string type)
+{
+    std::stringstream timeinfo;
+    timeinfo << "SELECT time_rasp FROM track_posts WHERE type ='" << type << "';";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > timeinfo_array = db_select(timeinfo.str().c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (timeinfo_array.size()>0)
+    {
+        const char *time_details = timeinfo_array.at(0).at(0).c_str();
+        struct tm tm;
+        strptime(time_details, "%Y-%m-%d %H:%M:%S %z", &tm);
+        time_t lasttime = mktime(&tm); 
+        return lasttime;
+        
+    } else 
+    {
+        return NULL;
+    }
+}
+
+
 vector<std::string> getIpInfo()
 {
     vector<std::string> info;
@@ -1231,8 +1346,7 @@ vector<std::string> getIpInfo()
         info.push_back(ipinfo_array.at(0).at(1));
     } 
     
-    return info;
-    
+    return info;    
 }
 
 
@@ -1558,6 +1672,60 @@ vector<std::string> getTerminalInfo()
         terminal.push_back(hardware_array.at(0).at(8)); //disk_percentage_used  16
     }
     
+    std::string sql_camera = "SELECT name FROM cameras;";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > camera_array = db_select(sql_camera.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    std::stringstream cams;
+    if (camera_array.size()>0)
+    {
+        for (int t=0; t< camera_array.size(); t++)
+        {
+           cams << "[" << camera_array.at(t).at(0) << "]";
+            
+        }
+    }
+    terminal.push_back(cams.str());                     //cameras  17
+    
     return terminal;
     
+}
+
+vector<std::string> getMatInfoFromId(int db_idmat)
+{
+    vector<std::string> matidarray;
+    
+    std::stringstream sql_mat;
+    sql_mat << "SELECT * FROM mat WHERE _id = " << db_idmat << ";";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > mat_array = db_select(sql_mat.str().c_str(), 8);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (mat_array.size()>0)
+    {
+        std::stringstream screen;
+        std::string matwidth = mat_array.at(0).at(4);
+        std::string matheight = mat_array.at(0).at(5);
+        screen << "[" << matwidth << "," << matheight << "]";                              //screen size
+        matidarray.push_back(screen.str());                                             //screen             0
+        matidarray.push_back(mat_array.at(0).at(7));                                    //hardware           1
+    }
+    return matidarray;
+}
+
+int getPostByIdAndType(int db_idpost)
+{
+    int id;
+    std::stringstream sql_post ;
+    sql_post << "SELECT * FROM track_posts WHERE _id = " << db_idpost << ";";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > post_array = db_select(sql_post.str().c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (post_array.size()>0)
+    {
+        id = atoi(post_array.at(0).at(0).c_str());
+    }
+    return id;
 }

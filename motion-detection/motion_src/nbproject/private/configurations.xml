@@ -74,10 +74,6 @@
             <df name="mat">
             </df>
             <df name="tracking">
-              <df name="27Nov2015">
-                <df name="TELE">
-                </df>
-              </df>
             </df>
           </df>
           <df name="database">
@@ -148,18 +144,6 @@
           <df name="log">
           </df>
           <df name="pics">
-            <df name="camera0">
-              <df name="TELE">
-                <df name="26Nov2015">
-                  <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="xml">
-                  </df>
-                </df>
-              </df>
-            </df>
             <df name="region">
             </df>
             <df name="screenshots">

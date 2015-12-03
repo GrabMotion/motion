@@ -67,6 +67,9 @@
 #include <json/json.h>
 #include <stdio.h>
 
+#include "tinyxml/tinyxml.h"
+#include "tinyxml/tinystr.h"
+
 
 using namespace google::protobuf::io;
 
@@ -85,6 +88,14 @@ std::string getXMLFilePathAndName(int cam, std::string recname, std::string curr
 void directoryExistsOrCreate(const char* pzPath);
 void startMainRecognition();
 Mat getImageWithTextByPath(std::string imagefilepath);
+Mat getImageWithRectByPath(std::string imagefilepath);
+Mat drawRectFromCoordinate(std::string coords, Mat mat, Scalar color);
+
+char * setTimeToRaspBerry(struct tm tmremote, int timezone_adjust);
+
+std::string parse_json( json_object* j );
+std::string parse_json_array( json_object* j, char* key );
+
 std::string getMediaIdFromJSON(std::string message);
 //void * postImage(void * args);
 int postImage(int db_instance_id);
@@ -95,6 +106,7 @@ std::string dumpinstancefolder;
 std::vector<int> cams;
 bool isRecognizing();
 std::string public_ip;
+std::string escape(const std::string& input);
         
 //xml
 std::string XML_FILE = "<import>session";
@@ -176,6 +188,51 @@ bool checkFile(const std::string &file);
 std::string exec_command(char* cmd);
 void insertHost(char *cstr);
 
+char * setTimeToRaspBerry(struct tm tmremote, int timezone_adjust)
+{
+    
+    char * text_time;
+    std::cout << std::endl;
+    std::cout << " Seconds  :"  << tmremote.tm_sec  << std::endl;
+    std::cout << " Minutes  :"  << tmremote.tm_min  << std::endl;
+    std::cout << " Hours    :"  << tmremote.tm_hour << std::endl;
+    std::cout << " Day      :"  << tmremote.tm_mday << std::endl;
+    std::cout << " Month    :"  << tmremote.tm_mon  << std::endl;
+    std::cout << " Year     :"  << tmremote.tm_year << std::endl;
+    std::cout << std::endl;
+    struct tm mytime;
+    struct timeval tv;
+    time_t epoch_time;
+    struct timezone timez;
+
+    int hour = tmremote.tm_hour + timezone_adjust;
+    mytime.tm_sec 	= tmremote.tm_sec  ;
+    mytime.tm_min 	= tmremote.tm_min  ;
+    mytime.tm_hour  = hour;
+    mytime.tm_mday  = tmremote.tm_mday ;
+    mytime.tm_mon   = tmremote.tm_mon  ;
+    mytime.tm_year  = tmremote.tm_year ;
+    epoch_time = mktime(&mytime);
+    cout << "epoch_time : " << epoch_time << endl;
+    /* Now set the clock to this time */
+    tv.tv_sec = epoch_time;
+    tv.tv_usec = 0;
+    // Set new system time.
+    if (settimeofday(&tv, NULL) != 0)
+    {
+        cout << "Cannot set system time" << endl;
+    }
+    // Get current date & time since Epoch.
+    if (gettimeofday(&tv, NULL) != 0)
+    {
+        printf("Cannot get current date & time since Epoch.");
+    }
+    text_time = ctime(&tv.tv_sec);
+    
+    return text_time;
+}
+
+
 inline bool file_exists (const std::string& name) {
     ifstream f(name.c_str());
     if (f.good()) {
@@ -187,7 +244,188 @@ inline bool file_exists (const std::string& name) {
     }   
 }
 
-int post_command_to_wp(std::string command)
+std::string parse_json_array( json_object* j, char* key ) 
+{
+    std::string val;
+    enum json_type type;
+    json_object* a = j;
+    if ( key ) 
+    {
+        a = json_object_object_get( j, key );
+    }
+
+    int l = json_object_array_length( a );
+    int i;
+    json_object* v;
+    for ( i = 0; i < l; i++ ) {
+        v = json_object_array_get_idx( a, i );
+        type = json_object_get_type( v );
+        if ( type == json_type_array ) {
+            parse_json_array( v, NULL );
+        } else 
+        {
+            val = parse_json( v );
+        }
+    }
+    
+    return val;
+}
+
+std::string parse_json ( json_object* j )
+{
+    
+    std::string val;
+    
+    enum json_type type;
+     
+    json_object_object_foreach( j, key, v ) {
+         
+        type = json_object_get_type( v );
+         
+        std::stringstream ss;
+        ss << key;
+        std::string strkey = ss.str();
+         
+        std::cout << std::endl;
+        std::cout << "json key: " << key << std::endl;
+        std::cout << std::endl;
+         
+        switch ( type ) {
+                 
+            case json_type_boolean:
+            case json_type_double:
+            case json_type_int:   
+            case json_type_string:
+                if ( strcmp( key, "href" ) == 0 )
+                {
+                    val = json_object_get_string(v);
+                    return val;
+                }
+            case json_type_object:
+                j = json_object_object_get( j, key );
+                val = parse_json( j );
+                break;
+                 
+            case json_type_array:
+                if ( strcmp( key, "self" ) == 0 ) 
+                {
+                    val = parse_json_array( j, key);
+                }
+                break;
+        }
+    }
+     
+    std::cout << "RETURN" << std::endl;
+     
+    return val;
+}
+
+
+int insertUpdatePostInfo(bool update, std::string message)
+{
+    
+    cout << "post_response: " <<  message << endl;
+    
+    int id; 
+    std::string date;
+    std::string modified;
+    std::string slug;
+    std::string post_type;
+    std::string link;
+    std::string api_link;
+    std::string featured_image;   
+    
+    std::stringstream _id;
+    
+    char *cstr = new char[message.length() + 1];
+    strcpy(cstr, message.c_str());
+    // do stuff
+    json_object * jobj = json_tokener_parse(cstr);
+     
+    enum json_type type;
+    json_object_object_foreach(jobj, key, val)
+    {
+        type = json_object_get_type(val);
+         
+        std::stringstream ss;
+        ss << key;
+        std::string strkey = ss.str();
+         
+        switch (type)
+        {
+            case json_type_int:
+            case json_type_boolean:
+            case json_type_double:
+            case json_type_string:
+                 
+               if ( strcmp( key, "id" ) == 0 )
+                {
+                    id = json_object_get_int(val);
+                }
+                else if ( strcmp( key, "date" ) == 0 )
+                {
+                    date = json_object_get_string(val);
+                }
+                else if ( strcmp( key, "modified" ) == 0 )
+                {
+                    modified = json_object_get_string(val);
+                }
+                else if ( strcmp( key, "slug" ) == 0 )
+                {
+                    slug = json_object_get_string(val);
+                }
+                else if ( strcmp( key, "type" ) == 0 )
+                {
+                    post_type = json_object_get_string(val);
+                }
+                else if ( strcmp( key, "featured_image" ) == 0 )
+                {
+                    featured_image = json_object_get_string(val);
+                }
+                else if ( strcmp( key, "link" ) == 0 )
+                {
+                    link = json_object_get_string(val);
+                }
+                break;
+                
+            case json_type_object:
+                if ( strcmp( key, "_links" ) == 0 )
+                {
+                    jobj = json_object_object_get( jobj, key );
+                    api_link = parse_json( jobj );
+                }
+                break;
+        }
+    }
+     
+    delete [] cstr;
+    
+    if (id>0)
+    {
+        if (!update)
+        {
+            //Update Time from Server
+            const char *timestr = modified.c_str();
+            struct tm server_time;
+            strptime(timestr, "%Y-%m-%dT%H:%M:%SZ", &server_time);
+            printf("The system time is set to %s\n", setTimeToRaspBerry(server_time, -3));
+            
+            _id << id;
+            insertIntoPosts(_id.str(), date, modified, slug, post_type, link, api_link, featured_image);  
+             
+        } else if (update)
+        {
+            _id << id;
+            updateIntoPost(_id.str(), date, modified);
+        } 
+  
+    } 
+    
+    return id;
+    
+}
+
+int post_command_to_wp(bool update, std::string command)
 {
     int id = 0;
     
@@ -197,24 +435,28 @@ int post_command_to_wp(std::string command)
     int size = sizeof(pipe);
     char buffer[128];
     std::string result = "";
+    std::string error;
     
+    std::stringstream post_response;
     while(!feof(pipe)) 
     {
     	if(fgets(buffer, sizeof(buffer), pipe) != NULL)
         {
-            std::string idstd;
-            char * token;
-            token = strtok( strtok (buffer,","), ":");
-            int i=0;
-            while( token != NULL ) 
-            {
-                token = strtok(NULL, ":");
-                idstd = token;
-                id = atoi(idstd.c_str());
-                break;
-            }
-            break;
-        }
+            post_response << buffer; 
+        }       
+    }
+    char *s;
+    s = strstr(buffer, "<?xml");      
+    if (s != NULL)                     
+    {
+        TiXmlDocument doc;
+        doc.Parse(post_response.str().c_str());
+        TiXmlNode * titlenode = doc.RootElement()->FirstChild( "head" )->FirstChild( "title" ); //Tree root
+        error = titlenode->Value();
+
+    } else 
+    {
+        id = insertUpdatePostInfo(update, post_response.str());
     }
     return id;
 }
@@ -710,6 +952,45 @@ struct post_args
 };
 struct post_args PostArgs;
 
+Mat drawRectFromCoordinate(std::string coords, Mat mat, Scalar color)
+{
+    vector<Point> coordinates;
+    std::stringstream ss(coords);
+    string d;
+    int c=0, x=0, y=0, t=0;
+    while (ss >> d)
+    {
+        d = d.erase( d.size() - 1 );
+        bool fi = d.find("[");
+        if (!fi)
+        {
+            d = d.erase(0 , 1);
+        }
+         
+        float cor =  atof (d.c_str());
+        if (c==0)
+        {
+            x = cor;
+            c++;
+        } else
+        {
+            y = cor;
+            Point p(x, y);
+            cout << "x: " << x << " y: " << y << endl; 
+            coordinates.push_back(p);
+            c=0;x=0;y=0;
+        }
+        t++;
+    }
+    
+    for (int i=0; i<=coordinates.size(); i++ )
+    {
+        cout << i << " : " << coordinates.at(i) << " " << i + 1 <<  " : " << coordinates.at(i+1) << endl;
+        cv::line(mat, coordinates.at(i), coordinates.at(i+1), cv::Scalar(1.0), 1, CV_AA); 
+    }     
+    return mat;
+}
+
 int postImage(int db_instance_id, std::string content)
 {
     
@@ -722,8 +1003,12 @@ int postImage(int db_instance_id, std::string content)
     std::string maxday = max_image.at(2);
     std::string maxrec = max_image.at(3);
     std::string maxtime = max_image.at(4);
+    std::string coords = max_image.at(4);
 
     Mat mat = getImageWithTextByPath(maxpath);
+    Scalar yellow(0,255,255);
+    mat = drawRectFromCoordinate(coords, mat, yellow);
+    
     std::string trackdatafile = basepath + "data/tracking"; 
     directoryExistsOrCreate(trackdatafile.c_str());
     std::string dayname = trackdatafile + "/" + maxday;
@@ -745,21 +1030,23 @@ int postImage(int db_instance_id, std::string content)
     std::stringstream media;
     media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << "' --data-binary @'"<< maximagepath << "' -d title='" << maxtime << "' -H \"Expect: \" http://dev.uimove.com/wp-json/wp/v2/media";
 
-    int idmedia = post_command_to_wp(media.str());
+    int idmedia = post_command_to_wp(false, media.str());
     
     if (idmedia)
     {
         
+        int id = getPostByIdAndType(idmedia);
+                
         std::stringstream post;
         post << "curl -X POST -d '{\"title\":\"" << maxtime << "\",\"content_raw\":\"Content\",\"content\":\"" << content << "\",\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\",\"featured_image\":" << 
         
-        idmedia << ",\"terms\":{\"category\":{\"ID\":2,\"name\":\"00000000db47b6ce\",\"parent\":1}}' " <<  
+        id << ",\"terms\":{\"category\":{\"ID\":2,\"name\":\"00000000db47b6ce\",\"parent\":1}}' " <<  
            
         "-H \"Content-Type:application/json\" --user jose:joselon http://dev.uimove.com/wp-json/wp/v2/posts";
         
         cout << "post_curl: " << post.str() << endl;
 
-        int idpost = post_command_to_wp(post.str());
+        int idpost = post_command_to_wp(false, post.str());
            
         if (idpost>0)
         {
@@ -1589,7 +1876,91 @@ motion::Message saveRecognition(motion::Message m)
     {
         insertIntervalCrontabIntoDatabase(pcamera, prec, db_camera_recognition_setupl_array); 
     } 
+    
+    // POSTING
+    
+    vector<std::string> mat_array = getMatInfoFromId(prec->db_idmat());
+    Mat mat = imread(mat_array.at(1));
+    Scalar red(255,0,0);
   
+    mat = drawRectFromCoordinate(rcoords, mat, red);
+           
+    std::string trackdatafile = basepath + "data/tracking"; 
+    directoryExistsOrCreate(trackdatafile.c_str());
+    std::string recognitions = trackdatafile + "/recognitions";
+    directoryExistsOrCreate(recognitions.c_str());
+   
+    std::string fineandextension = recname + ".jpg";
+    std::string maximagepath = recognitions + "/" + fineandextension;
+    imwrite(maximagepath, mat);
+  
+    cout << "posting: " << fineandextension << endl;
+    
+    std::stringstream media;
+    media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << "' --data-binary @'"<< maximagepath << "' -d title='" << recname << "' -H \"Expect: \" http://dev.uimove.com/wp-json/wp/v2/media";
+
+    int idmedia = post_command_to_wp(false, media.str());
+    
+    if (idmedia)
+    {
+        
+        int id = getPostByIdAndType(idmedia);
+        
+        vector<std::string> typeinfo = getTrackPostByType("terminal");
+        std::string postlink;
+        std::string apilink;
+        if (typeinfo.size()>0)
+        {
+           postlink = typeinfo.at(7);
+           apilink  = typeinfo.at(8);
+        }
+
+        std::string terminal_link       = postlink;
+        std::string terminal_api        = apilink;
+        std::string codename            = prec->codename();
+        std::string region              = rcoords;
+        int delay                       = prec->delay();
+        bool runatstartup               = prec->runatstartup();
+        bool hascron                    = prec->hascron();
+        std::string screen              = mat_array.at(0);
+
+        std::stringstream post_content;
+        post_content <<
+        "<b>Recognition Name        :</b> "             << recname              <<  "\n"    <<
+        "<b>Terminal                :</b> "             << terminal_link        <<  "\n"    <<
+        "<b>Terminal API            :</b> "             << terminal_api         <<  "\n"   <<
+        "<b>Codename                :</b> "             << prec->codename()     <<  "\n"    <<
+        "<b>Region                  :</b> "             << rcoords              <<  "\n"    <<
+        "<b>Delay                   :</b> "             << prec->delay()        <<  "\n"    <<
+        "<b>Run at startup          :</b> "             << prec->runatstartup() <<  "\n"    <<
+        "<b>Has cron job            :</b> "             << prec->hascron()      <<  "\n"    <<
+        "<b>Screen size             :</b> "             << screen               <<  "\n";
+
+
+        std::stringstream recognition_post;
+        recognition_post << "curl --user jose:joselon -X POST -d " << 
+        "'{\"title\":\""            << recname     <<  "\","   <<
+        "\"content_raw\":\"Content\",\"content\":\""<< escape(post_content.str()) <<  "\","     <<
+        "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
+        "\"featured_image\":\""     << id               <<  "\","   <<                
+        "\"name\":\""               << recname          <<  "\","   <<
+        "\"terminal\":\""           << terminal_link    <<  "\","   <<        
+        "\"terminal_api\":\""       << terminal_api     <<  "\","   <<        
+        "\"codename\":\""           << prec->codename() <<  "\","   <<                
+        "\"region\":\""             << rcoords          <<  "\","   <<                        
+        "\"delay\":\""              << prec->delay()    <<  "\","   <<                        
+        "\"runatstartup\":\""       << prec->runatstartup()         <<  "\","   <<                        
+        "\"hascron\":\""            << prec->hascron()              <<  "\","   <<                                               
+        "\"screen\":\""             << screen           <<  "\","   <<                                   
+        "\"keepalive_time\":\""     << time_rasp    <<  "\"}'"      <<   
+        " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
+        " http://dev.uimove.com/wp-json/wp/v2/recognition";
+
+        cout << "terminal_post: " << recognition_post.str() << endl;
+
+        post_command_to_wp(false, recognition_post.str());
+    }
+   
     return m; 
 }
 
@@ -1740,7 +2111,7 @@ motion::Message runCommand(motion::Message m)
             
             std::string recname = prec->recname();  
             
-            std::string xml_path = prec->xmlfilepath(); 
+            std::string xml_path = prec->xmlfilepath();     
             
             bool xmlexist = file_exists(xml_path);
             
@@ -1973,7 +2344,9 @@ motion::Message runCommand(motion::Message m)
         {
             cout << "motion::Message::SET_TIME" << endl;
             result_message = m.time();
+            
             cout << "coming time: "  << result_message  << endl;
+            
             struct tm tmremote;
             char *bufr;
             bufr = new char[result_message.length() + 1];
@@ -1981,43 +2354,9 @@ motion::Message runCommand(motion::Message m)
             cout << "bufr       : " << bufr << endl;
             memset(&tmremote, 0, sizeof(struct tm));
             strptime(bufr, "%Y-%m-%d %H:%M:%S %z", &tmremote);
-            std::cout << std::endl;
-            std::cout << " Seconds  :"  << tmremote.tm_sec  << std::endl;
-            std::cout << " Minutes  :"  << tmremote.tm_min  << std::endl;
-            std::cout << " Hours    :"  << tmremote.tm_hour << std::endl;
-            std::cout << " Day      :"  << tmremote.tm_mday << std::endl;
-            std::cout << " Month    :"  << tmremote.tm_mon  << std::endl;
-            std::cout << " Year     :"  << tmremote.tm_year << std::endl;
-            std::cout << std::endl;
-            struct tm mytime;
-            struct timeval tv;
-            time_t epoch_time;
-            struct timezone timez;
-            char * text_time;
-            int hour = tmremote.tm_hour; // + 3;
-            mytime.tm_sec 	= tmremote.tm_sec  ;
-            mytime.tm_min 	= tmremote.tm_min  ;
-            mytime.tm_hour  = hour;
-            mytime.tm_mday  = tmremote.tm_mday ;
-            mytime.tm_mon   = tmremote.tm_mon  ;
-            mytime.tm_year  = tmremote.tm_year ;
-            epoch_time = mktime(&mytime);
-            cout << "epoch_time : " << epoch_time << endl;
-            /* Now set the clock to this time */
-            tv.tv_sec = epoch_time;
-            tv.tv_usec = 0;
-            // Set new system time.
-            if (settimeofday(&tv, NULL) != 0)
-            {
-                cout << "Cannot set system time" << endl;
-            }
-            // Get current date & time since Epoch.
-            if (gettimeofday(&tv, NULL) != 0)
-            {
-                printf("Cannot get current date & time since Epoch.");
-            }
-            text_time = ctime(&tv.tv_sec);
-            printf("The system time is set to %s\n", text_time);
+            
+            setTimeToRaspBerry(tmremote, 0);
+                   
             m.set_type(motion::Message::TIME_SET);
             m.set_serverip(PROTO.serverip());
         }
@@ -2478,7 +2817,8 @@ std::string insertHost(const char *cstr)
     return publicip;
 }
 
-std::string escapeJsonString(const std::string& input) {
+
+std::string escape(const std::string& input) {
     std::ostringstream ss;
     //for (auto iter = input.cbegin(); iter != input.cend(); iter++) {
     //C++98/03:
@@ -2498,21 +2838,153 @@ std::string escapeJsonString(const std::string& input) {
     return ss.str();
 }
 
+void postTerminalStatus()
+{
+    
+    vector<std::string> typeinfo = getTrackPostByType("terminal");
+    bool update = false;
+    int count_update;
+    std::string api_url;
+    if (typeinfo.size()>0)
+    {
+       api_url = typeinfo.at(7);
+       update = true; 
+       count_update = atoi(typeinfo.at(9).c_str());
+    }
+
+    vector<std::string> terminal_info = getTerminalInfo();
+
+    std::string ipnumber            = terminal_info.at(0);
+    std::string ippublic            = terminal_info.at(1);
+    std::string macaddress          = escape(terminal_info.at(2));
+    std::string hostname            = escape(terminal_info.at(3));
+    std::string city                = terminal_info.at(4);
+    std::string country             = terminal_info.at(5);
+    std::string location            = terminal_info.at(6);
+    std::string network_provider    = terminal_info.at(7);
+    std::string uptime              = escape(terminal_info.at(8));
+    std::string starttime           = terminal_info.at(9);
+    std::string model               = escape(terminal_info.at(10));
+    std::string hardware            = terminal_info.at(11);
+    std::string serial              = terminal_info.at(12);
+    std::string disktotal           = terminal_info.at(13);
+    std::string diskused            = terminal_info.at(14);
+    std::string diskavailable       = terminal_info.at(15);
+    std::string disk_percentage_used= terminal_info.at(16);
+    std::string camera              = terminal_info.at(17);
+
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    
+    std::stringstream post_content;
+    post_content <<
+    "<b>Ip Number               :</b> "             << ipnumber             <<  "\n"    <<
+    "<b>Public Ip Number        :</b> "             << ippublic             <<  "\n"    <<
+    "<b>Mac Address             :</b> "             << macaddress           <<  "\n\n"  <<
+    "<b>Host Name               :</b> "             << hostname             <<  "\n"    <<
+    "<b>City                    :</b> "             << city                 <<  "\n"    <<
+    "<b>Country                 :</b> "             << country              <<  "\n"    <<
+    "<b>Location                :</b> "             << location             <<  "\n"    <<
+    "<b>Network Provider        :</b> "             << network_provider     <<  "\n\n"  <<
+    "<b>Uptime                  :</b> "             << uptime               <<  "\n"    <<
+    "<b>Start Time              :</b> "             << starttime            <<  "\n"    <<
+    "<b>Model                   :</b> "             << model                <<  "\n"    <<
+    "<b>Hardware                :</b> "             << hardware             <<  "\n"    <<
+    "<b>Serial                  :</b> "             << serial               <<  "\n"    <<
+    "<b>Camera                  :</b> "             << camera               <<  "\n\n"  <<        
+    "<b>Disk Total              :</b> "             << disktotal            <<  "\n"    <<
+    "<b>Disk Used               :</b> "             << diskused             <<  "\n"    <<
+    "<b>Disk Available          :</b> "             << diskavailable        <<  "\n"    <<
+    "<b>Disk Percentage Use     :</b> "             << disk_percentage_used <<  "\n\n"  <<
+    "<b>Keep Alive              :</b> "             << time_rasp            <<  "\n";
+
+    std::string content;
+    content = escape(post_content.str());
+    std::stringstream api_post_url;
+    std::stringstream post_content_update;
+    
+    if (update)
+    {
+        api_post_url << escape("<a href='") << api_url << escape("' target='_blank'>") << api_url << escape("</a>"); 
+        post_content_update << escape("<b>API URL                  :</b> ") << api_post_url.str() << escape("\n"); 
+        content += post_content_update.str();
+    } 
+
+    std::string posttype;
+    std::string url;
+    if (update)
+    {
+        posttype = "PUT";
+        url = api_url;
+    } else
+    {
+        posttype = "POST";
+        url = "http://dev.uimove.com/wp-json/wp/v2/terminal";
+    }
+
+    std::stringstream terminal_post;
+    terminal_post << "curl --user jose:joselon -X "         << posttype << " -d " << 
+    "'{\"title\":\""            << hardware     <<  "\","   <<
+    "\"content_raw\":\"Content\",\"content\":\""<<  content <<  "\","     <<
+    "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
+    "\"ipnumber\":\""           << ipnumber     <<  "\","   <<
+    "\"public_ipnumber\":\""    << ippublic     <<  "\","   <<        
+    "\"macaddress\":\""         << macaddress   <<  "\","   <<        
+    "\"hostname\":\""           << hostname     <<  "\","   <<                
+    "\"city\":\""               << city         <<  "\","   <<                        
+    "\"country\":\""            << country      <<  "\","   <<                        
+    "\"location\":\""           << location     <<  "\","   <<                        
+    "\"network_provider\":\""   << network_provider         <<  "\","     <<                        
+    "\"uptime\":\""             << uptime       <<  "\","   <<                        
+    "\"starttime\":\""          << starttime    <<  "\","   <<                        
+    "\"model\":\""              << model        <<  "\","   <<                        
+    "\"hardware\":\""           << hardware     <<  "\","   <<                        
+    "\"serial\":\""             << serial       <<  "\","   <<                        
+    "\"camera\":\""             << camera       <<  "\","   <<                        
+    "\"disk_total\":\""         << disktotal    <<  "\","   <<                        
+    "\"disk_used\":\""          << diskused     <<  "\","   <<                        
+    "\"disk_available\":\""     << diskavailable<<  "\","   <<                        
+    "\"disk_percentage_used\":\""               << disk_percentage_used <<  "\","   <<                        
+    "\"keepalive_time\":\""     << time_rasp    <<  "\"}'"      <<   
+    " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
+    " " << url << ";" ;
+
+    cout << "terminal_post: " << terminal_post.str() << endl;
+
+    post_command_to_wp(update, terminal_post.str());
+    
+}
+
+void terminalPost(double timecount)
+{
+    bool post_terminal = false;
+    time_t post_time = getLastPostTime("terminal");
+    if (post_time!=NULL)
+    {
+        time_t now;
+        time(&now); 
+
+        double posted = difftime(now, post_time);
+       
+        if ( posted > timecount ) {
+            post_terminal = true;
+        }         
+    } else {
+        post_terminal = true;
+    }
+
+    if (post_terminal)
+        postTerminalStatus();
+}
+
 int main (int argc, char * const av[])
 {
     
-    //motion 
-        //status
-        //start name
-        //stop name
-       
-    const char **argv = (const char **) av;
-    
-    //argc = 3;
-    //argv[1] = "-start"; //"start";
-    //argv[2] = "0";
-    //argv[3] = "VEREDA";
-   
+    const char **argv = (const char **) av; 
     cout << "argv[0]: " << argv[0] << endl;
     
     if (argc==2)
@@ -2642,7 +3114,6 @@ int main (int argc, char * const av[])
         time(&now); 
         
         double seconds_since_start = difftime(now, last);
-        
         double timecount = 60 * 60 * 24;
         
         if (seconds_since_start>timecount)
@@ -2891,6 +3362,16 @@ int main (int argc, char * const av[])
         cerr << "Unable to create thread" << endl;
     }
     
+    for (;;)
+    {
+        //Post Terminal
+        double timepostcount = 60 * 10; //60 * 24; 
+        terminalPost(timepostcount);
+        
+       
+        sleep(50);
+    }
+    
     //runo = pthread_create(&thread_observer, NULL, startObserver, NULL);
     //if ( runo  != 0) 
     //{
@@ -2907,77 +3388,7 @@ int main (int argc, char * const av[])
     
     //cout << "THREAD TERMINATED!!!!!!!!!!!!!!!!!!!!! = " << runs << endl;
     
-    for (;;)
-    {
-        
-        vector<std::string> terminal_info = getTerminalInfo();
-       
-        std::string command = "cat cat /var/log/dmesg"; ///var/log/syslog";
-        
-        char *cstr = new char[command.length() + 1];
-        strcpy(cstr, command.c_str());
-        std::string syslog_commnd = exec_command(cstr);
-        delete [] cstr;
-        
-        std::string syslog = "syslog"; // escapeJsonString(syslog_commnd);
-        
-        std::string ipnumber            = terminal_info.at(0);
-        std::string ippublic            = terminal_info.at(1);
-        std::string macaddress          = escapeJsonString(terminal_info.at(2));
-        std::string hostname            = escapeJsonString(terminal_info.at(3));
-        std::string city                = terminal_info.at(4);
-        std::string country             = terminal_info.at(5);
-        std::string location            = terminal_info.at(6);
-        std::string network_provider    = terminal_info.at(7);
-        std::string uptime              = escapeJsonString(terminal_info.at(8));
-        std::string starttime           = terminal_info.at(9);
-        std::string model               = escapeJsonString(terminal_info.at(10));
-        std::string hardware            = terminal_info.at(11);
-        std::string serial              = terminal_info.at(12);
-        std::string disktotal           = terminal_info.at(13);
-        std::string diskused            = terminal_info.at(14);
-        std::string diskavailable       = terminal_info.at(15);
-        std::string disk_percentage_used= terminal_info.at(16);
-        
-        struct timeval tr;
-        struct tm* ptmr;
-        char time_rasp[40];
-        gettimeofday (&tr, NULL);
-        ptmr = localtime (&tr.tv_sec);
-        strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
-         
-        std::stringstream terminal_post;
-        terminal_post << "curl --user jose:joselon -X POST -d " << 
-        "'{\"title\":\""            << hardware     <<  "\","   <<
-        "\"content_raw\":\"Content\",\"content\":\""<< syslog   <<  "\","               <<
-        "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
-        "\"ipnumber\":\""           << ipnumber     <<  "\","   <<
-        "\"public_ipnumber\":\""    << ippublic     <<  "\","   <<        
-        "\"macaddress\":\""         << macaddress   <<  "\","   <<        
-        "\"hostname\":\""           << hostname     <<  "\","   <<                
-        "\"city\":\""               << city         <<  "\","   <<                        
-        "\"country\":\""            << country      <<  "\","   <<                        
-        "\"location\":\""           << location     <<  "\","   <<                        
-        "\"network_provider\":\""   << network_provider         <<  "\","               <<                        
-        "\"uptime\":\""             << uptime       <<  "\","   <<                        
-        "\"starttime\":\""          << starttime    <<  "\","   <<                        
-        "\"model\":\""              << model        <<  "\","   <<                        
-        "\"hardware\":\""           << hardware     <<  "\","   <<                        
-        "\"serial\":\""             << serial       <<  "\","   <<                        
-        "\"disk_total\":\""         << disktotal    <<  "\","   <<                        
-        "\"disk_used\":\""          << diskused     <<  "\","   <<                        
-        "\"disk_available\":\""     << diskavailable<<  "\","   <<                        
-        "\"disk_percentage_used\":\""               << disk_percentage_used <<  "\","   <<                        
-        "\"keepalive_time\":\""     << time_rasp    <<  "\"}'"   <<   
-        " -H \"Content-Type:application/json\""      <<
-        " http://dev.uimove.com/wp-json/wp/v2/terminals";
-        
-        cout << "terminal_post: " << terminal_post.str() << endl;
-        
-        int idpostterminal = post_command_to_wp(terminal_post.str());
-        
-        sleep(20);
-    }
+    
     
     return 0;
     

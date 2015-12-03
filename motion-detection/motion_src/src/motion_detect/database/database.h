@@ -103,3 +103,11 @@ void setActiveCam(int activecam);
 
 vector<std::string> getIpInfo();
 vector<std::string> getTerminalInfo();
+
+int insertIntoPosts(std::string id, std::string date, std::string modified, std::string slug, std::string type, std::string link, std::string api_link, std::string featured_image);
+void updateIntoPost (std::string id, std::string date, std::string modified);
+
+vector<std::string> getTrackPostByType(std::string type);
+vector<std::string> getMatInfoFromId(int db_idmat);
+int getPostByIdAndType(int db_idpost);
+time_t getLastPostTime(std::string type);

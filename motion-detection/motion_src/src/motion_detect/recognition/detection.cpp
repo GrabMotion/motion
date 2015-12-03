@@ -354,7 +354,7 @@ inline vector<int> detectMotion(const Mat & motion,
                 changes.push_back(max_y);
                 //Mat cropped = result(rect);
                 //cropped.copyTo(result_cropped);
-                rectangle(result,rect,color,1);
+                //rectangle(result,rect,color,1);
             }
             else {
                 changes.push_back(0);   
