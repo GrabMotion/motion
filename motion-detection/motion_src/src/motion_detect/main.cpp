@@ -854,7 +854,7 @@ motion::Message::MotionCamera * takePictureToProto(int camera, motion::Message::
     cout << "mcam->db_idcamera::" << mcam->db_idcamera() << endl;
     
     //Write base64 to file for checking.
-    std::string basefile = "data/mat/" + IntToString(activemat);
+    std::string basefile = basepath + "data/mat/" + IntToString(activemat);
     
     std::ofstream out;
     out.open (basefile.c_str());
@@ -983,7 +983,7 @@ Mat drawRectFromCoordinate(std::string coords, Mat mat, Scalar color)
         t++;
     }
     
-    for (int i=0; i<=coordinates.size(); i++ )
+    for (int i=0; i<coordinates.size()-1; i++ )
     {
         cout << i << " : " << coordinates.at(i) << " " << i + 1 <<  " : " << coordinates.at(i+1) << endl;
         cv::line(mat, coordinates.at(i), coordinates.at(i+1), cv::Scalar(1.0), 1, CV_AA); 
@@ -1880,87 +1880,90 @@ motion::Message saveRecognition(motion::Message m)
     // POSTING
     
     vector<std::string> mat_array = getMatInfoFromId(prec->db_idmat());
-    Mat mat = imread(mat_array.at(1));
-    Scalar red(255,0,0);
-  
-    mat = drawRectFromCoordinate(rcoords, mat, red);
-           
-    std::string trackdatafile = basepath + "data/tracking"; 
-    directoryExistsOrCreate(trackdatafile.c_str());
-    std::string recognitions = trackdatafile + "/recognitions";
-    directoryExistsOrCreate(recognitions.c_str());
-   
-    std::string fineandextension = recname + ".jpg";
-    std::string maximagepath = recognitions + "/" + fineandextension;
-    imwrite(maximagepath, mat);
-  
-    cout << "posting: " << fineandextension << endl;
-    
-    std::stringstream media;
-    media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << "' --data-binary @'"<< maximagepath << "' -d title='" << recname << "' -H \"Expect: \" http://dev.uimove.com/wp-json/wp/v2/media";
-
-    int idmedia = post_command_to_wp(false, media.str());
-    
-    if (idmedia)
+    bool matexist = file_exists(mat_array.at(1));
+    if (matexist)
     {
-        
-        int id = getPostByIdAndType(idmedia);
-        
-        vector<std::string> typeinfo = getTrackPostByType("terminal");
-        std::string postlink;
-        std::string apilink;
-        if (typeinfo.size()>0)
+        Mat mat = imread(mat_array.at(1));
+        Scalar red(255,0,0);
+
+        mat = drawRectFromCoordinate(rcoords, mat, red);
+
+        std::string trackdatafile = basepath + "data/tracking"; 
+        directoryExistsOrCreate(trackdatafile.c_str());
+        std::string recognitions = trackdatafile + "/recognitions";
+        directoryExistsOrCreate(recognitions.c_str());
+
+        std::string fineandextension = recname + ".jpg";
+        std::string maximagepath = recognitions + "/" + fineandextension;
+        imwrite(maximagepath, mat);
+
+        cout << "posting: " << fineandextension << endl;
+
+        std::stringstream media;
+        media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << "' --data-binary @'"<< maximagepath << "' -d title='" << recname << "' -H \"Expect: \" http://dev.uimove.com/wp-json/wp/v2/media";
+
+        int idmedia = post_command_to_wp(false, media.str());
+
+        if (idmedia)
         {
-           postlink = typeinfo.at(7);
-           apilink  = typeinfo.at(8);
+
+            int id = getPostByIdAndType(idmedia);
+
+            vector<std::string> typeinfo = getTrackPostByType("terminal");
+            std::string postlink;
+            std::string apilink;
+            if (typeinfo.size()>0)
+            {
+               postlink = typeinfo.at(7);
+               apilink  = typeinfo.at(8);
+            }
+
+            std::string terminal_link       = postlink;
+            std::string terminal_api        = apilink;
+            std::string codename            = prec->codename();
+            std::string region              = rcoords;
+            int delay                       = prec->delay();
+            bool runatstartup               = prec->runatstartup();
+            bool hascron                    = prec->hascron();
+            std::string screen              = mat_array.at(0);
+
+            std::stringstream post_content;
+            post_content <<
+            "<b>Recognition Name        :</b> "             << recname              <<  "\n"    <<
+            "<b>Terminal                :</b> "             << terminal_link        <<  "\n"    <<
+            "<b>Terminal API            :</b> "             << terminal_api         <<  "\n"   <<
+            "<b>Codename                :</b> "             << prec->codename()     <<  "\n"    <<
+            "<b>Region                  :</b> "             << rcoords              <<  "\n"    <<
+            "<b>Delay                   :</b> "             << prec->delay()        <<  "\n"    <<
+            "<b>Run at startup          :</b> "             << prec->runatstartup() <<  "\n"    <<
+            "<b>Has cron job            :</b> "             << prec->hascron()      <<  "\n"    <<
+            "<b>Screen size             :</b> "             << screen               <<  "\n";
+
+
+            std::stringstream recognition_post;
+            recognition_post << "curl --user jose:joselon -X POST -d " << 
+            "'{\"title\":\""            << recname     <<  "\","   <<
+            "\"content_raw\":\"Content\",\"content\":\""<< escape(post_content.str()) <<  "\","     <<
+            "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
+            "\"featured_image\":\""     << id               <<  "\","   <<                
+            "\"name\":\""               << recname          <<  "\","   <<
+            "\"terminal\":\""           << terminal_link    <<  "\","   <<        
+            "\"terminal_api\":\""       << terminal_api     <<  "\","   <<        
+            "\"codename\":\""           << prec->codename() <<  "\","   <<                
+            "\"region\":\""             << rcoords          <<  "\","   <<                        
+            "\"delay\":\""              << prec->delay()    <<  "\","   <<                        
+            "\"runatstartup\":\""       << prec->runatstartup()         <<  "\","   <<                        
+            "\"hascron\":\""            << prec->hascron()              <<  "\","   <<                                               
+            "\"screen\":\""             << screen           <<  "\","   <<                                   
+            "\"keepalive_time\":\""     << time_rasp    <<  "\"}'"      <<   
+            " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
+            " http://dev.uimove.com/wp-json/wp/v2/recognition";
+
+            cout << "terminal_post: " << recognition_post.str() << endl;
+
+            post_command_to_wp(false, recognition_post.str());
         }
-
-        std::string terminal_link       = postlink;
-        std::string terminal_api        = apilink;
-        std::string codename            = prec->codename();
-        std::string region              = rcoords;
-        int delay                       = prec->delay();
-        bool runatstartup               = prec->runatstartup();
-        bool hascron                    = prec->hascron();
-        std::string screen              = mat_array.at(0);
-
-        std::stringstream post_content;
-        post_content <<
-        "<b>Recognition Name        :</b> "             << recname              <<  "\n"    <<
-        "<b>Terminal                :</b> "             << terminal_link        <<  "\n"    <<
-        "<b>Terminal API            :</b> "             << terminal_api         <<  "\n"   <<
-        "<b>Codename                :</b> "             << prec->codename()     <<  "\n"    <<
-        "<b>Region                  :</b> "             << rcoords              <<  "\n"    <<
-        "<b>Delay                   :</b> "             << prec->delay()        <<  "\n"    <<
-        "<b>Run at startup          :</b> "             << prec->runatstartup() <<  "\n"    <<
-        "<b>Has cron job            :</b> "             << prec->hascron()      <<  "\n"    <<
-        "<b>Screen size             :</b> "             << screen               <<  "\n";
-
-
-        std::stringstream recognition_post;
-        recognition_post << "curl --user jose:joselon -X POST -d " << 
-        "'{\"title\":\""            << recname     <<  "\","   <<
-        "\"content_raw\":\"Content\",\"content\":\""<< escape(post_content.str()) <<  "\","     <<
-        "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
-        "\"featured_image\":\""     << id               <<  "\","   <<                
-        "\"name\":\""               << recname          <<  "\","   <<
-        "\"terminal\":\""           << terminal_link    <<  "\","   <<        
-        "\"terminal_api\":\""       << terminal_api     <<  "\","   <<        
-        "\"codename\":\""           << prec->codename() <<  "\","   <<                
-        "\"region\":\""             << rcoords          <<  "\","   <<                        
-        "\"delay\":\""              << prec->delay()    <<  "\","   <<                        
-        "\"runatstartup\":\""       << prec->runatstartup()         <<  "\","   <<                        
-        "\"hascron\":\""            << prec->hascron()              <<  "\","   <<                                               
-        "\"screen\":\""             << screen           <<  "\","   <<                                   
-        "\"keepalive_time\":\""     << time_rasp    <<  "\"}'"      <<   
-        " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
-        " http://dev.uimove.com/wp-json/wp/v2/recognition";
-
-        cout << "terminal_post: " << recognition_post.str() << endl;
-
-        post_command_to_wp(false, recognition_post.str());
-    }
-   
+    } 
     return m; 
 }
 

@@ -1707,9 +1707,9 @@ vector<std::string> getMatInfoFromId(int db_idmat)
         std::stringstream screen;
         std::string matwidth = mat_array.at(0).at(4);
         std::string matheight = mat_array.at(0).at(5);
-        screen << "[" << matwidth << "," << matheight << "]";                              //screen size
+        screen << "[" << matwidth << "," << matheight << "]";                           //screen size
         matidarray.push_back(screen.str());                                             //screen             0
-        matidarray.push_back(mat_array.at(0).at(7));                                    //hardware           1
+        matidarray.push_back(mat_array.at(0).at(6));                                    //matfile            1
     }
     return matidarray;
 }
