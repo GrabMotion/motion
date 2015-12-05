@@ -110,4 +110,7 @@ void updateIntoPost (std::string id, std::string date, std::string modified);
 vector<std::string> getTrackPostByType(std::string type);
 vector<std::string> getMatInfoFromId(int db_idmat);
 int getPostByIdAndType(int db_idpost);
+vector<vector<string> > getTrackPosts(std::string type);
+vector<vector<string> > getTrackPostChilds(int id);
+
 time_t getLastPostTime(std::string type);

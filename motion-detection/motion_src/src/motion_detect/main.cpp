@@ -91,6 +91,10 @@ Mat getImageWithTextByPath(std::string imagefilepath);
 Mat getImageWithRectByPath(std::string imagefilepath);
 Mat drawRectFromCoordinate(std::string coords, Mat mat, Scalar color);
 
+void terminalPost(double timecount);
+void postCameraStatus();
+void postTerminalStatus();
+
 char * setTimeToRaspBerry(struct tm tmremote, int timezone_adjust);
 
 std::string parse_json( json_object* j );
@@ -98,7 +102,7 @@ std::string parse_json_array( json_object* j, char* key );
 
 std::string getMediaIdFromJSON(std::string message);
 //void * postImage(void * args);
-int postImage(int db_instance_id);
+int postIstance(int db_instance_id);
 void split(const string& s, char c, vector<string>& v);
 int post_command_to_wp(std::string command);
 void insertHost(char *cstr);
@@ -193,13 +197,13 @@ char * setTimeToRaspBerry(struct tm tmremote, int timezone_adjust)
     
     char * text_time;
     std::cout << std::endl;
-    std::cout << " Seconds  :"  << tmremote.tm_sec  << std::endl;
-    std::cout << " Minutes  :"  << tmremote.tm_min  << std::endl;
-    std::cout << " Hours    :"  << tmremote.tm_hour << std::endl;
-    std::cout << " Day      :"  << tmremote.tm_mday << std::endl;
-    std::cout << " Month    :"  << tmremote.tm_mon  << std::endl;
-    std::cout << " Year     :"  << tmremote.tm_year << std::endl;
-    std::cout << std::endl;
+    //std::cout << " Seconds  :"  << tmremote.tm_sec  << std::endl;
+    //std::cout << " Minutes  :"  << tmremote.tm_min  << std::endl;
+    //std::cout << " Hours    :"  << tmremote.tm_hour << std::endl;
+    //std::cout << " Day      :"  << tmremote.tm_mday << std::endl;
+    //std::cout << " Month    :"  << tmremote.tm_mon  << std::endl;
+    //std::cout << " Year     :"  << tmremote.tm_year << std::endl;
+    //std::cout << std::endl;
     struct tm mytime;
     struct timeval tv;
     time_t epoch_time;
@@ -286,9 +290,9 @@ std::string parse_json ( json_object* j )
         ss << key;
         std::string strkey = ss.str();
          
-        std::cout << std::endl;
-        std::cout << "json key: " << key << std::endl;
-        std::cout << std::endl;
+        //std::cout << std::endl;
+        //std::cout << "json key: " << key << std::endl;
+        //std::cout << std::endl;
          
         switch ( type ) {
                  
@@ -315,7 +319,7 @@ std::string parse_json ( json_object* j )
         }
     }
      
-    std::cout << "RETURN" << std::endl;
+    //std::cout << "RETURN" << std::endl;
      
     return val;
 }
@@ -775,6 +779,38 @@ Mat getImageWithTextByPath(std::string imagefilepath)
     return mat;
 }
 
+Mat extractMat(string loadedmat)
+{
+    std::string oridecoded = base64_decode(loadedmat);
+
+    stringstream decoded;
+    decoded << oridecoded;
+
+    // The data we need to deserialize.
+    int width_d = 0;
+    int height_d = 0;
+    int type_d = 0;
+    int size_d = 0;
+
+    // Read the width, height, type and size of the buffer
+    decoded.read((char*)(&width_d), sizeof(int));
+    decoded.read((char*)(&height_d), sizeof(int));
+    decoded.read((char*)(&type_d), sizeof(int));
+    decoded.read((char*)(&size_d), sizeof(int));
+
+    // Allocate a buffer for the pixels
+    char* data_d = new char[size_d];
+    // Read the pixels from the stringstream
+    decoded.read(data_d, size_d);
+
+    Mat extracted = cv::Mat(height_d, width_d, type_d, data_d).clone();
+
+    // Delete our buffer
+    delete[]data_d;
+
+    return extracted;
+}
+
 motion::Message::MotionCamera * takePictureToProto(int camera, motion::Message::MotionCamera * mcam)
 {
     
@@ -986,12 +1022,12 @@ Mat drawRectFromCoordinate(std::string coords, Mat mat, Scalar color)
     for (int i=0; i<coordinates.size()-1; i++ )
     {
         cout << i << " : " << coordinates.at(i) << " " << i + 1 <<  " : " << coordinates.at(i+1) << endl;
-        cv::line(mat, coordinates.at(i), coordinates.at(i+1), cv::Scalar(1.0), 1, CV_AA); 
+        cv::line(mat, coordinates.at(i), coordinates.at(i+1), color, 1, CV_AA); 
     }     
     return mat;
 }
 
-int postImage(int db_instance_id, std::string content)
+int postInstance(int db_instance_id, std::string content)
 {
     
     vector<string> max_image = getMaxImageByPath(db_instance_id);
@@ -1075,34 +1111,50 @@ void * startObserver(void * arg)
         
         observer_running = true; 
         
-        for (int k=0; k< cams.size(); k++)
-        {
-            
-            std::cout << "::: CAM " << k << " OBSERVE " << observe << " :::" << std::endl;
-            
-            std::stringstream dumpcamera;
-            dumpcamera << dumpinstancefolder << "/camera" << cams.at(k);
-            std::string dumpfolder = dumpcamera.str() + "/";
-            
-            struct dirent **entry_list;
-            int count;
-            int i;
-            struct stat st;
+        struct dirent **entry_list_device;
+        int count_device;
+        struct stat stdev;
 
-            count = scandir(dumpfolder.c_str(), &entry_list, 0, versionsort);
-            if (count < 0) 
+        count_device = scandir(dumpinstancefolder.c_str(), &entry_list_device, 0, versionsort);
+        if (count_device < 0) 
+        {
+            break;
+        }
+        
+        for (int i = 0; i < count_device; i++) 
+        {
+            struct dirent *entry_device;
+            entry_device = entry_list_device[i];
+            
+            std::string name = entry_list_device[i]->d_name;
+            
+            if (entry_device->d_name[0] != '.' && entry_device->d_name[strlen(entry_device->d_name)-1] != '~') 
+            {
+                break;
+            }
+            
+            std::string devicedir = dumpinstancefolder + "/" + entry_device->d_name;
+               
+            std::string dumpfolder = devicedir + "/";
+            
+            struct dirent **entry_list_instances;
+            int count_inst;
+            struct stat stin;
+
+            count_inst = scandir(dumpfolder.c_str(), &entry_list_instances, 0, versionsort);
+            if (count_inst < 0) 
             {
                 break;
             }
 
-            for (i = 0; i < count; i++) 
+            for (int j = 0; j < count_inst; j++) 
             {
-                struct dirent *entry;
-                entry = entry_list[i];
+                struct dirent *entry_inst;
+                entry_inst = entry_list_instances[j];
                 
-                std::string dumpfile = dumpcamera.str() + "/" + entry->d_name;
-                lstat(dumpfile.c_str(), &st);
-                bool isdir = S_ISDIR(st.st_mode);
+                std::string dumpfile = dumpfolder + "/" + entry_inst->d_name;
+                lstat(dumpfile.c_str(), &stin);
+                bool isdir = S_ISDIR(stin.st_mode);
                 if (!isdir)
                 {
                     if(dumpfile.substr(dumpfile.find_last_of(".") + 1) == "dat") 
@@ -1169,7 +1221,7 @@ void * startObserver(void * arg)
                         "<p>Begin time:</p> " << pinstance.begintime()          << "\n" <<           
                         "<p>End time:</p> " << pinstance.endtime()              << "\n";           
                         
-                        int post = postImage(db_instance_id, postcontent.str());
+                        int post = postInstance(db_instance_id, postcontent.str());
 
                         if (post)
                         {
@@ -1188,13 +1240,153 @@ void * startObserver(void * arg)
                         }
                     }
                 }
-                free(entry);
+                free(entry_inst);
             }
-            free(entry_list);          
+            free(entry_device);          
+            free(entry_list_instances);          
         }
-        observe ++;
+        free(entry_list_device);          
         sleep(30);
     } 
+}
+
+void loadInstancesFromFile()
+{
+    struct dirent **entry_list_device;
+    int count_device;
+    struct stat stdev;
+
+    count_device = scandir(dumpinstancefolder.c_str(), &entry_list_device, 0, versionsort);
+    if (count_device < 0) 
+    {
+        return;
+    }
+
+    for (int i = 0; i < count_device; i++) 
+    {
+        struct dirent *entry_device;
+        entry_device = entry_list_device[i];
+
+        std::string name = entry_list_device[i]->d_name;
+
+        if (entry_device->d_name[0] != '.' && entry_device->d_name[strlen(entry_device->d_name)-1] != '~') 
+        {
+            break;
+        }
+
+        std::string devicedir = dumpinstancefolder + "/" + entry_device->d_name;
+
+        std::string dumpfolder = devicedir + "/";
+
+        struct dirent **entry_list_instances;
+        int count_inst;
+        struct stat stin;
+
+        count_inst = scandir(dumpfolder.c_str(), &entry_list_instances, 0, versionsort);
+        if (count_inst < 0) 
+        {
+            break;
+        }
+
+        for (int j = 0; j < count_inst; j++) 
+        {
+            struct dirent *entry_inst;
+            entry_inst = entry_list_instances[j];
+
+            std::string dumpfile = dumpfolder + "/" + entry_inst->d_name;
+            lstat(dumpfile.c_str(), &stin);
+            bool isdir = S_ISDIR(stin.st_mode);
+            if (!isdir)
+            {
+                if(dumpfile.substr(dumpfile.find_last_of(".") + 1) == "dat") 
+                {
+
+                    std::string protodata = get_file_contents(dumpfile);
+                    std::string oridecoded = base64_decode(protodata);
+
+                    motion::Message::Instance pinstance;
+
+                    pinstance.ParsePartialFromArray(oridecoded.c_str(), oridecoded.size());
+
+                    std::string XMLFILE = pinstance.xmlfile(); 
+                    if(!std::ifstream(XMLFILE.c_str()))
+                    {
+                        build_xml(XMLFILE.c_str());
+                    }
+
+                    time_t tbegin = pinstance.begintime();
+                    time_t tinit = pinstance.inittime();
+                    time_t tend = pinstance.endtime();
+
+                    time_t begin_t = (tbegin - tinit) / CLOCKS_PER_SEC;
+                    std::ostringstream begin;
+                    begin << begin_t;
+                    std::ostringstream end;
+                    end << (tend - tinit) / CLOCKS_PER_SEC;
+                    writeXMLInstance(XMLFILE, begin.str(), end.str(), pinstance.instance(), pinstance.instancecode());
+
+                    pinstance.set_instancestart(begin.str());
+                    pinstance.set_instanceend(end.str());
+
+                    vector<int> images;
+                    images.clear();
+
+                    int imagesize = pinstance.image_size();
+
+                    for (int j = 0; j < imagesize; j++)
+                    {
+                        //Image
+                        int db_image_id;
+                        const motion::Message::Image & img = pinstance.image(j);
+                        db_image_id = insertIntoIMage(img);
+                        const motion::Message::Crop & crop = pinstance.crop(j);                
+                        insertIntoCrop(crop, db_image_id);
+                        images.push_back(db_image_id);
+                    } 
+
+                    struct tm t_mend;
+                    std::stringstream endt;
+                    endt << pinstance.endtime();
+                    const char * endtimechar = endt.str().c_str();
+
+                    motion::Message::Video dvideo = pinstance.video();
+                    int db_video_id = insertIntoVideo(dvideo);
+                    int db_instance_id = insertIntoInstance(pinstance.instance(), &pinstance, endtimechar, db_video_id, images);
+
+                    std::stringstream postcontent;
+                    postcontent << 
+                    "<p>Camera name:</p> " << pinstance.camera()            << "\n" << 
+                    "<p>Camera number:</p> " << pinstance.cameranumber()    << "\n" << 
+                    "<p>Recognition Job:</p> " << pinstance.recname()       << "\n" << 
+                    "<p>Instance:</p> " << pinstance.instance()             << "\n\n" <<   
+                    "<p>Begin time:</p> " << pinstance.begintime()          << "\n" <<           
+                    "<p>End time:</p> " << pinstance.endtime()              << "\n";           
+
+                    int post = postInstance(db_instance_id, postcontent.str());
+
+                    if (post)
+                    {
+
+                        int removed = remove( dumpfile.c_str() );
+                        if( removed != 0 )
+                        {
+                            cout << "Cannot delete instance dump data file: " << dumpfile << endl;
+                            exit(0);
+                        } else
+                        {
+                            cout << "instance data file removed: " << dumpfile << endl;
+                        }
+
+                        pinstance.Clear(); 
+                    }
+                }
+            }
+            free(entry_inst);
+        }
+        free(entry_device);          
+        free(entry_list_instances);          
+    }
+    free(entry_list_device);   
 }
 
 std::string IntToString ( int number )
@@ -1880,10 +2072,14 @@ motion::Message saveRecognition(motion::Message m)
     // POSTING
     
     vector<std::string> mat_array = getMatInfoFromId(prec->db_idmat());
+    std::string path = mat_array.at(1);
     bool matexist = file_exists(mat_array.at(1));
     if (matexist)
     {
-        Mat mat = imread(mat_array.at(1));
+        string loadedmat = get_file_contents(path);
+        
+        Mat mat = extractMat(loadedmat);
+       
         Scalar red(255,0,0);
 
         mat = drawRectFromCoordinate(rcoords, mat, red);
@@ -1898,72 +2094,98 @@ motion::Message saveRecognition(motion::Message m)
         imwrite(maximagepath, mat);
 
         cout << "posting: " << fineandextension << endl;
-
-        std::stringstream media;
-        media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << "' --data-binary @'"<< maximagepath << "' -d title='" << recname << "' -H \"Expect: \" http://dev.uimove.com/wp-json/wp/v2/media";
-
-        int idmedia = post_command_to_wp(false, media.str());
-
-        if (idmedia)
+        
+        bool jpgexist = file_exists(maximagepath);
+        if (jpgexist)
         {
 
-            int id = getPostByIdAndType(idmedia);
+            std::stringstream media;
+            media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << 
+            "' --data-binary @'"<< maximagepath << "' -d title='" << recname << "' -H \"Expect: \" http://dev.uimove.com/wp-json/wp/v2/media";
 
-            vector<std::string> typeinfo = getTrackPostByType("terminal");
-            std::string postlink;
-            std::string apilink;
-            if (typeinfo.size()>0)
+            int idmedia = post_command_to_wp(false, media.str());
+
+            if (idmedia)
             {
-               postlink = typeinfo.at(7);
-               apilink  = typeinfo.at(8);
+
+                int id = getPostByIdAndType(idmedia);
+
+                vector<std::string> typeinfo = getTrackPostByType("terminal");
+                std::string postlink;
+                std::string apilink;
+                if (typeinfo.size()>0)
+                {
+                   postlink = typeinfo.at(6);
+                   apilink  = typeinfo.at(7);
+                }
+
+                std::string terminal_link       = postlink;
+                std::string terminal_api        = apilink;
+                std::string codename            = prec->codename();
+                std::string region              = rcoords;
+                int delay                       = prec->delay();
+                bool runatstartup               = prec->runatstartup();
+                bool hascron                    = prec->hascron();
+                std::string screen              = mat_array.at(0);
+                
+                std::string coordsnb = region;    
+                coordsnb.erase(std::remove(coordsnb.begin(), coordsnb.end(), '\n'), coordsnb.end());
+                
+                std::stringstream post_content;
+                post_content <<
+                "<b>Recognition Name        :</b> "             << recname              <<  "\n\n"    <<
+                "<b>Recognizing             :</b> "             << "NO"                 <<  "\n"    <<
+                "<b>Codename                :</b> "             << prec->codename()     <<  "\n"    <<
+                "<b>Region                  :</b> "             << coordsnb             <<  "\n"    <<
+                "<b>Delay                   :</b> "             << prec->delay()        <<  "\n"    <<
+                "<b>Run at startup          :</b> "             << prec->runatstartup() <<  "\n"    <<
+                "<b>Has cron job            :</b> "             << prec->hascron()      <<  "\n"    <<
+                "<b>Screen size             :</b> "             << screen               <<  "\n\n"  <<
+                "<b>API URL                 :</b> "             << "N/A"                <<  "\n"    <<
+                "<b>Keep Alive              :</b> "             << time_rasp            <<  "\n\n";
+
+                
+                std::string content = escape(post_content.str());
+                        
+                std::stringstream terminal_post_url;
+                terminal_post_url << escape("<a href='") << terminal_link << escape("' target='_blank'>") << terminal_link << escape("</a>"); 
+                std::stringstream terminal_url;
+                terminal_url << escape("<b>Terminal                :</b> ") << terminal_post_url.str() << escape("\n"); 
+                
+                content += terminal_url.str();
+                
+                std::stringstream terminal_api_url;
+                terminal_api_url << escape("<a href='") << terminal_api << escape("' target='_blank'>") << terminal_api << escape("</a>"); 
+                std::stringstream terminal_api_url_json;
+                terminal_api_url_json << escape("<b>Terminal Api            :</b> ") << terminal_api_url.str() << escape("\n"); 
+                
+                content += terminal_api_url_json.str();
+                
+                std::stringstream recognition_post;
+                recognition_post << "curl --user jose:joselon -X POST -d " << 
+                "'{\"title\":\""            << recname     <<  "\","    <<
+                "\"content_raw\":\"Content\",\"content\":\""<< content  <<  "\","       <<
+                "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
+                "\"featured_image\":\""     << idmedia          <<  "\","   <<                
+                "\"name\":\""               << recname          <<  "\","   <<
+                "\"terminal\":\""           << terminal_link    <<  "\","   <<        
+                "\"terminal_api\":\""       << terminal_api     <<  "\","   <<        
+                "\"codename\":\""           << prec->codename() <<  "\","   <<                
+                "\"region\":\""             << escape(region)   <<  "\","   <<                        
+                "\"delay\":\""              << prec->delay()    <<  "\","   <<                        
+                "\"runatstartup\":\""       << prec->runatstartup()         <<  "\","   <<                        
+                "\"hascron\":\""            << prec->hascron()              <<  "\","   <<                                               
+                "\"screen\":\""             << screen           <<  "\","   <<                                   
+                "\"keepalive_time\":\""     << time_rasp    <<  "\"}'"      <<   
+                " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
+                " http://dev.uimove.com/wp-json/wp/v2/recognition";
+
+                cout << "terminal_post: " << recognition_post.str() << endl;
+
+                post_command_to_wp(false, recognition_post.str());
             }
-
-            std::string terminal_link       = postlink;
-            std::string terminal_api        = apilink;
-            std::string codename            = prec->codename();
-            std::string region              = rcoords;
-            int delay                       = prec->delay();
-            bool runatstartup               = prec->runatstartup();
-            bool hascron                    = prec->hascron();
-            std::string screen              = mat_array.at(0);
-
-            std::stringstream post_content;
-            post_content <<
-            "<b>Recognition Name        :</b> "             << recname              <<  "\n"    <<
-            "<b>Terminal                :</b> "             << terminal_link        <<  "\n"    <<
-            "<b>Terminal API            :</b> "             << terminal_api         <<  "\n"   <<
-            "<b>Codename                :</b> "             << prec->codename()     <<  "\n"    <<
-            "<b>Region                  :</b> "             << rcoords              <<  "\n"    <<
-            "<b>Delay                   :</b> "             << prec->delay()        <<  "\n"    <<
-            "<b>Run at startup          :</b> "             << prec->runatstartup() <<  "\n"    <<
-            "<b>Has cron job            :</b> "             << prec->hascron()      <<  "\n"    <<
-            "<b>Screen size             :</b> "             << screen               <<  "\n";
-
-
-            std::stringstream recognition_post;
-            recognition_post << "curl --user jose:joselon -X POST -d " << 
-            "'{\"title\":\""            << recname     <<  "\","   <<
-            "\"content_raw\":\"Content\",\"content\":\""<< escape(post_content.str()) <<  "\","     <<
-            "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
-            "\"featured_image\":\""     << id               <<  "\","   <<                
-            "\"name\":\""               << recname          <<  "\","   <<
-            "\"terminal\":\""           << terminal_link    <<  "\","   <<        
-            "\"terminal_api\":\""       << terminal_api     <<  "\","   <<        
-            "\"codename\":\""           << prec->codename() <<  "\","   <<                
-            "\"region\":\""             << rcoords          <<  "\","   <<                        
-            "\"delay\":\""              << prec->delay()    <<  "\","   <<                        
-            "\"runatstartup\":\""       << prec->runatstartup()         <<  "\","   <<                        
-            "\"hascron\":\""            << prec->hascron()              <<  "\","   <<                                               
-            "\"screen\":\""             << screen           <<  "\","   <<                                   
-            "\"keepalive_time\":\""     << time_rasp    <<  "\"}'"      <<   
-            " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
-            " http://dev.uimove.com/wp-json/wp/v2/recognition";
-
-            cout << "terminal_post: " << recognition_post.str() << endl;
-
-            post_command_to_wp(false, recognition_post.str());
-        }
-    } 
+        } 
+    }
     return m; 
 }
 
@@ -2962,6 +3184,125 @@ void postTerminalStatus()
     
 }
 
+void postCameraStatus()
+{
+    
+    vector<std::string> terminfo = getTrackPostByType("terminal");
+    std::string term_api_url;
+    std::string term_url;
+    if (terminfo.size()>0)
+    {
+       term_api_url = terminfo.at(7);
+       term_url = terminfo.at(8);
+    }
+    
+    vector<vector<string> > recinfo = getTrackPosts("recognition");
+    bool hasrec = false;
+    if (recinfo.size()>0)
+    {
+       hasrec = true; 
+    }
+    
+    vector<vector<string> > caminfo = getTrackPosts("camera");
+    bool update_camera = false;
+    if (caminfo.size()>0)
+    {
+       update_camera = true; 
+    }
+    
+    std::vector<int> camsarray;
+    stringstream sql_cams;
+    sql_cams   <<
+    "SELECT C.name, C.number FROM cameras;";
+    cout << "sql_active_cam: " << sql_cams.str() << endl;
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > array_cams = db_select(sql_cams.str().c_str(), 2);
+    pthread_mutex_unlock(&databaseMutex);
+
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    
+    for (int i=0; i<camsarray.size(); i++)
+    {
+        std::string cameraname = array_cams.at(i).at(0);
+        std::string cameranumber = array_cams.at(i).at(1);
+        
+        //vector<string> childs_array = getTrackPostChilds(caminfo.at(i).at(10));
+        //if (childs_array.size()>0)
+        //{
+            
+        //}
+        
+        std::stringstream post_cam_content;
+        post_cam_content <<
+        "<b>Name                    :</b> "             << cameraname       <<  "\n"    <<
+        "<b>Number                  :</b> "             << cameranumber     <<  "\n\n"  <<
+        "<b>Keep Alive              :</b> "             << time_rasp        <<  "\n\n";   
+        
+        std::string content;
+        content = escape(post_cam_content.str());
+        
+        std::stringstream api_cam_post_url;
+        std::stringstream post_cam_content_update;
+        
+        std::string api_url = caminfo.at(i).at(7);
+       
+        if (update_camera)
+        {
+            api_cam_post_url << escape("<a href='") << api_url << escape("' target='_blank'>") << api_url << escape("</a>"); 
+            post_cam_content_update << escape("<b>API URL                  :</b> ") << api_cam_post_url.str() << escape("\n\n"); 
+            content += post_cam_content_update.str();
+        } 
+
+        std::stringstream term_post_url;
+        std::stringstream post_term_content_update;
+        
+        term_post_url << escape("<a href='") << term_url << escape("' target='_blank'>") << term_url << escape("</a>"); 
+        post_term_content_update << escape("<b>TERMINAL                  :</b> ") << term_post_url.str() << escape("\n\n"); 
+        content += post_term_content_update.str();
+        
+        std::stringstream api_term_api_url;
+        std::stringstream post_term_api_content_update;
+        
+        api_term_api_url << escape("<a href='") << term_api_url << escape("' target='_blank'>") << term_api_url << escape("</a>"); 
+        post_term_api_content_update << escape("<b>API URL                  :</b> ") << api_term_api_url.str() << escape("\n\n"); 
+        content += post_term_api_content_update.str();
+
+        std::string posttype;
+        std::string url;
+        if (update_camera)
+        {
+            posttype = "PUT";
+            url = api_url;
+        } else
+        {
+            posttype = "POST";
+            url = "http://dev.uimove.com/wp-json/wp/v2/camera";
+        }
+        
+        std::stringstream terminal_post;
+        terminal_post << "curl --user jose:joselon -X "         << posttype << " -d " << 
+        "'{\"title\":\""            << cameraname     <<  "\","   <<
+        "\"content_raw\":\"Content\",\"content\":\""<<  content <<  "\","     <<
+        "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","       <<
+        "\"name\":\""               << cameraname   <<  "\","       <<
+        "\"number\":\""             << cameranumber <<  "\","       <<        
+        //"\"recognition_array\":\""  << recognition_array      <<  "\","      <<                             
+        "\"keepalive_time\":\""     << time_rasp    <<  "\"}'"      <<   
+        " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
+        " " << url << ";" ;
+
+        cout << "terminal_post: " << terminal_post.str() << endl;
+
+        post_command_to_wp(update_camera, terminal_post.str());
+    }
+  
+}
+
 void terminalPost(double timecount)
 {
     bool post_terminal = false;
@@ -3298,14 +3639,14 @@ int main (int argc, char * const av[])
             std::string param_camera = argv[2];
             std::string param_name   = argv[3];
             
-            bool load = loadStartQuery(param_camera, param_name); 
-            if (load)
-            {
-                startMainRecognition();
-            } else 
-            {
-                cout << "No matching values for the current arguments." << endl; 
-            }
+            //bool load = loadStartQuery(param_camera, param_name); 
+            //if (load)
+            //{
+            //    startMainRecognition();
+            //} else 
+            //{
+            //    cout << "No matching values for the current arguments." << endl; 
+            //}
         } 
         else if (doparam=="-stop")
         {
@@ -3364,15 +3705,22 @@ int main (int argc, char * const av[])
     if ( runs  != 0) {
         cerr << "Unable to create thread" << endl;
     }
+   
+    //Run Forever
+    double t_postcount      = 60 * 20; //60 * 24; 
+    double t_loadinstance   = 10; //60 * 24; 
     
     for (;;)
     {
-        //Post Terminal
-        double timepostcount = 60 * 10; //60 * 24; 
-        terminalPost(timepostcount);
+        time_t now;
+        time(&now); 
         
+        //Post Terminal
+        terminalPost(t_postcount);
+        
+        loadInstancesFromFile();
        
-        sleep(50);
+        sleep(20);
     }
     
     //runo = pthread_create(&thread_observer, NULL, startObserver, NULL);

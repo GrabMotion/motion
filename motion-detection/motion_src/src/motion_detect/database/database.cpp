@@ -1276,16 +1276,14 @@ void updateIntoPost (std::string id, std::string date, std::string modified)
     
 }
 
-
-
 vector<std::string> getTrackPostByType(std::string type)
 {
     vector<std::string> info;
     
     std::stringstream typeinfo;
-    typeinfo << "SELECT * FROM track_posts WHERE type ='" << type << "' AND _id = (SELECT MAX(_id) FROM track_posts);";
+    typeinfo << "SELECT * FROM track_posts WHERE type ='" << type << "' AND _id = (SELECT MAX(_id) FROM track_posts WHERE type ='" << type << "')";
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > typeinfo_array = db_select(typeinfo.str().c_str(), 11);
+    vector<vector<string> > typeinfo_array = db_select(typeinfo.str().c_str(), 12);
     pthread_mutex_unlock(&databaseMutex);
     
     if (typeinfo_array.size()>0)
@@ -1301,10 +1299,49 @@ vector<std::string> getTrackPostByType(std::string type)
         info.push_back(typeinfo_array.at(0).at(8));
         info.push_back(typeinfo_array.at(0).at(9));
         info.push_back(typeinfo_array.at(0).at(10));
+        info.push_back(typeinfo_array.at(0).at(11));
     } 
-    
     return info;
+}
+
+vector<vector<string> > getTrackPosts(std::string type)
+{
+    vector<vector<string> > info;
     
+    std::stringstream typeinfo;
+    typeinfo << "SELECT * FROM track_posts WHERE type ='" << type << "';";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > typeinfo_array = db_select(typeinfo.str().c_str(), 11);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (typeinfo_array.size()>0)
+    {
+        return typeinfo_array;
+    } 
+    return info;
+}
+
+vector<vector<string> > getTrackPostChilds(int id)
+{
+    vector<vector<string> > child;
+    
+    std::stringstream typeinfo;
+    typeinfo << 
+    "SELECT "                   <<
+    "RTPC.post "                <<
+    "RTPC.post_url "            <<
+    "FROM track_posts AS TP "   <<
+    "JOIN rel_track_post_children AS RTPC ON TP._id_rel_track_post_children = RTPC._id_track_post " <<     
+    "WHERE TP._id_track_post =" << id << ";";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > postchilds_array = db_select(typeinfo.str().c_str(), 11);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (postchilds_array.size()>0)
+    {
+        return postchilds_array;
+    } 
+    return child;
 }
 
 time_t getLastPostTime(std::string type)

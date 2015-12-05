@@ -52,6 +52,8 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o
  /usr/local/include/google/protobuf/unknown_field_set.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/base64.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/../tinyxml/tinystr.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/../tinyxml/tinyxml.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/httppost.c
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp
@@ -62,6 +64,8 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/streamlistener.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinystr.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxml.h
  /usr/local/include/google/protobuf/descriptor.h
  /usr/local/include/google/protobuf/extension_set.h
  /usr/local/include/google/protobuf/generated_enum_reflection.h

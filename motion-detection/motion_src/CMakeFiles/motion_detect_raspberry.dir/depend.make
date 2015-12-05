@@ -51,6 +51,8 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o: /u
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o: /usr/local/include/google/protobuf/unknown_field_set.h
 
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/b64/base64.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/database/../tinyxml/tinystr.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/database/../tinyxml/tinyxml.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/database/database.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/http/httppost.c
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/main.cpp
@@ -61,6 +63,8 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_dete
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/recognition/detection.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/socket/netcvc.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/socket/streamlistener.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/tinyxml/tinystr.h
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: src/motion_detect/tinyxml/tinyxml.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/descriptor.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/extension_set.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o: /usr/local/include/google/protobuf/generated_enum_reflection.h
