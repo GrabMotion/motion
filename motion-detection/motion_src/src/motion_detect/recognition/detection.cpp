@@ -11,6 +11,7 @@
 //
   
 #include "../recognition/detection.h"
+
   
 #include <iostream>
 #include <fstream>
@@ -1079,7 +1080,24 @@ void dumpInstance(int activecamnum,
 
 
 
-
+bool isRecognizing()
+{
+    bool recognizing = false;
+    int sizec = R_PROTO.motioncamera_size();
+    for (int t = 0; t < sizec; t++)
+    {
+        pthread_mutex_lock(&protoMutex);
+        motion::Message::MotionCamera * mcamera = R_PROTO.mutable_motioncamera(t);
+        bool recis = mcamera->recognizing();
+        pthread_mutex_unlock(&protoMutex);    
+        if (recis)
+        {
+            recognizing = true;
+        }
+        
+    }
+    return recognizing;
+}
 
 
  

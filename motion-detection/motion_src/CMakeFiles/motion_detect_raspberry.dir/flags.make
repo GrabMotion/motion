@@ -3,11 +3,11 @@
 
 # compile C with /usr/bin/gcc
 # compile CXX with /usr/bin/c++
-C_FLAGS = -g -I/home/pi/motion/motion-detection/motion_src/src -I/usr/local/include -I/src/motion_detect/tinyxml -I/src/motion_detect/recognition -I/src/motion_detect/protobuffer -I/src/motion_detect/streaming -I/src/motion_detect/practical -I/src/motion_detect/ntp -I/src/motion_detect/b64 -I/src/motion_detect/socket -I/src/motion_detect/database -I/src/motion_detect/http   
+C_FLAGS = -g -I/home/pi/motion/motion-detection/motion_src/src -I/usr/local/include -I/src/motion_detect/tinyxml -I/src/motion_detect/recognition -I/src/motion_detect/protobuffer -I/src/motion_detect/streaming -I/src/motion_detect/practical -I/src/motion_detect/ntp -I/src/motion_detect/b64 -I/src/motion_detect/socket -I/src/motion_detect/database -I/src/motion_detect/http -I/src/motion_detect/utils -I/src/motion_detect/operations   
 
 C_DEFINES = 
 
-CXX_FLAGS = -o3 -w -g -I/home/pi/motion/motion-detection/motion_src/src -I/usr/local/include -I/src/motion_detect/tinyxml -I/src/motion_detect/recognition -I/src/motion_detect/protobuffer -I/src/motion_detect/streaming -I/src/motion_detect/practical -I/src/motion_detect/ntp -I/src/motion_detect/b64 -I/src/motion_detect/socket -I/src/motion_detect/database -I/src/motion_detect/http   
+CXX_FLAGS = -o3 -w -g -I/home/pi/motion/motion-detection/motion_src/src -I/usr/local/include -I/src/motion_detect/tinyxml -I/src/motion_detect/recognition -I/src/motion_detect/protobuffer -I/src/motion_detect/streaming -I/src/motion_detect/practical -I/src/motion_detect/ntp -I/src/motion_detect/b64 -I/src/motion_detect/socket -I/src/motion_detect/database -I/src/motion_detect/http -I/src/motion_detect/utils -I/src/motion_detect/operations   
 
 CXX_DEFINES = 
 

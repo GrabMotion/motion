@@ -17,6 +17,8 @@ INCLUDE_DIRECTORIES(
 	${SOCKET_DIRECTORY}  /src/motion_detect/socket
 	${DATABASE_DIRECTORY}  /src/motion_detect/database
         ${HTTP_DIRECTORY}  /src/motion_detect/http
+        ${UTILS_DIRECTORY}  /src/motion_detect/utils
+        ${OPERATIONS_DIRECTORY}  /src/motion_detect/operations
 )
 
 FIND_PACKAGE(Protobuf REQUIRED)
@@ -64,6 +66,20 @@ ADD_EXECUTABLE(motion_detect_raspberry
 	src/motion_detect/database/database.h
 	src/motion_detect/database/database.cpp
         src/motion_detect/http/httppost.c
+        src/motion_detect/http/post.cpp
+        src/motion_detect/http/post.h
+        src/motion_detect/http/json.cpp
+        src/motion_detect/http/json.h         
+        src/motion_detect/utils/utils.cpp
+        src/motion_detect/utils/utils.h
+        src/motion_detect/operations/communications.h
+        src/motion_detect/operations/communications.cpp
+        src/motion_detect/operations/camera.h
+        src/motion_detect/operations/camera.cpp
+        src/motion_detect/operations/observer.h
+        src/motion_detect/operations/observer.cpp
+        src/motion_detect/operations/startup.h
+        src/motion_detect/operations/startup.cpp
 )
 
 TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lcurl -lpthread -ljson -lm -ldl ${PROTOBUF_LIBRARIES} -lsqlite3 -lusb)

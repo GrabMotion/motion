@@ -17,7 +17,10 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/../database/../b64/base64.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/../database/../protobuffer/motion.pb.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/../database/../tinyxml/tinystr.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/../database/../tinyxml/tinyxml.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/../database/database.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/../utils/utils.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp
  /usr/local/include/google/protobuf/descriptor.h
  /usr/local/include/google/protobuf/extension_set.h
@@ -50,22 +53,264 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o
  /usr/local/include/google/protobuf/stubs/template_util.h
  /usr/local/include/google/protobuf/stubs/type_traits.h
  /usr/local/include/google/protobuf/unknown_field_set.h
+ /usr/local/include/opencv2/calib3d/calib3d.hpp
+ /usr/local/include/opencv2/contrib/contrib.hpp
+ /usr/local/include/opencv2/contrib/openfabmap.hpp
+ /usr/local/include/opencv2/contrib/retina.hpp
+ /usr/local/include/opencv2/core/core.hpp
+ /usr/local/include/opencv2/core/core_c.h
+ /usr/local/include/opencv2/core/mat.hpp
+ /usr/local/include/opencv2/core/operations.hpp
+ /usr/local/include/opencv2/core/types_c.h
+ /usr/local/include/opencv2/core/version.hpp
+ /usr/local/include/opencv2/features2d/features2d.hpp
+ /usr/local/include/opencv2/flann/config.h
+ /usr/local/include/opencv2/flann/defines.h
+ /usr/local/include/opencv2/flann/miniflann.hpp
+ /usr/local/include/opencv2/highgui/highgui.hpp
+ /usr/local/include/opencv2/highgui/highgui_c.h
+ /usr/local/include/opencv2/imgproc/imgproc.hpp
+ /usr/local/include/opencv2/imgproc/imgproc_c.h
+ /usr/local/include/opencv2/imgproc/types_c.h
+ /usr/local/include/opencv2/ml/ml.hpp
+ /usr/local/include/opencv2/objdetect/objdetect.hpp
+ /usr/local/include/opencv2/opencv.hpp
+ /usr/local/include/opencv2/photo/photo.hpp
+ /usr/local/include/opencv2/photo/photo_c.h
+ /usr/local/include/opencv2/video/background_segm.hpp
+ /usr/local/include/opencv2/video/tracking.hpp
+ /usr/local/include/opencv2/video/video.hpp
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/http/json.o
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/../http/json.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/json.cpp
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/http/post.o
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/../database/../b64/base64.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/../database/../tinyxml/tinystr.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/../database/../tinyxml/tinyxml.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/../database/database.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/../http/../protobuffer/motion.pb.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/../http/json.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/../http/post.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/../utils/utils.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/post.cpp
+ /usr/local/include/google/protobuf/descriptor.h
+ /usr/local/include/google/protobuf/extension_set.h
+ /usr/local/include/google/protobuf/generated_enum_reflection.h
+ /usr/local/include/google/protobuf/generated_message_util.h
+ /usr/local/include/google/protobuf/io/coded_stream.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream_impl.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream_impl_lite.h
+ /usr/local/include/google/protobuf/message.h
+ /usr/local/include/google/protobuf/message_lite.h
+ /usr/local/include/google/protobuf/repeated_field.h
+ /usr/local/include/google/protobuf/stubs/atomicops.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm64_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm_qnx.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_atomicword_compat.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_generic_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_macosx.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_mips_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_pnacl.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_solaris.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_tsan.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_x86_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_x86_msvc.h
+ /usr/local/include/google/protobuf/stubs/common.h
+ /usr/local/include/google/protobuf/stubs/once.h
+ /usr/local/include/google/protobuf/stubs/platform_macros.h
+ /usr/local/include/google/protobuf/stubs/stl_util.h
+ /usr/local/include/google/protobuf/stubs/template_util.h
+ /usr/local/include/google/protobuf/stubs/type_traits.h
+ /usr/local/include/google/protobuf/unknown_field_set.h
+ /usr/local/include/opencv2/calib3d/calib3d.hpp
+ /usr/local/include/opencv2/contrib/contrib.hpp
+ /usr/local/include/opencv2/contrib/openfabmap.hpp
+ /usr/local/include/opencv2/contrib/retina.hpp
+ /usr/local/include/opencv2/core/core.hpp
+ /usr/local/include/opencv2/core/core_c.h
+ /usr/local/include/opencv2/core/mat.hpp
+ /usr/local/include/opencv2/core/operations.hpp
+ /usr/local/include/opencv2/core/types_c.h
+ /usr/local/include/opencv2/core/version.hpp
+ /usr/local/include/opencv2/features2d/features2d.hpp
+ /usr/local/include/opencv2/flann/config.h
+ /usr/local/include/opencv2/flann/defines.h
+ /usr/local/include/opencv2/flann/miniflann.hpp
+ /usr/local/include/opencv2/highgui/highgui.hpp
+ /usr/local/include/opencv2/highgui/highgui_c.h
+ /usr/local/include/opencv2/imgproc/imgproc.hpp
+ /usr/local/include/opencv2/imgproc/imgproc_c.h
+ /usr/local/include/opencv2/imgproc/types_c.h
+ /usr/local/include/opencv2/ml/ml.hpp
+ /usr/local/include/opencv2/objdetect/objdetect.hpp
+ /usr/local/include/opencv2/opencv.hpp
+ /usr/local/include/opencv2/photo/photo.hpp
+ /usr/local/include/opencv2/photo/photo_c.h
+ /usr/local/include/opencv2/video/background_segm.hpp
+ /usr/local/include/opencv2/video/tracking.hpp
+ /usr/local/include/opencv2/video/video.hpp
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o
- /home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/base64.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/../tinyxml/tinystr.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/../tinyxml/tinyxml.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.h
- /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/httppost.c
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/http/post.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../practical/PracticalSocket.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/communications.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/observer.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/startup.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../b64/base64.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../protobuffer/motion.pb.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.h
- /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/netcvc.h
- /home/pi/motion/motion-detection/motion_src/src/motion_detect/socket/streamlistener.h
- /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinystr.h
- /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxml.h
+ /usr/local/include/google/protobuf/descriptor.h
+ /usr/local/include/google/protobuf/extension_set.h
+ /usr/local/include/google/protobuf/generated_enum_reflection.h
+ /usr/local/include/google/protobuf/generated_message_util.h
+ /usr/local/include/google/protobuf/io/coded_stream.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream_impl.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream_impl_lite.h
+ /usr/local/include/google/protobuf/message.h
+ /usr/local/include/google/protobuf/message_lite.h
+ /usr/local/include/google/protobuf/repeated_field.h
+ /usr/local/include/google/protobuf/stubs/atomicops.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm64_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm_qnx.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_atomicword_compat.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_generic_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_macosx.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_mips_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_pnacl.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_solaris.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_tsan.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_x86_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_x86_msvc.h
+ /usr/local/include/google/protobuf/stubs/common.h
+ /usr/local/include/google/protobuf/stubs/once.h
+ /usr/local/include/google/protobuf/stubs/platform_macros.h
+ /usr/local/include/google/protobuf/stubs/stl_util.h
+ /usr/local/include/google/protobuf/stubs/template_util.h
+ /usr/local/include/google/protobuf/stubs/type_traits.h
+ /usr/local/include/google/protobuf/unknown_field_set.h
+ /usr/local/include/opencv2/calib3d/calib3d.hpp
+ /usr/local/include/opencv2/contrib/contrib.hpp
+ /usr/local/include/opencv2/contrib/openfabmap.hpp
+ /usr/local/include/opencv2/contrib/retina.hpp
+ /usr/local/include/opencv2/core/core.hpp
+ /usr/local/include/opencv2/core/core_c.h
+ /usr/local/include/opencv2/core/mat.hpp
+ /usr/local/include/opencv2/core/operations.hpp
+ /usr/local/include/opencv2/core/types_c.h
+ /usr/local/include/opencv2/core/version.hpp
+ /usr/local/include/opencv2/features2d/features2d.hpp
+ /usr/local/include/opencv2/flann/config.h
+ /usr/local/include/opencv2/flann/defines.h
+ /usr/local/include/opencv2/flann/miniflann.hpp
+ /usr/local/include/opencv2/highgui/highgui.hpp
+ /usr/local/include/opencv2/highgui/highgui_c.h
+ /usr/local/include/opencv2/imgproc/imgproc.hpp
+ /usr/local/include/opencv2/imgproc/imgproc_c.h
+ /usr/local/include/opencv2/imgproc/types_c.h
+ /usr/local/include/opencv2/ml/ml.hpp
+ /usr/local/include/opencv2/objdetect/objdetect.hpp
+ /usr/local/include/opencv2/opencv.hpp
+ /usr/local/include/opencv2/photo/photo.hpp
+ /usr/local/include/opencv2/photo/photo_c.h
+ /usr/local/include/opencv2/video/background_segm.hpp
+ /usr/local/include/opencv2/video/tracking.hpp
+ /usr/local/include/opencv2/video/video.hpp
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/camera.o
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../operations/camera.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/camera.cpp
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/communications.o
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../b64/base64.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../database/../tinyxml/tinystr.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../database/../tinyxml/tinyxml.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../database/database.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../http/post.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../operations/../practical/PracticalSocket.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../operations/../protobuffer/motion.pb.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../operations/camera.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../operations/communications.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../socket/netcvc.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../utils/utils.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/communications.cpp
+ /usr/local/include/google/protobuf/descriptor.h
+ /usr/local/include/google/protobuf/extension_set.h
+ /usr/local/include/google/protobuf/generated_enum_reflection.h
+ /usr/local/include/google/protobuf/generated_message_util.h
+ /usr/local/include/google/protobuf/io/coded_stream.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream_impl.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream_impl_lite.h
+ /usr/local/include/google/protobuf/message.h
+ /usr/local/include/google/protobuf/message_lite.h
+ /usr/local/include/google/protobuf/repeated_field.h
+ /usr/local/include/google/protobuf/stubs/atomicops.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm64_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm_qnx.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_atomicword_compat.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_generic_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_macosx.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_mips_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_pnacl.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_solaris.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_tsan.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_x86_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_x86_msvc.h
+ /usr/local/include/google/protobuf/stubs/common.h
+ /usr/local/include/google/protobuf/stubs/once.h
+ /usr/local/include/google/protobuf/stubs/platform_macros.h
+ /usr/local/include/google/protobuf/stubs/stl_util.h
+ /usr/local/include/google/protobuf/stubs/template_util.h
+ /usr/local/include/google/protobuf/stubs/type_traits.h
+ /usr/local/include/google/protobuf/unknown_field_set.h
+ /usr/local/include/opencv2/calib3d/calib3d.hpp
+ /usr/local/include/opencv2/contrib/contrib.hpp
+ /usr/local/include/opencv2/contrib/openfabmap.hpp
+ /usr/local/include/opencv2/contrib/retina.hpp
+ /usr/local/include/opencv2/core/core.hpp
+ /usr/local/include/opencv2/core/core_c.h
+ /usr/local/include/opencv2/core/mat.hpp
+ /usr/local/include/opencv2/core/operations.hpp
+ /usr/local/include/opencv2/core/types_c.h
+ /usr/local/include/opencv2/core/version.hpp
+ /usr/local/include/opencv2/features2d/features2d.hpp
+ /usr/local/include/opencv2/flann/config.h
+ /usr/local/include/opencv2/flann/defines.h
+ /usr/local/include/opencv2/flann/miniflann.hpp
+ /usr/local/include/opencv2/highgui/highgui.hpp
+ /usr/local/include/opencv2/highgui/highgui_c.h
+ /usr/local/include/opencv2/imgproc/imgproc.hpp
+ /usr/local/include/opencv2/imgproc/imgproc_c.h
+ /usr/local/include/opencv2/imgproc/types_c.h
+ /usr/local/include/opencv2/ml/ml.hpp
+ /usr/local/include/opencv2/objdetect/objdetect.hpp
+ /usr/local/include/opencv2/opencv.hpp
+ /usr/local/include/opencv2/photo/photo.hpp
+ /usr/local/include/opencv2/photo/photo_c.h
+ /usr/local/include/opencv2/video/background_segm.hpp
+ /usr/local/include/opencv2/video/tracking.hpp
+ /usr/local/include/opencv2/video/video.hpp
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/observer.o
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/observer.cpp
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/startup.o
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../database/../b64/base64.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../database/../tinyxml/tinystr.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../database/../tinyxml/tinyxml.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../database/database.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../http/json.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../operations/camera.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../operations/startup.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../utils/../protobuffer/motion.pb.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/../utils/utils.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/startup.cpp
  /usr/local/include/google/protobuf/descriptor.h
  /usr/local/include/google/protobuf/extension_set.h
  /usr/local/include/google/protobuf/generated_enum_reflection.h
@@ -164,12 +409,12 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o
  /usr/local/include/google/protobuf/wire_format_lite.h
  /usr/local/include/google/protobuf/wire_format_lite_inl.h
 CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../database/../tinyxml/tinystr.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../database/../tinyxml/tinyxml.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../database/database.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../recognition/../b64/base64.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../recognition/../protobuffer/motion.pb.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../recognition/detection.h
- /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../tinyxml/tinystr.h
- /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/../tinyxml/tinyxml.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp
  /usr/local/include/google/protobuf/descriptor.h
  /usr/local/include/google/protobuf/extension_set.h
@@ -382,3 +627,69 @@ CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinystr.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxml.h
  /home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlparser.cpp
+CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/utils/utils.o
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/utils/../database/../b64/base64.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/utils/../database/../tinyxml/tinystr.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/utils/../database/../tinyxml/tinyxml.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/utils/../database/database.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/utils/../utils/../protobuffer/motion.pb.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/utils/../utils/utils.h
+ /home/pi/motion/motion-detection/motion_src/src/motion_detect/utils/utils.cpp
+ /usr/local/include/google/protobuf/descriptor.h
+ /usr/local/include/google/protobuf/extension_set.h
+ /usr/local/include/google/protobuf/generated_enum_reflection.h
+ /usr/local/include/google/protobuf/generated_message_util.h
+ /usr/local/include/google/protobuf/io/coded_stream.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream_impl.h
+ /usr/local/include/google/protobuf/io/zero_copy_stream_impl_lite.h
+ /usr/local/include/google/protobuf/message.h
+ /usr/local/include/google/protobuf/message_lite.h
+ /usr/local/include/google/protobuf/repeated_field.h
+ /usr/local/include/google/protobuf/stubs/atomicops.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm64_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_arm_qnx.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_atomicword_compat.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_generic_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_macosx.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_mips_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_pnacl.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_solaris.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_tsan.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_x86_gcc.h
+ /usr/local/include/google/protobuf/stubs/atomicops_internals_x86_msvc.h
+ /usr/local/include/google/protobuf/stubs/common.h
+ /usr/local/include/google/protobuf/stubs/once.h
+ /usr/local/include/google/protobuf/stubs/platform_macros.h
+ /usr/local/include/google/protobuf/stubs/stl_util.h
+ /usr/local/include/google/protobuf/stubs/template_util.h
+ /usr/local/include/google/protobuf/stubs/type_traits.h
+ /usr/local/include/google/protobuf/unknown_field_set.h
+ /usr/local/include/opencv2/calib3d/calib3d.hpp
+ /usr/local/include/opencv2/contrib/contrib.hpp
+ /usr/local/include/opencv2/contrib/openfabmap.hpp
+ /usr/local/include/opencv2/contrib/retina.hpp
+ /usr/local/include/opencv2/core/core.hpp
+ /usr/local/include/opencv2/core/core_c.h
+ /usr/local/include/opencv2/core/mat.hpp
+ /usr/local/include/opencv2/core/operations.hpp
+ /usr/local/include/opencv2/core/types_c.h
+ /usr/local/include/opencv2/core/version.hpp
+ /usr/local/include/opencv2/features2d/features2d.hpp
+ /usr/local/include/opencv2/flann/config.h
+ /usr/local/include/opencv2/flann/defines.h
+ /usr/local/include/opencv2/flann/miniflann.hpp
+ /usr/local/include/opencv2/highgui/highgui.hpp
+ /usr/local/include/opencv2/highgui/highgui_c.h
+ /usr/local/include/opencv2/imgproc/imgproc.hpp
+ /usr/local/include/opencv2/imgproc/imgproc_c.h
+ /usr/local/include/opencv2/imgproc/types_c.h
+ /usr/local/include/opencv2/ml/ml.hpp
+ /usr/local/include/opencv2/objdetect/objdetect.hpp
+ /usr/local/include/opencv2/opencv.hpp
+ /usr/local/include/opencv2/photo/photo.hpp
+ /usr/local/include/opencv2/photo/photo_c.h
+ /usr/local/include/opencv2/video/background_segm.hpp
+ /usr/local/include/opencv2/video/tracking.hpp
+ /usr/local/include/opencv2/video/video.hpp

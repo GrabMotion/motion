@@ -15,6 +15,13 @@ FILE(REMOVE_RECURSE
   "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/socket/netcvc.o"
   "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o"
   "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/http/httppost.o"
+  "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/http/post.o"
+  "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/http/json.o"
+  "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/utils/utils.o"
+  "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/communications.o"
+  "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/camera.o"
+  "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/observer.o"
+  "CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/startup.o"
   "src/motion_detect/motion_detect_raspberry.pdb"
   "src/motion_detect/motion_detect_raspberry"
 )

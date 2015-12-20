@@ -17,6 +17,8 @@
 extern CvCapture * camera;
 extern cv::VideoCapture * videocam;
 
+bool isRecognizing();
+
 //Observer Recogition
 extern std::string basepath;
 extern bool is_recognizing;

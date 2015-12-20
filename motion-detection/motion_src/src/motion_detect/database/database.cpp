@@ -7,6 +7,7 @@
  */
 
 #include "../database/database.h"
+#include "../utils/utils.h"
 
 using namespace google::protobuf::io;
 
@@ -178,28 +179,28 @@ int db_cpuinfo()
         revision    = splitString(revision, ": ").at(1);
         serial      = splitString(serial, ": ").at(1);
         
-        stringstream sql;
-        sql <<
-        "INSERT INTO hardware (model, hardware, serial, revision) " <<
+        stringstream sql_terminal;
+        sql_terminal <<
+        "INSERT INTO terminal (model, hardware, serial, revision) " <<
         "SELECT '"  << model        << "'"
         ", '"       << hardware     << "'"
         ", '"       << serial       << "'"
         ", '"       << revision     << "'" <<
-        " WHERE NOT EXISTS (SELECT * FROM hardware WHERE model  = '" << model    << "' " <<
+        " WHERE NOT EXISTS (SELECT * FROM terminal WHERE model  = '" << model    << "' " <<
         " AND hardware  = '"    << hardware     << "' " <<
         " AND serial    = '"    << serial       << "' " <<
         " AND revision  = '"    << revision     << "' " << ");";
-        std::string stdquery = sql.str().c_str();
+        std::string stdquery = sql_terminal.str().c_str();
         pthread_mutex_lock(&databaseMutex);
         db_execute(stdquery.c_str());
         pthread_mutex_unlock(&databaseMutex);
     
-        std::string last_hardware_id_query = "SELECT MAX(_id) FROM hardware;";
+        std::string last_terminal_id_query = "SELECT MAX(_id) FROM terminal;";
         pthread_mutex_lock(&databaseMutex);
-        vector<vector<string> > hardware_array = db_select(last_hardware_id_query.c_str(), 1);
+        vector<vector<string> > terminal_array = db_select(last_terminal_id_query.c_str(), 1);
         pthread_mutex_unlock(&databaseMutex);
-        int db_hardware_id = atoi(hardware_array.at(0).at(0).c_str());
-        cout << "db_hardware_id: " << db_hardware_id << endl;
+        int db_terminal_id = atoi(terminal_array.at(0).at(0).c_str());
+        cout << "db_terminal_id: " << db_terminal_id << endl;
          
         FILE *in;
 	char buff[512];
@@ -228,26 +229,47 @@ int db_cpuinfo()
 	}
 	pclose(in);
         
+        FILE *temp;
+        char bufftemp[512];
+        if(!(temp = popen("vcgencmd measure_temp", "r")))
+        {
+            return 1;
+        }
+
+        std::string temperature;
+        while(fgets(bufftemp, sizeof(bufftemp), temp)!=NULL)
+        {
+            stringstream bus;
+            bus << bufftemp;
+            temperature = bus.str();
+        }
+        pclose(temp);
+        
         cout << "0: " << result.at(0) << endl;
         cout << "1: " << result.at(1) << endl;
         cout << "2: " << result.at(2) << endl;
         cout << "3: " << result.at(3) << endl;
         cout << "4: " << result.at(4) << endl;
         
-        stringstream sql_update_hard;
-        sql_update_hard <<
-        "UPDATE hardware SET " <<
+        std::string tempnotparsed = splitString(temperature, "'").at(0);
+        std::string tmp = splitString(tempnotparsed, "=").at(1); 
+     
+        stringstream sql_update_terminal;
+        sql_update_terminal <<
+        "UPDATE terminal SET "                  <<
         "disktotal = "      << result.at(1)     << ", "
         "diskused = "       << result.at(2)     << ", "
         "diskavailable = "  << result.at(3)     << ", "
-        "diskper = '"       << result.at(4)     << "' "
-        "WHERE _id  = " << db_hardware_id    << ";";
-        std::string stdhardquery = sql_update_hard.str().c_str();
+        "diskper = '"       << result.at(4)     << "', "
+        "temperature = '"   << tmp              << "' "
+        "WHERE _id  = "     << db_terminal_id   << ";";
+        std::string stdterminalquery = sql_update_terminal.str().c_str();
+        cout << "stdterminalquery: " << stdterminalquery << endl;
         pthread_mutex_lock(&databaseMutex);
-        db_execute(stdhardquery.c_str());
+        db_execute(stdterminalquery.c_str());
         pthread_mutex_unlock(&databaseMutex);
        
-    return db_hardware_id;
+    return db_terminal_id;
    
 }
 
@@ -435,7 +457,8 @@ bool loadStartQuery(std::string camera, std::string recname)
     
     std::string XML_FILE = "<import>session"; 
     
-    std::string xml_path = getXMLFilePathAndName(camnum, recname, _day, XML_FILE);
+    
+    std::string xml_path = getXMLFilePathAndName(sourcepath, camnum, recname, _day, XML_FILE);
   
     int db_dayid = insertDayIntoDatabase(_day, db_month_id);
     
@@ -636,6 +659,7 @@ vector<string> getMaxImageByPath(google::protobuf::int32 instanceid)
         check_istances <<
         "SELECT "                   <<
         "MAX(I.imagechanges), "     <<
+        "I._id, "                   <<        
         "I.path, "                  <<
         "I.name, "                  <<
         "D.label, "                 <<
@@ -654,22 +678,24 @@ vector<string> getMaxImageByPath(google::protobuf::int32 instanceid)
         cout << "check_istances: " << check_istances.str() << endl;
 
         pthread_mutex_lock(&databaseMutex);
-        vector<vector<string> > image_array = db_select(check_istances.str().c_str(), 7);
+        vector<vector<string> > image_array = db_select(check_istances.str().c_str(), 8);
         pthread_mutex_unlock(&databaseMutex); 
 
         if (image_array.size()>0)
         {
-            std::string path = image_array.at(0).at(1);
+            std::string _id = image_array.at(0).at(1);
+            maximage.push_back(_id);
+            std::string path = image_array.at(0).at(2);
             maximage.push_back(path);
-            std::string name = image_array.at(0).at(2);
+            std::string name = image_array.at(0).at(3);
             maximage.push_back(name);
-            std::string day = image_array.at(0).at(3);
+            std::string day = image_array.at(0).at(4);
             maximage.push_back(day);
-            std::string rec = image_array.at(0).at(4);
+            std::string rec = image_array.at(0).at(5);
             maximage.push_back(rec);
-            std::string time = image_array.at(0).at(5);
+            std::string time = image_array.at(0).at(6);
             maximage.push_back(time);   
-            std::string coords = image_array.at(0).at(6);
+            std::string coords = image_array.at(0).at(7);
             maximage.push_back(coords);   
         }
     }
@@ -853,7 +879,9 @@ int insertServerIntoDatabase(int clientnumber, std::string clientname, std::stri
 {
     std::stringstream sql_insert_server;
     sql_insert_server << "INSERT OR REPLACE INTO server (_id, client_number, client_name, base_url) values (" <<
-    "1, " << clientnumber << ", '" << clientname << ", '" << base << "');";
+    "1, " << clientnumber << ", '" << clientname << "', '" << base << "');";
+    
+    cout << "sql_insert_server: " << sql_insert_server.str() << endl;
     
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_insert_server.str().c_str());   
@@ -1217,7 +1245,7 @@ vector<string> getIntervalsByCamberaAndRec(std::string camera, std::string recna
 }
 
 
-void insertIntoHost(std::string publicip, std::string hostname, std::string city, std::string region, std::string country, std::string loc, std::string org)
+void insertIntoLocation(std::string publicip, std::string hostname, std::string city, std::string region, std::string country, std::string loc, std::string org)
 {
     struct timeval tr;
     struct tm* ptmr;
@@ -1227,18 +1255,27 @@ void insertIntoHost(std::string publicip, std::string hostname, std::string city
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
     
     //rel_camera_month.
-    stringstream sql_host;
-    sql_host <<
-    "INSERT INTO host (publicip, hostname, city, region, country, location, organization, time) " <<
+    stringstream sql_location;
+    sql_location <<
+    "INSERT INTO location (publicip, hostname, city, region, country, location, organization, time) " <<
     "SELECT '" << publicip << "', '"  << hostname << "', '" << city << "', '" << region << "', '" << country << "', '" << loc << "', '" << org << "', '" << time_rasp << "'" << 
-    " WHERE NOT EXISTS (SELECT * FROM host WHERE publicip = '" << publicip << "');";
-    cout << "sql_host: " << sql_host.str() << endl;
+    " WHERE NOT EXISTS (SELECT * FROM location WHERE publicip = '" << publicip << "');";
+    cout << "sql_location: " << sql_location.str() << endl;
     pthread_mutex_lock(&databaseMutex); 
-    db_execute(sql_host.str().c_str());
+    db_execute(sql_location.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
 }
 
-int insertIntoPosts(std::string id, std::string date, std::string modified, std::string slug, std::string type, std::string link, std::string api_link, std::string featured_image)
+int insertIntoPosts(std::string id, 
+        std::string date, 
+        std::string modified, 
+        std::string slug, 
+        std::string type, 
+        std::string link, 
+        std::string api_link, 
+        std::string featured_image, 
+        std::string post_parent,
+        int db_local)
 {
     struct timeval tr;
     struct tm* ptmr;
@@ -1250,8 +1287,8 @@ int insertIntoPosts(std::string id, std::string date, std::string modified, std:
     //rel_camera_month.
     stringstream sql_posts;
     sql_posts <<
-    "INSERT INTO track_posts (id, date, modified, slug, type, link, api_link, featured_image, count_update, time_rasp) " <<
-    "SELECT " << id << ", '"  << date << "', '" << modified << "', '" << slug << "', '" << type << "', '" << link << "', '" << api_link << "', '" << featured_image << "', 0, '" << time_rasp << "'" << 
+    "INSERT INTO track_posts (id, date, modified, slug, type, link, api_link, featured_image, post_parent, count_update, db_local, time_rasp) " <<
+    "SELECT " << id << ", '"  << date << "', '" << modified << "', '" << slug << "', '" << type << "', '" << link << "', '" << api_link << "', '" << featured_image << "', '" << post_parent << "', 0, " << db_local << ",'" << time_rasp << "'" << 
     " WHERE NOT EXISTS (SELECT * FROM track_posts WHERE id = " << id << ");";
     cout << "sql_posts: " << sql_posts.str() << endl;
     pthread_mutex_lock(&databaseMutex); 
@@ -1303,23 +1340,45 @@ vector<std::string> getTrackPostByType(std::string type)
     std::stringstream typeinfo;
     typeinfo << "SELECT * FROM track_posts WHERE type ='" << type << "' AND _id = (SELECT MAX(_id) FROM track_posts WHERE type ='" << type << "')";
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > typeinfo_array = db_select(typeinfo.str().c_str(), 12);
+    cout << "typeinfo: " << typeinfo.str() << endl;
+    vector<vector<string> > typeinfo_array = db_select(typeinfo.str().c_str(), 13);
     pthread_mutex_unlock(&databaseMutex);
     
     if (typeinfo_array.size()>0)
     {
-        info.push_back(typeinfo_array.at(0).at(0));
-        info.push_back(typeinfo_array.at(0).at(1));
-        info.push_back(typeinfo_array.at(0).at(2));
-        info.push_back(typeinfo_array.at(0).at(3));
-        info.push_back(typeinfo_array.at(0).at(4));
-        info.push_back(typeinfo_array.at(0).at(5));
-        info.push_back(typeinfo_array.at(0).at(6));
-        info.push_back(typeinfo_array.at(0).at(7));
-        info.push_back(typeinfo_array.at(0).at(8));
-        info.push_back(typeinfo_array.at(0).at(9));
-        info.push_back(typeinfo_array.at(0).at(10));
-        info.push_back(typeinfo_array.at(0).at(11));
+        info.push_back(typeinfo_array.at(0).at(0));     // _id
+        info.push_back(typeinfo_array.at(0).at(1));     // id
+        info.push_back(typeinfo_array.at(0).at(2));     // date
+        info.push_back(typeinfo_array.at(0).at(3));     // modified
+        info.push_back(typeinfo_array.at(0).at(4));     // slug
+        info.push_back(typeinfo_array.at(0).at(5));     // type
+        info.push_back(typeinfo_array.at(0).at(6));     // link
+        info.push_back(typeinfo_array.at(0).at(7));     // api_link
+        info.push_back(typeinfo_array.at(0).at(8));     // featured_image
+        info.push_back(typeinfo_array.at(0).at(9));     // post_parent
+        info.push_back(typeinfo_array.at(0).at(10));    // count_update
+        info.push_back(typeinfo_array.at(0).at(11));    // db_local
+        info.push_back(typeinfo_array.at(0).at(12));    // time_rasp
+    } 
+    return info;
+}
+
+vector<std::string> getTrackPostByTypeAndId(std::string type, int db_local)
+{
+    vector<std::string> info;
+    
+    std::stringstream typeinfo;
+    typeinfo << "SELECT * FROM track_posts WHERE type ='" << type << "' "           << 
+    "AND _id = (SELECT MAX(_id) FROM track_posts WHERE type ='" << type << "') "
+    "AND db_local = " << db_local << ";";
+    pthread_mutex_lock(&databaseMutex);
+    cout << "typeinfo: " << typeinfo.str() << endl;
+    vector<vector<string> > typeinfo_array = db_select(typeinfo.str().c_str(), 13);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (typeinfo_array.size()>0)
+    {
+        return typeinfo_array.at(0);
     } 
     return info;
 }
@@ -1392,7 +1451,7 @@ vector<std::string> getIpInfo()
     vector<std::string> info;
     
     std::stringstream ipinfo;
-    ipinfo << "SELECT publicip, time FROM host;";
+    ipinfo << "SELECT publicip, time FROM location;";
     pthread_mutex_lock(&databaseMutex);
     vector<vector<string> > ipinfo_array = db_select(ipinfo.str().c_str(), 2);
     pthread_mutex_unlock(&databaseMutex);
@@ -1411,9 +1470,9 @@ vector<std::string> getLocationInfo()
     vector<std::string> info_location;
     
     std::stringstream locinfo;
-    locinfo << "SELECT city, country, location FROM host;";
+    locinfo << "SELECT _id, city, country, location FROM location;";
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > locinfo_array = db_select(locinfo.str().c_str(), 3);
+    vector<vector<string> > locinfo_array = db_select(locinfo.str().c_str(), 4);
     pthread_mutex_unlock(&databaseMutex);
     
     if (locinfo_array.size()>0)
@@ -1421,6 +1480,7 @@ vector<std::string> getLocationInfo()
         info_location.push_back(locinfo_array.at(0).at(0));
         info_location.push_back(locinfo_array.at(0).at(1));
         info_location.push_back(locinfo_array.at(0).at(2));
+        info_location.push_back(locinfo_array.at(0).at(3));
     } 
     
     return info_location;    
@@ -1706,20 +1766,20 @@ vector<std::string> getTerminalInfo()
         terminal.push_back(macaddress);                     //macaddress            2
     }
     
-    std::stringstream sql_host;
-    sql_host << "SELECT * " <<
-    "FROM host WHERE _id = (SELECT MAX(_id) FROM host);";
+    std::stringstream sql_location;
+    sql_location << "SELECT * " <<
+    "FROM location WHERE _id = (SELECT MAX(_id) FROM location);";
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > host_array = db_select(sql_host.str().c_str(), 9);
+    vector<vector<string> > location_array = db_select(sql_location.str().c_str(), 9);
     pthread_mutex_unlock(&databaseMutex);
     
-    if (host_array.size()>0)
+    if (location_array.size()>0)
     {
-        terminal.push_back(host_array.at(0).at(2)); //hostname              3
-        terminal.push_back(host_array.at(0).at(3)); //city                  4
-        terminal.push_back(host_array.at(0).at(5)); //country               5
-        terminal.push_back(host_array.at(0).at(6)); //location              6
-        terminal.push_back(host_array.at(0).at(7)); //network_provider      7
+        terminal.push_back(location_array.at(0).at(2)); //hostname              3
+        terminal.push_back(location_array.at(0).at(3)); //city                  4
+        terminal.push_back(location_array.at(0).at(5)); //country               5
+        terminal.push_back(location_array.at(0).at(6)); //location              6
+        terminal.push_back(location_array.at(0).at(7)); //network_provider      7
     }
     
     std::string sql_status = "SELECT * FROM status;";
@@ -1733,38 +1793,25 @@ vector<std::string> getTerminalInfo()
         terminal.push_back(status_array.at(0).at(2)); //starttime           9
     }
     
-    std::string sql_hardware = "SELECT * FROM hardware;";
+    std::string sql_terminal = "SELECT * FROM terminal;";
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > hardware_array = db_select(sql_hardware.c_str(), 9);
+    vector<vector<string> > terminal_array = db_select(sql_terminal.c_str(), 10);
     pthread_mutex_unlock(&databaseMutex);
     
-    if (hardware_array.size()>0)
+    if (terminal_array.size()>0)
     {
-        terminal.push_back(hardware_array.at(0).at(1)); //model                 10
-        terminal.push_back(hardware_array.at(0).at(2)); //hardware              11
-        terminal.push_back(hardware_array.at(0).at(3)); //serial                12
-        terminal.push_back(hardware_array.at(0).at(5)); //disktotal             13
-        terminal.push_back(hardware_array.at(0).at(6)); //diskused              14
-        terminal.push_back(hardware_array.at(0).at(7)); //diskavailable         15
-        terminal.push_back(hardware_array.at(0).at(8)); //disk_percentage_used  16
+        terminal.push_back(terminal_array.at(0).at(0)); //db_local              10
+        terminal.push_back(terminal_array.at(0).at(1)); //model                 11
+        terminal.push_back(terminal_array.at(0).at(2)); //hardware              12
+        terminal.push_back(terminal_array.at(0).at(3)); //serial                13
+        terminal.push_back(terminal_array.at(0).at(4)); //revision              14
+        terminal.push_back(terminal_array.at(0).at(5)); //disktotal             15
+        terminal.push_back(terminal_array.at(0).at(6)); //diskused              16
+        terminal.push_back(terminal_array.at(0).at(7)); //diskavailable         17
+        terminal.push_back(terminal_array.at(0).at(8)); //disk_percentage_used  18
+        terminal.push_back(terminal_array.at(0).at(9)); //temperature           19
     }
-    
-    std::string sql_camera = "SELECT name FROM cameras;";
-    pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > camera_array = db_select(sql_camera.c_str(), 1);
-    pthread_mutex_unlock(&databaseMutex);
-    
-    std::stringstream cams;
-    if (camera_array.size()>0)
-    {
-        for (int t=0; t< camera_array.size(); t++)
-        {
-           cams << "[" << camera_array.at(t).at(0) << "]";
-            
-        }
-    }
-    terminal.push_back(cams.str());                     //cameras  17
-    
+   
     return terminal;
     
 }
@@ -1822,4 +1869,328 @@ vector<std::string> getServerInfo()
         return server_array.at(0);
     }
     return matidarray;
+}
+
+void insertUpdateStatus(std::string uptime, vector<int> camsarray, int db_terminal_id)
+{
+    
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    
+    //Status
+    stringstream sql_status;
+    sql_status <<
+    "INSERT INTO status (uptime, starttime) " <<
+    "SELECT '"  << uptime         << "'"
+    ", '"       << time_rasp        << "' "
+    "WHERE NOT EXISTS (SELECT * FROM status WHERE uptime = '"<< uptime << "' " <<
+    "AND starttime = '" << time_rasp << "');";
+    cout << "sql_status: " << sql_status.str() << endl;
+    db_execute(sql_status.str().c_str());
+    
+    std::string last_status_id_query = "SELECT MAX(_id) FROM status";
+    vector<vector<string> > status_array = db_select(last_status_id_query.c_str(), 1);
+    int db_status_id = atoi(status_array.at(0).at(0).c_str());
+    cout << "db_status_id: " << db_status_id << endl;
+    
+    stringstream sql_status_update;
+    sql_status_update <<
+    "UPDATE status SET "
+    "uptime = '"    << uptime << "',"
+    "starttime = '" << time_rasp << "' "
+    "WHERE _id = " << db_status_id << ";";
+    cout << "sql_status_update: " << sql_status_update.str() << endl;
+    db_execute(sql_status_update.str().c_str());
+    
+    cout << "Getting hard info." << endl;
+    vector<int> camhard;
+    for (int i=0; i< camsarray.size(); i++)
+    {
+        stringstream insert_camera_query;
+        insert_camera_query <<
+        "INSERT INTO rel_terminal_camera (_id_terminal, _id_camera) " <<
+        "SELECT " << db_terminal_id << "," << camsarray.at(i) <<
+        " WHERE NOT EXISTS (SELECT * FROM rel_terminal_camera WHERE _id_terminal = "
+        << db_terminal_id << " AND _id_camera = " << camsarray.at(i) << ");";
+        cout << "insert_camera_query: " << insert_camera_query.str() << endl;
+        db_execute(insert_camera_query.str().c_str());
+            
+        std::string last_har_cam_id_query = "SELECT MAX(_id) FROM rel_terminal_camera";
+        vector<vector<string> > camhard_array = db_select(last_har_cam_id_query.c_str(), 1);
+        int db_cam_hard_id = atoi(camhard_array.at(0).at(0).c_str());
+        cout << "db_cam_hard_id: " << db_cam_hard_id << endl;
+            
+        camhard.push_back(db_cam_hard_id);
+        
+    }
+    
+    //rel_terminal_camera_status
+    for (int i=0; i< camhard.size(); i++)
+    {
+        stringstream insert_rel_hardcamsta_query;
+        insert_rel_hardcamsta_query <<
+        "INSERT INTO rel_terminal_camera_status (_id_terminal_camera, _id_status) " <<
+        "SELECT " << camhard.at(i) << "," << db_status_id <<
+        " WHERE NOT EXISTS (SELECT * FROM rel_terminal_camera_status WHERE _id_terminal_camera = "
+        << camhard.at(i) << " AND _id_status = " << db_status_id << ");";
+        cout << "insert_rel_hardcamsta_query: " << insert_rel_hardcamsta_query.str() << endl;
+        db_execute(insert_rel_hardcamsta_query.str().c_str());
+    }
+    
+    //Reset to recognizing = 0 to all jobs
+    stringstream sql_update_recognizing;
+    sql_update_recognizing <<
+    "UPDATE recognition_setup SET recognizing = 0;";
+    db_execute(sql_update_recognizing.str().c_str());
+    
+}
+
+motion::Message saveRecognition(motion::Message m)
+{
+    
+    motion::Message::MotionCamera * pcamera = m.mutable_motioncamera(0);
+    motion::Message::MotionRec * prec = pcamera->mutable_motionrec(0);
+
+    int sizec = m.motioncamera_size();
+
+    cout << "sizec: " << sizec << endl;
+    bool cameraexist = false;
+
+    std::string rcoords;
+    int db_coordnatesid; 
+    if (prec->hasregion())
+    {
+        std::string rc = prec->coordinates(); 
+        rcoords = base64_decode(rc);
+        db_coordnatesid = insertRegionIntoDatabase(rcoords);   
+        m.set_data(rcoords);
+    }
+
+     //Month.
+    string str_month;
+    if (m.has_currmonth())
+    {
+        str_month = m.currmonth();
+    }
+    cout << "str_month: " << str_month << endl;
+
+    motion::Message::MotionMonth * pmonth = pcamera->mutable_motionmonth(0);
+
+    std::string cameraname = pcamera->cameraname();
+
+    stringstream sql_camera;
+    sql_camera   <<
+    "SELECT C._id FROM cameras AS C WHERE name = '" << cameraname << "';";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > camera_array = db_select(sql_camera.str().c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+
+    int db_camera_id = atoi(camera_array.at(0).at(0).c_str());
+
+    int db_month_id = insertMonthIntoDatabase(str_month, db_camera_id);
+
+    string str_day;
+    if (m.has_currday())
+    {
+        str_day = m.currday();
+    }
+
+    google::protobuf::uint32 activecam = m.activecam();
+
+    std::string recname = prec->recname();
+
+    std::string xml_path = getXMLFilePathAndName(sourcepath, activecam, recname, str_day, XML_FILE);
+
+     //time
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+
+    int db_dayid;
+    int db_recognition_setupid;
+    
+    db_dayid = insertDayIntoDatabase(str_day, db_month_id);
+    int db_recognitionsetup_id = insertIntoRecognitionSetup(prec, db_dayid, db_camera_id, db_coordnatesid, xml_path);
+    prec->set_db_idrec(db_recognitionsetup_id);
+    
+    int db_camera_recognition_setupl_array = insertIntoRelCameraRecognitionSetup(time_rasp, db_recognitionsetup_id, db_camera_id);
+
+    if (prec->hascron())
+    {
+        insertIntervalCrontabIntoDatabase(pcamera, prec, db_camera_recognition_setupl_array); 
+    }   
+    return m; 
+}
+
+
+motion::Message::MotionCamera * getMonthByCameraIdMonthAndDate(
+                motion::Message::MotionCamera * mcam,   
+                std::string camid, 
+                std::string month, 
+                std::string day,
+                std::string rec)
+{
+     
+    stringstream sql_month;
+    sql_month                   <<
+    "SELECT "                   <<
+    "D._id AS dayid, "          <<  //0
+    "D.label, "                 <<  //1    
+    "I.instancestart, "         <<  //2  
+    "I.instanceend, "           <<  //3
+    "IM._id, "                  <<  //4
+    "IM.imagechanges, "         <<  //5
+    "IM.name AS imagename, "    <<  //6
+    "IM.path AS imagepath, "    <<  //7
+    "C.rect, "                  <<  //8
+    "I.number, "                <<  //9
+    "I._id AS instanceid, "     <<  //10
+    "V.name, "                  <<  //11
+    "V.path, "                  <<  //12
+    "I.number "                 <<  //13
+    "FROM rel_day_instance_recognition_setup AS RDIR " <<
+    "JOIN day AS D ON RDIR._id_day = D._id " << 
+    "JOIN recognition_setup AS RS ON RDIR._id_recognition_setup = RS._id " << 
+    "JOIN instance AS I ON RDIR._id_instance = I._id " << 
+    "JOIN rel_instance_image AS RII ON I._id = RII._id_instance " << 
+    "JOIN image AS IM ON RII._id_image = IM._id " << 
+    "JOIN crop AS C ON C._id_image_father = IM._id " << 
+    "JOIN video AS V ON I._id_video = V._id " << 
+    "WHERE RS._id_camera = " << camid << 
+    " AND RDIR._id_day IN (SELECT _id from day WHERE label = '" << day << "') " << 
+    "AND RDIR._id_recognition_setup IN (SELECT _id from recognition_setup WHERE name = '" << rec << "');";
+
+    std::string sql_monthstr = sql_month.str();
+    cout << "sql_monthstr: " << sql_monthstr << endl;
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > rcm_array = db_select(sql_monthstr.c_str(), 14);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (rcm_array.size()>0)
+    {
+        motion::Message::MotionMonth * mmonth = mcam->add_motionmonth();
+        mmonth->set_monthlabel(month);
+        
+        motion::Message::MotionDay * mday = mmonth->add_motionday();
+        mday->set_daylabel(day);
+        
+        google::protobuf::int32 dayid = atoi(rcm_array.at(0).at(0).c_str());
+        mday->set_db_dayid(dayid);
+    
+        int instancecounter = 0;
+        motion::Message::Instance * minstance;
+
+        for (int i=0; i< rcm_array.size(); i++)
+        {
+            vector<string> rowi = rcm_array.at(i);
+
+            google::protobuf::int32 instanceid = atoi(rowi.at(10).c_str());
+
+            if (instanceid != instancecounter)
+            {    
+                minstance = mday->add_instance();
+                minstance->set_instancestart(rowi.at(2));
+                minstance->set_instanceend(rowi.at(3));
+
+                cout << "instancecounter:: " << instancecounter << " instanceid:: " << instanceid << endl;
+
+                std::string last = rowi.at(10).c_str();
+                google::protobuf::int32 idinstance = atoi(last.c_str());
+                minstance->set_idinstance(idinstance);
+                instancecounter = instanceid;
+                
+                std::string number = rowi.at(13).c_str();
+                google::protobuf::int32 instancenumber = atoi(number.c_str());
+                minstance->set_number(instancenumber);
+
+                motion::Message::Video * mvideo = minstance->mutable_video();
+                std::string vname = rowi.at(11);
+                mvideo->set_name(vname);        
+                std::string vpath = rowi.at(12);
+                mvideo->set_path(vpath);
+            }
+
+            motion::Message::Image * mimage = minstance->add_image();
+            int imgid = atoi(rowi.at(4).c_str());
+            mimage->set_imagechanges(atoi(rowi.at(5).c_str()));
+            mimage->set_name(rowi.at(6));
+            mimage->set_path(rowi.at(7));   
+
+            motion::Message::Crop * mcrop = minstance->add_crop();
+            mcrop->set_db_imagefatherid(imgid);
+            mcrop->set_rect(rowi.at(8));
+            
+        }
+    }
+    return mcam;
+}
+
+void updateRecognition(motion::Message m)
+{
+
+    motion::Message::MotionCamera * pcamera = m.mutable_motioncamera(0);   
+    motion::Message::MotionMonth * pmonth = pcamera->mutable_motionmonth(0);
+    motion::Message::MotionRec * prec = pcamera->mutable_motionrec(0);
+    motion::Message::MotionDay * pday = pmonth->mutable_motionday(0);
+    
+    string str_month;
+    if (m.has_currmonth())
+    {
+        str_month = m.currmonth();
+    }
+
+    string str_day;
+    if (m.has_currday())
+    {
+        str_day = m.currday();
+    }
+    
+    std::string rcoords;
+    if (prec->hasregion())
+    {
+        std::string rc = prec->coordinates(); 
+        rcoords = base64_decode(rc);
+        updateRegionIntoDatabase(rcoords, prec->db_recognitionsetupid());
+    }
+     
+    google::protobuf::uint32 activecam = R_PROTO.activecam();
+    
+    std::string xml_path = getXMLFilePathAndName(sourcepath, activecam, prec->recname(), str_day, XML_FILE);
+    
+     //time
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    
+    //insertIntervalCrontabIntoDatabase(pcamera);
+    updateRecognitionSetup(pcamera->db_idcamera(), prec, pday);
+    updateCameraMonth(time_rasp, prec->db_recognitionsetupid());
+    
+}
+
+vector<std::string> getCamerasFromDB()
+{
+    vector<std::string> cameraarray;
+    
+    std::stringstream sql_camera;
+    sql_camera << "SELECT number, name, created FROM cameras;";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > camera_array = db_select(sql_camera.str().c_str(), 3);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (camera_array.size()>0)
+    {
+        return camera_array.at(0);
+    }
+    return cameraarray;
 }

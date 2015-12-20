@@ -14,7 +14,13 @@ SET(CMAKE_C_COMPILER_ID "GNU")
 SET(CMAKE_DEPENDS_CHECK_CXX
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/b64/base64.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/b64/base64.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/database/database.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/http/json.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/http/json.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/http/post.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/http/post.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/main.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/camera.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/camera.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/communications.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/communications.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/observer.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/observer.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/startup.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/operations/startup.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/practical/PracticalSocket.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/practical/PracticalSocket.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.cc" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/protobuffer/motion.pb.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/recognition/detection.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/recognition/detection.o"
@@ -24,6 +30,7 @@ SET(CMAKE_DEPENDS_CHECK_CXX
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxml.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxml.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlerror.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlerror.o"
   "/home/pi/motion/motion-detection/motion_src/src/motion_detect/tinyxml/tinyxmlparser.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/tinyxml/tinyxmlparser.o"
+  "/home/pi/motion/motion-detection/motion_src/src/motion_detect/utils/utils.cpp" "/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir/src/motion_detect/utils/utils.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -45,6 +52,8 @@ SET(CMAKE_C_TARGET_INCLUDE_PATH
   "/src/motion_detect/socket"
   "/src/motion_detect/database"
   "/src/motion_detect/http"
+  "/src/motion_detect/utils"
+  "/src/motion_detect/operations"
   )
 SET(CMAKE_CXX_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})
 SET(CMAKE_Fortran_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})

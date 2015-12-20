@@ -35,6 +35,10 @@
 
 using namespace std;
 
+//Global
+extern std::string sourcepath;
+extern std::string XML_FILE;
+
 void status();
 void db_open();
 void db_execute(const char *sql);
@@ -47,7 +51,6 @@ extern std::string getGlobalIntToString(int id);
 extern bool checkFile(const std::string &file);
 extern std::string get_file_contents(std::string filename);
 extern pthread_mutex_t protoMutex, databaseMutex;
-extern std::string getXMLFilePathAndName(int cam, std::string recname, std::string currday, std::string name);
 
 extern bool to_bool(std::string const& s);
 
@@ -89,7 +92,7 @@ vector<string> getImageByPath(std::string path);
 int insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idmedia, int db_srv_idpost);
 vector<vector<string> > getNotTrackedInstance();
 
-void insertIntoHost(std::string publicip, std::string hostname, std::string city, std::string region, std::string country, std::string loc, std::string org);
+void insertIntoLocation(std::string publicip, std::string hostname, std::string city, std::string region, std::string country, std::string loc, std::string org);
     
 //database
 int insertIntoIMage(const motion::Message::Image & img);
@@ -106,10 +109,13 @@ vector<std::string> getIpInfo();
 vector<std::string> getTerminalInfo();
 vector<std::string> getLocationInfo();
 
-int insertIntoPosts(std::string id, std::string date, std::string modified, std::string slug, std::string type, std::string link, std::string api_link, std::string featured_image);
+int insertIntoPosts(std::string id, std::string date, std::string modified, std::string slug, std::string type, std::string link, std::string api_link, std::string featured_image, std::string post_parent, int db_local);
 void updateIntoPost (std::string id, std::string date, std::string modified);
 
 vector<std::string> getTrackPostByType(std::string type);
+
+vector<std::string> getTrackPostByTypeAndId(std::string type, int db_local);
+
 vector<std::string> getMatInfoFromId(int db_idmat);
 int getPostByIdAndType(int db_idpost);
 vector<vector<string> > getTrackPosts(std::string type);
@@ -118,3 +124,20 @@ vector<vector<string> > getTrackPostChilds(int id);
 time_t getLastPostTime(std::string type);
 
 vector<std::string> getServerInfo();
+
+
+void insertUpdateStatus(std::string uptime, vector<int> camsarray, int db_terminal_id);
+
+motion::Message saveRecognition(motion::Message m);
+
+
+motion::Message::MotionCamera * getMonthByCameraIdMonthAndDate(
+                motion::Message::MotionCamera * mcam,   
+                std::string camid, 
+                std::string month, 
+                std::string day,
+                std::string rec);
+
+void updateRecognition(motion::Message m);
+
+vector<std::string> getCamerasFromDB();
