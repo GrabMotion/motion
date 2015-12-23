@@ -67,6 +67,7 @@ extern std::string getCurrentMonthLabel();
 int insertMonthIntoDatabase(std::string str_month, int db_camera_id);
 void updateRegionIntoDatabase(std::string rcoords, int recognitionid);
 int insertRegionIntoDatabase(std::string rcoords);
+int insertServerIntoDatabase(int clientnumber, std::string clientname, std::string base);
 
 int insertDayIntoDatabase(std::string str_day, int db_month_id);
 int insertIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera, motion::Message::MotionRec * prec, int db_camera_recognition_setupl_array);
@@ -103,6 +104,7 @@ void setActiveCam(int activecam);
 
 vector<std::string> getIpInfo();
 vector<std::string> getTerminalInfo();
+vector<std::string> getLocationInfo();
 
 int insertIntoPosts(std::string id, std::string date, std::string modified, std::string slug, std::string type, std::string link, std::string api_link, std::string featured_image);
 void updateIntoPost (std::string id, std::string date, std::string modified);
@@ -114,3 +116,5 @@ vector<vector<string> > getTrackPosts(std::string type);
 vector<vector<string> > getTrackPostChilds(int id);
 
 time_t getLastPostTime(std::string type);
+
+vector<std::string> getServerInfo();

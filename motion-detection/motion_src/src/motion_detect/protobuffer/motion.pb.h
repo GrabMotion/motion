@@ -76,11 +76,13 @@ enum Message_ActionType {
   Message_ActionType_REC_HAS_CHANGES = 2040,
   Message_ActionType_REC_HAS_INSTANCE = 2050,
   Message_ActionType_PROTO_HAS_FILE = 3030,
-  Message_ActionType_PROTO_NO_FILE = 3031
+  Message_ActionType_PROTO_NO_FILE = 3031,
+  Message_ActionType_SERVER_INFO = 3032,
+  Message_ActionType_SERVER_INFO_OK = 3033
 };
 bool Message_ActionType_IsValid(int value);
 const Message_ActionType Message_ActionType_ActionType_MIN = Message_ActionType_ENGAGE;
-const Message_ActionType Message_ActionType_ActionType_MAX = Message_ActionType_PROTO_NO_FILE;
+const Message_ActionType Message_ActionType_ActionType_MAX = Message_ActionType_SERVER_INFO_OK;
 const int Message_ActionType_ActionType_ARRAYSIZE = Message_ActionType_ActionType_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Message_ActionType_descriptor();
@@ -2087,6 +2089,8 @@ class Message : public ::google::protobuf::Message {
   static const ActionType REC_HAS_INSTANCE = Message_ActionType_REC_HAS_INSTANCE;
   static const ActionType PROTO_HAS_FILE = Message_ActionType_PROTO_HAS_FILE;
   static const ActionType PROTO_NO_FILE = Message_ActionType_PROTO_NO_FILE;
+  static const ActionType SERVER_INFO = Message_ActionType_SERVER_INFO;
+  static const ActionType SERVER_INFO_OK = Message_ActionType_SERVER_INFO_OK;
   static inline bool ActionType_IsValid(int value) {
     return Message_ActionType_IsValid(value);
   }
@@ -2354,6 +2358,37 @@ class Message : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 activecamnum() const;
   inline void set_activecamnum(::google::protobuf::int32 value);
 
+  // optional int32 clientnumber = 19;
+  inline bool has_clientnumber() const;
+  inline void clear_clientnumber();
+  static const int kClientnumberFieldNumber = 19;
+  inline ::google::protobuf::int32 clientnumber() const;
+  inline void set_clientnumber(::google::protobuf::int32 value);
+
+  // optional string serverurl = 20;
+  inline bool has_serverurl() const;
+  inline void clear_serverurl();
+  static const int kServerurlFieldNumber = 20;
+  inline const ::std::string& serverurl() const;
+  inline void set_serverurl(const ::std::string& value);
+  inline void set_serverurl(const char* value);
+  inline void set_serverurl(const char* value, size_t size);
+  inline ::std::string* mutable_serverurl();
+  inline ::std::string* release_serverurl();
+  inline void set_allocated_serverurl(::std::string* serverurl);
+
+  // optional string clientname = 21;
+  inline bool has_clientname() const;
+  inline void clear_clientname();
+  static const int kClientnameFieldNumber = 21;
+  inline const ::std::string& clientname() const;
+  inline void set_clientname(const ::std::string& value);
+  inline void set_clientname(const char* value);
+  inline void set_clientname(const char* value, size_t size);
+  inline ::std::string* mutable_clientname();
+  inline ::std::string* release_clientname();
+  inline void set_allocated_clientname(::std::string* clientname);
+
   // @@protoc_insertion_point(class_scope:motion.Message)
  private:
   inline void set_has_activecam();
@@ -2390,6 +2425,12 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_recname();
   inline void set_has_activecamnum();
   inline void clear_has_activecamnum();
+  inline void set_has_clientnumber();
+  inline void clear_has_clientnumber();
+  inline void set_has_serverurl();
+  inline void clear_has_serverurl();
+  inline void set_has_clientname();
+  inline void clear_has_clientname();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2413,6 +2454,9 @@ class Message : public ::google::protobuf::Message {
   ::std::string* videofilepath_;
   ::std::string* recname_;
   ::google::protobuf::int32 activecamnum_;
+  ::google::protobuf::int32 clientnumber_;
+  ::std::string* serverurl_;
+  ::std::string* clientname_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -7721,6 +7765,182 @@ inline void Message::set_activecamnum(::google::protobuf::int32 value) {
   set_has_activecamnum();
   activecamnum_ = value;
   // @@protoc_insertion_point(field_set:motion.Message.activecamnum)
+}
+
+// optional int32 clientnumber = 19;
+inline bool Message::has_clientnumber() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void Message::set_has_clientnumber() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void Message::clear_has_clientnumber() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void Message::clear_clientnumber() {
+  clientnumber_ = 0;
+  clear_has_clientnumber();
+}
+inline ::google::protobuf::int32 Message::clientnumber() const {
+  // @@protoc_insertion_point(field_get:motion.Message.clientnumber)
+  return clientnumber_;
+}
+inline void Message::set_clientnumber(::google::protobuf::int32 value) {
+  set_has_clientnumber();
+  clientnumber_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.clientnumber)
+}
+
+// optional string serverurl = 20;
+inline bool Message::has_serverurl() const {
+  return (_has_bits_[0] & 0x00080000u) != 0;
+}
+inline void Message::set_has_serverurl() {
+  _has_bits_[0] |= 0x00080000u;
+}
+inline void Message::clear_has_serverurl() {
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline void Message::clear_serverurl() {
+  if (serverurl_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    serverurl_->clear();
+  }
+  clear_has_serverurl();
+}
+inline const ::std::string& Message::serverurl() const {
+  // @@protoc_insertion_point(field_get:motion.Message.serverurl)
+  return *serverurl_;
+}
+inline void Message::set_serverurl(const ::std::string& value) {
+  set_has_serverurl();
+  if (serverurl_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    serverurl_ = new ::std::string;
+  }
+  serverurl_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.serverurl)
+}
+inline void Message::set_serverurl(const char* value) {
+  set_has_serverurl();
+  if (serverurl_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    serverurl_ = new ::std::string;
+  }
+  serverurl_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.serverurl)
+}
+inline void Message::set_serverurl(const char* value, size_t size) {
+  set_has_serverurl();
+  if (serverurl_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    serverurl_ = new ::std::string;
+  }
+  serverurl_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.serverurl)
+}
+inline ::std::string* Message::mutable_serverurl() {
+  set_has_serverurl();
+  if (serverurl_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    serverurl_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.serverurl)
+  return serverurl_;
+}
+inline ::std::string* Message::release_serverurl() {
+  clear_has_serverurl();
+  if (serverurl_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = serverurl_;
+    serverurl_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message::set_allocated_serverurl(::std::string* serverurl) {
+  if (serverurl_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete serverurl_;
+  }
+  if (serverurl) {
+    set_has_serverurl();
+    serverurl_ = serverurl;
+  } else {
+    clear_has_serverurl();
+    serverurl_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.serverurl)
+}
+
+// optional string clientname = 21;
+inline bool Message::has_clientname() const {
+  return (_has_bits_[0] & 0x00100000u) != 0;
+}
+inline void Message::set_has_clientname() {
+  _has_bits_[0] |= 0x00100000u;
+}
+inline void Message::clear_has_clientname() {
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline void Message::clear_clientname() {
+  if (clientname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    clientname_->clear();
+  }
+  clear_has_clientname();
+}
+inline const ::std::string& Message::clientname() const {
+  // @@protoc_insertion_point(field_get:motion.Message.clientname)
+  return *clientname_;
+}
+inline void Message::set_clientname(const ::std::string& value) {
+  set_has_clientname();
+  if (clientname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    clientname_ = new ::std::string;
+  }
+  clientname_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.clientname)
+}
+inline void Message::set_clientname(const char* value) {
+  set_has_clientname();
+  if (clientname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    clientname_ = new ::std::string;
+  }
+  clientname_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.clientname)
+}
+inline void Message::set_clientname(const char* value, size_t size) {
+  set_has_clientname();
+  if (clientname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    clientname_ = new ::std::string;
+  }
+  clientname_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.clientname)
+}
+inline ::std::string* Message::mutable_clientname() {
+  set_has_clientname();
+  if (clientname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    clientname_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.clientname)
+  return clientname_;
+}
+inline ::std::string* Message::release_clientname() {
+  clear_has_clientname();
+  if (clientname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = clientname_;
+    clientname_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message::set_allocated_clientname(::std::string* clientname) {
+  if (clientname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete clientname_;
+  }
+  if (clientname) {
+    set_has_clientname();
+    clientname_ = clientname;
+  } else {
+    clear_has_clientname();
+    clientname_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.clientname)
 }
 
 

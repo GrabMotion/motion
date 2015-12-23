@@ -848,6 +848,24 @@ int insertMonthIntoDatabase(std::string str_month, int db_camera_id)
     
     return db_month_id;
 }
+
+int insertServerIntoDatabase(int clientnumber, std::string clientname, std::string base)
+{
+    std::stringstream sql_insert_server;
+    sql_insert_server << "INSERT OR REPLACE INTO server (_id, client_number, client_name, base_url) values (" <<
+    "1, " << clientnumber << ", '" << clientname << ", '" << base << "');";
+    
+    pthread_mutex_lock(&databaseMutex);
+    db_execute(sql_insert_server.str().c_str());   
+    
+    std::string last_server_query = "SELECT MAX(_id) FROM server";
+    vector<vector<string> > server_array = db_select(last_server_query.c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    cout << "server_array: " << endl;
+    int db_server_id = atoi(server_array.at(0).at(0).c_str());
+    cout << "db_server_id: " << db_server_id << endl;
+    return db_server_id;
+}
  
 int insertRegionIntoDatabase(std::string rcoords)
 {
@@ -866,6 +884,8 @@ int insertRegionIntoDatabase(std::string rcoords)
     cout << "db_coordnates_id: " << db_coordnates_id << endl;
     return db_coordnates_id;
 }
+
+
 
 void updateRegionIntoDatabase(std::string rcoords, int db_recognitionid)
 {
@@ -1386,6 +1406,26 @@ vector<std::string> getIpInfo()
     return info;    
 }
 
+vector<std::string> getLocationInfo()
+{
+    vector<std::string> info_location;
+    
+    std::stringstream locinfo;
+    locinfo << "SELECT city, country, location FROM host;";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > locinfo_array = db_select(locinfo.str().c_str(), 3);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (locinfo_array.size()>0)
+    {
+        info_location.push_back(locinfo_array.at(0).at(0));
+        info_location.push_back(locinfo_array.at(0).at(1));
+        info_location.push_back(locinfo_array.at(0).at(2));
+    } 
+    
+    return info_location;    
+}
+
 
 // INSTANCE 
 
@@ -1765,4 +1805,21 @@ int getPostByIdAndType(int db_idpost)
         id = atoi(post_array.at(0).at(0).c_str());
     }
     return id;
+}
+
+vector<std::string> getServerInfo()
+{
+    vector<std::string> matidarray;
+    
+    std::stringstream sql_server;
+    sql_server << "SELECT client_number, client_name, base_url FROM server;";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > server_array = db_select(sql_server.str().c_str(), 3);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (server_array.size()>0)
+    {
+        return server_array.at(0);
+    }
+    return matidarray;
 }
