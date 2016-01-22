@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "login/login.h"
 
 #include <QPoint>
 #include <QMouseEvent>
@@ -13,6 +14,10 @@
 #include <QTreeWidgetItem>
 #include <QGraphicsView>
 #include <QTimeLine>
+
+#include <Qurl>
+#include <QScriptEngine>
+#include <QScriptValueIterator>
 #include <string>
 #include <qfile.h>
 
@@ -51,14 +56,48 @@ Q_DECLARE_METATYPE(ListItems*)
 Mat main_mat;
 ListItems * items;
 
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    //set toogle to recgnition button.
+    LoginDialog* loginDialog = new LoginDialog( this );
+    connect( loginDialog, SIGNAL (acceptLogin(QString&,QString&,QString&,QString&,int&)), this, SLOT (slotAcceptUserLogin(QString&,QString&,QString&,QString&,int&)));
+
+    QString url  = settings.value("serverurl").toString();
+    if (!url.isEmpty())
+    {
+         loginDialog->setServerUrl( url ); // optional
+    }
+    QString user = settings.value("username").toString();
+    if (!user.isEmpty())
+    {
+         loginDialog->setUsername( user ); // optional
+    }
+    QString pass = settings.value("password").toString();
+    if (!pass.isEmpty())
+    {
+         loginDialog->setPassword( url ); // optional
+    }
+    loginDialog->exec();
+}
+
+void MainWindow::slotAcceptUserLogin(QString & surl, QString & usern, QString & passw, QString & clnt, int & clid)
+{
+
+    serverurl = surl;
+    username = usern;
+    password = passw;
+    client = clnt;
+    clientid = clid;
+
+    settings.setValue("serverurl", surl);
+    settings.setValue("username", usern);
+    settings.setValue("password", passw);
+    settings.setValue("client", clnt);
+
+    //set toggle to recgnition button.
     ui->start_recognition->setCheckable(true);
 
     //BroadCast Sockets:
@@ -180,6 +219,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //Start Serarch
     MainWindow::on_search_button_clicked();
 
+    ui->api_link->setOpenExternalLinks(true);
 }
 
 void MainWindow::getLocalNetwork()
@@ -351,10 +391,12 @@ void MainWindow::on_picture_clicked()
     motion::Message m;
     m.set_type(motion::Message::ActionType::Message_ActionType_TAKE_PICTURE);
 
-    int index = ui->cameracombo->currentIndex();
-    QVariant number = ui->cameracombo->itemData(index);
-    float n = number.toFloat();
-    m.set_activecam(n);
+    //int index = ui->cameracombo->currentIndex();
+    //QVariant number = ui->cameracombo->itemData(index);
+    //float n = number.toFloat();
+
+    int activecam = PROTO.activecam();
+    m.set_activecam(activecam);
 
     m.set_currday(getCurrentDayLabel());
     m.set_currmonth(getCurrentMonthLabel());
@@ -366,26 +408,22 @@ void MainWindow::on_picture_clicked()
 
 void MainWindow::on_refresh_clicked()
 {
-
     i_spinner->start();
 
     motion::Message m;
     m.set_type(motion::Message::ActionType::Message_ActionType_REFRESH);
 
-    //Aca tomar activemat del combo y mandar campo obligatorio.
-    QVariant id = ui->cameracombo->itemData(ui->cameracombo->currentIndex());
-    m.set_activecam(id.toFloat());
+    int index = ui->cameracombo->currentIndex();
+    m.set_activecam(index);
 
     QString rec = ui->rec->currentText();
     m.set_data(rec.toStdString()); //recname
 
     m.set_currday(getCurrentDayLabel());
     m.set_currmonth(getCurrentMonthLabel());
-    m.set_activecam(id.toFloat());
 
     setMessageBodyAndSend(m);
     google::protobuf::ShutdownProtobufLibrary();
-
 }
 
 std::string MainWindow::getCurrentDayLabel()
@@ -706,53 +744,58 @@ void MainWindow::split(const string& s, char c, vector<string>& v)
 void MainWindow::on_start_recognition_toggled(bool checked)
 {
 
-    motion::Message m;
-
-    int index = ui->cameracombo->currentIndex();
-    m.set_activecam(index);
-
-    if (!checked)
+    //Reset toggle
+    if (start_recognition_toggled)
     {
-        m.set_type(motion::Message::ActionType::Message_ActionType_REC_STOP);
-    }
-    else
+        start_recognition_toggled = false;
+    } else
     {
-        m.set_type(motion::Message::ActionType::Message_ActionType_REC_START);
+
+        motion::Message m;
+
+        int index = ui->cameracombo->currentIndex();
+        m.set_activecam(index);
+
+        if (!checked)
+        {
+            m.set_type(motion::Message::ActionType::Message_ActionType_REC_STOP);
+        }
+        else
+        {
+            m.set_type(motion::Message::ActionType::Message_ActionType_REC_START);
+        }
+
+        std::string _month = getCurrentMonthLabel();
+        m.set_currmonth(_month);
+
+        std::string _day = getCurrentDayLabel();
+        m.set_currday(_day);
+
+        //Speed
+        QString qt_packagesize = ui->speedcombo->currentText();
+        int pz = qt_packagesize.toInt();
+        m.set_packagesize(pz);
+
+        motion::Message::MotionCamera * mcamera = m.add_motioncamera();
+
+        int camnum = ui->cameracombo->currentIndex();
+        mcamera->set_cameranumber(camnum);
+
+        QString cameraname = ui->cameracombo->currentText();
+        mcamera->set_cameraname(cameraname.toStdString());
+
+        QString qt_name = ui->rec_name->text();
+
+        motion::Message::MotionRec * mrec = mcamera->add_motionrec();
+        mrec->set_recname(qt_name.toStdString());
+
+        QVariant dbname = ui->rec->itemData(ui->rec->currentIndex());
+        google::protobuf::int32 nameid = static_cast<int>(dbname.toFloat());
+        mrec->set_db_idrec(nameid);
+
+        setMessageBodyAndSend(m);
+
     }
-
-    std::string _month = getCurrentMonthLabel();
-    m.set_currday(_month);
-
-    std::string _day = getCurrentDayLabel();
-    m.set_currmonth(_day);
-
-    //Speed
-    QString qt_packagesize = ui->speedcombo->currentText();
-    int pz = qt_packagesize.toInt();
-    m.set_packagesize(pz);
-
-    motion::Message::MotionCamera * mcamera = m.add_motioncamera();
-
-    QVariant number = ui->cameracombo->itemData(index);
-    float camnum = number.toFloat();
-    mcamera->set_cameranumber(camnum);
-
-    QString cameraname = ui->cameracombo->currentText();
-    mcamera->set_cameraname(cameraname.toStdString());
-
-    QString qt_name = ui->rec_name->text();
-
-    motion::Message::MotionRec * mrec = mcamera->add_motionrec();
-    mrec->set_recname(qt_name.toStdString());
-
-    motion::Message::MotionRecName * mrecname = mcamera->add_motionrecname();
-    mrecname->set_name(qt_name.toStdString());
-
-    QVariant dbname = ui->rec->itemData(ui->rec->currentIndex());
-    google::protobuf::int32 nameid = static_cast<int>(dbname.toFloat());
-    mrec->set_db_idrec(nameid);
-
-    setMessageBodyAndSend(m);
 }
 
 void MainWindow::on_save_rec_clicked()
@@ -763,12 +806,19 @@ void MainWindow::on_save_rec_clicked()
     int index = ui->cameracombo->currentIndex();
     m.set_activecam(index);
 
+    motion::Message::MotionCamera * mprotocam = PROTO.mutable_motioncamera(index);
+
     m.set_type(motion::Message::ActionType::Message_ActionType_SAVE);
     motion::Message::MotionCamera * mcamera = m.add_motioncamera();
 
     QString vspeed = ui->speedcombo->currentText();
 
     motion::Message::MotionRec * mrec = mcamera->add_motionrec();
+
+    int dbmat = mprotocam->db_idmat();
+    mrec->set_db_idmat(dbmat);
+
+    mrec->set_activerec(true);
 
     int speed = vspeed.toInt();
     mrec->set_speed(speed);
@@ -809,44 +859,44 @@ void MainWindow::on_save_rec_clicked()
         mrec->set_storeimage(false);
     }
 
-    motion::Message::MotionCamera * mprotocam = PROTO.mutable_motioncamera(index);
-
     int recsize = mprotocam->motionrec_size();
+
+    //motion::Message::MotionCamera * mprotocam1 = PROTO.mutable_motioncamera(index+1);
+    //int recsize1 = mprotocam1->motionrec_size();
+
     QString qt_name = ui->rec_name->text();
 
-    for (int i=0; i<recsize; i++)
-    {
-        motion::Message::MotionRec * mprotorec = mprotocam->mutable_motionrec(i);
-        if (mprotorec->activerec())
-        {
-            std::string xmlpath = mprotorec->xmlfilepath();
-            mprotorec->set_xmlfilepath(xmlpath);
-            mprotorec->set_recname(qt_name.toStdString());
+    //for (int i=0; i<recsize; i++)
+    //{
+        //motion::Message::MotionRec * mprotorec = mprotocam->mutable_motionrec(i);
+        //bool isactiverec = mprotorec->activerec();
+        //if (isactiverec)
+        //{
+            //std::string xmlpath = mprotorec->xmlfilepath();
+            //mprotorec->set_xmlfilepath(xmlpath);
 
-            google::protobuf::uint32 mrows = mprotorec->matrows();
+            mrec->set_recname(qt_name.toStdString());
+
+            google::protobuf::uint32 mrows = mprotocam->matrows();
             mrec->set_matrows(mrows);
 
-            google::protobuf::uint32 mcols = mprotorec->matcols();
+            google::protobuf::uint32 mcols = mprotocam->matcols();
             mrec->set_matcols(mcols);
 
-            google::protobuf::uint32 mwidth = mprotorec->matheight();
+            google::protobuf::uint32 mwidth = mprotocam->matheight();
             mrec->set_matheight(mwidth);
 
-            google::protobuf::uint32 mheight = mprotorec->matwidth();
+            google::protobuf::uint32 mheight = mprotocam->matwidth();
             mrec->set_matwidth(mheight);
 
-            if (mprotorec->has_lastinstance())
-            {
-                std::string last = mprotorec->lastinstance();
-                mrec->set_lastinstance(last);
-            }
+            //if (mprotorec->has_lastinstance())
+            //{
+            //    std::string last = mprotorec->lastinstance();
+            //    mrec->set_lastinstance(last);
+            //}
 
-            int dbmat = mprotorec->db_idmat();
-            mrec->set_db_idmat(dbmat);
-
-            mrec->set_activerec(true);
-        }
-    }
+        //}
+    //}
 
     int db_idcamera = mprotocam->db_idcamera();
     mcamera->set_db_idcamera(db_idcamera);
@@ -1047,7 +1097,7 @@ void MainWindow::getTerminalFolder(motion::Message m)
     rootDir.cdUp();
     QString basedir = rootDir.absolutePath();
 
-    QString day = m.currday().c_str();
+    QString day = getCurrentDayLabel().c_str(); //m.currday().c_str();
     QString qt_name = ui->rec->currentText();
     QString rec = qt_name;
     bool hasrec;
@@ -1118,6 +1168,11 @@ void MainWindow::getTerminalFolder(motion::Message m)
         stringstream ss;
         ss << data_day_ipfile;
         folder_paths.push_back(ss.str()); // 0
+    }
+
+    if (qt_cam_number>0)
+    {
+        cout << "camera 1" << endl;
     }
 
     /* MAT */
@@ -1333,7 +1388,7 @@ void MainWindow::saveMat(std::string encodedmat, google::protobuf::uint32 file)
 
 }
 
-void MainWindow::loadMat(const motion::Message::MotionRec * mrec)
+void MainWindow::loadMat(google::protobuf::uint32 file)
 {
 
     QString qt_ip = ui->ips_combo->currentText();
@@ -1341,11 +1396,15 @@ void MainWindow::loadMat(const motion::Message::MotionRec * mrec)
     std::string qt_ip_str = qt_ip.toUtf8().constData();
     std::string matfolder = folder_paths.at(1);
 
-    google::protobuf::uint32 file = mrec->activemat();
-
     std::string basefile = matfolder + "/" + std::to_string(file) + ".mat";
 
     cout << "basefile: " << basefile << endl;
+
+    std::string matpathfile = "/jose/repos/motion/matstring.txt";
+    std::ofstream out;
+    out.open (matpathfile.c_str());
+    out << basefile << "\n";
+    out.close();
 
     QString mat_file = QString::fromStdString(basefile);
 
@@ -1362,6 +1421,7 @@ void MainWindow::loadMat(const motion::Message::MotionRec * mrec)
 
     } else
     {
+
         MainWindow::get_mat();
         cout << "basefile: " << basefile << endl;
     }
@@ -1569,14 +1629,29 @@ void MainWindow::enable_diable_Uppper_Bar(bool set)
 void MainWindow::enable_diable_Lateral_Time(bool set)
 {
     QFont f( "Arial", 11, QFont::Bold);
-    ui->computer_time->setFont(f);
-    ui->remote_terminal_time->setFont(f);
     ui->instance_started->setFont(f);
     ui->synched->setFont(f);
+    ui->remote_terminal_time->setFont(f);
 
-    ui->label_computer_time->setEnabled(set);
-    ui->computer_time->setEnabled(set);
-    ui->label_terminal_time->setEnabled(set);
+    ui->set_api_url->setEnabled(set);
+
+    /*bool hasclient = false;
+    if (PROTO.has_clientnumber())
+    {
+        hasclient = true;
+    }*/
+
+    ui->label_client_name->setEnabled(set);
+    ui->client_number->setEnabled(set);
+
+    /*bool hasserverurl = false;
+    if (PROTO.has_serverurl())
+    {
+        hasserverurl = true;
+    }*/
+
+    ui->label_server_url->setEnabled(set);
+
     ui->remote_terminal_time->setEnabled(set);
     ui->set_time->setEnabled(set);
     ui->synched->setEnabled(set);
@@ -1625,19 +1700,6 @@ void MainWindow::enable_disable_Save(bool set)
     ui->rec->setEnabled(set);
 }
 
-void MainWindow::enable_diable_Process(bool set)
-{
-    ui->label_process->setEnabled(set);
-    ui->time_process->setEnabled(set);
-    ui->process->setEnabled(set);
-    ui->quene->setEnabled(set);
-    ui->run->setEnabled(set);
-    ui->process_list->setEnabled(set);
-    ui->edit_process->setEnabled(set);
-    ui->end_process->setEnabled(set);
-    ui->label_process_schedule->setEnabled(set);
-}
-
 void MainWindow::enableDisableButtons(int set)
 {
     switch (set)
@@ -1654,7 +1716,6 @@ void MainWindow::enableDisableButtons(int set)
             ui->watch_video->setEnabled(false);
             ui->watch_image->setEnabled(false);
             MainWindow::enable_diable_Lower_Bar(false);
-            MainWindow::enable_diable_Process(false);
             MainWindow::enable_disable_Save(false);
         break;
 
@@ -1670,7 +1731,6 @@ void MainWindow::enableDisableButtons(int set)
             ui->watch_video->setEnabled(false);
             ui->watch_image->setEnabled(false);
             MainWindow::enable_diable_Lower_Bar(true);
-            MainWindow::enable_diable_Process(true);
         break;
 
         case ENGAGED_INSTANCE:
@@ -1685,7 +1745,6 @@ void MainWindow::enableDisableButtons(int set)
             //ui->watch_video->setEnabled(true);
             //ui->watch_image->setEnabled(true);
             MainWindow::enable_diable_Lower_Bar(true);
-            MainWindow::enable_diable_Process(true);
         break;
     }
 }
@@ -1936,6 +1995,11 @@ void MainWindow::onRecNameTextChanged()
     ui->rec_new->setEnabled(true);
 }
 
+void MainWindow::onServerTextChanged()
+{
+
+}
+
 void MainWindow::updateTime(motion::Message m)
 {
 
@@ -1957,7 +2021,7 @@ void MainWindow::updateTime(motion::Message m)
 
     time_string[25] = '\0';
 
-    ui->computer_time->setText(time_string);
+    //ui->computer_time->setText(time_string);
 
     double diff = difftime(t2, t1);
     int sec = ((diff + 500) / 1000);
@@ -2040,8 +2104,21 @@ void MainWindow::remoteProto(motion::Message remote)
         case motion::Message::TAKE_PICTURE:
         case motion::Message::GET_MAT:
         {
-            motion::Message::MotionCamera * mcamp = PROTO.mutable_motioncamera(PROTO.activecam());
-            int sizerec = mcamp->motionrec_size();
+
+            int activecam = PROTO.activecam();
+            int camsize = PROTO.motioncamera_size();
+
+            motion::Message::MotionCamera * mcamp = PROTO.mutable_motioncamera(activecam);
+            google::protobuf::uint32 matfile = mcamp->activemat();
+            mcamp->set_activemat(matfile);
+
+            int db_idmat = mcamp->db_idmat();
+            mcamp->set_db_idmat(db_idmat);
+
+            MainWindow::saveMat(PROTO.data(), matfile);
+            MainWindow::loadMat(mcamp->activemat());
+
+            /*int sizerec = mcamp->motionrec_size();
             int activerec=0;
             if (sizerec>0)
             {
@@ -2058,7 +2135,7 @@ void MainWindow::remoteProto(motion::Message remote)
                         mrec->set_db_idmat(db_idmat);
                     }
                 }
-            }
+            }*/
         }
         break;
         case motion::Message::GET_XML:
@@ -2112,8 +2189,10 @@ void MainWindow::remoteProto(motion::Message remote)
         }
         break;
         case motion::Message::SAVE_OK:
+        case motion::Message::SERVER_INFO_OK:
         {
-            motion::Message::MotionCamera * mcamp = PROTO.mutable_motioncamera(PROTO.activecam());
+            /*int activecam = PROTO.activecam();
+            motion::Message::MotionCamera * mcamp = PROTO.mutable_motioncamera(activecam);
             ui->start_recognition->setEnabled(true);
             bool recognizing = mcamp->recognizing();
             if (recognizing)
@@ -2124,7 +2203,7 @@ void MainWindow::remoteProto(motion::Message remote)
             {
                 ui->start_recognition->setText("START");
                 ui->start_recognition->setStyleSheet("QPushButton { background-color : #66CC00; color : #FFFFFF; border:6pxsolidwhite; }");
-            }
+            }*/
             MainWindow::on_refresh_clicked();
         }
         break;
@@ -2132,14 +2211,14 @@ void MainWindow::remoteProto(motion::Message remote)
         {
             ui->start_recognition->setText("STOP");
             ui->start_recognition->setStyleSheet("QPushButton { background-color : #FF0000; color : #FFFFFF; border:6pxsolidwhite; }");
-            ui->start_recognition->setChecked(true);
+            //ui->start_recognition->setChecked(true);
         }
         break;
         case motion::Message::REC_STOP:
         {
             ui->start_recognition->setText("START");
             ui->start_recognition->setStyleSheet("QPushButton { background-color : #66CC00; color : #FFFFFF; border:6pxsolidwhite; }");
-            ui->start_recognition->setChecked(false);
+            //ui->start_recognition->setChecked(false);
         }
         break;
         case motion::Message::UPDATE_OK:
@@ -2160,34 +2239,71 @@ void MainWindow::engage_refresh(bool engage)
         MainWindow::updateTime(PROTO);
         ui->qt_drawing_output->ClearRegion();
     }
+    bool hasclient = false;
+    if (PROTO.has_clientnumber())
+    {
+        hasclient = true;
+        ui->server_url->setText(PROTO.serverurl().c_str());
+
+        serverurl = PROTO.serverurl().c_str();
+
+        std::stringstream cn;
+        cn << PROTO.clientnumber();
+
+        std::string clientname = PROTO.clientname();
+
+        int indexc = ui->client_number->findText(clientname.c_str());
+        if (indexc==-1)
+        {
+           int idc = PROTO.clientnumber();
+           ui->client_number->addItem(clientname.c_str(), QVariant(idc));
+        } else
+        {
+           ui->motionmonth->setCurrentIndex(indexc);
+        }
+
+        ui->set_api_url->setEnabled(false);
+        ui->server_url->setEnabled(false);
+        ui->client_number->setEnabled(false);
+    } else
+    {
+
+    }
 
     std::string time = PROTO.time();
     MainWindow::updateTime(PROTO);
 
     int camsize = PROTO.motioncamera_size();
-    const motion::Message::MotionCamera * mmactivecam;
+    motion::Message::MotionCamera * mmactivecam;
+
+    if (camsize>2)
+    {
+        cout << "ERROR" << endl;
+    }
 
     for (int i = 0; i < camsize; i++)
     {
-        const motion::Message::MotionCamera & mmcam = PROTO.motioncamera(i);
-        QString ccombo = mmcam.cameraname().c_str();
+        motion::Message::MotionCamera * mmcam = PROTO.mutable_motioncamera(i);
+        QString ccombo = mmcam->cameraname().c_str();
         int indexc = ui->cameracombo->findText(ccombo);
         if (indexc == -1)
         {
             ui->cameracombo->addItem(ccombo);
-            int itemdata = mmcam.cameranumber();
+            int itemdata = mmcam->cameranumber();
             ui->cameracombo->itemData(itemdata);
             int pactivecam = PROTO.activecam();
-            int camnum = mmcam.cameranumber();
+            int camnum = mmcam->cameranumber();
             if (pactivecam==camnum)
             {
-                mmactivecam = &mmcam;
+                mmactivecam = mmcam;
             }
         }
     }
 
     int activecam = PROTO.activecam();
     motion::Message::MotionCamera * mcam = PROTO.mutable_motioncamera(activecam);
+
+    MainWindow::getTerminalFolder(PROTO);
 
     int sizee = mcam->motionmonth_size();
     if (sizee>0)
@@ -2203,7 +2319,8 @@ void MainWindow::engage_refresh(bool engage)
             MainWindow::enableDisableButtons(ENGAGED_NO_INSTANCE);
     }
 
-    if (mcam->motionrec_size()>0)
+    int motionrecsize = mcam->motionrec_size();
+    if (motionrecsize>0)
     {
         int activerec = 0;
         int sizerec = mcam->motionrec_size();
@@ -2231,32 +2348,35 @@ void MainWindow::engage_refresh(bool engage)
                             ui->delay->setCurrentIndex(indexn);
                             ui->delay->setCurrentText(recname.c_str());
                         }
+
+                        QString ccombo = mrec->name().c_str();
+                        int indexr = ui->rec->findText(ccombo);
+                        if (indexr == -1)
+                        {
+                            ui->rec->addItem(ccombo);
+                            int itemdata = mrec->db_idrec();
+                            ui->rec->itemData(itemdata);
+                            int isrec = QString::compare(ccombo, activerec, Qt::CaseInsensitive);
+                            if (isrec==0)
+                            {
+                                ui->rec->setCurrentIndex(indexr);
+                                ui->rec->setCurrentText(ccombo);
+                            }
+                        }
                     }
                     MainWindow::loadRecData(mrec);
-                }
-                const motion::Message::MotionRecName & mrecname = mmactivecam->motionrecname(l);
-                QString ccombo = mrecname.name().c_str();
-                int indexr = ui->rec->findText(ccombo);
-                if (indexr == -1)
-                {
-                    ui->rec->addItem(ccombo);
-                    int itemdata = mrecname.db_idrec();
-                    ui->rec->itemData(itemdata);
-                    int isrec = QString::compare(ccombo, activerec, Qt::CaseInsensitive);
-                    if (isrec==0)
-                    {
-                        ui->rec->setCurrentIndex(indexr);
-                        ui->rec->setCurrentText(ccombo);
-                    }
                 }
             }
         }
     }
-
-    MainWindow::getTerminalFolder(PROTO);
     MainWindow::enableStartButton(mcam);
 
     i_spinner->stop();
+
+    if (!hasclient)
+    {
+        on_set_api_url_clicked();
+    }
 }
 
 void MainWindow::loadRecData(const motion::Message::MotionRec * mrec)
@@ -2321,7 +2441,7 @@ void MainWindow::loadRecData(const motion::Message::MotionRec * mrec)
     {
         google::protobuf::uint32 matint =  mrec->activemat();
         if (matint>0)
-            MainWindow::loadMat(mrec);
+            MainWindow::loadMat(mrec->activemat());
     }
 
     if (mrec->has_coordinates())
@@ -2370,37 +2490,6 @@ void MainWindow::loadRecData(const motion::Message::MotionRec * mrec)
     }
 
 }
-
-void MainWindow::populateRecCombo(motion::Message::MotionCamera * mmactivecam, QString activerec)
-{
-    if (mmactivecam)
-    {
-        int sizerec = mmactivecam->motionrec_size();
-        if (sizerec>0)
-        {
-            ui->rec->setEnabled(true);
-            for (int l = 0; l < sizerec; l++)
-            {
-                const motion::Message::MotionRecName & mrecname = mmactivecam->motionrecname(l);
-                QString ccombo = mrecname.name().c_str();
-                int indexr = ui->rec->findText(ccombo);
-                if (indexr == -1)
-                {
-                    ui->rec->addItem(ccombo);
-                    int itemdata = mrecname.db_idrec();
-                    ui->rec->itemData(itemdata);
-                    int isrec = QString::compare(ccombo, activerec, Qt::CaseInsensitive);
-                    if (isrec==0)
-                    {
-                        ui->rec->setCurrentIndex(indexr);
-                        ui->rec->setCurrentText(ccombo);
-                    }
-                }
-            }
-        }
-    }
-}
-
 
 void MainWindow::enableStartButton(const motion::Message::MotionCamera * mcam)
 {
@@ -2600,6 +2689,7 @@ void MainWindow::resutlEcho(string str)
         switch (current____type)
         {
              case motion::Message::TAKE_PICTURE:
+             case motion::Message::GET_MAT:
              {
                 current_package=0;
                 ui->mat_progress->setValue(0);
@@ -2662,6 +2752,7 @@ void MainWindow::get_mat()
 {
     motion::Message m;
     int activecam = PROTO.activecam();
+    m.set_activecam(activecam);
     motion::Message::MotionCamera * mcam = PROTO.mutable_motioncamera(activecam);
     if (mcam->motionrec_size()>0)
     {
@@ -2702,7 +2793,57 @@ void MainWindow::on_rec_activated(const QString &rec)
 void MainWindow::on_cameracombo_activated(const QString &camera)
 {
     QString none;
-    MainWindow::on_engage(none);
+    //MainWindow::on_engage(none);
+    MainWindow::on_rec_new_clicked();
+    ui->rec->setEnabled(false);
+    ui->remote_directory->setEnabled(false);
+
+    cout << "camera: " << camera.toStdString() << endl;
+
+    int indexcamera = ui->cameracombo->findText(camera);
+
+    cout << "indexcamera: " << indexcamera << endl;
+
+    PROTO.set_activecam(indexcamera);
+
+    ui->start_recognition->setText("START");
+    ui->start_recognition->setStyleSheet(styleSheet());
+    if (ui->start_recognition->isChecked())
+    {
+        start_recognition_toggled = true;
+        ui->start_recognition->setChecked(false);
+    }
+
+    MainWindow::engage_refresh(true);
 }
 
 
+void MainWindow::on_set_api_url_clicked()
+{
+
+    motion::Message m;
+
+    m.set_type(motion::Message::ActionType::Message_ActionType_SERVER_INFO);
+
+    //QString server_url = ui->server_url->text();
+    //m.set_serverurl(server_url.toStdString());
+
+    m.set_serverurl(serverurl.toStdString());
+
+    //int indexm = ui->client_number->findText(ui->client_number->currentText());
+
+    //QVariant idc = ui->client_number->itemData(indexm);
+    //google::protobuf::int32 idclient = static_cast<int>(idc.toFloat());
+
+    //m.set_clientnumber(idclient);
+
+    m.set_clientnumber(clientid);
+
+    //QString client_name = ui->client_number->currentText();
+    //m.set_clientname(client_name.toStdString());
+
+    m.set_clientname(client.toStdString());
+
+    setMessageBodyAndSend(m);
+
+}
