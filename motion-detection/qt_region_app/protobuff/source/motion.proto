@@ -15,12 +15,17 @@ message Message
 	repeated MotionCamera motioncamera  		= 10;
 	optional string 	currmonth 		= 11;
 	optional string 	currday	 		= 12;
-	optional int32 		currcam			= 13;
-	optional int32 packagesize 			= 14;	
-	optional string imagefilepath 			= 15; 
-	optional string videofilepath 			= 16;
-	optional string recname 			= 17;
-	
+	optional string 	currdaytitle		= 13;		
+	optional int32 		currcam			= 14;
+	optional int32 packagesize 			= 15;	
+	optional string imagefilepath 			= 16; 
+	optional string videofilepath 			= 17;
+	optional string recname 			= 18;
+	optional int32 activecamnum 			= 19;
+	optional int32 clientnumber 			= 20; 
+	optional string serverurl 			= 21;
+	optional string clientname 			= 22;
+
 
 	enum ActionType 
 	{
@@ -54,6 +59,8 @@ message Message
 		 REC_HAS_INSTANCE		= 2050;
 		 PROTO_HAS_FILE 		= 3030;
 		 PROTO_NO_FILE 		  	= 3031;
+		 SERVER_INFO 		  	= 3032;
+		 SERVER_INFO_OK 		= 3033;
 	}
 	
 	enum SocketType
@@ -97,6 +104,13 @@ message Message
 		optional int32 db_idrec 			= 10;
 		optional bool fromdatabase			= 11;
 		repeated MotionTrack motiontrack    		= 12;
+		optional int32 activemat		= 16;
+		optional int32 	matcols			= 20;
+		optional int32 	matrows 		= 21;
+		optional int32 	matwidth		= 22;
+		optional int32 	matheight 		= 23;
+		optional int32 db_idmat 		= 17;
+		optional bytes tempdata 		= 18;
 	}
 
 	message MotionTrack
@@ -139,6 +153,7 @@ message Message
 		optional int32 speed 			= 31;
 		optional int32 activerec 		= 32;
 		optional string matbasefile		= 33;
+		optional string created			= 34;
 	}
 
 	message MotionCron
@@ -160,6 +175,7 @@ message Message
 		optional string daylabel			= 2;
 		optional int32 db_dayid 			= 3;
 		optional string xmlfilepath			= 4; 
+		optional string title				= 5;
 	}
 	
 	message Instance
@@ -172,6 +188,21 @@ message Message
 		repeated Image 		image      	    	= 6;
 		repeated Crop 		crop      	   	= 7;		
 		optional Video 		video      	    	= 8;
+		optional string 	dir			= 9;
+		optional string 	xmlfile			= 10;
+		optional string 	extdata			= 11;
+		optional string 	end			= 12;
+		optional int32 		begintime		= 13;
+		optional int32 		endtime			= 14;
+		optional int32 		inittime		= 15;
+		optional string 	instance		= 16;
+		optional string 	instancecode		= 17;
+		optional string 	timeinfo		= 18;
+		optional int32 		db_dayid 		= 19;
+		optional int32 		db_recognition_setup_id = 20;
+		optional string 	recname			= 21;
+		optional string 	camera			= 22;
+		optional int32 		cameranumber 		= 23;
 	}
 	
 	message Image
