@@ -254,7 +254,7 @@ motion::Message getRefreshProto(motion::Message m)
         muser->set_pfobjectid(user_info.at(7));
         muser->set_username(user_info.at(8));
         muser->set_email(user_info.at(9));
-        muser->set_first_name(user_info.at(10));
+        muser->set_first_name(user_info.at(10)); 
         muser->set_last_name(user_info.at(11));
         muser->set_location(user_info.at(12));
         muser->set_uiidinstallation(user_info.at(13));

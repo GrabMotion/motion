@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network script
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     socket/streamlistener.cpp \
     socket/streamsender.cpp \
     socket/udpserver.cpp \
-    socket/matlistener.cpp
+    socket/matlistener.cpp \
+    login/login.cpp
 
 HEADERS  += mainwindow.h \
     drawing/mouse_coordinates.h \
@@ -52,7 +53,8 @@ HEADERS  += mainwindow.h \
     socket/streamlistener.h \
     socket/streamsender.h \
     socket/matlistener.h \
-    socket/udpserver.h
+    socket/udpserver.h \
+    login/login.h
 
 FORMS    += mainwindow.ui
 
@@ -74,3 +76,5 @@ QMAKE_CXXFLAGS += -std=c++0x -pthread
 DESTDIR     = ../macdeployqt
 OBJECTS_DIR = ../macdeployqt
 MOC_DIR     = ../macdeployqt
+
+QMAKE_MAC_SDK = macosx10.11

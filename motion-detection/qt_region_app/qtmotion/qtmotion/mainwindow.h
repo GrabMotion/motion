@@ -42,6 +42,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
+#include <QNetworkReply>
 
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -49,6 +50,8 @@
 #include "b64/base64.h"
 
 #include "drawing/mouse_coordinates.h"
+
+#include <QSettings>
 
 #include <sstream>
 #include <vector>
@@ -94,6 +97,10 @@ public:
     std::string ExtractString( std::string source, std::string start, std::string end );
     std::vector<std::string> splitProto(const std::string &s, char delim);
 
+    QString serverurl, username, password, client;
+    int clientid;
+    QSettings settings;
+
 private:
     Ui::MainWindow *ui;
     QtWaitingSpinner *m_spinner;
@@ -134,7 +141,6 @@ private:
     void enable_diable_Lateral_Time(bool set);
     void enable_diable_Lateral_Grid(bool set);
     void enable_diable_Lower_Bar(bool set);
-    void enable_diable_Process(bool set);
     void enable_disable_Save(bool set);
 
     void on_engage(QString rec);
@@ -154,7 +160,7 @@ private:
     bool finished=false;
 
     void saveMat(std::string encodedmat, google::protobuf::uint32 file);
-    void loadMat(const motion::Message::MotionRec * mrec);
+    void loadMat(google::protobuf::uint32 file);
     cv::Mat extractMat(string loadedmat);
     void saveImage(std::string oridecoded, std::string file);
 
@@ -186,10 +192,12 @@ private:
     std::string imagepath;
 
     void engage_refresh(bool engage);
-    void populateRecCombo(motion::Message::MotionCamera * mmactivecam, QString activerec);
     void enableStartButton(const motion::Message::MotionCamera * mcam);
 
     void loadRecData(const motion::Message::MotionRec * mrec);
+
+    bool start_recognition_toggled = false;
+
 
 public:
     Q_SLOT void setremoteProto(motion::Message payload)
@@ -210,6 +218,9 @@ public:
     }
 
 private slots:
+
+    //Login
+    void slotAcceptUserLogin(QString&,QString&,QString&,QString&, int&);
 
     //buttons
     void on_engage_button_clicked();
@@ -253,6 +264,7 @@ private slots:
     void on_collapse_clicked();
     void on_expand_clicked();
     void onRecNameTextChanged();
+    void onServerTextChanged();
     void on_save_rec_clicked();
     void on_rec_new_clicked();
     void on_rec_activated(const QString &arg1);
@@ -261,6 +273,8 @@ private slots:
     void on_cameracombo_activated(const QString &arg1);
 
     void get_mat();
+
+    void on_set_api_url_clicked();
 
 signals:
     void drawLinesSignal(std::vector<cv::Point2f> lines);

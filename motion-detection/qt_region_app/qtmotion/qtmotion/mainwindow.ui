@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>999</width>
+    <width>1032</width>
     <height>698</height>
    </rect>
   </property>
@@ -345,8 +345,8 @@ color: rgb(255, 252, 253);</string>
      <rect>
       <x>670</x>
       <y>46</y>
-      <width>321</width>
-      <height>169</height>
+      <width>351</width>
+      <height>171</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="layout_time">
@@ -359,14 +359,7 @@ color: rgb(255, 252, 253);</string>
      <property name="bottomMargin">
       <number>0</number>
      </property>
-     <item row="4" column="0" colspan="3">
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
+     <item row="7" column="0">
       <widget class="QLabel" name="label_rec_started">
        <property name="maximumSize">
         <size>
@@ -382,7 +375,7 @@ color: rgb(255, 252, 253);</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="6" column="0">
       <widget class="QLabel" name="label_terminal_status">
        <property name="maximumSize">
         <size>
@@ -399,29 +392,75 @@ color: rgb(255, 252, 253);</string>
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label_terminal_time">
+      <widget class="QLabel" name="label_server_url">
        <property name="maximumSize">
         <size>
-         <width>130</width>
+         <width>100</width>
          <height>11</height>
         </size>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Terminal Time:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Server URL:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
-     <item row="0" column="0" colspan="3">
-      <widget class="Line" name="line_2">
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_client_name">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>11</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Client:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1" colspan="3">
+      <widget class="QComboBox" name="client_number"/>
+     </item>
+     <item row="4" column="4" colspan="2">
+      <widget class="QLabel" name="synched">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="4" colspan="2">
+      <widget class="QLabel" name="api_link">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="4" colspan="2">
+      <widget class="QPushButton" name="set_api_url">
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" colspan="6">
+      <widget class="Line" name="line">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="6" column="1" colspan="2">
+     <item row="7" column="1" colspan="5">
       <widget class="QLabel" name="instance_started_2">
        <property name="maximumSize">
         <size>
@@ -434,21 +473,7 @@ color: rgb(255, 252, 253);</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="1" colspan="2">
-      <widget class="QLabel" name="remote_terminal_time">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1" colspan="2">
-      <widget class="QLabel" name="computer_time">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1" colspan="2">
+     <item row="6" column="1" colspan="5">
       <widget class="QLabel" name="instance_started">
        <property name="maximumSize">
         <size>
@@ -461,23 +486,27 @@ color: rgb(255, 252, 253);</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_computer_time">
-       <property name="maximumSize">
-        <size>
-         <width>130</width>
-         <height>11</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Computer Time:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     <item row="0" column="0" colspan="5">
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="4" column="0" colspan="2">
+      <widget class="QLabel" name="remote_terminal_time">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="2" colspan="2">
       <widget class="QPushButton" name="set_time">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -499,14 +528,8 @@ color: rgb(255, 252, 253);</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="2">
-      <widget class="QLabel" name="synched">
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>16777215</height>
-        </size>
-       </property>
+     <item row="2" column="1" colspan="3">
+      <widget class="QLabel" name="server_url">
        <property name="text">
         <string/>
        </property>
@@ -519,109 +542,12 @@ color: rgb(255, 252, 253);</string>
      <rect>
       <x>670</x>
       <y>215</y>
-      <width>323</width>
+      <width>351</width>
       <height>321</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="layout_instances">
-     <item row="4" column="0" colspan="4">
-      <widget class="QTreeWidget" name="remote_directory">
-       <column>
-        <property name="text">
-         <string>Instance</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>End</string>
-        </property>
-       </column>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_rec_job">
-       <property name="maximumSize">
-        <size>
-         <width>55</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Rec. job</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QPushButton" name="expand">
-       <property name="text">
-        <string>Exp</string>
-       </property>
-      </widget>
-     </item>
      <item row="6" column="2">
-      <widget class="QPushButton" name="watch_video">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Video</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" colspan="2">
-      <widget class="QComboBox" name="motionmonth"/>
-     </item>
-     <item row="5" column="0">
-      <widget class="QPushButton" name="collapse">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Coll</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="3">
-      <widget class="QProgressBar" name="xml_progress">
-       <property name="maximumSize">
-        <size>
-         <width>60</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="value">
-        <number>24</number>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1" colspan="3">
-      <widget class="QComboBox" name="cameracombo"/>
-     </item>
-     <item row="2" column="1" colspan="3">
-      <widget class="QComboBox" name="rec">
-       <property name="minimumSize">
-        <size>
-         <width>150</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="2">
       <layout class="QHBoxLayout" name="instance_spinner">
        <item>
         <spacer name="spinnerLeftSpacer_2">
@@ -651,7 +577,10 @@ color: rgb(255, 252, 253);</string>
        </item>
       </layout>
      </item>
-     <item row="6" column="0">
+     <item row="1" column="2" colspan="2">
+      <widget class="QComboBox" name="motionday"/>
+     </item>
+     <item row="7" column="0">
       <widget class="QPushButton" name="getxml">
        <property name="maximumSize">
         <size>
@@ -664,10 +593,7 @@ color: rgb(255, 252, 253);</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="2" colspan="2">
-      <widget class="QComboBox" name="motionday"/>
-     </item>
-     <item row="5" column="3">
+     <item row="6" column="3">
       <widget class="QPushButton" name="refresh">
        <property name="maximumSize">
         <size>
@@ -696,19 +622,6 @@ color: rgb(255, 252, 253);</string>
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
-      <widget class="QPushButton" name="watch_image">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Image</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="1">
       <spacer name="verticalSpacer">
        <property name="orientation">
@@ -721,6 +634,116 @@ color: rgb(255, 252, 253);</string>
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="7" column="1">
+      <widget class="QPushButton" name="watch_image">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Image</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_rec_job">
+       <property name="maximumSize">
+        <size>
+         <width>55</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Rec. job</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QPushButton" name="expand">
+       <property name="text">
+        <string>Exp</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="2">
+      <widget class="QPushButton" name="watch_video">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Video</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QComboBox" name="motionmonth"/>
+     </item>
+     <item row="5" column="0" colspan="4">
+      <widget class="QTreeWidget" name="remote_directory">
+       <column>
+        <property name="text">
+         <string>Instance</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>End</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item row="0" column="1" colspan="3">
+      <widget class="QComboBox" name="cameracombo"/>
+     </item>
+     <item row="6" column="0">
+      <widget class="QPushButton" name="collapse">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Coll</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="3">
+      <widget class="QProgressBar" name="xml_progress">
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="value">
+        <number>24</number>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" colspan="3">
+      <widget class="QComboBox" name="rec">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -889,7 +912,7 @@ color: rgb(255, 252, 253);</string>
        </property>
        <property name="time">
         <time>
-         <hour>7</hour>
+         <hour>0</hour>
          <minute>0</minute>
          <second>0</second>
         </time>
@@ -906,7 +929,7 @@ color: rgb(255, 252, 253);</string>
        </property>
        <property name="minimumDateTime">
         <datetime>
-         <hour>7</hour>
+         <hour>0</hour>
          <minute>0</minute>
          <second>0</second>
          <year>2000</year>
@@ -923,10 +946,13 @@ color: rgb(255, 252, 253);</string>
        </property>
        <property name="minimumTime">
         <time>
-         <hour>7</hour>
+         <hour>0</hour>
          <minute>0</minute>
          <second>0</second>
         </time>
+       </property>
+       <property name="currentSection">
+        <enum>QDateTimeEdit::HourSection</enum>
        </property>
        <property name="displayFormat">
         <string>h:mm AP</string>
@@ -940,7 +966,7 @@ color: rgb(255, 252, 253);</string>
       <widget class="QDateTimeEdit" name="time_to">
        <property name="time">
         <time>
-         <hour>21</hour>
+         <hour>12</hour>
          <minute>0</minute>
          <second>0</second>
         </time>
@@ -951,7 +977,7 @@ color: rgb(255, 252, 253);</string>
          <minute>59</minute>
          <second>59</second>
          <year>2000</year>
-         <month>2</month>
+         <month>1</month>
          <day>1</day>
         </datetime>
        </property>
@@ -1000,6 +1026,9 @@ color: rgb(255, 252, 253);</string>
        <property name="text">
         <string>Startup</string>
        </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item row="1" column="8">
@@ -1021,121 +1050,7 @@ color: rgb(255, 252, 253);</string>
         <bool>true</bool>
        </property>
        <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="gridLayoutWidget_3">
-    <property name="geometry">
-     <rect>
-      <x>1000</x>
-      <y>6</y>
-      <width>431</width>
-      <height>611</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="process_quene">
-     <item row="2" column="0" colspan="5">
-      <widget class="QTreeWidget" name="process_list">
-       <column>
-        <property name="text">
-         <string>Process</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Status</string>
-        </property>
-       </column>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_process">
-       <property name="text">
-        <string> Process:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="4">
-      <widget class="QPushButton" name="run">
-       <property name="maximumSize">
-        <size>
-         <width>60</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Run</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1" colspan="3">
-      <widget class="QComboBox" name="process"/>
-     </item>
-     <item row="1" column="1" colspan="2">
-      <widget class="QDateTimeEdit" name="time_process">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="displayFormat">
-        <string>hh:mm A</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QPushButton" name="edit_process">
-       <property name="maximumSize">
-        <size>
-         <width>120</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Edit Process</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3" colspan="2">
-      <widget class="QPushButton" name="quene">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Quene</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_process_schedule">
-       <property name="text">
-        <string>Schedule:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="3" colspan="2">
-      <widget class="QPushButton" name="end_process">
-       <property name="maximumSize">
-        <size>
-         <width>120</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>End Proces</string>
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -1159,7 +1074,7 @@ color: rgb(255, 252, 253);</string>
      <rect>
       <x>800</x>
       <y>535</y>
-      <width>191</width>
+      <width>221</width>
       <height>121</height>
      </rect>
     </property>
@@ -1226,8 +1141,11 @@ color: rgb(255, 252, 253);</string>
          <height>16777215</height>
         </size>
        </property>
+       <property name="styleSheet">
+        <string notr="true">font: 14pt &quot;.SF NS Text&quot;;</string>
+       </property>
        <property name="text">
-        <string>Save Rec</string>
+        <string>Save Recognition</string>
        </property>
       </widget>
      </item>
@@ -1239,7 +1157,7 @@ color: rgb(255, 252, 253);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>999</width>
+     <width>1032</width>
      <height>22</height>
     </rect>
    </property>
