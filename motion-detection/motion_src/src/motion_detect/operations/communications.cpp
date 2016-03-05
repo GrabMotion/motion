@@ -240,18 +240,61 @@ motion::Message getRefreshProto(motion::Message m)
      
     setActiveCam(activecam);
      
-    vector<std::string> server_info = getServerInfo();
-    if (server_info.size()>0)
+    vector<std::string> user_info = getUserInfo();
+    if (user_info.size()>0)
     {
-        m.set_clientnumber(atoi(server_info.at(0).c_str()));
-        m.set_clientname(server_info.at(1));
-        m.set_serverurl(server_info.at(2));
+        motion::Message::MotionUser * muser = m.add_motionuser();
+        muser->set_clientnumber(atoi(user_info.at(0).c_str()));
+        muser->set_wp_user(user_info.at(1));
+        muser->set_wp_password(user_info.at(2));
+        muser->set_wp_server_url(user_info.at(3));
+        muser->set_wp_userid(atoi(user_info.at(4).c_str()));
+        muser->set_wp_client_id(atoi(user_info.at(5).c_str()));
+        muser->set_wp_client_mediaid(atoi(user_info.at(6).c_str()));
+        muser->set_pfobjectid(user_info.at(7));
+        muser->set_username(user_info.at(8));
+        muser->set_email(user_info.at(9));
+        muser->set_first_name(user_info.at(10));
+        muser->set_last_name(user_info.at(11));
+        muser->set_location(user_info.at(12));
+        muser->set_uiidinstallation(user_info.at(13));
     }
-     
+
+    vector<std::string> device_info = getTerminalInfo();
+    if (device_info.size()>0)
+    {
+        motion::Message::MotionDevice * mdevice = m.add_motiondevice();
+
+       device_info.at(0)); //db_local              10
+       device_info.at(1)); //model                 11
+       device_info.at(2)); //hardware              12
+       device_info.at(3)); //serial                13
+       device_info.at(4)); //revision              14
+       device_info.at(5)); //disktotal             15
+       device_info.at(6)); //diskused              16
+       device_info.at(7)); //diskavailable         17
+       device_info.at(8)); //disk_percentage_used  18
+       device_info.at(9)); //temperature           19
+       device_info.at(10)); //created      
+
+        mdevice->device_info
+
+        stringstream sql_starttime;
+        sql_starttime << "SELECT starttime FROM status;";
+        pthread_mutex_lock(&databaseMutex);
+        vector<vector<string> > starttime_array = db_select(sql_starttime.str().c_str(), 1);
+        pthread_mutex_unlock(&databaseMutex);
+        std::string starttime = starttime_array.at(0).at(0);
+        m.set_devicestarttime(starttime);
+        cout << "starttime: " << starttime << endl;
+    }
+
+
+
     vector<int> cams;
     stringstream sql_cameras;
     sql_cameras <<
-    "SELECT C._id, C.number, C.name, C.active FROM cameras C;";
+    "SELECT C._id, C.number, C.name, C.active, C.thumbnail FROM cameras C;";
     pthread_mutex_lock(&databaseMutex);
     vector<vector<string> > cameras_array = db_select(sql_cameras.str().c_str(), 4);
     pthread_mutex_unlock(&databaseMutex);
@@ -274,7 +317,8 @@ motion::Message getRefreshProto(motion::Message m)
         mcam->set_cameranumber(camnum);
         std::string cameraname = rowc.at(2);
         mcam->set_cameraname(cameraname);
-         
+        mcam->set_thumbnail(rowc.at(4)); 
+
         int takepicture = motion::Message::TAKE_PICTURE;
         if ((m.type() == takepicture) && (activecam==q))
         {
@@ -692,14 +736,6 @@ motion::Message runCommand(motion::Message m)
 
             m = getRefreshProto(m);
           
-            stringstream sql_starttime;
-            sql_starttime << "SELECT starttime FROM status;";
-            pthread_mutex_lock(&databaseMutex);
-            vector<vector<string> > starttime_array = db_select(sql_starttime.str().c_str(), 1);
-            pthread_mutex_unlock(&databaseMutex);
-            std::string starttime = starttime_array.at(0).at(0);
-            m.set_devicestarttime(starttime);
-            cout << "starttime: " << starttime << endl;
         }
         break;
         
@@ -876,13 +912,13 @@ motion::Message runCommand(motion::Message m)
             
             if (load)
             {
-                startMainRecognition();
+                startMainRecognition(atoi(camera.str().c_str()));
             } else 
             {
                 cout << "No matching values for the current arguments." << endl; 
             }
             
-            updateRecStatus(1, mcamera->cameranumber(), mrec->recname());
+            updateRecStatusByRecName(1, mrec->recname());
             
             m.Clear();
             
@@ -918,7 +954,7 @@ motion::Message runCommand(motion::Message m)
             
             motion::Message::MotionRec * mrec = mcamera->mutable_motionrec(0);
                 
-            updateRecStatus(0, mcamera->cameranumber(), mrec->recname());
+            updateRecStatusByRecName(0, mrec->recname());
             
             mcamera->Clear();
             mrec->Clear();
@@ -1007,10 +1043,10 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::SERVER_INFO:
         {
             cout << "motion::Message::SERVER_INFO" << endl;
-            std::string serverbase  = m.serverurl();
-            int clientnumber        = m.clientnumber(); 
-            std::string clientname  = m.clientname();
-            int db_server = insertServerIntoDatabase(clientnumber, clientname, serverbase);
+
+            motion::Message::MotionUser * muser = m.mutable_motionuser(0);
+            int db_server = insertUserIntoDatabase(muser);
+
             m.set_serverip(PROTO.serverip());
             m.set_type(motion::Message::SERVER_INFO_OK);
         }
@@ -1066,6 +1102,8 @@ try
       PROTO = ms;
       
       google::protobuf::uint32 chunck_size = PROTO.packagesize();
+      
+      cout << "count socket size:" << chunck_size << endl;
         
       value = ms.type();
       if (ms.has_serverip())

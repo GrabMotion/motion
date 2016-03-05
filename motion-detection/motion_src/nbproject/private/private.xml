@@ -10,11 +10,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>rfs://root@192.168.0.6:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/http/json.h</file>
-            <file>rfs://root@192.168.0.6:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp</file>
-            <file>rfs://root@192.168.0.6:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.h</file>
-            <file>rfs://root@192.168.0.6:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp</file>
-            <file>rfs://root@192.168.0.6:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/http/post.h</file>
+            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp</file>
+            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/communications.cpp</file>
+            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/http/post.cpp</file>
+            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/startup.cpp</file>
+            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.h</file>
+            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp</file>
+            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/http/post.h</file>
         </group>
     </open-files>
 </project-private>

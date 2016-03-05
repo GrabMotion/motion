@@ -109,8 +109,11 @@ std::string parse_json ( json_object* j )
 }
 
 
-std::string parse_and_store_ipinfo_io(const char *cstr)
+vector<std::string> parse_and_store_ipinfo_io(const char *cstr)
 {
+    
+    vector<std::string> location;
+            
     json_object * jobj = json_tokener_parse(cstr);
     
     std::string publicip; 
@@ -157,7 +160,15 @@ std::string parse_and_store_ipinfo_io(const char *cstr)
         }
     }
     
-    insertIntoLocation(publicip, hostname, city, region, country, loc, org);
+    location.push_back(publicip);
+    location.push_back(hostname);
+    location.push_back(city);
+    location.push_back(region);
+    location.push_back(country);
+    location.push_back(loc);
+    location.push_back(org);
     
-    return publicip;
+    //insertIntoLocation(publicip, hostname, city, region, country, loc, org);
+    
+    return location;
 }

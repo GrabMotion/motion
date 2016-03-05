@@ -15,6 +15,6 @@ std::string parse_json( json_object* j );
 std::string parse_json_array( json_object* j, char* key );
 
 //Host Info
-std::string parse_and_store_ipinfo_io(const char *cstr);
+vector<std::string> parse_and_store_ipinfo_io(const char *cstr);
 
 //std::string getMediaIdFromJSON(std::string message);

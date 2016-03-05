@@ -5,8 +5,8 @@
  * Created on April 19, 2015, 11:23 PM
  */
 
-#include <iostream>
-#include <string>
+#include <iostream> h 
+#include <string>  
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -31,9 +31,14 @@
 #include "operations/startup.h"
 
 
+#include <parse.h>
+
 using namespace std;
 
 // GLOBAL VARIABLES //
+
+//Parse
+ParseClient client;
 
 //Paths
 std::string basepath;
@@ -57,12 +62,15 @@ std::string dumpinstancefolder;
 std::string CLIENT_ID;
 std::string SERVER_BASE_URL;
 std::string public_ip;
+std::string hostname;
+std::string city;
+std::string region;
+std::string country;
+std::string loc;
+std::string org;
 
 //xml
 std::string XML_FILE = "<import>session";
-
-//Threads
-int runt, runb, runs, runr, runl, runm, runw, runss, runo, ruse;
 
 /// TCP Streaming
 int         clientSock;
@@ -70,8 +78,15 @@ char*     	server_ip;
 int       	server_port;
 int       	server_camera;
 
+
+//Threads
+int runt, runb, runs, runr, runl, runm, runw, runss, runo, ruse;
+int numRecognitionThreads = 4;
+std::vector<pthread_t> threads_recognition(4);
+std::vector<int> threads_recognizing_pids(4);
+
 // Threading
-pthread_t thread_broadcast, thread_echo, thread_socket, thread_recognition;
+pthread_t thread_broadcast, thread_echo, thread_socket;
 bool observer_thread_running = false;
 
 //Threads
@@ -90,13 +105,15 @@ int number_of_changes;
 int resutl_watch_detected;
 std::string startrecognitiontime;
 string DIR_FORMAT           = "%d%h%Y"; // 1Jan1970
-void startMainRecognition();
+void startMainRecognition(int camnum);
 void * startRecognition(void * arg);
 
 //Run Forever
-double t_postcount      = 60 * 20; //60 * 24; 
-double t_postlocation   = 60 * 60 * 12; 
-double t_loadinstance   = 10; //60 * 24;      
+double t_post_terminal      = 60 * 20; //60 * 24; 
+double t_post_location   = 60 * 60 * 12; 
+double t_post_camera     = 60 * 60 * 6; 
+
+double t_load_instance   = 10; //60 * 24;      
 
 
 int main_loop_counter;
@@ -107,9 +124,9 @@ const int MAXRCVSTRING = 4096;          // Longest string to receive
 
 void * ThreadMain(void *clntSock);
 
-void startMainRecognition()
+void startMainRecognition(int camnum)
 {
-    runr = pthread_create(&thread_recognition, NULL, startRecognition, NULL);
+    runr = pthread_create(&threads_recognition[camnum], NULL, startRecognition, NULL);
     if ( runr  != 0) 
     {
         cerr << "Unable to create thread" << endl;
@@ -182,7 +199,7 @@ void * broadcastsender ( void * args )
     for (;;) 
     {
         sock.sendTo(sendString, strlen(sendString), destAddress, destPort);
-        //cout << "UPD Send: " << countud << " " << endl;
+        cout << "UPD Send: " << countud << " " << endl;
         countud++;
         sleep(5);
     }
@@ -207,7 +224,7 @@ void startThreads()
        cerr << "Unable to create thread" << endl;
    }
    
-    //Socket
+    //Socket 
     runs = pthread_create(&thread_socket, NULL, socketThread, NULL);
     if ( runs  != 0) {
         cerr << "Unable to create thread" << endl;
@@ -217,6 +234,9 @@ void startThreads()
 int main (int argc, char * const av[])
 {
     
+	cout << "CV_MAJOR_VERSION: " << CV_MAJOR_VERSION << endl;
+	
+	
     const char **argv = (const char **) av; 
     cout << "argv[0]: " << argv[0] << endl;
     if (argc==2)
@@ -263,38 +283,60 @@ int main (int argc, char * const av[])
     startUpParams(argc, argv);
     //Start Threads
     startThreads();
-     
+    
+    //Parse
+    client = parseInitialize("fsLv65faQqwqhliCGF7oGqcT8MxPDFjmcxIuonGw", "T3PK1u0NQ36eZm91jM0TslCREDj8LBeKzGCsrudE");
+    //parseSendRequest(client, "POST", "/1/classes/TestObject", "{\"foo\":\"bar\"}"  
+        
     //Main Loop
     for (;;)
     {
-        time_t now;
-        time(&now); 
-        
-        vector<std::string> server_info = getServerInfo();
-        
+        vector<std::string> user_info = getUserInfo();
+
         cout << "main loop counter: " << main_loop_counter << endl;
-        
-        if (server_info.size()>0)
+
+        if (user_info.size()>0)
         {
-            
-            CLIENT_ID       = server_info.at(0);
-            SERVER_BASE_URL = "http://" + server_info.at(2);
-            
+
             //Post Location
-            locationPost(t_postlocation);
-                
-            //Post Terminal
-            terminalPost(t_postcount);
-            
+            locationPost(t_post_location);
+
             //Post Camera
-            postCameraStatus();
-            
-        
+            cameraPost(t_post_camera); 
+
+            time_t now;
+            time(&now); 
+
+            CLIENT_ID       = user_info.at(5);
+            SERVER_BASE_URL = user_info.at(3);
+
+            //Post Terminal
+            terminalPost(t_post_terminal);
+
+            sleep(5);
+
+            //Scan local instances and store
             loadInstancesFromFile();
-        }    
+
+            sleep(5);
+
+            struct timeval tr;
+            struct tm* ptmr;
+            char curr_time[40];
+            gettimeofday (&tr, NULL);
+            ptmr = localtime (&tr.tv_sec);
+            strftime (curr_time, sizeof (curr_time), "%H:%M:%S", ptmr);
+            std::stringstream timecompare;
+            timecompare << curr_time;
+
+            //Run Job if in Interval
+            runJobsInterval(timecompare.str(), threads_recognition);
+
+            main_loop_counter ++;
+            
+        }
         
-        main_loop_counter ++;
-        sleep(30);
+        sleep(10);
     }
      
     //Stream Socket Server.

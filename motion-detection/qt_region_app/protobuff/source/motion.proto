@@ -5,71 +5,86 @@ message Message
 	
 	optional int32 activecam 			= 1; 
 	required ActionType type 			= 2 [default = ENGAGE];
-	optional string time 				= 3;  
-	optional bytes data 				= 4;
-	optional int32 data_amount			= 5;
-	optional int32 data_total 			= 6;
-	optional string serverip 			= 7;
-	optional string clientip 			= 8;
-	optional string devicestarttime 		= 9;
-	repeated MotionCamera motioncamera  		= 10;
-	optional string 	currmonth 		= 11;
-	optional string 	currday	 		= 12;
-	optional int32 		currcam			= 13;
-	optional int32 packagesize 			= 14;	
-	optional string imagefilepath 			= 15; 
-	optional string videofilepath 			= 16;
-	optional string recname 			= 17;
-	
+	repeated MotionUser motionuser  	= 3;
+	repeated MotionCamera motioncamera  = 4;
+	repeated MotionDevice motiondevice  = 5;
+	optional string time 				= 6;  
+	optional bytes data 				= 7;
+	optional int32 data_amount			= 8;
+	optional int32 data_total 			= 9;
+	optional string serverip 			= 10;
+	optional string clientip 			= 11;
+	optional string devicestarttime 	= 12;
+	optional string currmonth 			= 13;
+	optional string currday	 			= 14;
+	optional string currdaytitle		= 15;		
+	optional int32 currcam				= 16;
+	optional int32 packagesize 			= 17;	
+	optional string imagefilepath 		= 18; 
+	optional string videofilepath 		= 19;
+	optional string recname 			= 20;
+	optional int32 activecamnum 		= 21;
 
+	enum ResponseType
+	{
+		LOGIN_SUCCESSFUL		= 100;
+		LOGIN_FAILED        	= 101;
+		ERROR_INVALID_USERNAME	= 102;
+		ERROR_INVALID_PASSWORD	= 103;
+		ERROR_LOGIN_FAILIURE	= 104;
+		ERROR_TIMEOUT	       	= 105;
+	}
+	
 	enum ActionType 
 	{
-		 ENGAGE                   	= 1000;
-		 REC_START			= 1002;
-		 REC_RUNNING			= 1003;
-		 REC_STOP	        	= 1004;
-		 UNENGAGE                 	= 1005;
-		 GET_TIME                	= 1006;
-		 SET_TIME                 	= 1007;
-		 TIME_SET                 	= 1008;
-		 STRM_START	      		= 1009;
-		 STRM_STOP			= 1010;
-		 TAKE_PICTURE 			= 1011;
-		 DISSCONNECT		      	= 1012;
-		 REFRESH			= 1013;
-		 GET_XML			= 1014;
-		 GET_IMAGE			= 1015;
-		 GET_VIDEO			= 1016;
-		 SAVE				= 1017;
-		 OPEN				= 1018;
-		 UPDATE				= 1019;
-		 SAVE_OK			= 1020;
-	         UPDATE_OK			= 1021; 
-		 GET_MAT			= 1022;	
-		 RESPONSE_OK			= 2000;
-		 RESPONSE_NEXT			= 2010;
-		 RESPONSE_END			= 2020;
-		 RESPONSE_FINISH		= 2030;
-		 REC_HAS_CHANGES		= 2040;
-		 REC_HAS_INSTANCE		= 2050;
-		 PROTO_HAS_FILE 		= 3030;
-		 PROTO_NO_FILE 		  	= 3031;
+		ENGAGE              = 1000;
+		REC_START			= 1002;
+		REC_RUNNING			= 1003;
+		REC_STOP	        = 1004;
+		UNENGAGE            = 1005;
+		GET_TIME            = 1006;
+		SET_TIME            = 1007;
+		TIME_SET            = 1008;
+		STRM_START	      	= 1009;
+		STRM_STOP			= 1010;
+		TAKE_PICTURE 		= 1011;
+		DISSCONNECT		    = 1012;
+		REFRESH				= 1013;
+		GET_XML				= 1014;
+		GET_IMAGE			= 1015;
+		GET_VIDEO			= 1016;
+		SAVE				= 1017;
+		OPEN				= 1018;
+		UPDATE				= 1019;
+		SAVE_OK				= 1020;
+		 UPDATE_OK			= 1021; 
+		GET_MAT				= 1022;	
+		RESPONSE_OK			= 2000;
+		RESPONSE_NEXT		= 2010;
+		RESPONSE_END		= 2020;
+		RESPONSE_FINISH		= 2030;
+		REC_HAS_CHANGES		= 2040;
+		REC_HAS_INSTANCE	= 2050;
+		PROTO_HAS_FILE 		= 3030;
+		PROTO_NO_FILE 		= 3031;
+		SERVER_INFO 		= 3032;
+		SERVER_INFO_OK 		= 3033;
 	}
 	
 	enum SocketType
 	{
 		SOCKET_PROTO_TOSTRING		= 10;
 		SOCKET_PROTO_TOARRAY		= 11;
-		SOCKET_PLAIN_TEXT		= 12;
-		SPLITTED_MESSAGE		= 13;
-		SINGLE_MESSAGE			= 14;
-		SOCKET_BUFFER_NANO_SIZE     	= 1024;
-		SOCKET_BUFFER_MINI_SIZE     	= 2048;
-		SOCKET_BUFFER_MICRO_SIZE    	= 4096;
-		SOCKET_BUFFER_SMALL_SIZE    	= 8196;
-		SOCKET_BUFFER_REGULAR_SIZE  	= 16392;
-		SOCKET_BUFFER_MEDIUM_SIZE   	= 32784;
-		SOCKET_BUFFER_BIG_SIZE      	= 65568;
+		SOCKET_PLAIN_TEXT			= 12;
+		SPLITTED_MESSAGE			= 13;
+		SINGLE_MESSAGE				= 14;
+		SOCKET_BUFFER_NANO_SIZE     = 1024;
+		SOCKET_BUFFER_MINI_SIZE     = 2048;
+		SOCKET_BUFFER_MICRO_SIZE    = 4096;
+		SOCKET_BUFFER_SMALL_SIZE    = 8196;
+		SOCKET_BUFFER_REGULAR_SIZE  = 16392;
+		SOCKET_BUFFER_MEDIUM_SIZE   = 32784;
+		SOCKET_BUFFER_BIG_SIZE      = 65568;
 		TCP_ECHO_PORT            	= 5010;
 		TCP_STREAMING_PORT       	= 5020;
 		UDP_PORT                 	= 5030;
@@ -79,24 +94,82 @@ message Message
 	enum ProcessType
 	{
 		PROCESS_PEOPLE_COUNT		= 4001;
-		PROCESS_FACE_DETECT		= 4002;
+		PROCESS_FACE_DETECT			= 4002;
 		PROCESS_WALK_DIRECTION		= 4003;
+	}
+
+	message MotionDevice
+	{
+        
+		optional string ipnumber       		 = 1;
+		optional string ippublic             = 2;
+		optional string macaddress           = 3;
+		optional string hostname             = 4;
+		optional string city                 = 5;
+		optional string country              = 6;
+		optional string location             = 7;
+		optional string network_provider     = 8;
+		optional string uptime               = 9;
+		optional string starttime            = 10;
+		optional int32 db_local              = 11;
+        optional string model                = 12;
+        optional string hardware             = 13;
+        optional string serial               = 14; 
+        optional string revision             = 15; 
+        optional int32 disktotal             = 16; 
+        optional int32 diskused              = 17; 
+        optional int32 diskavailable         = 18; 
+        optional int32 disk_percentage_used  = 19; 
+        optional int32 temperature           = 20;
+	}
+	
+	message MotionUser
+	{
+		optional int32 clientnumber 		= 1; 
+		optional string wp_user				= 2;
+		optional string wp_password			= 3;
+		optional string wp_server_url		= 4;
+		optional int32  wp_userid			= 5;
+		optional int32  wp_client_id		= 6;
+		optional int32  wp_client_mediaid	= 7;
+		optional string pfobjectid 			= 8;
+		optional string username   			= 9;
+		optional string email   			= 10;
+		optional string first_name 			= 11;
+		optional string last_name  			= 12;
+		optional string location   			= 13;
+		optional string uiidinstallation	= 14;
+		optional int32  service_type		= 15;
+	}	
+
+	enum ServiceType
+	{
+		SERVICE_FREE_ACCOUNT		= 5001;
+		SERVICE_PAID_ACCOUNT		= 5002;
 	}
 
 	message MotionCamera
 	{
 		repeated MotionMonth motionmonth    		= 1;
 		repeated MotionRec motionrec		    	= 2;
-		optional int32 cameraid   			= 3 [default = 0];
-		optional int32 cameranumber   			= 4;
-		optional string cameraname   			= 5;
-		optional bool hasrecjob           		= 6;
+		optional int32 cameraid   					= 3 [default = 0];
+		optional int32 cameranumber   				= 4;
+		optional string cameraname   				= 5;
+		optional bool hasrecjob           			= 6;
 		optional bool recognizing           		= 7;
-		optional bool recognizing_flag  		= 8;
-		optional int32 db_idcamera 			= 9;
-		optional int32 db_idrec 			= 10;
-		optional bool fromdatabase			= 11;
+		optional bool recognizing_flag  			= 8;
+		optional int32 db_idcamera 					= 9;
+		optional int32 db_idrec 					= 10;
+		optional bool fromdatabase					= 11;
 		repeated MotionTrack motiontrack    		= 12;
+		optional int32 activemat					= 13;
+		optional int32 	matcols						= 14;
+		optional int32 	matrows 					= 15;	
+		optional int32 	matwidth					= 16;
+		optional int32 	matheight 					= 17;
+		optional int32 db_idmat 					= 18;
+		optional bytes tempdata 					= 19;
+		optional bytes thumbnail 					= 20;
 	}
 
 	message MotionTrack
@@ -111,34 +184,35 @@ message Message
 		optional string timestart		= 3;
 		optional string timeend			= 4;
 		optional string recname 		= 5;
-		optional string camerasince   		= 6;	 
+		optional string camerasince   	= 6;	 
 		optional bool storeimage 		= 7;
 		optional bool storevideo 		= 8;
-		optional string codename        	= 9;
+		optional string codename        = 9;
 		optional bool hasregion			= 10;
 		optional string coordinates		= 11;
 		optional int32 delay			= 12;
-		optional string startrectime 		= 13;
-		optional string stoprectime 		= 14;
-		optional bool	runatstartup		= 15;
+		optional string startrectime 	= 13;
+		optional string stoprectime 	= 14;
+		optional bool	runatstartup	= 15;
 		optional int32 activemat		= 16;
 		optional int32 db_idmat 		= 17;
-		optional int32 db_idcoordinates 	= 18;
-		optional int32 db_intervalid		= 19;
+		optional int32 db_idcoordinates = 18;
+		optional int32 db_intervalid	= 19;
 		optional int32 	matcols			= 20;
 		optional int32 	matrows 		= 21;
 		optional int32 	matwidth		= 22;
 		optional int32 	matheight 		= 23;
-		optional string lastinstance		= 24;
+		optional string lastinstance	= 24;
 		optional int32 db_idmonth 		= 25;
 		optional int32 db_idday 		= 26;
 		optional string xmlfilepath		= 27;
-		optional int32 db_recognitionsetupid  	= 28;
+		optional int32 db_recognitionsetupid = 28;
 		optional bool hascron    		= 29;
-		repeated MotionCron motioncron		= 30;
+		repeated MotionCron motioncron	= 30;
 		optional int32 speed 			= 31;
 		optional int32 activerec 		= 32;
 		optional string matbasefile		= 33;
+		optional string created			= 34;
 	}
 
 	message MotionCron
@@ -149,50 +223,66 @@ message Message
 	
 	message MotionMonth
 	{
-		repeated MotionDay motionday 		= 1;
+		repeated MotionDay motionday 	= 1;
 		optional string monthlabel		= 2;
 		optional int32 db_monthid		= 3;		
 	}
 
 	message MotionDay
 	{
-		repeated Instance instance      		= 1;
+		repeated Instance instance      	= 1;
 		optional string daylabel			= 2;
 		optional int32 db_dayid 			= 3;
 		optional string xmlfilepath			= 4; 
+		optional string title				= 5;
 	}
 	
 	message Instance
 	{
 		required int32 		idinstance 		= 1;
 		optional int32 		number 			= 2;
-		optional string 	instancestart   	= 3;	
-		optional string 	instanceend	    	= 4;
+		optional string 	instancestart   = 3;	
+		optional string 	instanceend	    = 4;
 		optional string 	fileformat		= 5;
-		repeated Image 		image      	    	= 6;
+		repeated Image 		image      	    = 6;
 		repeated Crop 		crop      	   	= 7;		
-		optional Video 		video      	    	= 8;
+		optional Video 		video      	    = 8;
+		optional string 	dir				= 9;
+		optional string 	xmlfile			= 10;
+		optional string 	extdata			= 11;
+		optional string 	end				= 12;
+		optional int32 		begintime		= 13;
+		optional int32 		endtime			= 14;
+		optional int32 		inittime		= 15;
+		optional string 	instance		= 16;
+		optional string 	instancecode	= 17;
+		optional string 	timeinfo		= 18;
+		optional int32 		db_dayid 		= 19;
+		optional int32 		db_recognition_setup_id = 20;
+		optional string 	recname			= 21;
+		optional string 	camera			= 22;
+		optional int32 		cameranumber 	= 23;
 	}
 	
 	message Image
 	{
 		optional string path 				= 1;
 		optional string name				= 2;
-		optional int32 	imagechanges 	    		= 3;	
+		optional int32 	imagechanges 	    = 3;	
 		optional string time				= 4;
 	}
 	
 	message Crop
 	{
 		optional string rect				= 1;
-		optional int32 db_imagefatherid			= 2;
+		optional int32 db_imagefatherid		= 2;
 	}
 	
 	message Video
 	{
 		optional string path 				= 1;
 		optional string name				= 2;
-		optional string instancefolder			= 3;
+		optional string instancefolder		= 3;
 	}
 }  
 

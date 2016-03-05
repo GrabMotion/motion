@@ -57,12 +57,15 @@ extern bool to_bool(std::string const& s);
 extern motion::Message PROTO, R_PROTO;
 extern std::string exec_command(char* cmd);
 
-void updateRecStatus(int status, int camera, std::string recname);
+void updateRecStatusByRecName(int status, std::string recname);
+void updateRecStatusByCamera(int status, int camnum);
+
+int getRecRunningByName(std::string name);
 static int callback(void *ptr, int argc, char* argv[], char* cols[] );
 int db_cpuinfo();
 std::vector<int> db_cams(std::vector<int> cams);
 bool loadStartQuery(std::string camera, std::string recname);
-vector<string> startIfNotRunningQuery(std::string camera, char * time);
+vector<string> checkJobRunningQuery(std::string camera, char * time);
 
 extern std::string getCurrentDayLabel();
 extern std::string getCurrentMonthLabel();
@@ -70,14 +73,17 @@ extern std::string getCurrentMonthLabel();
 int insertMonthIntoDatabase(std::string str_month, int db_camera_id);
 void updateRegionIntoDatabase(std::string rcoords, int recognitionid);
 int insertRegionIntoDatabase(std::string rcoords);
-int insertServerIntoDatabase(int clientnumber, std::string clientname, std::string base);
+int insertUserIntoDatabase(motion::Message::MotionUser * muser); //int clientnumber, std::string clientname, std::string base);
 
 int insertDayIntoDatabase(std::string str_day, int db_month_id);
-int insertIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera, motion::Message::MotionRec * prec, int db_camera_recognition_setupl_array);
+int insertIntervalIntoDatabase(motion::Message::MotionCamera * pcamera, motion::Message::MotionRec * prec);
 
-//int updateIntervalCrontabIntoDatabase(motion::Message::MotionCamera * pcamera);
-
-int insertIntoRecognitionSetup(motion::Message::MotionRec * prec, int db_day_id, int db_camera_id, int db_coordnates_id, std::string xmlfilepath);
+int insertIntoRecognitionSetup(motion::Message::MotionRec * prec, 
+        int db_day_id, 
+        int db_camera_id, 
+        int db_coordnates_id, 
+        std::string xmlfilepath,
+        std::string created);
 
 int insertIntoRelCameraRecognitionSetup(char * time_rasp, int db_recognitionsetup_id, int db_camera_id);
 
@@ -89,11 +95,10 @@ vector<string> getIntervalsByCamberaAndRec(std::string camera, std::string recna
 
 vector<string> getMaxImageByPath(google::protobuf::int32 imageid);
 vector<string> getImageByPath(std::string path);
-int insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idmedia, int db_srv_idpost);
+//int insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idmedia, int db_srv_idpost);
 vector<vector<string> > getNotTrackedInstance();
 
-void insertIntoLocation(std::string publicip, std::string hostname, std::string city, std::string region, std::string country, std::string loc, std::string org);
-    
+void insertIntoLocation(vector<std::string> location);
 //database
 int insertIntoIMage(const motion::Message::Image & img);
 void insertIntoCrop(const motion::Message::Crop & crop, int db_image_id);
@@ -114,7 +119,9 @@ void updateIntoPost (std::string id, std::string date, std::string modified);
 
 vector<std::string> getTrackPostByType(std::string type);
 
-vector<std::string> getTrackPostByTypeAndId(std::string type, int db_local);
+vector<std::string> getTrackPostByTypeAndIdLocal(std::string type, int db_local);
+vector<std::string> getTrackPostByTypeAndIdRemote(std::string type, int db_remote);
+vector<std::string> getTrackPostByTypeAndIdParent(std::string type, int post_parent);
 
 vector<std::string> getMatInfoFromId(int db_idmat);
 int getPostByIdAndType(int db_idpost);
@@ -123,7 +130,7 @@ vector<vector<string> > getTrackPostChilds(int id);
 
 time_t getLastPostTime(std::string type);
 
-vector<std::string> getServerInfo();
+vector<std::string> getUserInfo();
 
 
 void insertUpdateStatus(std::string uptime, vector<int> camsarray, int db_terminal_id);
@@ -141,3 +148,7 @@ motion::Message::MotionCamera * getMonthByCameraIdMonthAndDate(
 void updateRecognition(motion::Message m);
 
 vector<std::string> getCamerasFromDB();
+
+std::string getDayCreatedById(int dayid);
+
+std::string getIntervalByIdRecognitionSetupId(int db_idrec);

@@ -70,8 +70,6 @@
             <df name="mat">
             </df>
             <df name="tracking">
-              <df name="recognitions">
-              </df>
             </df>
           </df>
           <df name="database">

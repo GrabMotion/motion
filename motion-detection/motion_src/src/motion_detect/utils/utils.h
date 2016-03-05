@@ -33,6 +33,7 @@ std::string fixedLength(int value, int digits);
 
 //Date Time
 std::string getCurrentDayLabel();
+std::string getCurrentDayTitle();
 std::string getCurrentMonthLabel();
 char *getShortTimeRasp();
 char * getTimeRasp();

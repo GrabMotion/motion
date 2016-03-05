@@ -131,6 +131,51 @@ motion::Message::MotionCamera * takePictureToProto(int camera, motion::Message::
     return mcam;
 }
 
+
+std::string takeThumbnailFromCamera(int camera)
+{
+    
+    cout << "CAPTURING !!!!!!!!!!!!!" << endl;
+    
+    CvCapture* capture = cvCreateCameraCapture(camera);
+    if (capture == NULL)
+    {
+        std::cout << "No cam found." << std::endl;
+    }
+    
+    int w = 640; //1280; //320;
+    int h = 480; //720;  //240;
+    
+    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
+    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
+    
+    //IplImage* img=0;
+    //img = cvQueryFrame( capture );
+    //cvSaveImage("IplImage.JPG",img);
+    
+    Mat mat; //(h, w, CV_8U); //CV_8U); // CV_8UC3);
+    mat = cvQueryFrame(capture);
+    //cvtColor(mat, mat, CV_RGB2GRAY);
+     
+    cout << "+++++++++++CREATING THUMBNAIL++++++++++++++" << endl;
+    
+    Size size(100,75);//the dst image size,e.g.100x100
+    Mat dst;//dst image
+    resize(mat,dst,size);//resize image
+
+    std:stringstream thumbmat;
+    thumbmat << dst << endl;
+
+    std::string thumbnail = thumbmat.str();
+
+    std::string thumbencoded = base64_encode(reinterpret_cast<const unsigned char*>(thumbnail.c_str()), thumbnail.length());
+    
+    cvReleaseCapture(&capture);
+    
+    return thumbencoded;
+}
+
+
 std::vector<int> getCameras()
 {
     std::vector<int> camsv;

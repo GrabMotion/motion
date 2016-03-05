@@ -40,25 +40,6 @@ double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d) {
   return 2.0 * earthRadiusKm * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
 }
 
-std::string get_command_from_wp(std::string command)
-{
-    FILE* pipe = popen(command.c_str(), "r");
-    int size = sizeof(pipe);
-    char buffer[128];
-    std::string result = "";
-    std::string error;
-    
-    std::stringstream post_response;
-    while(!feof(pipe)) 
-    {
-    	if(fgets(buffer, sizeof(buffer), pipe) != NULL)
-        {
-            post_response << buffer; 
-        }       
-    }
-    pclose(pipe);
-    return post_response.str();
-}
 
 motion::Message postRecognition(motion::Message m)
 {
@@ -105,101 +86,112 @@ motion::Message postRecognition(motion::Message m)
         bool jpgexist = file_exists(maximagepath);
         if (jpgexist)
         {
+            //int id = getPostByIdAndType(idmedia);
 
-            std::stringstream media;
-            media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << 
-            "' --data-binary @'"<< maximagepath << "' -d title='" << recname << "' -H \"Expect: \" " << SERVER_BASE_URL << "/wp-json/wp/v2/media";
-
-            int idmedia = post_command_to_wp(false, media.str(), prec->db_idmat());
-
-            if (idmedia)
+            vector<std::string> camerainfo = getTrackPostByTypeAndIdLocal("camera", pcamera->db_idcamera());
+            std::string post_parent;
+            if (camerainfo.size()>0)
             {
-
-                int id = getPostByIdAndType(idmedia);
-
-                vector<std::string> typeinfo = getTrackPostByType("terminal");
-                std::string postlink;
-                std::string apilink;
-                if (typeinfo.size()>0)
-                {
-                   postlink = typeinfo.at(6);
-                   apilink  = typeinfo.at(7);
-                }
-
-                std::string terminal_link       = postlink;
-                std::string terminal_api        = apilink;
-                std::string codename            = prec->codename();
-                std::string region              = rcoords;
-                int delay                       = prec->delay();
-                bool runatstartup               = prec->runatstartup();
-                bool hascron                    = prec->hascron();
-                std::string screen              = mat_array.at(0);
-
-                std::string coordsnb = region;    
-                coordsnb.erase(std::remove(coordsnb.begin(), coordsnb.end(), '\n'), coordsnb.end());
-
-                std::stringstream post_content;
-                post_content <<
-                "<b>Recognition Name        :</b> "             << recname              <<  "\n\n"    <<
-                "<b>Recognizing             :</b> "             << "NO"                 <<  "\n"    <<
-                "<b>Codename                :</b> "             << prec->codename()     <<  "\n"    <<
-                "<b>Region                  :</b> "             << coordsnb             <<  "\n"    <<
-                "<b>Delay                   :</b> "             << prec->delay()        <<  "\n"    <<
-                "<b>Run at startup          :</b> "             << prec->runatstartup() <<  "\n"    <<
-                "<b>Has cron job            :</b> "             << prec->hascron()      <<  "\n"    <<
-                "<b>Screen size             :</b> "             << screen               <<  "\n\n"  <<
-                "<b>API URL                 :</b> "             << "N/A"                <<  "\n"    <<
-                "<b>Keep Alive              :</b> "             << time_rasp            <<  "\n\n";
-
-
-                std::string content = escape(post_content.str());
-
-                std::stringstream terminal_post_url;
-                terminal_post_url << escape("<a href='") << terminal_link << escape("' target='_blank'>") << terminal_link << escape("</a>"); 
-                std::stringstream terminal_url;
-                terminal_url << escape("<b>Terminal                :</b> ") << terminal_post_url.str() << escape("\n"); 
-
-                content += terminal_url.str();
-
-                std::stringstream terminal_api_url;
-                terminal_api_url << escape("<a href='") << terminal_api << escape("' target='_blank'>") << terminal_api << escape("</a>"); 
-                std::stringstream terminal_api_url_json;
-                terminal_api_url_json << escape("<b>Terminal Api            :</b> ") << terminal_api_url.str() << escape("\n"); 
-
-                content += terminal_api_url_json.str();
-
-                std::stringstream recognition_post;
-                recognition_post << "curl --user jose:joselon -X POST -d " << 
-                "'{\"title\":\""            << recname     <<  "\","    <<
-                "\"content_raw\":\"Content\",\"content\":\""<< content  <<  "\","       <<
-                "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
-                "\"featured_image\":\""     << idmedia          <<  "\","   <<                
-                "\"name\":\""               << recname          <<  "\","   <<
-                "\"terminal\":\""           << terminal_link    <<  "\","   <<        
-                "\"terminal_api\":\""       << terminal_api     <<  "\","   <<        
-                "\"codename\":\""           << prec->codename() <<  "\","   <<                
-                "\"region\":\""             << escape(region)   <<  "\","   <<                        
-                "\"delay\":\""              << prec->delay()    <<  "\","   <<                        
-                "\"runatstartup\":\""       << prec->runatstartup()         <<  "\","   <<                        
-                "\"hascron\":\""            << prec->hascron()              <<  "\","   <<                                               
-                "\"screen\":\""             << screen           <<  "\","   <<                                   
-                "\"keepalive_time\":\""     << time_rasp    <<  "\"}'"      <<   
-                " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
-                " " << SERVER_BASE_URL << "/wp-json/wp/v2/recognition";
-
-                cout << "recognition_post: " << recognition_post.str() << endl;
-
-                post_command_to_wp(false, recognition_post.str(), prec->db_idrec());
+               post_parent = camerainfo.at(1);
             }
+
+            vector<std::string> recinfo = getTrackPostByTypeAndIdLocal("recognition", prec->db_idrec());
+            
+            std::string postlink;
+            std::string api_url;
+            bool rec_update = false;
+            int idmedia;
+            
+            if (recinfo.size()>0)
+            {
+               postlink = recinfo.at(6);
+               api_url  = recinfo.at(7);
+               idmedia  = atoi(recinfo.at(8).c_str());
+               rec_update = true;
+               
+            } else 
+            {
+                std::stringstream media;
+                media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << 
+                "' --data-binary @'"<< maximagepath << "' -d title='" << recname << "' -H \"Expect: \" " << SERVER_BASE_URL << "/wp-json/wp/v2/media";
+
+                idmedia = post_command_to_wp(false, media.str(), prec->db_idmat());
+            }
+            
+            std::string media_url;
+            vector<std::string> media_attahced = getTrackPostByTypeAndIdRemote("attachment", idmedia);
+            if (media_attahced.size()>0)
+            {
+                media_url  = media_attahced.at(6);
+            }
+
+            std::string posttype;
+            std::string url;
+            if (rec_update)
+            {
+                posttype = "PUT";
+                url = api_url;
+            } else
+            {
+                posttype = "POST";
+                url = SERVER_BASE_URL + "/wp-json/wp/v2/recognition";
+            }
+
+            std::string codename            = prec->codename();
+            std::string region              = rcoords;
+            int delay                       = prec->delay();
+            bool runatstartup               = prec->runatstartup();
+            bool hascron                    = prec->hascron();
+            std::string screen              = mat_array.at(0);
+            
+            std::string coordsnb = region;    
+            coordsnb.erase(std::remove(coordsnb.begin(), coordsnb.end(), '\n'), coordsnb.end());
+
+            bool running = getRecRunningByName(recname);
+            
+            std::string intervals = getIntervalByIdRecognitionSetupId(prec->db_idrec());
+            
+            std::stringstream recognition_post;
+            recognition_post << "curl --user jose:joselon -X " << posttype << " -d " << 
+            "'{\"title\":\""            << recname     <<  "\","    <<
+            "\"content_raw\":\"Content\",\"content\":\" \","        <<
+            "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
+            "\"featured_image\":\""             << idmedia          <<  "\","   <<                
+            "\"recognition_name\":\""           << recname          <<  "\","   <<
+            "\"recognition_codename\":\""       << prec->codename() <<  "\","   <<                
+            "\"recognition_region\":\""         << escape(region)   <<  "\","   <<                        
+            "\"recognition_delay\":\""          << prec->delay()    <<  "\","   <<                        
+            "\"recognition_runatstartup\":\""   << prec->runatstartup()         <<  "\","   <<                        
+            "\"recognition_hascron\":\""        << prec->hascron()              <<  "\","   <<                                               
+            "\"recognition_interval\":\""       << intervals                    <<  "\","   <<                                                       
+            "\"recognition_screen\":\""         << screen                       <<  "\","   <<                                   
+            "\"recognition_running\":\""        << running                      <<  "\","   <<                                   
+            "\"recognition_created\":\""        << prec->created()              <<  "\","   <<                                   
+            "\"post_parent\":\""                << post_parent                  <<  "\","   << 
+            "\"recognition_media_url\":\""      << escape(media_url)            <<  "\","    << 
+            "\"recognition_keepalive_time\":\"" << time_rasp                    <<  "\"}'"      <<   
+            " -H \"Content-Type:application/json\" -H \"Expect: \""             <<
+            " " << url;
+
+            cout << "recognition_post: " << recognition_post.str() << endl;
+
+            int post = post_command_to_wp(false, recognition_post.str(), prec->db_idrec());
+            
+            if (post)
+            {
+                //Reset to recognizing = 0 to all jobs
+                updateRecStatusByRecName(0, recname);
+            }
+            
         } 
     }
     
-    
+    return m;
 }
 
-int postInstance(int db_instance_id, std::string content)
+int instancePost(motion::Message::Instance pinstance, int db_instance_id, int post_parent)
 {
-    
+    int post;
     vector<string> max_image = getMaxImageByPath(db_instance_id);
     if (max_image.size()==0)
         return 0;
@@ -235,39 +227,56 @@ int postInstance(int db_instance_id, std::string content)
     cout << "posting: " << fineandextension << endl;
     
     std::stringstream media;
-    media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << "' --data-binary @'"<< maximagepath << "' -d title='" << maxtime << "' -H \"Expect: \" " << SERVER_BASE_URL << "/wp-json/wp/v2/media";
+    media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << 
+    fineandextension << "' --data-binary @'"    << 
+    maximagepath << "' -d title='"              << 
+    maxtime << "' -H \"Expect: \" "             << 
+    SERVER_BASE_URL << "/wp-json/wp/v2/media";
 
     int idmedia = post_command_to_wp(false, media.str(), db_local);
+    
+    std::string media_url;
+    vector<std::string> media_attahced = getTrackPostByTypeAndIdRemote("attachment", idmedia);
+    if (media_attahced.size()>0)
+    {
+        media_url  = media_attahced.at(6);
+    }
     
     if (idmedia)
     {
         
-        int id = getPostByIdAndType(idmedia);
-                
-        std::stringstream post;
-        post << "curl -X POST -d '{\"title\":\"" << maxtime << "\",\"content_raw\":\"Content\",\"content\":\"" << content << "\",\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\",\"featured_image\":" << 
+        int id_featured_image = getPostByIdAndType(idmedia);
         
-        id << ",\"terms\":{\"category\":{\"ID\":2,\"name\":\"00000000db47b6ce\",\"parent\":1}}' " <<  
-           
-        "-H \"Content-Type:application/json\" --user jose:joselon " << SERVER_BASE_URL << "/wp-json/wp/v2/posts";
+        std::string url = SERVER_BASE_URL + "/wp-json/wp/v2/instance";
         
-        cout << "post_curl: " << post.str() << endl;
+        std::stringstream instance_post;
+        instance_post << "curl --user jose:joselon -X POST -d " << 
+        "'{\"title\":\""            << maxtime                  <<  "\","       <<
+        "\"content_raw\":\"Content\",\"content\":\" \","        <<
+        "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
+        "\"post_parent\":\""            << post_parent          <<  "\","   <<                
+        "\"featured_image\":\""         << id_featured_image            <<  "\","   <<                
+        "\"instance_number\":\""        << pinstance.instance()         <<  "\","   <<
+        "\"instance_begintime\":\""     << pinstance.instancestart()    <<  "\","   <<
+        "\"instance_endtime\":\""       << pinstance.instanceend()      <<  "\","   <<
+        "\"instance_code\":\""          << pinstance.instancecode()     <<  "\","   <<
+        "\"instance_media_url\":\""     << media_url                    <<  "\"}'"  <<    
+        " -H \"Content-Type:application/json\" -H \"Expect: \"" <<
+        " " << url;
+        
+        cout << "instance_post: " << instance_post.str() << endl;
 
-        int idpost = post_command_to_wp(false, post.str(), db_local);
-           
-        if (idpost>0)
-        {
-            int tracked = insertTracking(db_instance_id, maximagepath, idmedia, idpost);
-            return tracked;
-        } else 
-        {
-            return 0;
-        }
+        post = post_command_to_wp(false, instance_post.str(), db_instance_id);
+       
+        //PUSH NOTIFICATION.
+        
     
     } else 
     {
         return 0;
     }
+    
+    return post;
 
 }
 
@@ -342,6 +351,56 @@ int post_command_to_wp(bool update, std::string command, int db_local)
     }
     return id;
 }
+
+std::string get_command_to_wp(std::string command)
+{
+    FILE* pipe = popen(command.c_str(), "r");
+    int size = sizeof(pipe);
+    char buffer[128];
+    std::string result = "";
+    std::string error;
+    
+    std::stringstream post_response;
+    while(!feof(pipe)) 
+    {
+    	if(fgets(buffer, sizeof(buffer), pipe) != NULL)
+        {
+            post_response << buffer; 
+        }       
+    }
+    pclose(pipe);
+    return post_response.str();
+}
+
+vector<std::string> get_command_to_array_wp(std::string url)
+{
+    int id = 0;
+    
+    std::string command = "curl " + url;
+    cout << "get_command: " << command << endl;
+    
+    FILE* pipe = popen(command.c_str(), "r");
+    int size = sizeof(pipe);
+    char buffer[128];
+    std::string result = "";
+    std::string error;
+    
+    std::stringstream post_response;
+    while(!feof(pipe)) 
+    {
+    	if(fgets(buffer, sizeof(buffer), pipe) != NULL)
+        {
+            post_response << buffer; 
+        }       
+    }
+    pclose(pipe);
+    char *s;
+    s = strstr(buffer, "<?xml");      
+   
+    return parsePost(post_response.str(), 0);
+}
+
+
 
 void locationPost(bool update,  vector<std::string> locationinfo )
 {
@@ -447,6 +506,67 @@ void locationPost(bool update,  vector<std::string> locationinfo )
     }
 }
 
+int dayPost(int db_recid, int db_dayid, std::string label, std::string xml)
+{
+    int idday;
+    
+    vector<std::string> recinfo = getTrackPostByTypeAndIdLocal("recognition", db_recid);
+    std::string post_parent;
+    if (recinfo.size()>0)
+    {
+        post_parent = recinfo.at(1);
+    }
+
+    bool update_day = false;
+    std::string day_api_url; 
+    vector<std::string> dayinfo = getTrackPostByTypeAndIdParent("day", atoi(post_parent.c_str()));
+    if (dayinfo.size()>0)
+    {
+        update_day= true;
+    }
+   
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+    
+    std::string posttype;
+    std::string url;
+    
+    if (update_day)
+    {
+        posttype = "PUT";
+        url = dayinfo.at(7);
+    } else 
+    {
+        posttype = "POST";
+        url = SERVER_BASE_URL + "/wp-json/wp/v2/day";
+    }
+ 
+    std::string day_created = getDayCreatedById(db_dayid);
+    
+    std::stringstream day_post;
+    day_post << "curl --user jose:joselon -X " << posttype << " -d "   << 
+    "'{\"title\":\""            << label                    <<  "\","       <<
+    "\"content_raw\":\"Content\",\"content\":\" \","        <<
+    "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
+    "\"post_parent\":\""            << post_parent          <<  "\","   <<                
+    "\"day_label\":\""              << label                <<  "\","   <<                
+    "\"day_xml\":\""                << xml                  <<  "\","   <<
+    "\"day_created\":\""            << day_created          <<  "\","   <<        
+    "\"day_keepalive_time\":\""     << time_rasp            <<  "\"}'"  <<     
+    " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
+    " " << url;
+
+    cout << "day_post: " << day_post.str() << endl;
+
+    idday = post_command_to_wp(false, day_post.str(), db_dayid);
+
+    return idday;
+}
+
 vector<std::string> parsePost(std::string message, int numArgs, ...)
 {
     
@@ -483,6 +603,9 @@ vector<std::string> parsePost(std::string message, int numArgs, ...)
     
     vector<std::string> relation_array;
     std::stringstream customs;
+    
+    std::string location_latitude;
+    std::string location_longitude;
     
     char *cstr = new char[message.length() + 1];
     strcpy(cstr, message.c_str());
@@ -534,19 +657,18 @@ vector<std::string> parsePost(std::string message, int numArgs, ...)
                     link = json_object_get_string(val);
                 }
                 break;
-                
-            //case json_type_object:
-            //    if ( strcmp( key, "_links" ) == 0 )
-            //    {
-            //        jobj = json_object_object_get( jobj, key );
-            //        api_link = parse_json( jobj );
-            //    }
-                
+                    
             case json_type_array:
                 if ( strcmp( key, "post_parent" ) == 0 )
                 {
                     post_parent = parse_json_array(jobj, key); 
-                } 
+                } else if ( strcmp( key, "location_latitude" ) == 0 )
+                {
+                    location_latitude = parse_json_array(jobj, key); 
+                } else if ( strcmp( key, "location_longitude" ) == 0 )
+                {
+                    location_longitude = parse_json_array(jobj, key); 
+                }          
                 break;
         }
     }
@@ -571,8 +693,11 @@ vector<std::string> parsePost(std::string message, int numArgs, ...)
     
     if (relation_array.size()>0)    
     {
-        result_post.push_back(customs.str()); // 9
+        result_post.push_back(customs.str());   // 9
     }
+    
+    result_post.push_back(location_latitude);         // 10
+    result_post.push_back(location_longitude);        // 11
     
     return result_post;
 }
@@ -620,6 +745,7 @@ void postTerminalStatus()
     std::string diskavailable       = terminal_info.at(16);
     std::string disk_percentage_used= terminal_info.at(17);
     std::string temperature         = terminal_info.at(19);
+    std::string created             = terminal_info.at(20);
 
     struct timeval tr;
     struct tm* ptmr;
@@ -657,12 +783,14 @@ void postTerminalStatus()
     "\"terminal_serial\":\""             << serial       <<  "\","   <<
     "\"terminal_revision\":\""           << revision       <<  "\"," <<       
     "\"terminal_disk_total\":\""         << disktotal    <<  "\","   <<                        
-    "\"terminal_disk_used\":\""                   << diskused     <<  "\","   <<                        
-    "\"terminal_disk_available\":\""              << diskavailable<<  "\","   <<                        
-    "\"terminal_disk_percentage_used\":\""        << disk_percentage_used    <<  "\","   << 
-    "\"terminal_temperature\":\""                 << temperature             <<  "\","   <<    
-    "\"post_parent\":\""                 << post_parent             <<  "\","   <<         
-    "\"keepalive_time\":\""     << time_rasp    <<  "\"}'"      <<   
+    "\"terminal_disk_used\":\""                 << diskused     <<  "\","   <<                        
+    "\"terminal_disk_available\":\""            << diskavailable<<  "\","   <<                        
+    "\"terminal_disk_percentage_used\":\""      << disk_percentage_used     <<  "\","   << 
+    "\"terminal_temperature\":\""               << temperature              <<  "\","   <<    
+    "\"post_parent\":\""                        << post_parent              <<  "\","   <<         
+    "\"terminal_temperature\":\""               << temperature              <<  "\","   <<
+    "\"terminal_created\":\""                   << created                  <<  "\","   <<
+    "\"terminal_keepalive_time\":\""            << time_rasp                <<  "\"}'"  <<   
     " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
     " " << url << ";" ;
 
@@ -703,7 +831,7 @@ void postCameraStatus()
             std::string cameraname      = array_cams.at(i).at(2);
             std::string cameracreated   = array_cams.at(i).at(3);
             
-            vector<std::string> locationbyid = getTrackPostByTypeAndId("camera", db_local_cam);
+            vector<std::string> locationbyid = getTrackPostByTypeAndIdLocal("camera", db_local_cam);
             
             std::string url;
             std::string posttype;
@@ -775,7 +903,8 @@ void locationPost(double timecount)
 
         double posted = difftime(now, post_time);
        
-        if ( posted > timecount ) {
+        if ( posted > timecount ) 
+        {
             post_location = true;
         }         
     } else {
@@ -787,13 +916,56 @@ void locationPost(double timecount)
         //Location post
         vector<std::string> haslocation = getTrackPostByType("location");
         vector<std::string> locationinfo = getLocationInfo();
+        
         if (haslocation.size()==0)
         {
+            
             locationPost(false, locationinfo);
+            
         } else {
-            locationinfo.push_back(haslocation.at(7));
-            locationPost(true, locationinfo);
+            
+            std::string location =  locationinfo.at(3);
+            vector<string> location_vector;
+            split(location.c_str(), ',', location_vector);
+        
+            double stored_local_latitude = atof(location_vector.at(0).c_str());
+            double stored_local_longitude = atof(location_vector.at(1).c_str());
+            
+            vector<std::string> location_from_server = get_command_to_array_wp(haslocation.at(7));
+            
+            double stored_server_latitude = atof(location_from_server.at(10).c_str());
+            double stored_server_longitude = atof(location_from_server.at(11).c_str());
+      
+            double measure_distance = distanceEarth(stored_local_latitude, stored_local_longitude, stored_server_latitude, stored_server_longitude);
+            
+            if(measure_distance>1000)
+            {
+                locationinfo.push_back(haslocation.at(7));
+                locationPost(true, locationinfo);
+            }
         }           
     }
+}
+
+void cameraPost(double timecount)
+{   
+    bool post_camera = false;
+    time_t post_time = getLastPostTime("camera");
+    if (post_time!=NULL)
+    {
+        time_t now;
+        time(&now); 
+
+        double posted = difftime(now, post_time);
+       
+        if ( posted > timecount ) {
+            post_camera = true;
+        }         
+    } else {
+        post_camera = true;
+    }
+    
+    if (post_camera)
+        postCameraStatus();          
     
 }

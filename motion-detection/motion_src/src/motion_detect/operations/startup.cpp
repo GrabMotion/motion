@@ -11,6 +11,7 @@
 #include "../utils/utils.h"
 #include "../database/database.h"
 #include "../operations/camera.h"
+#include "../recognition/detection.h"
 #include "../http/json.h"
 
 #include <iostream>
@@ -26,6 +27,11 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <usb.h>
+#include <time.h>
+
+#include <pthread.h>
+#include <signal.h>
+#include <cerrno> 
 
 
 int hardwareInfo()
@@ -58,6 +64,13 @@ int hardwareInfo()
     
     std::string basedatafile = basepath + "data"; //"data";
     directoryExistsOrCreate(basedatafile.c_str());
+    
+    //Clear recognitions start if rebooted.
+    for (int i=0; i<cams.size(); i++)
+    {
+        int camnum = cams.at(i);
+        updateRecStatusByCamera(0, camnum);
+    }
     
      //Store into database.
     vector<int> camsarray = db_cams(cams);
@@ -191,7 +204,17 @@ int netWorkInfo()
         {
             busloc << buffloc;
         }
-        public_ip = parse_and_store_ipinfo_io(busloc.str().c_str());
+        vector<std::string> locationp = parse_and_store_ipinfo_io(busloc.str().c_str());
+        
+        hostname = locationp.at(1);
+        city = locationp.at(2);
+        region = locationp.at(3);
+        country = locationp.at(4);
+        loc = locationp.at(5);        
+        org = locationp.at(6);
+                
+        insertIntoLocation(locationp);
+        
         pclose(inloc);
         
         std::string maccheck = "cat /sys/class/net/eth0/address";
@@ -238,6 +261,58 @@ int createDirectories()
     return 0;
 }
 
+void runJobsInterval(std::string timecompare, std::vector<pthread_t> threads_recognition)
+{
+    for (int t=0; t< cams.size(); t++)
+    {
+       
+       char time_interval[8];    
+       char *cstr = new char[timecompare.length() + 1];
+       strcpy(cstr, timecompare.c_str());
+     
+       stringstream camstr;
+       camstr << cams.at(t);
+    
+       int camnum = atoi(camstr.str().c_str());
+       
+       int running;
+        
+       int threadid = threads_recognizing_pids[camnum];
+       
+       if (threadid>0)
+       {
+            int response = pthread_kill(threadid, 0);
+            if (response != 0) 
+            {
+                 running = 0;
+            } else 
+            {
+                 running = 1;
+            }
+       } else 
+       {
+           running = 0;
+       }
+       
+        updateRecStatusByCamera(running, camnum);
+       
+        vector<string> runvector = checkJobRunningQuery(camstr.str(), cstr);
+        if (runvector.size()>0)
+        {     
+            std::string camer    = camstr.str();
+            std::string recname  = runvector.at(1); 
+            if (loadStartQuery(camer, recname))
+            {
+                startMainRecognition(camnum);
+            } else 
+            {
+                cout << "No matching values for the current arguments." << endl; 
+            }
+            updateRecStatusByRecName(1, recname);
+        }
+    }
+}
+
 int startUpParams(int argc, const char **argv)
 {
     // Run Params
@@ -258,7 +333,7 @@ int startUpParams(int argc, const char **argv)
             bool load = loadStartQuery(param_camera, param_name); 
             if (load)
             {
-                startMainRecognition();
+                startMainRecognition(atoi(param_camera.c_str()));
             } else 
             {
                 cout << "No matching values for the current arguments." << endl; 
@@ -269,48 +344,13 @@ int startUpParams(int argc, const char **argv)
             
         }
     }
-    
-    for (int t=0; t< cams.size(); t++)
-    {
-       
-        //struct timeval tr;
-        //struct tm* ptmr;
-        char time_interval[8];
-        //gettimeofday (&tr, NULL);
-        //ptmr = localtime (&tr.tv_sec);
-        //strftime (time_interval, sizeof (time_interval), "%H:%M:%S", ptmr);
-        
-     
-        std::string timecompare = "11:00:00";
-          
-        char *cstr = new char[timecompare.length() + 1];
-        strcpy(cstr, timecompare.c_str());
-        
-    
-       stringstream camstr;
-       camstr << cams.at(t);
-       vector<string> runvector = startIfNotRunningQuery(camstr.str(), cstr);
-       if (runvector.size()>0)
-       {
-           std::string camer    = camstr.str();
-           std::string recname  = runvector.at(1); 
-           if (loadStartQuery(camer, recname))
-            {
-                startMainRecognition();
-            } else 
-            {
-                cout << "No matching values for the current arguments." << endl; 
-            }
-       }
-    }
-    
+   
     struct timeval tr;
     struct tm* ptmr;
     char time_rasp[40];
     gettimeofday (&tr, NULL);
     ptmr = localtime (&tr.tv_sec);
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
-    cout <<  ":::start time:::: " << time_rasp << endl;
     
     //Activity
     stringstream allparams;

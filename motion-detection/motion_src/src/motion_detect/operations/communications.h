@@ -27,7 +27,7 @@ extern int ruse;
 extern pthread_mutex_t databaseMutex;
 extern std::string basepath;
 extern std::string sourcepath;
-extern void startMainRecognition();
+extern void startMainRecognition(int camnum);
 extern bool stop_capture;
 
 //UDP

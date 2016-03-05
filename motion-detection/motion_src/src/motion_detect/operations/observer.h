@@ -13,3 +13,4 @@ motion::Message getLocalPtoro();
 //Global
 extern std::string dumpinstancefolder;
 extern pthread_mutex_t fileMutex;
+extern std::vector<int> cams;

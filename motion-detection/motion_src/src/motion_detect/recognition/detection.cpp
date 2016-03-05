@@ -486,10 +486,10 @@ double getFramesPerSecond(CvCapture *capture)
 
 
 void * startRecognition(void * arg)
-{
-     
+{   
+ 
     pthread_detach(pthread_self());
-     
+    
     motion::Message::MotionCamera * pcamera;
     motion::Message::MotionMonth * pmonth;
     motion::Message::MotionDay * pday;
@@ -511,6 +511,10 @@ void * startRecognition(void * arg)
             }
         }
     }
+    
+    int self = pthread_self();
+    cout << "THREAD PID: " << self << endl;
+    threads_recognizing_pids[activecamnum] = self;
     
     if (!cameraexist)
     {
@@ -625,11 +629,14 @@ void * startRecognition(void * arg)
    
     //Day.
     string str_day;
+    string str_day_title;
     if (R_PROTO.has_currday())
     {
         str_day = R_PROTO.currday();
+        str_day_title = R_PROTO.currdaytitle();
     }
     cout << "str_day: " << str_day << endl;
+    cout << "str_day_title: " << str_day_title << endl;
      
     //Check if day exist or else add it.
     bool dayexist=false;
@@ -651,6 +658,7 @@ void * startRecognition(void * arg)
         pthread_mutex_lock(&protoMutex);
         pday = pmonth->add_motionday();
         pday->set_daylabel(str_day);
+        pday->set_title(str_day_title);
         pday->set_db_dayid(mrec->db_idday());
         pthread_mutex_unlock(&protoMutex);
         cout << "sigo" << endl;
@@ -844,6 +852,10 @@ void * startRecognition(void * arg)
                 dumpInstance(activecamnum, pinstance, DIR, XML_FILE, EXT_DATA, init_time, begin_time, end_time, instance, instancecode, dumpfilename.str(), mrec->name(), pcamera->cameraname());
                 
                 pinstance->Clear();
+                
+                threads_recognizing_pids[activecamnum] = 0;
+                
+                pthread_exit(NULL);
            
             }
 
@@ -984,7 +996,18 @@ void * startRecognition(void * arg)
                     
                     end_time = clock();
                     
-                    dumpInstance(activecamnum, pinstance, DIR, XML_FILE, EXT_DATA, init_time, begin_time, end_time, instance, instancecode, dumpfilename.str(), mrec->name(), pcamera->cameraname());
+                    dumpInstance(activecamnum, 
+                            pinstance, 
+                            DIR, XML_FILE, 
+                            EXT_DATA, 
+                            init_time, 
+                            begin_time, 
+                            end_time, 
+                            instance, 
+                            instancecode, 
+                            dumpfilename.str(), 
+                            pday->title(), 
+                            pcamera->cameraname());
                     
                     pinstance->Clear();
                  
@@ -1026,7 +1049,7 @@ void dumpInstance(int activecamnum,
         std::string instance, 
         std::string instancecode,
         std::string dumpfilename,
-        std::string recname,
+        std::string title,
         std::string camera)
 {
     
@@ -1046,7 +1069,7 @@ void dumpInstance(int activecamnum,
     pinstance->set_instance(instance);
     pinstance->set_instancecode(instancecode);
     
-    pinstance->set_recname(recname);
+    pinstance->set_recname(title);
 
     pinstance->set_camera(camera);
     pinstance->set_cameranumber(activecamnum);
@@ -1099,5 +1122,18 @@ bool isRecognizing()
     return recognizing;
 }
 
+bool isRecognizingAtCamera(int camera)
+{
+    bool recognizing = false;
+    pthread_mutex_lock(&protoMutex);
+    motion::Message::MotionCamera * mcamera = R_PROTO.mutable_motioncamera(camera);
+    bool recis = mcamera->recognizing();
+    pthread_mutex_unlock(&protoMutex);    
+    if (recis)
+    {
+        recognizing = true;
+    }
+    return recognizing;
+}
 
  

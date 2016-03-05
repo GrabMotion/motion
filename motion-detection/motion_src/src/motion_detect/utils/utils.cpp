@@ -172,6 +172,19 @@ std::string getCurrentDayLabel()
     return _day;
 }
 
+std::string getCurrentDayTitle()
+{
+    struct timeval td;
+    struct tm* ptd;
+    char day_rasp[10];
+    gettimeofday (&td, NULL);
+    ptd = localtime (&td.tv_sec);
+    const char * dir = "%h%a%d";
+    strftime (day_rasp, sizeof (day_rasp), dir, ptd);
+    std::string _day(day_rasp, 8);
+    return _day;
+}
+
 std::string getGlobalIntToString(int id)
 {
     std::stringstream strm;
@@ -251,6 +264,7 @@ char * setTimeToRaspBerry(struct tm tmremote, int timezone_adjust)
     mytime.tm_mon   = tmremote.tm_mon  ;
     mytime.tm_year  = tmremote.tm_year ;
     epoch_time = mktime(&mytime);
+    
     cout << "epoch_time : " << epoch_time << endl;
     /* Now set the clock to this time */
     tv.tv_sec = epoch_time;

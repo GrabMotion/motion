@@ -18,13 +18,12 @@ extern std::string public_ip;
 double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d);
 
 std::string get_command_from_wp(std::string command);
+vector<std::string> get_command_to_array_wp(std::string url);
 
 int post_command_to_wp(bool update, std::string command, int db_local);
 int post_command_to_wp(std::string command);
 
 vector<std::string> parsePost(std::string message, int numArgs, ...);
-
-int postInstance(int db_instance_id, std::string content);
 
 void postCameraStatus();
 void postTerminalStatus();
@@ -35,7 +34,11 @@ int insertUpdatePostInfo(bool update, std::string message, int db_local);
 
 void locationPost(bool update, vector<std::string> locationinfo );
 
+int instancePost(motion::Message::Instance pinstance, int db_instance_id, int post_parent);
+
 void terminalPost(double timecount);
 void locationPost(double timecount);
+void cameraPost(double timecount);
 
 void postTerminalStatus();
+int dayPost(int db_recid, int db_dayid, std::string label, std::string xml);

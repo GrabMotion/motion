@@ -18,11 +18,10 @@ extern CvCapture * camera;
 extern cv::VideoCapture * videocam;
 
 bool isRecognizing();
+bool isRecognizingAtCamera(int camera);
 
 //Observer Recogition
 extern std::string basepath;
-extern bool is_recognizing;
-extern bool is_recognizing_flag;
 extern int resutl_watch_detected;
 extern std::string startrecognitiontime;
 extern void directoryExistsOrCreate(const char* pzPath);
@@ -33,6 +32,8 @@ extern std::string getGlobalIntToString(int id);
 extern motion::Message PROTO, R_PROTO;
 extern pthread_mutex_t protoMutex, databaseMutex;
 extern std::string sourcepath;
+
+extern std::vector<int> threads_recognizing_pids;
 
 extern std::string DIR_FORMAT;
 
