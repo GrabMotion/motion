@@ -34,7 +34,7 @@
 #include <cerrno> 
 
 
-int hardwareInfo()
+int hardwareInfo() 
 {
  
     cout << "Getting hard info." << endl;

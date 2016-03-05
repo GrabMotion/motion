@@ -150,7 +150,7 @@ std::string takeThumbnailFromCamera(int camera)
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
     
     //IplImage* img=0;
-    //img = cvQueryFrame( capture );
+    //img = cvQueryFrame( capture );  
     //cvSaveImage("IplImage.JPG",img);
     
     Mat mat; //(h, w, CV_8U); //CV_8U); // CV_8UC3);

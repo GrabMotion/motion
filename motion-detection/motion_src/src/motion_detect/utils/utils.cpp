@@ -69,7 +69,7 @@ char *getShortTimeRasp()
     struct timeval tr;
     struct tm* ptmr;
     char time_rasp[40];
-    gettimeofday (&tr, NULL);
+    gettimeofday (&tr, NULL); 
     ptmr = localtime (&tr.tv_sec);
     strftime (time_rasp, sizeof (time_rasp), "%H:%M:%S", ptmr);
     return time_rasp;
