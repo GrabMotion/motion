@@ -30,6 +30,10 @@ extern std::string sourcepath;
 extern void startMainRecognition(int camnum);
 extern bool stop_capture;
 
+// WP USER AND PASSWORD
+extern std::string WP_USER;
+extern std::string WP_PASS;
+
 //UDP
 int UDPSend(motion::Message m);
 

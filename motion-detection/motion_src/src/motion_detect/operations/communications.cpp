@@ -7,10 +7,9 @@
 
 
 #include "../operations/communications.h"
-
+#include "../database/database.h"
 #include "../utils/utils.h"
 #include "../b64/base64.h"
-#include "../database/database.h"
 #include "../http/post.h"
 #include "../socket/netcvc.h"
 #include "../operations/camera.h"
@@ -43,7 +42,6 @@ int count_sent__split=0;
 int count_vector_size=0;
 std::string msg;
 int inttype, protofile;
-
 
 struct arg_struct
 {
@@ -99,7 +97,7 @@ motion::Message serializeMediaToProto(motion::Message m, cv::Mat mat)
     cout << " oriencoded size : " << oriencoded.size() << endl;
     
     //Store into proto
-    m.set_data(oriencoded.c_str());
+    m.set_datafile(oriencoded.c_str());
 
     return m;
 }
@@ -245,17 +243,17 @@ motion::Message getRefreshProto(motion::Message m)
     {
         motion::Message::MotionUser * muser = m.add_motionuser();
         muser->set_clientnumber(atoi(user_info.at(0).c_str()));
-        muser->set_wp_user(user_info.at(1));
-        muser->set_wp_password(user_info.at(2));
-        muser->set_wp_server_url(user_info.at(3));
-        muser->set_wp_userid(atoi(user_info.at(4).c_str()));
-        muser->set_wp_client_id(atoi(user_info.at(5).c_str()));
-        muser->set_wp_client_mediaid(atoi(user_info.at(6).c_str()));
+        muser->set_wpuser(user_info.at(1));
+        muser->set_wppassword(user_info.at(2));
+        muser->set_wpserverurl(user_info.at(3));
+        muser->set_wpuserid(atoi(user_info.at(4).c_str()));
+        muser->set_wpclientid(atoi(user_info.at(5).c_str()));
+        muser->set_wpclientmediaid(atoi(user_info.at(6).c_str()));
         muser->set_pfobjectid(user_info.at(7));
         muser->set_username(user_info.at(8));
         muser->set_email(user_info.at(9));
-        muser->set_first_name(user_info.at(10)); 
-        muser->set_last_name(user_info.at(11));
+        muser->set_firstname(user_info.at(10)); 
+        muser->set_lastname(user_info.at(11)); 
         muser->set_location(user_info.at(12));
         muser->set_uiidinstallation(user_info.at(13));
     }
@@ -264,44 +262,42 @@ motion::Message getRefreshProto(motion::Message m)
     if (device_info.size()>0)
     {
         motion::Message::MotionDevice * mdevice = m.add_motiondevice();
-
-       device_info.at(0)); //db_local              10
-       device_info.at(1)); //model                 11
-       device_info.at(2)); //hardware              12
-       device_info.at(3)); //serial                13
-       device_info.at(4)); //revision              14
-       device_info.at(5)); //disktotal             15
-       device_info.at(6)); //diskused              16
-       device_info.at(7)); //diskavailable         17
-       device_info.at(8)); //disk_percentage_used  18
-       device_info.at(9)); //temperature           19
-       device_info.at(10)); //created      
-
-        mdevice->device_info
-
-        stringstream sql_starttime;
-        sql_starttime << "SELECT starttime FROM status;";
-        pthread_mutex_lock(&databaseMutex);
-        vector<vector<string> > starttime_array = db_select(sql_starttime.str().c_str(), 1);
-        pthread_mutex_unlock(&databaseMutex);
-        std::string starttime = starttime_array.at(0).at(0);
-        m.set_devicestarttime(starttime);
-        cout << "starttime: " << starttime << endl;
+        mdevice->set_ipnumber(device_info.at(0));                       //ipnumber              
+        mdevice->set_ippublic(device_info.at(1));                       //ippublic              
+        mdevice->set_macaddress(device_info.at(2));                     //macaddress            
+        mdevice->set_hostname(device_info.at(3));                       //hostname              
+        mdevice->set_city(device_info.at(4));                           //city                  
+        mdevice->set_country(device_info.at(5));                        //country               
+        mdevice->set_location(device_info.at(6));                       //location              
+        mdevice->set_network_provider(device_info.at(7));               //network_provider      
+        mdevice->set_uptime(device_info.at(8));                         //uptime                
+        mdevice->set_starttime(device_info.at(9));                      //starttime             
+        mdevice->set_db_local(atoi(device_info.at(10).c_str()));                 //db_local               
+        mdevice->set_model(device_info.at(11));                         //model                 
+        mdevice->set_hardware(device_info.at(12));                      //hardware              
+        mdevice->set_serial(device_info.at(13));                         //serial                
+        mdevice->set_revision(device_info.at(14));                       //revision              
+        mdevice->set_disktotal(atoi(device_info.at(15).c_str()));                //disktotal              
+        mdevice->set_diskused(atoi(device_info.at(16).c_str()));                 //diskused               
+        mdevice->set_diskavailable(atoi(device_info.at(17).c_str()));            //diskavailable          
+        mdevice->set_disk_percentage_used(atoi(device_info.at(18).c_str()));     //disk_percentage_used   
+        mdevice->set_temperature(atoi(device_info.at(19).c_str()));              //temperature            
     }
-
-
 
     vector<int> cams;
     stringstream sql_cameras;
     sql_cameras <<
-    "SELECT C._id, C.number, C.name, C.active, C.thumbnail FROM cameras C;";
+    "SELECT C._id, C.number, C.name, C.active, C.thumbnail_path FROM cameras C;";
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > cameras_array = db_select(sql_cameras.str().c_str(), 4);
+    vector<vector<string> > cameras_array = db_select(sql_cameras.str().c_str(), 5);
     pthread_mutex_unlock(&databaseMutex);
      
     int camsize = cameras_array.size();
     cout << "camsize: " <<  camsize << endl;
-      
+  
+    std::stringstream thubnails;
+    thubnails << fixedLength(camsize, 4);
+
     for (int q=0; q<camsize; q++)
     {
          
@@ -317,14 +313,47 @@ motion::Message getRefreshProto(motion::Message m)
         mcam->set_cameranumber(camnum);
         std::string cameraname = rowc.at(2);
         mcam->set_cameraname(cameraname);
-        mcam->set_thumbnail(rowc.at(4)); 
-
+        
         int takepicture = motion::Message::TAKE_PICTURE;
         if ((m.type() == takepicture) && (activecam==q))
         {
             mcam = takePictureToProto(activecam, mcam);
-            m.set_data(mcam->tempdata());
+            m.set_datafile(mcam->tempdata());
             mcam->clear_tempdata();
+        }
+
+        int engage = motion::Message::ENGAGE;
+        if (m.type() == engage && m.includethubmnails())
+        { 
+            cout << "ENTRA THUMBNAIL" << endl;
+
+            //blobs
+            /*const char * zKey = blob_key.c_str();
+            unsigned char **pzBlob;
+            int *pnBlob = 0;
+            readBlob(zKey, pzBlob, pnBlob);
+            if( SQLITE_OK!=readBlob(blob_key.c_str(), &pzBlob, &pnBlob) )
+            {
+                databaseError();
+            }*/
+             
+            std::string thubmnail_path = rowc.at(4);
+
+            cout << "thubmnail_path: " << thubmnail_path << endl;
+           
+            std::string thumbencoded = get_file_contents(thubmnail_path);
+
+            cout << "thumbencoded: " << thumbencoded.substr(0, 200) << endl; 
+        
+            thubnails << "THUMBNAILSTART" << q << thumbencoded << "THUMBNAILEND" << q << endl;
+            
+            cout << "thumb decoded: " << thumbencoded.substr(0, 200) << endl;
+            
+            if (q==(camsize-1))
+            {
+                cout << "CIERRA THUMBNAIL: " << thubnails.str().size() << endl;
+                m.set_datafile(thubnails.str()); 
+            }   
         }
          
         bool active = to_bool(rowc.at(3));
@@ -727,11 +756,38 @@ motion::Message runCommand(motion::Message m)
             sql_connection <<
             "INSERT into connections (serverip, time) VALUES ('"
             << m.serverip() << "', '" << time_rasp << "');";
-            cout << "sql_connection: " << sql_connection.str() << endl;
+
+            //cout << "sql_connection: " << sql_connection.str() << endl;
+
             pthread_mutex_lock(&databaseMutex);
             db_execute(sql_connection.str().c_str());
             pthread_mutex_unlock(&databaseMutex);
-            
+
+            /*cout << "****************************************" << endl;
+            if (m.has_type())
+                cout << "ENGAGE type            :" << m.type() << endl;
+            if (m.has_time())
+                cout << "ENGAGE time            :" << m.time() << endl;
+            if (m.has_serverip())
+                cout << "ENGAGE serverip        :" << m.serverip() << endl;
+            if (m.has_dataamount())
+            cout << "ENGAGE serverip            :" << m.dataamount() << endl;
+            if (m.has_packagesize())
+            cout << "ENGAGE packagesize         :" << m.packagesize() << endl;
+            if (m.has_includethubmnails())
+            cout << "ENGAGE includethubmnails   :" << m.includethubmnails() << endl;
+            if (m.has_imagefilepath())
+            cout << "ENGAGE imagefilepath       :" << m.imagefilepath() << endl;
+            if (m.has_datafile())
+            cout << "ENGAGE datafile            :" << m.datafile() << endl;
+            if (m.has_devicestarttime())
+            cout << "ENGAGE devicestarttime     :" << m.devicestarttime() << endl;
+            if (m.has_dataamount())
+            cout << "ENGAGE dataamount          :" << m.dataamount() << endl;
+            if (m.has_datatotal())
+            cout << "ENGAGE datatotal           :" << m.datatotal() << endl;
+            cout << "****************************************" << endl;*/
+        
             m.set_type(motion::Message::ENGAGE);
 
             m = getRefreshProto(m);
@@ -799,7 +855,7 @@ motion::Message runCommand(motion::Message m)
                 string xml_loaded = get_file_contents(xml_path);
                 cout << "xml_loaded: " << xml_loaded << endl;
                 std:string encoded_xml = base64_encode(reinterpret_cast<const unsigned char*>(xml_loaded.c_str()),xml_loaded.length());
-                m.set_data(encoded_xml.c_str());
+                m.set_datafile(encoded_xml.c_str());
                 
                 std::string strdecoded = base64_decode(encoded_xml);
                 
@@ -835,7 +891,7 @@ motion::Message runCommand(motion::Message m)
 
             //std::string path = strmpath.str();
             
-            string filename = m.data();
+            string filename = m.datafile();
         
             std::string command;
             command += "cat ";
@@ -858,7 +914,7 @@ motion::Message runCommand(motion::Message m)
             int size = oriencoded.size();
             
             //Store into proto
-            m.set_data(oriencoded.c_str());
+            m.set_datafile(oriencoded.c_str());
             
             m.set_type(motion::Message::GET_VIDEO);
             
@@ -1005,6 +1061,7 @@ motion::Message runCommand(motion::Message m)
         case motion::Message::GET_TIME:
         {
             cout << "motion::Message::GET_TIME" << endl;
+            
             struct timeval tr;
             struct tm* ptmr;
             char time_rasp[40];
@@ -1044,11 +1101,66 @@ motion::Message runCommand(motion::Message m)
         {
             cout << "motion::Message::SERVER_INFO" << endl;
 
+            struct timeval tr;
+            struct tm* ptmr;
+            char time_rasp[40];
+            gettimeofday (&tr, NULL);
+            ptmr = localtime (&tr.tv_sec);
+            strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+
+            cout << "****************************************" << endl;
+            cout << "SERVER_INFO type                   :" << m.type()                  << endl;
+            cout << "SERVER_INFO serverip               :" << m.serverip()              << endl;
+            cout << "SERVER_INFO packagesize            :" << m.packagesize()           << endl;
+            cout << "SERVER_INFO includethubmnails      :" << m.includethubmnails()     << endl;
+            cout << "SERVER_INFO serverip               :" << m.serverip()              << endl; 
+            cout << "SERVER_INFO imagefilepath          :" << m.imagefilepath()         << endl;       
+            cout << "****************************************" << endl;
+            
             motion::Message::MotionUser * muser = m.mutable_motionuser(0);
             int db_server = insertUserIntoDatabase(muser);
 
-            m.set_serverip(PROTO.serverip());
+            /// WP USER AND PASSWORD ///
+            //if (muser->has_wpuser())    
+            //   WP_USER = muser->wpuser(); 
+    
+            //if (muser->has_wppassword())    
+            //    WP_PASS = muser->wppassword(); 
+
+            /// WP BASE URL AND USER ID ///
+            if (muser->has_wpserverurl())
+                SERVER_BASE_URL = muser->wpserverurl();  
+                
+            if (muser->has_wpclientid()) 
+                CLIENT_ID = muser->wpclientid();  
+    
+            std::stringstream clientid;
+            clientid << muser->wpclientid() << endl;
+
+            std::stringstream postparent;
+            postparent << muser->wpparent() << endl;
+
+            std::stringstream timerasp;
+            timerasp << time_rasp << endl;
+
+            int db_track = insertIntoPosts(clientid.str(), 
+                timerasp.str(),
+                muser->wpmodified(),
+                muser->wpslug(),
+                muser->wptype(),
+                muser->wplink(),
+                muser->wpapilink(),
+                muser->wpfeaturedimage(),
+                postparent.str(), 
+                db_server); 
+
+            if (PROTO.has_serverip())
+            {
+                m.set_serverip(PROTO.serverip());
+            }
             m.set_type(motion::Message::SERVER_INFO_OK);
+
+            m = getRefreshProto(m);
         }
         break;
     }
@@ -1103,9 +1215,13 @@ try
       
       google::protobuf::uint32 chunck_size = PROTO.packagesize();
       
-      cout << "count socket size:" << chunck_size << endl;
+      cout << "count_sent__split:" << count_sent__split << endl;
+      //cout << "count vector size:" << count_vector_size << endl;
         
       value = ms.type();
+
+      cout << "Proto size   : " << ms.ByteSize() << endl;
+
       if (ms.has_serverip())
         T_PROTO.set_serverip(ms.serverip());
         
@@ -1163,17 +1279,34 @@ try
       
       //Split file outside proto.
       std::string datafile;
-      if (m.has_data())
+      if (m.has_datafile())
       {
           
-          datafile = "PROFILE" + m.data();
-          //cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
-          //cout << "m size 1: " << m.ByteSize() << endl;
-          m.clear_data();
-          //cout << "m size 2: " << m.ByteSize() << endl;
-          //cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
-          protofile = motion::Message::PROTO_HAS_FILE;
-          
+        std::stringstream thubm;
+        thubm << m.datafile() << endl;
+
+        /*std::string thend = "THUMBNAILEND";
+
+        if(strstr(thubm.str().c_str(), thend.c_str()))
+        {
+            cout << "THUMBNAILEND CONTEINED!!!" << endl;
+
+            //cout << endl;
+            //cout << thubm.str() << endl;
+
+        } else 
+        {
+            cout << "THUMBNAILEND NOT CONTEINED!!!" << endl;
+        }*/
+
+        datafile = "PROFILE" + m.datafile();
+        //cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
+        //cout << "m size 1: " << m.ByteSize() << endl;
+        m.clear_datafile();
+        //cout << "m size 2: " << m.ByteSize() << endl;
+        //cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
+        protofile = motion::Message::PROTO_HAS_FILE;
+  
       } else
       {
           protofile = motion::Message::PROTO_NO_FILE;
@@ -1183,8 +1316,6 @@ try
       int size = m.ByteSize();
         
       char dataresponse[size];
-    
-      //cout << "Proto size   : " << size << endl;
       
       //cout << "active cam: " << m.activecam() << endl;
       //cout << "type: " << m.type() << endl;
@@ -1205,6 +1336,8 @@ try
           ssenc << datafile;
           //cout << "encoded_proto size ::2::  " << ssenc.str().size() << endl;
           //cout << "::::::::::::::::::::::::::::::::::::::::::::::: " << endl;
+
+          cout << "ssenc size: " << ssenc.str().size() << endl;
       }
       else
       {
@@ -1282,7 +1415,7 @@ try
         //cout << "Socket Sent Size: " << msg.size() << endl;
         
         sock->send(msg.c_str(), msg.size());
-        
+
         return ms.type();
         
     }

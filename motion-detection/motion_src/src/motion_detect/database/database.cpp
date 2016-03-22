@@ -6,8 +6,8 @@
  * Created on Julio 22, 2015, 11:23 AM
  */
 
-#include "../database/database.h"
 #include "../utils/utils.h"
+#include "../database/database.h"
 #include "../operations/camera.h"
 
 using namespace google::protobuf::io;
@@ -15,6 +15,8 @@ using namespace google::protobuf::io;
 sqlite3 *db;
 char *zErrMsg = 0;
 int  cd, rc;
+
+
 
 static int callback(void *NotUsed, int argc, char **argv, char **azColName)
 {
@@ -107,6 +109,157 @@ void db_execute(const char * sql)
 void db_close()
 {
     sqlite3_close(db);
+}
+
+
+///BLOB
+// http://www.sqlite.org/cvstrac/wiki?p=BlobExample
+void createBlobTable()
+{
+    db_open();
+    createBlobTable(db);
+    db_close();
+}
+
+/*
+** Create the blobs table in database db. Return an SQLite error code.
+*/ 
+static int createBlobTable(sqlite3 *db){
+  const char *zSql = "CREATE TABLE blobs(key TEXT PRIMARY KEY, value BLOB)";
+  return sqlite3_exec(db, zSql, 0, 0, 0);
+}
+
+/*
+** Store a blob in database db. Return an SQLite error code.
+**
+** This function inserts a new row into the blobs table. The 'key' column
+** of the new row is set to the string pointed to by parameter zKey. The
+** blob pointed to by zBlob, size nBlob bytes, is stored in the 'value' 
+** column of the new row.
+*/ 
+static int writeBlob(
+  //sqlite3 *db,                   /* Database to insert data into */
+  const char *zKey,              /* Null-terminated key string */
+  const unsigned char *zBlob,    /* Pointer to blob of data */
+  int nBlob                      /* Length of data pointed to by zBlob */
+){
+
+  db_open();
+
+  const char *zSql = "INSERT INTO blobs(key, value) VALUES(?, ?)";
+  sqlite3_stmt *pStmt;
+  int rc;
+
+  do {
+    /* Compile the INSERT statement into a virtual machine. */
+    rc = sqlite3_prepare(db, zSql, -1, &pStmt, 0);
+    if( rc!=SQLITE_OK ){
+      return rc;
+    }
+
+    /* Bind the key and value data for the new table entry to SQL variables
+    ** (the ? characters in the sql statement) in the compiled INSERT 
+    ** statement. 
+    **
+    ** NOTE: variables are numbered from left to right from 1 upwards.
+    ** Passing 0 as the second parameter of an sqlite3_bind_XXX() function 
+    ** is an error.
+    */
+    sqlite3_bind_text(pStmt, 1, zKey, -1, SQLITE_STATIC);
+    sqlite3_bind_blob(pStmt, 2, zBlob, nBlob, SQLITE_STATIC);
+
+    /* Call sqlite3_step() to run the virtual machine. Since the SQL being
+    ** executed is not a SELECT statement, we assume no data will be returned.
+    */
+    rc = sqlite3_step(pStmt);
+    assert( rc!=SQLITE_ROW );
+
+    /* Finalize the virtual machine. This releases all memory and other
+    ** resources allocated by the sqlite3_prepare() call above.
+    */
+    rc = sqlite3_finalize(pStmt);
+
+    /* If sqlite3_finalize() returned SQLITE_SCHEMA, then try to execute
+    ** the statement again.
+    */
+  } while( rc==SQLITE_SCHEMA );
+
+  db_close();
+
+  return rc;
+}
+
+/*
+** Read a blob from database db. Return an SQLite error code.
+*/ 
+int readBlob(const char *zKey, unsigned char **pzBlob, int *pnBlob)
+{
+  const char *zSql = "SELECT value FROM blobs WHERE key = ?";
+  sqlite3_stmt *pStmt;
+  int rc;
+
+  /* In case there is no table entry for key zKey or an error occurs, 
+  ** set *pzBlob and *pnBlob to 0 now.
+  */
+  *pzBlob = 0;
+  *pnBlob = 0;
+
+  do {
+    /* Compile the SELECT statement into a virtual machine. */
+    rc = sqlite3_prepare(db, zSql, -1, &pStmt, 0);
+    if( rc!=SQLITE_OK ){
+      return rc;
+    }
+
+    /* Bind the key to the SQL variable. */
+    sqlite3_bind_text(pStmt, 1, zKey, -1, SQLITE_STATIC);
+
+    /* Run the virtual machine. We can tell by the SQL statement that
+    ** at most 1 row will be returned. So call sqlite3_step() once
+    ** only. Normally, we would keep calling sqlite3_step until it
+    ** returned something other than SQLITE_ROW.
+    */
+    rc = sqlite3_step(pStmt);
+    if( rc==SQLITE_ROW ){
+      /* The pointer returned by sqlite3_column_blob() points to memory
+      ** that is owned by the statement handle (pStmt). It is only good
+      ** until the next call to an sqlite3_XXX() function (e.g. the 
+      ** sqlite3_finalize() below) that involves the statement handle. 
+      ** So we need to make a copy of the blob into memory obtained from 
+      ** malloc() to return to the caller.
+      */
+      *pnBlob = sqlite3_column_bytes(pStmt, 0);
+      *pzBlob = (unsigned char *)malloc(*pnBlob);
+      memcpy(*pzBlob, sqlite3_column_blob(pStmt, 0), *pnBlob);
+    }
+
+    /* Finalize the statement (this releases resources allocated by 
+    ** sqlite3_prepare() ).
+    */
+    rc = sqlite3_finalize(pStmt);
+
+    /* If sqlite3_finalize() returned SQLITE_SCHEMA, then try to execute
+    ** the statement all over again.
+    */
+  } while( rc==SQLITE_SCHEMA );
+
+  return rc;
+}
+
+/*
+** Free a blob read by readBlob().
+*/
+static void freeBlob(unsigned char *zBlob){
+  free(zBlob);
+}
+
+/*
+** Print the most recent database error for database db to standard error.
+*/
+static void databaseError(){
+  int errcode = sqlite3_errcode(db);
+  const char *errmsg = sqlite3_errmsg(db);
+  fprintf(stderr, "Database error %d: %s\n", errcode, errmsg);
 }
 
 void updateRecStatusByRecName(int status, std::string recname)
@@ -383,18 +536,63 @@ std::vector<int> db_cams(std::vector<int> cams)
             }
         }
 
-        std::string thumbmail = takeThumbnailFromCamera(cams.at(i));
-      
-        stringstream insert_camera_query;
-        insert_camera_query <<
-        "INSERT INTO cameras (number, name, active, thumbnail, created) " <<
-        "SELECT " << cams.at(i) << ",'" << camera << "'," << active << ",'" << thumbmail << "','" << time_rasp << "' " << 
-        " WHERE NOT EXISTS (SELECT * FROM cameras WHERE name = '" << camera << "');";
-        cout << "insert_camera_query: " << insert_camera_query.str() << endl;
+        //blob not working
+        /*unsigned char * zBlob = takeThumbnailFromCamera(cams.at(i));
+        
+        //white blol
+        std::string dale = "fñgohfodigoifjgoiuhefougih";
+        const char *zKey = dale.c_str();
+        cout << "zKey: " << zKey << endl;
+        int nBlob = strlen(zBlob);
+        //int nBlob = sizeof(zBlob);
+        cout << "nBlob: " << nBlob << endl;
+        if ( SQLITE_OK != writeBlob(zKey, zBlob, nBlob) )
+         {
+            databaseError();
+        }
+        free(zBlob);*/
+
+        std::string thumbpath = takeThumbnailFromCamera(cams.at(i));
+
+        std::stringstream select_cameras; 
+        select_cameras << "SELECT number FROM cameras WHERE name = '" << camera << "';";
+        cout << "select_cameras: " << select_cameras.str()  << endl;  
         pthread_mutex_lock(&databaseMutex);
-        db_execute(insert_camera_query.str().c_str());
+        vector<vector<string> > select_cameras_array = db_select(select_cameras.str().c_str(), 1);
         pthread_mutex_unlock(&databaseMutex);
-       
+
+        if (select_cameras_array.size() > 0)
+        {
+            std::stringstream update_camera_query;
+
+            update_camera_query <<
+            "UPDATE cameras set "   <<
+            "number = "             << cams.at(i) << ", "  <<
+            "name = '"              << camera     << "', " <<  
+            "active = "             << active     << ", "  <<
+            "thumbnail_path = '"    << thumbpath  << "', " <<
+            "created = '"           << time_rasp  << "' " <<  
+            " WHERE number = '"     << cams.at(i) << "';";
+
+            cout << "update_camera_query: " << update_camera_query.str()  << endl;  
+            pthread_mutex_lock(&databaseMutex);
+            db_execute(update_camera_query.str().c_str());
+            pthread_mutex_unlock(&databaseMutex);
+
+        } else 
+        {
+            std::stringstream insert_camera_query;
+            insert_camera_query <<
+            "INSERT INTO cameras (number, name, active, thumbnail_path, created) " <<
+            "SELECT " << cams.at(i) << ",'" << camera << "'," << active << ",'" << thumbpath << "','" << time_rasp << "' " << 
+            " WHERE NOT EXISTS (SELECT * FROM cameras WHERE name = '" << camera << "');";
+            cout << "insert_camera_query: " << insert_camera_query.str().substr(0, 400) << endl;
+            pthread_mutex_lock(&databaseMutex);
+            db_execute(insert_camera_query.str().c_str());
+            pthread_mutex_unlock(&databaseMutex);
+        }
+
+        
         std::string last_cameras_id_query = "SELECT MAX(_id) FROM cameras";
         pthread_mutex_lock(&databaseMutex);
         vector<vector<string> > cameras_array = db_select(last_cameras_id_query.c_str(), 1);
@@ -929,6 +1127,56 @@ int insertUserIntoDatabase(motion::Message::MotionUser * muser) //int clientnumb
 
     std::stringstream sql_insert_user;
 
+    cout << "********************************************" << endl;
+
+    if (muser->has_clientnumber())
+        cout <<  "clientnumber      : " <<      muser->clientnumber()        << endl; 
+    
+    if (muser->has_wpuser())    
+        cout <<  "wpuser            : " <<      muser->wpuser()              << endl; 
+    
+    if (muser->has_wppassword())    
+        cout <<  "wp_password       : " <<      muser->wppassword()          << endl; 
+    
+    if (muser->has_wpserverurl())   
+        cout <<  "wp_server_url     : " <<      muser->wpserverurl()         << endl; 
+    
+    if (muser->has_wpuserid())  
+        cout << "wp_userid          : " <<      muser->wpuserid()            << endl; 
+    
+    if (muser->has_wpclientid())    
+        cout <<  "wp_client_id      : " <<      muser->wpclientid()          << endl; 
+    
+    if (muser->has_wpclientmediaid())   
+        cout <<  "wp_client_mediaid : " <<      muser->wpclientmediaid()     << endl; 
+    
+    if (muser->has_pfobjectid())    
+        cout <<  "pfobjectid        : " <<      muser->pfobjectid()          << endl; 
+    
+    if (muser->has_username())  
+        cout << "username           : " <<      muser->username()            << endl; 
+    
+    if (muser->has_email())     
+        cout << "email              : " <<      muser->email()               << endl; 
+    
+    if (muser->has_firstname())     
+        cout << "first_name         :" <<       muser->firstname()           << endl; 
+    
+    if (muser->has_lastname())  
+        cout << "last_name          : " <<      muser->lastname()            << endl; 
+    
+    if (muser->has_location())  
+        cout << "location           : " <<      muser->location()            << endl; 
+    
+    if (muser->has_uiidinstallation())  
+        cout << "uiidinstallation   : " <<      muser->uiidinstallation()    << endl; 
+    
+    if (muser->has_clientnumber())  
+        cout << "clientnumber       : " <<      muser->clientnumber()        << endl;
+    
+
+    cout << "********************************************" << endl;
+
     sql_insert_user << "INSERT OR REPLACE INTO user (" <<
         "clientnumber,  "       <<  //0
         "wp_user,  "            <<  //1 
@@ -936,7 +1184,7 @@ int insertUserIntoDatabase(motion::Message::MotionUser * muser) //int clientnumb
         "wp_server_url,  "      <<  //3
         "wp_userid,  "          <<  //4
         "wp_client_id,  "       <<  //5
-        "wp_client_mediaid,  " <<  //6
+        "wp_client_mediaid,  "  <<  //6
         "pfobjectid,  "         <<  //7
         "username,  "           <<  //8
         "email,  "              <<  //9
@@ -946,27 +1194,25 @@ int insertUserIntoDatabase(motion::Message::MotionUser * muser) //int clientnumb
         "uiidinstallation  "    <<  //13
         ") values ("            <<
         muser->clientnumber()       << ", '"    <<  
-        muser->wp_user()            << "', '"   <<  
-        muser->wp_password()        << "', '"   <<  
-        muser->wp_server_url()      << "',  "   <<  
-        muser->wp_userid()          << " ,  "   <<  
-        muser->wp_client_id()       << " ,  "   <<  
-        muser->wp_client_mediaid() << " , '"   <<  
+        muser->wpuser()            << "', '"   <<  
+        muser->wppassword()        << "', '"   <<  
+        muser->wpserverurl()     << "',  "   <<  
+        muser->wpuserid()          << " ,  "   <<  
+        muser->wpclientid()       << " ,  "   <<  
+        muser->wpclientmediaid()  << " , '"    <<  
         muser->pfobjectid()         << "', '"   <<  
         muser->username()           << "', '"   <<  
         muser->email()              << "', '"   <<  
-        muser->first_name()         << "', '"   <<  
-        muser->last_name()          << "', '"   <<  
+        muser->firstname()         << "', '"   <<  
+        muser->lastname()          << "', '"   <<  
         muser->location()           << "', '"   <<  
-        muser->uiidinstallation()   << "', '"   <<  
-        muser->clientnumber()       << "');"   <<  
+        muser->uiidinstallation()   << "');";
     
     cout << "sql_insert_user: " << sql_insert_user.str() << endl;
     
     pthread_mutex_lock(&databaseMutex);
     db_execute(sql_insert_user.str().c_str());   
-    
-    std::string last_server_query = "SELECT MAX(_id) FROM server";
+    std::string last_server_query = "SELECT MAX(_id) FROM user";
     vector<vector<string> > user_array = db_select(last_server_query.c_str(), 1);
     pthread_mutex_unlock(&databaseMutex);
     cout << "user_array: " << endl;
@@ -992,8 +1238,6 @@ int insertRegionIntoDatabase(std::string rcoords)
     cout << "db_coordnates_id: " << db_coordnates_id << endl;
     return db_coordnates_id;
 }
-
-
 
 void updateRegionIntoDatabase(std::string rcoords, int db_recognitionid)
 {
@@ -1884,7 +2128,7 @@ vector<std::string> getTerminalInfo()
     vector<vector<string> > terminal_array = db_select(sql_terminal.c_str(), 11);
     pthread_mutex_unlock(&databaseMutex);
     
-    if (terminal_array.size()>0)
+    if (terminal_array.size()>0) 
     {
         terminal.push_back(terminal_array.at(0).at(0)); //db_local              10
         terminal.push_back(terminal_array.at(0).at(1)); //model                 11
@@ -1896,7 +2140,7 @@ vector<std::string> getTerminalInfo()
         terminal.push_back(terminal_array.at(0).at(7)); //diskavailable         17
         terminal.push_back(terminal_array.at(0).at(8)); //disk_percentage_used  18
         terminal.push_back(terminal_array.at(0).at(9)); //temperature           19
-        terminal.push_back(terminal_array.at(0).at(10)); //created               20
+        terminal.push_back(terminal_array.at(0).at(10)); //created              20
     }
    
     return terminal;
@@ -2047,6 +2291,23 @@ void insertUpdateStatus(std::string uptime, vector<int> camsarray, int db_termin
    
 }
 
+int insertIntoNetwork(std::string public_ip, std::string local_ip, std::string resutl_mac )
+{
+
+    //Status
+    stringstream sql_network;
+    sql_network <<
+    "INSERT INTO network (ipnumber, ippublic, macaddress) " <<
+    "SELECT '"  << local_ip        << "'"
+    ", '"       << public_ip       << "' " << 
+    ", '"       << resutl_mac      << "' " << 
+    "WHERE NOT EXISTS (SELECT * FROM network WHERE ipnumber = '"<< local_ip << "' " <<
+    "AND ippublic = '"      << public_ip    << "' " <<
+    "AND macaddress = '"    << resutl_mac   << "');";
+    cout << "sql_network: " << sql_network.str() << endl;
+    db_execute(sql_network.str().c_str());
+}
+
 motion::Message saveRecognition(motion::Message m)
 {
     
@@ -2065,7 +2326,7 @@ motion::Message saveRecognition(motion::Message m)
         std::string rc = prec->coordinates(); 
         rcoords = base64_decode(rc);
         db_coordnatesid = insertRegionIntoDatabase(rcoords);   
-        m.set_data(rcoords);
+        m.set_datafile(rcoords);
     }
 
      //Month.

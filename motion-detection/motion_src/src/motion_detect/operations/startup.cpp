@@ -175,7 +175,7 @@ int netWorkInfo()
         
     if (callip)
     {    
-        /*FILE *inip;
+        FILE *inip;
         char buffip[512];
         if(!(inip = popen("curl ifconfig.me", "r")))
         {
@@ -188,8 +188,11 @@ int netWorkInfo()
             public_ip = busip.str();
         }
         
+        //REMOVE WHITE SPACES
+        public_ip.erase( std::remove_if( public_ip.begin(), public_ip.end(), ::isspace ), public_ip.end() );
+
         cout << "ipnumber: " << NETWORK_IP << endl;
-        cout << "publicip: " << public_ip << endl;*/
+        cout << "publicip: " << public_ip << endl;
         
         FILE *inloc;
         char buffloc[512];
@@ -223,20 +226,10 @@ int netWorkInfo()
         std::string resutl_mac = exec_command(cestrmac);
         resutl_mac.erase(std::remove(resutl_eth0.begin(), resutl_eth0.end(), '\n'), resutl_eth0.end());
 
-         //Status
-        stringstream sql_network;
-        sql_network <<
-        "INSERT INTO network (ipnumber, ippublic, macaddress) " <<
-        "SELECT '"  << local_ip        << "'"
-        ", '"       << public_ip       << "' " << 
-        ", '"       << resutl_mac      << "' " << 
-        "WHERE NOT EXISTS (SELECT * FROM network WHERE ipnumber = '"<< local_ip << "' " <<
-        "AND ippublic = '"      << public_ip    << "' " <<
-        "AND macaddress = '"    << resutl_mac   << "');";
-        cout << "sql_network: " << sql_network.str() << endl;
-        db_execute(sql_network.str().c_str());
+        int insert_network = insertIntoNetwork(public_ip, local_ip, resutl_mac);
         
     }
+
     return 0;
 }
 
@@ -251,6 +244,8 @@ int createDirectories()
     directoryExistsOrCreate(trackdatafile.c_str());
     dumpinstancefolder = basepath + "data/instances";
     directoryExistsOrCreate(dumpinstancefolder.c_str());
+    std::string thumbnailpath = basepath + "data/thumbnails"; 
+    directoryExistsOrCreate(thumbnailpath.c_str());
     
     for (int k=0; k< cams.size(); k++)
     {

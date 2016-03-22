@@ -19,6 +19,9 @@
 
 #include <sqlite3.h>
 
+#include <assert.h>
+#include <malloc.h>
+
 #include <sys/time.h>
 
 #include "../tinyxml/tinyxml.h"
@@ -26,6 +29,8 @@
 
 #include "../protobuffer/motion.pb.h"
 #include "../b64/base64.h"
+
+ #include "../utils/utils.h"
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
@@ -44,14 +49,23 @@ void db_open();
 void db_execute(const char *sql);
 vector<vector<string> > db_select(const char *sql, int columns);
 void db_close();
+void createBlobTable();
+
+//blob
+static int createBlobTable(sqlite3 *db);
+static int writeBlob(const char *zKey, const unsigned char *zBlob, int nBlob);
+int readBlob(const char *zKey, unsigned char **pzBlob, int *pnBlob);
+static void freeBlob(unsigned char *zBlob);
+static void databaseError();
 
 extern std::string basepath;
 extern vector<string> splitString(string input, string delimiter);
 extern std::string getGlobalIntToString(int id);
 extern bool checkFile(const std::string &file);
 extern std::string get_file_contents(std::string filename);
-extern pthread_mutex_t protoMutex, databaseMutex;
+extern pthread_mutex_t protoMutex, databaseMutex; 
 
+extern char genRandom();
 extern bool to_bool(std::string const& s);
 
 extern motion::Message PROTO, R_PROTO;
@@ -152,3 +166,5 @@ vector<std::string> getCamerasFromDB();
 std::string getDayCreatedById(int dayid);
 
 std::string getIntervalByIdRecognitionSetupId(int db_idrec);
+
+int insertIntoNetwork(std::string public_ip, std::string local_ip, std::string resutl_mac );

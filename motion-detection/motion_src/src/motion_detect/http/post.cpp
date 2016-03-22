@@ -68,7 +68,7 @@ motion::Message postRecognition(motion::Message m)
 
         cv::Scalar red(255,0,0);
         
-        std::string rcoords = m.data();
+        std::string rcoords = m.datafile();
 
         mat = drawRectFromCoordinate(rcoords, mat, red);
 
@@ -112,8 +112,8 @@ motion::Message postRecognition(motion::Message m)
             } else 
             {
                 std::stringstream media;
-                media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << fineandextension << 
-                "' --data-binary @'"<< maximagepath << "' -d title='" << recname << "' -H \"Expect: \" " << SERVER_BASE_URL << "/wp-json/wp/v2/media";
+                media << "curl --user " << WP_USER << ":" << WP_PASS << " -X POST -H 'Content-Disposition: filename=" << fineandextension << 
+                "' --data-binary @'"<< maximagepath << "' -d title='" << recname << "' -H \"Expect: \" " << SERVER_BASE_URL << "media";
 
                 idmedia = post_command_to_wp(false, media.str(), prec->db_idmat());
             }
@@ -134,7 +134,7 @@ motion::Message postRecognition(motion::Message m)
             } else
             {
                 posttype = "POST";
-                url = SERVER_BASE_URL + "/wp-json/wp/v2/recognition";
+                url = SERVER_BASE_URL + "recognition";
             }
 
             std::string codename            = prec->codename();
@@ -152,7 +152,7 @@ motion::Message postRecognition(motion::Message m)
             std::string intervals = getIntervalByIdRecognitionSetupId(prec->db_idrec());
             
             std::stringstream recognition_post;
-            recognition_post << "curl --user jose:joselon -X " << posttype << " -d " << 
+            recognition_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X " << posttype << " -d " << 
             "'{\"title\":\""            << recname     <<  "\","    <<
             "\"content_raw\":\"Content\",\"content\":\" \","        <<
             "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
@@ -227,11 +227,11 @@ int instancePost(motion::Message::Instance pinstance, int db_instance_id, int po
     cout << "posting: " << fineandextension << endl;
     
     std::stringstream media;
-    media << "curl --user jose:joselon -X POST -H 'Content-Disposition: filename=" << 
+    media << "curl --user " << WP_USER << ":" << WP_PASS << " -X POST -H 'Content-Disposition: filename=" << 
     fineandextension << "' --data-binary @'"    << 
     maximagepath << "' -d title='"              << 
     maxtime << "' -H \"Expect: \" "             << 
-    SERVER_BASE_URL << "/wp-json/wp/v2/media";
+    SERVER_BASE_URL << "media";
 
     int idmedia = post_command_to_wp(false, media.str(), db_local);
     
@@ -247,10 +247,10 @@ int instancePost(motion::Message::Instance pinstance, int db_instance_id, int po
         
         int id_featured_image = getPostByIdAndType(idmedia);
         
-        std::string url = SERVER_BASE_URL + "/wp-json/wp/v2/instance";
+        std::string url = SERVER_BASE_URL + "instance";
         
         std::stringstream instance_post;
-        instance_post << "curl --user jose:joselon -X POST -d " << 
+        instance_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X POST -d " << 
         "'{\"title\":\""            << maxtime                  <<  "\","       <<
         "\"content_raw\":\"Content\",\"content\":\" \","        <<
         "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
@@ -420,7 +420,7 @@ void locationPost(bool update,  vector<std::string> locationinfo )
     latitude = locations.at(1);
     
     std::stringstream clientapi;
-    clientapi << SERVER_BASE_URL << "/wp-json/wp/v2/client/" <<  CLIENT_ID;
+    clientapi << SERVER_BASE_URL << "client/" <<  CLIENT_ID;
     std::string client_api = escape(clientapi.str());
     
     bool post_location      = false;
@@ -436,12 +436,12 @@ void locationPost(bool update,  vector<std::string> locationinfo )
     } else 
     {
         posttype = "POST";
-        url_location = SERVER_BASE_URL + "/wp-json/wp/v2/location";
+        url_location = SERVER_BASE_URL + "location";
         post_location = true;
     }
    
     /*std::stringstream url_client;
-    url_client << " curl " << SERVER_BASE_URL << "/wp-json/wp/v2/client/" << CLIENT_ID;
+    url_client << " curl " << SERVER_BASE_URL << "client/" << CLIENT_ID;
     std::string locations_relationship_response = get_command_from_wp(url_client.str());
     vector<string> locations_relationship = parsePost(locations_relationship_response, 1, "client_locations");
     std::string response_locations;
@@ -487,7 +487,7 @@ void locationPost(bool update,  vector<std::string> locationinfo )
     if (post_location)
     {
         std::stringstream location_post;
-        location_post << "curl --user jose:joselon -X " << posttype << " -d "   << 
+        location_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X " << posttype << " -d "   << 
         "'{\"title\":\""            << city                     <<  "\","       <<
         "\"content_raw\":\"Content\",\"content\":\" \","        <<
         "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
@@ -542,13 +542,13 @@ int dayPost(int db_recid, int db_dayid, std::string label, std::string xml)
     } else 
     {
         posttype = "POST";
-        url = SERVER_BASE_URL + "/wp-json/wp/v2/day";
+        url = SERVER_BASE_URL + "day";
     }
  
     std::string day_created = getDayCreatedById(db_dayid);
     
     std::stringstream day_post;
-    day_post << "curl --user jose:joselon -X " << posttype << " -d "   << 
+    day_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X " << posttype << " -d "   << 
     "'{\"title\":\""            << label                    <<  "\","       <<
     "\"content_raw\":\"Content\",\"content\":\" \","        <<
     "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
@@ -570,6 +570,7 @@ int dayPost(int db_recid, int db_dayid, std::string label, std::string xml)
 vector<std::string> parsePost(std::string message, int numArgs, ...)
 {
     
+    cout << "message: " << endl;
     va_list args;             // define argument list variable
     va_start (args,numArgs);  // init list; point to last
                             //   defined argument
@@ -597,7 +598,7 @@ vector<std::string> parsePost(std::string message, int numArgs, ...)
     std::string link;
     std::string api_link;
     std::string featured_image; 
-    std::string post_parent;
+    std::string post_parent; 
     
     std::stringstream _id;
     
@@ -676,7 +677,7 @@ vector<std::string> parsePost(std::string message, int numArgs, ...)
     delete [] cstr;
     
     std::stringstream apilink;
-    apilink << SERVER_BASE_URL << "/wp-json/wp/v2/" << post_type << "/" << id ;
+    apilink << SERVER_BASE_URL << "" << post_type << "/" << id ;
   
      api_link = apilink.str();
      
@@ -763,11 +764,11 @@ void postTerminalStatus()
     } else
     {
         posttype = "POST";
-        url = SERVER_BASE_URL + "/wp-json/wp/v2/terminal";
+        url = SERVER_BASE_URL + "terminal";
     }
 
     std::stringstream terminal_post;
-    terminal_post << "curl --user jose:joselon -X "         << posttype << " -d " << 
+    terminal_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X "         << posttype << " -d " << 
     "'{\"title\":\""            << hardware     <<  "\","   <<
     "\"content_raw\":\"Content\",\"content\":\"\","     <<
     "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
@@ -845,11 +846,11 @@ void postCameraStatus()
             } else
             {
                 posttype = "POST";
-                url = SERVER_BASE_URL + "/wp-json/wp/v2/camera";
+                url = SERVER_BASE_URL + "camera";
             }
                
             std::stringstream camera_post;
-            camera_post << "curl --user jose:joselon -X "         << posttype << " -d " << 
+            camera_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X "         << posttype << " -d " << 
             "'{\"title\":\""            << cameraname     <<  "\","   <<
             "\"content_raw\":\"Content\",\"content\":\"\","     <<
             "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","           <<

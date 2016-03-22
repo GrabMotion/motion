@@ -5,7 +5,7 @@
  * Created on Dec 12, 2015, 7:48 PM
  */
 
-#include <vector>
+#include <vector> 
 #include "../protobuffer/motion.pb.h"
 
 #include "opencv2/opencv.hpp"

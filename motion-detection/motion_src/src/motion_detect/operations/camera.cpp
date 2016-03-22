@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <ctime>
 #include <sys/types.h>
+#include <string> 
 
 using namespace std;
 using namespace cv;
@@ -143,8 +144,8 @@ std::string takeThumbnailFromCamera(int camera)
         std::cout << "No cam found." << std::endl;
     }
     
-    int w = 640; //1280; //320;
-    int h = 480; //720;  //240;
+    int w = 60; //640; //1280; //320;
+    int h = 45; //480; //720;  //240;
     
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
@@ -153,26 +154,65 @@ std::string takeThumbnailFromCamera(int camera)
     //img = cvQueryFrame( capture );  
     //cvSaveImage("IplImage.JPG",img);
     
-    Mat mat; //(h, w, CV_8U); //CV_8U); // CV_8UC3);
-    mat = cvQueryFrame(capture);
+    Mat bigmat; //(h, w, CV_8U); //CV_8U); // CV_8UC3);
+    bigmat = cvQueryFrame(capture);
     //cvtColor(mat, mat, CV_RGB2GRAY);
      
     cout << "+++++++++++CREATING THUMBNAIL++++++++++++++" << endl;
     
-    Size size(100,75);//the dst image size,e.g.100x100
-    Mat dst;//dst image
-    resize(mat,dst,size);//resize image
+    Size size(100,75);      //the dst image size,e.g.100x100
+    Mat mat;                //dst image
+    resize(bigmat,mat,size);   //resize image
 
-    std:stringstream thumbmat;
-    thumbmat << dst << endl;
+    //std:stringstream thumbmat;
+    //thumbmat << dst << endl;
 
-    std::string thumbnail = thumbmat.str();
+    //std::string thumbnail = thumbmat.str();
 
-    std::string thumbencoded = base64_encode(reinterpret_cast<const unsigned char*>(thumbnail.c_str()), thumbnail.length());
+    //std::string thumbencoded = base64_encode(reinterpret_cast<const unsigned char*>(thumbnail.c_str()), thumbnail.length());
+
+    // We will need to also serialize the width, height, type and size of the matrix
+    int width_s     = mat.cols;
+    int height_s    = mat.rows;
+    int type_s      = mat.type();
+    size_t size_s   = mat.total() * mat.elemSize();
     
+    cout << "width_s    : " << width_s << endl;
+    cout << "height_s   : " << height_s << endl;
+    cout << "type_s     : " << type_s << endl;
+    cout << "size_s     : " << size_s << endl;
+    
+    // Write the whole image data
+    std::stringstream ss;
+    ss.write((char*)    (&width_s),     sizeof(int));
+    ss.write((char*)    (&height_s),    sizeof(int));
+    ss.write((char*)    (&type_s),      sizeof(int));
+    ss.write((char*)    (&size_s),      sizeof(size_t));
+
+    ss.write((char*)    mat.data,      size_s);
+    
+    std::string ssstring = ss.str();
+
+    std::string encodedmat = base64_encode(reinterpret_cast<const unsigned char*>(ssstring.c_str()), ssstring.length());
+
+    std::time_t t = std::time(0);
+    stringstream tst;
+    tst << t;
+    int activemat = atoi(tst.str().c_str());
+
+    cout << "encodedmat: " << encodedmat.substr(0, 200) << endl; 
+
+    //Write base64 to file for checking.
+    std::string basefile = basepath + "data/thumbnails/" + IntToString(activemat) + ".mat";
+
+    std::ofstream out;
+    out.open (basefile.c_str());
+    out << encodedmat << "\n";
+    out.close();
+
     cvReleaseCapture(&capture);
-    
-    return thumbencoded;
+        
+    return basefile;
 }
 
 

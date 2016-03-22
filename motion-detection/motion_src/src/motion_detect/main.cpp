@@ -78,6 +78,9 @@ char*     	server_ip;
 int       	server_port;
 int       	server_camera;
 
+//WP User and Password
+std::string WP_USER;
+std::string WP_PASS;
 
 //Threads
 int runt, runb, runs, runr, runl, runm, runw, runss, runo, ruse;
@@ -117,6 +120,7 @@ double t_load_instance   = 10; //60 * 24;
 
 
 int main_loop_counter;
+
 
 #define RCVBUFSIZE 1024
 //const unsigned int RCVBUFSIZE = 100000; //4096; //32;     // Size of receive buffer
@@ -236,6 +240,7 @@ int main (int argc, char * const av[])
     
 	cout << "CV_MAJOR_VERSION: " << CV_MAJOR_VERSION << endl;
 	
+    //createBlobTable();
 	
     const char **argv = (const char **) av; 
     cout << "argv[0]: " << argv[0] << endl;
@@ -297,6 +302,10 @@ int main (int argc, char * const av[])
 
         if (user_info.size()>0)
         {
+
+            //WP USER PASS
+            WP_USER = user_info.at(1);
+            WP_PASS = user_info.at(2);
 
             //Post Location
             locationPost(t_post_location);

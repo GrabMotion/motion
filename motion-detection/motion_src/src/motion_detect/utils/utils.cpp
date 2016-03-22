@@ -16,7 +16,11 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+#include <string>
+
 #include <errno.h>
+
+
 
 std::string getXMLFilePathAndName(std::string sourcepath, int cam, std::string recname, std::string currday, std::string name)
 {
@@ -428,3 +432,37 @@ cv::Mat extractMat(string loadedmat)
 
     return extracted;
 }
+
+// String Generator
+/*char genRandom()
+{
+    static const char alphanum[] =
+    "0123456789"
+    "!@#$%^&*"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    "abcdefghijklmnopqrstuvwxyz";
+
+    int stringLength = sizeof(alphanum) - 1;
+
+    return alphanum[rand() % stringLength];
+}
+
+std::string random_string(size_t length)
+{
+    static const std::string alphanums =
+        "0123456789"
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    static std::mt19937 rg{std::random_device{}()};
+    static std::uniform_int_distribution<> pick(0, alphanums.size() - 1);
+
+    std::string s;
+
+    s.reserve(length);
+
+    while(length--)
+        s += alphanums[pick(rg)];
+
+    return s;
+}*/

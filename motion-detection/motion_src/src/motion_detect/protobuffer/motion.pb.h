@@ -35,6 +35,7 @@ void protobuf_AssignDesc_motion_2eproto();
 void protobuf_ShutdownFile_motion_2eproto();
 
 class Message;
+class Message_MotionDevice;
 class Message_MotionUser;
 class Message_MotionCamera;
 class Message_MotionTrack;
@@ -193,6 +194,345 @@ inline bool Message_ServiceType_Parse(
 }
 // ===================================================================
 
+class Message_MotionDevice : public ::google::protobuf::Message {
+ public:
+  Message_MotionDevice();
+  virtual ~Message_MotionDevice();
+
+  Message_MotionDevice(const Message_MotionDevice& from);
+
+  inline Message_MotionDevice& operator=(const Message_MotionDevice& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Message_MotionDevice& default_instance();
+
+  void Swap(Message_MotionDevice* other);
+
+  // implements Message ----------------------------------------------
+
+  Message_MotionDevice* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Message_MotionDevice& from);
+  void MergeFrom(const Message_MotionDevice& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string ipnumber = 1;
+  inline bool has_ipnumber() const;
+  inline void clear_ipnumber();
+  static const int kIpnumberFieldNumber = 1;
+  inline const ::std::string& ipnumber() const;
+  inline void set_ipnumber(const ::std::string& value);
+  inline void set_ipnumber(const char* value);
+  inline void set_ipnumber(const char* value, size_t size);
+  inline ::std::string* mutable_ipnumber();
+  inline ::std::string* release_ipnumber();
+  inline void set_allocated_ipnumber(::std::string* ipnumber);
+
+  // optional string ippublic = 2;
+  inline bool has_ippublic() const;
+  inline void clear_ippublic();
+  static const int kIppublicFieldNumber = 2;
+  inline const ::std::string& ippublic() const;
+  inline void set_ippublic(const ::std::string& value);
+  inline void set_ippublic(const char* value);
+  inline void set_ippublic(const char* value, size_t size);
+  inline ::std::string* mutable_ippublic();
+  inline ::std::string* release_ippublic();
+  inline void set_allocated_ippublic(::std::string* ippublic);
+
+  // optional string macaddress = 3;
+  inline bool has_macaddress() const;
+  inline void clear_macaddress();
+  static const int kMacaddressFieldNumber = 3;
+  inline const ::std::string& macaddress() const;
+  inline void set_macaddress(const ::std::string& value);
+  inline void set_macaddress(const char* value);
+  inline void set_macaddress(const char* value, size_t size);
+  inline ::std::string* mutable_macaddress();
+  inline ::std::string* release_macaddress();
+  inline void set_allocated_macaddress(::std::string* macaddress);
+
+  // optional string hostname = 4;
+  inline bool has_hostname() const;
+  inline void clear_hostname();
+  static const int kHostnameFieldNumber = 4;
+  inline const ::std::string& hostname() const;
+  inline void set_hostname(const ::std::string& value);
+  inline void set_hostname(const char* value);
+  inline void set_hostname(const char* value, size_t size);
+  inline ::std::string* mutable_hostname();
+  inline ::std::string* release_hostname();
+  inline void set_allocated_hostname(::std::string* hostname);
+
+  // optional string city = 5;
+  inline bool has_city() const;
+  inline void clear_city();
+  static const int kCityFieldNumber = 5;
+  inline const ::std::string& city() const;
+  inline void set_city(const ::std::string& value);
+  inline void set_city(const char* value);
+  inline void set_city(const char* value, size_t size);
+  inline ::std::string* mutable_city();
+  inline ::std::string* release_city();
+  inline void set_allocated_city(::std::string* city);
+
+  // optional string country = 6;
+  inline bool has_country() const;
+  inline void clear_country();
+  static const int kCountryFieldNumber = 6;
+  inline const ::std::string& country() const;
+  inline void set_country(const ::std::string& value);
+  inline void set_country(const char* value);
+  inline void set_country(const char* value, size_t size);
+  inline ::std::string* mutable_country();
+  inline ::std::string* release_country();
+  inline void set_allocated_country(::std::string* country);
+
+  // optional string location = 7;
+  inline bool has_location() const;
+  inline void clear_location();
+  static const int kLocationFieldNumber = 7;
+  inline const ::std::string& location() const;
+  inline void set_location(const ::std::string& value);
+  inline void set_location(const char* value);
+  inline void set_location(const char* value, size_t size);
+  inline ::std::string* mutable_location();
+  inline ::std::string* release_location();
+  inline void set_allocated_location(::std::string* location);
+
+  // optional string network_provider = 8;
+  inline bool has_network_provider() const;
+  inline void clear_network_provider();
+  static const int kNetworkProviderFieldNumber = 8;
+  inline const ::std::string& network_provider() const;
+  inline void set_network_provider(const ::std::string& value);
+  inline void set_network_provider(const char* value);
+  inline void set_network_provider(const char* value, size_t size);
+  inline ::std::string* mutable_network_provider();
+  inline ::std::string* release_network_provider();
+  inline void set_allocated_network_provider(::std::string* network_provider);
+
+  // optional string uptime = 9;
+  inline bool has_uptime() const;
+  inline void clear_uptime();
+  static const int kUptimeFieldNumber = 9;
+  inline const ::std::string& uptime() const;
+  inline void set_uptime(const ::std::string& value);
+  inline void set_uptime(const char* value);
+  inline void set_uptime(const char* value, size_t size);
+  inline ::std::string* mutable_uptime();
+  inline ::std::string* release_uptime();
+  inline void set_allocated_uptime(::std::string* uptime);
+
+  // optional string starttime = 10;
+  inline bool has_starttime() const;
+  inline void clear_starttime();
+  static const int kStarttimeFieldNumber = 10;
+  inline const ::std::string& starttime() const;
+  inline void set_starttime(const ::std::string& value);
+  inline void set_starttime(const char* value);
+  inline void set_starttime(const char* value, size_t size);
+  inline ::std::string* mutable_starttime();
+  inline ::std::string* release_starttime();
+  inline void set_allocated_starttime(::std::string* starttime);
+
+  // optional int32 db_local = 11;
+  inline bool has_db_local() const;
+  inline void clear_db_local();
+  static const int kDbLocalFieldNumber = 11;
+  inline ::google::protobuf::int32 db_local() const;
+  inline void set_db_local(::google::protobuf::int32 value);
+
+  // optional string model = 12;
+  inline bool has_model() const;
+  inline void clear_model();
+  static const int kModelFieldNumber = 12;
+  inline const ::std::string& model() const;
+  inline void set_model(const ::std::string& value);
+  inline void set_model(const char* value);
+  inline void set_model(const char* value, size_t size);
+  inline ::std::string* mutable_model();
+  inline ::std::string* release_model();
+  inline void set_allocated_model(::std::string* model);
+
+  // optional string hardware = 13;
+  inline bool has_hardware() const;
+  inline void clear_hardware();
+  static const int kHardwareFieldNumber = 13;
+  inline const ::std::string& hardware() const;
+  inline void set_hardware(const ::std::string& value);
+  inline void set_hardware(const char* value);
+  inline void set_hardware(const char* value, size_t size);
+  inline ::std::string* mutable_hardware();
+  inline ::std::string* release_hardware();
+  inline void set_allocated_hardware(::std::string* hardware);
+
+  // optional string serial = 14;
+  inline bool has_serial() const;
+  inline void clear_serial();
+  static const int kSerialFieldNumber = 14;
+  inline const ::std::string& serial() const;
+  inline void set_serial(const ::std::string& value);
+  inline void set_serial(const char* value);
+  inline void set_serial(const char* value, size_t size);
+  inline ::std::string* mutable_serial();
+  inline ::std::string* release_serial();
+  inline void set_allocated_serial(::std::string* serial);
+
+  // optional string revision = 15;
+  inline bool has_revision() const;
+  inline void clear_revision();
+  static const int kRevisionFieldNumber = 15;
+  inline const ::std::string& revision() const;
+  inline void set_revision(const ::std::string& value);
+  inline void set_revision(const char* value);
+  inline void set_revision(const char* value, size_t size);
+  inline ::std::string* mutable_revision();
+  inline ::std::string* release_revision();
+  inline void set_allocated_revision(::std::string* revision);
+
+  // optional int32 disktotal = 16;
+  inline bool has_disktotal() const;
+  inline void clear_disktotal();
+  static const int kDisktotalFieldNumber = 16;
+  inline ::google::protobuf::int32 disktotal() const;
+  inline void set_disktotal(::google::protobuf::int32 value);
+
+  // optional int32 diskused = 17;
+  inline bool has_diskused() const;
+  inline void clear_diskused();
+  static const int kDiskusedFieldNumber = 17;
+  inline ::google::protobuf::int32 diskused() const;
+  inline void set_diskused(::google::protobuf::int32 value);
+
+  // optional int32 diskavailable = 18;
+  inline bool has_diskavailable() const;
+  inline void clear_diskavailable();
+  static const int kDiskavailableFieldNumber = 18;
+  inline ::google::protobuf::int32 diskavailable() const;
+  inline void set_diskavailable(::google::protobuf::int32 value);
+
+  // optional int32 disk_percentage_used = 19;
+  inline bool has_disk_percentage_used() const;
+  inline void clear_disk_percentage_used();
+  static const int kDiskPercentageUsedFieldNumber = 19;
+  inline ::google::protobuf::int32 disk_percentage_used() const;
+  inline void set_disk_percentage_used(::google::protobuf::int32 value);
+
+  // optional int32 temperature = 20;
+  inline bool has_temperature() const;
+  inline void clear_temperature();
+  static const int kTemperatureFieldNumber = 20;
+  inline ::google::protobuf::int32 temperature() const;
+  inline void set_temperature(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:motion.Message.MotionDevice)
+ private:
+  inline void set_has_ipnumber();
+  inline void clear_has_ipnumber();
+  inline void set_has_ippublic();
+  inline void clear_has_ippublic();
+  inline void set_has_macaddress();
+  inline void clear_has_macaddress();
+  inline void set_has_hostname();
+  inline void clear_has_hostname();
+  inline void set_has_city();
+  inline void clear_has_city();
+  inline void set_has_country();
+  inline void clear_has_country();
+  inline void set_has_location();
+  inline void clear_has_location();
+  inline void set_has_network_provider();
+  inline void clear_has_network_provider();
+  inline void set_has_uptime();
+  inline void clear_has_uptime();
+  inline void set_has_starttime();
+  inline void clear_has_starttime();
+  inline void set_has_db_local();
+  inline void clear_has_db_local();
+  inline void set_has_model();
+  inline void clear_has_model();
+  inline void set_has_hardware();
+  inline void clear_has_hardware();
+  inline void set_has_serial();
+  inline void clear_has_serial();
+  inline void set_has_revision();
+  inline void clear_has_revision();
+  inline void set_has_disktotal();
+  inline void clear_has_disktotal();
+  inline void set_has_diskused();
+  inline void clear_has_diskused();
+  inline void set_has_diskavailable();
+  inline void clear_has_diskavailable();
+  inline void set_has_disk_percentage_used();
+  inline void clear_has_disk_percentage_used();
+  inline void set_has_temperature();
+  inline void clear_has_temperature();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::std::string* ipnumber_;
+  ::std::string* ippublic_;
+  ::std::string* macaddress_;
+  ::std::string* hostname_;
+  ::std::string* city_;
+  ::std::string* country_;
+  ::std::string* location_;
+  ::std::string* network_provider_;
+  ::std::string* uptime_;
+  ::std::string* starttime_;
+  ::std::string* model_;
+  ::std::string* hardware_;
+  ::google::protobuf::int32 db_local_;
+  ::google::protobuf::int32 disktotal_;
+  ::std::string* serial_;
+  ::std::string* revision_;
+  ::google::protobuf::int32 diskused_;
+  ::google::protobuf::int32 diskavailable_;
+  ::google::protobuf::int32 disk_percentage_used_;
+  ::google::protobuf::int32 temperature_;
+  friend void  protobuf_AddDesc_motion_2eproto();
+  friend void protobuf_AssignDesc_motion_2eproto();
+  friend void protobuf_ShutdownFile_motion_2eproto();
+
+  void InitAsDefaultInstance();
+  static Message_MotionDevice* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class Message_MotionUser : public ::google::protobuf::Message {
  public:
   Message_MotionUser();
@@ -253,62 +593,62 @@ class Message_MotionUser : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 clientnumber() const;
   inline void set_clientnumber(::google::protobuf::int32 value);
 
-  // optional string wp_user = 2;
-  inline bool has_wp_user() const;
-  inline void clear_wp_user();
-  static const int kWpUserFieldNumber = 2;
-  inline const ::std::string& wp_user() const;
-  inline void set_wp_user(const ::std::string& value);
-  inline void set_wp_user(const char* value);
-  inline void set_wp_user(const char* value, size_t size);
-  inline ::std::string* mutable_wp_user();
-  inline ::std::string* release_wp_user();
-  inline void set_allocated_wp_user(::std::string* wp_user);
+  // optional string wpuser = 2;
+  inline bool has_wpuser() const;
+  inline void clear_wpuser();
+  static const int kWpuserFieldNumber = 2;
+  inline const ::std::string& wpuser() const;
+  inline void set_wpuser(const ::std::string& value);
+  inline void set_wpuser(const char* value);
+  inline void set_wpuser(const char* value, size_t size);
+  inline ::std::string* mutable_wpuser();
+  inline ::std::string* release_wpuser();
+  inline void set_allocated_wpuser(::std::string* wpuser);
 
-  // optional string wp_password = 3;
-  inline bool has_wp_password() const;
-  inline void clear_wp_password();
-  static const int kWpPasswordFieldNumber = 3;
-  inline const ::std::string& wp_password() const;
-  inline void set_wp_password(const ::std::string& value);
-  inline void set_wp_password(const char* value);
-  inline void set_wp_password(const char* value, size_t size);
-  inline ::std::string* mutable_wp_password();
-  inline ::std::string* release_wp_password();
-  inline void set_allocated_wp_password(::std::string* wp_password);
+  // optional string wppassword = 3;
+  inline bool has_wppassword() const;
+  inline void clear_wppassword();
+  static const int kWppasswordFieldNumber = 3;
+  inline const ::std::string& wppassword() const;
+  inline void set_wppassword(const ::std::string& value);
+  inline void set_wppassword(const char* value);
+  inline void set_wppassword(const char* value, size_t size);
+  inline ::std::string* mutable_wppassword();
+  inline ::std::string* release_wppassword();
+  inline void set_allocated_wppassword(::std::string* wppassword);
 
-  // optional string wp_server_url = 4;
-  inline bool has_wp_server_url() const;
-  inline void clear_wp_server_url();
-  static const int kWpServerUrlFieldNumber = 4;
-  inline const ::std::string& wp_server_url() const;
-  inline void set_wp_server_url(const ::std::string& value);
-  inline void set_wp_server_url(const char* value);
-  inline void set_wp_server_url(const char* value, size_t size);
-  inline ::std::string* mutable_wp_server_url();
-  inline ::std::string* release_wp_server_url();
-  inline void set_allocated_wp_server_url(::std::string* wp_server_url);
+  // optional string wpserverurl = 4;
+  inline bool has_wpserverurl() const;
+  inline void clear_wpserverurl();
+  static const int kWpserverurlFieldNumber = 4;
+  inline const ::std::string& wpserverurl() const;
+  inline void set_wpserverurl(const ::std::string& value);
+  inline void set_wpserverurl(const char* value);
+  inline void set_wpserverurl(const char* value, size_t size);
+  inline ::std::string* mutable_wpserverurl();
+  inline ::std::string* release_wpserverurl();
+  inline void set_allocated_wpserverurl(::std::string* wpserverurl);
 
-  // optional int32 wp_userid = 5;
-  inline bool has_wp_userid() const;
-  inline void clear_wp_userid();
-  static const int kWpUseridFieldNumber = 5;
-  inline ::google::protobuf::int32 wp_userid() const;
-  inline void set_wp_userid(::google::protobuf::int32 value);
+  // optional int32 wpuserid = 5;
+  inline bool has_wpuserid() const;
+  inline void clear_wpuserid();
+  static const int kWpuseridFieldNumber = 5;
+  inline ::google::protobuf::int32 wpuserid() const;
+  inline void set_wpuserid(::google::protobuf::int32 value);
 
-  // optional int32 wp_client_id = 6;
-  inline bool has_wp_client_id() const;
-  inline void clear_wp_client_id();
-  static const int kWpClientIdFieldNumber = 6;
-  inline ::google::protobuf::int32 wp_client_id() const;
-  inline void set_wp_client_id(::google::protobuf::int32 value);
+  // optional int32 wpclientid = 6;
+  inline bool has_wpclientid() const;
+  inline void clear_wpclientid();
+  static const int kWpclientidFieldNumber = 6;
+  inline ::google::protobuf::int32 wpclientid() const;
+  inline void set_wpclientid(::google::protobuf::int32 value);
 
-  // optional int32 wp_client_mediaid = 7;
-  inline bool has_wp_client_mediaid() const;
-  inline void clear_wp_client_mediaid();
-  static const int kWpClientMediaidFieldNumber = 7;
-  inline ::google::protobuf::int32 wp_client_mediaid() const;
-  inline void set_wp_client_mediaid(::google::protobuf::int32 value);
+  // optional int32 wpclientmediaid = 7;
+  inline bool has_wpclientmediaid() const;
+  inline void clear_wpclientmediaid();
+  static const int kWpclientmediaidFieldNumber = 7;
+  inline ::google::protobuf::int32 wpclientmediaid() const;
+  inline void set_wpclientmediaid(::google::protobuf::int32 value);
 
   // optional string pfobjectid = 8;
   inline bool has_pfobjectid() const;
@@ -346,29 +686,29 @@ class Message_MotionUser : public ::google::protobuf::Message {
   inline ::std::string* release_email();
   inline void set_allocated_email(::std::string* email);
 
-  // optional string first_name = 11;
-  inline bool has_first_name() const;
-  inline void clear_first_name();
-  static const int kFirstNameFieldNumber = 11;
-  inline const ::std::string& first_name() const;
-  inline void set_first_name(const ::std::string& value);
-  inline void set_first_name(const char* value);
-  inline void set_first_name(const char* value, size_t size);
-  inline ::std::string* mutable_first_name();
-  inline ::std::string* release_first_name();
-  inline void set_allocated_first_name(::std::string* first_name);
+  // optional string firstname = 11;
+  inline bool has_firstname() const;
+  inline void clear_firstname();
+  static const int kFirstnameFieldNumber = 11;
+  inline const ::std::string& firstname() const;
+  inline void set_firstname(const ::std::string& value);
+  inline void set_firstname(const char* value);
+  inline void set_firstname(const char* value, size_t size);
+  inline ::std::string* mutable_firstname();
+  inline ::std::string* release_firstname();
+  inline void set_allocated_firstname(::std::string* firstname);
 
-  // optional string last_name = 12;
-  inline bool has_last_name() const;
-  inline void clear_last_name();
-  static const int kLastNameFieldNumber = 12;
-  inline const ::std::string& last_name() const;
-  inline void set_last_name(const ::std::string& value);
-  inline void set_last_name(const char* value);
-  inline void set_last_name(const char* value, size_t size);
-  inline ::std::string* mutable_last_name();
-  inline ::std::string* release_last_name();
-  inline void set_allocated_last_name(::std::string* last_name);
+  // optional string lastname = 12;
+  inline bool has_lastname() const;
+  inline void clear_lastname();
+  static const int kLastnameFieldNumber = 12;
+  inline const ::std::string& lastname() const;
+  inline void set_lastname(const ::std::string& value);
+  inline void set_lastname(const char* value);
+  inline void set_lastname(const char* value, size_t size);
+  inline ::std::string* mutable_lastname();
+  inline ::std::string* release_lastname();
+  inline void set_allocated_lastname(::std::string* lastname);
 
   // optional string location = 13;
   inline bool has_location() const;
@@ -394,65 +734,165 @@ class Message_MotionUser : public ::google::protobuf::Message {
   inline ::std::string* release_uiidinstallation();
   inline void set_allocated_uiidinstallation(::std::string* uiidinstallation);
 
-  // optional int32 service_type = 15;
-  inline bool has_service_type() const;
-  inline void clear_service_type();
-  static const int kServiceTypeFieldNumber = 15;
-  inline ::google::protobuf::int32 service_type() const;
-  inline void set_service_type(::google::protobuf::int32 value);
+  // optional int32 servicetype = 15;
+  inline bool has_servicetype() const;
+  inline void clear_servicetype();
+  static const int kServicetypeFieldNumber = 15;
+  inline ::google::protobuf::int32 servicetype() const;
+  inline void set_servicetype(::google::protobuf::int32 value);
+
+  // optional string wpslug = 16;
+  inline bool has_wpslug() const;
+  inline void clear_wpslug();
+  static const int kWpslugFieldNumber = 16;
+  inline const ::std::string& wpslug() const;
+  inline void set_wpslug(const ::std::string& value);
+  inline void set_wpslug(const char* value);
+  inline void set_wpslug(const char* value, size_t size);
+  inline ::std::string* mutable_wpslug();
+  inline ::std::string* release_wpslug();
+  inline void set_allocated_wpslug(::std::string* wpslug);
+
+  // optional string wplink = 17;
+  inline bool has_wplink() const;
+  inline void clear_wplink();
+  static const int kWplinkFieldNumber = 17;
+  inline const ::std::string& wplink() const;
+  inline void set_wplink(const ::std::string& value);
+  inline void set_wplink(const char* value);
+  inline void set_wplink(const char* value, size_t size);
+  inline ::std::string* mutable_wplink();
+  inline ::std::string* release_wplink();
+  inline void set_allocated_wplink(::std::string* wplink);
+
+  // optional string wpapilink = 18;
+  inline bool has_wpapilink() const;
+  inline void clear_wpapilink();
+  static const int kWpapilinkFieldNumber = 18;
+  inline const ::std::string& wpapilink() const;
+  inline void set_wpapilink(const ::std::string& value);
+  inline void set_wpapilink(const char* value);
+  inline void set_wpapilink(const char* value, size_t size);
+  inline ::std::string* mutable_wpapilink();
+  inline ::std::string* release_wpapilink();
+  inline void set_allocated_wpapilink(::std::string* wpapilink);
+
+  // optional string wpfeaturedimage = 19;
+  inline bool has_wpfeaturedimage() const;
+  inline void clear_wpfeaturedimage();
+  static const int kWpfeaturedimageFieldNumber = 19;
+  inline const ::std::string& wpfeaturedimage() const;
+  inline void set_wpfeaturedimage(const ::std::string& value);
+  inline void set_wpfeaturedimage(const char* value);
+  inline void set_wpfeaturedimage(const char* value, size_t size);
+  inline ::std::string* mutable_wpfeaturedimage();
+  inline ::std::string* release_wpfeaturedimage();
+  inline void set_allocated_wpfeaturedimage(::std::string* wpfeaturedimage);
+
+  // optional string wptype = 20;
+  inline bool has_wptype() const;
+  inline void clear_wptype();
+  static const int kWptypeFieldNumber = 20;
+  inline const ::std::string& wptype() const;
+  inline void set_wptype(const ::std::string& value);
+  inline void set_wptype(const char* value);
+  inline void set_wptype(const char* value, size_t size);
+  inline ::std::string* mutable_wptype();
+  inline ::std::string* release_wptype();
+  inline void set_allocated_wptype(::std::string* wptype);
+
+  // optional int32 wpparent = 21;
+  inline bool has_wpparent() const;
+  inline void clear_wpparent();
+  static const int kWpparentFieldNumber = 21;
+  inline ::google::protobuf::int32 wpparent() const;
+  inline void set_wpparent(::google::protobuf::int32 value);
+
+  // optional string wpmodified = 22;
+  inline bool has_wpmodified() const;
+  inline void clear_wpmodified();
+  static const int kWpmodifiedFieldNumber = 22;
+  inline const ::std::string& wpmodified() const;
+  inline void set_wpmodified(const ::std::string& value);
+  inline void set_wpmodified(const char* value);
+  inline void set_wpmodified(const char* value, size_t size);
+  inline ::std::string* mutable_wpmodified();
+  inline ::std::string* release_wpmodified();
+  inline void set_allocated_wpmodified(::std::string* wpmodified);
 
   // @@protoc_insertion_point(class_scope:motion.Message.MotionUser)
  private:
   inline void set_has_clientnumber();
   inline void clear_has_clientnumber();
-  inline void set_has_wp_user();
-  inline void clear_has_wp_user();
-  inline void set_has_wp_password();
-  inline void clear_has_wp_password();
-  inline void set_has_wp_server_url();
-  inline void clear_has_wp_server_url();
-  inline void set_has_wp_userid();
-  inline void clear_has_wp_userid();
-  inline void set_has_wp_client_id();
-  inline void clear_has_wp_client_id();
-  inline void set_has_wp_client_mediaid();
-  inline void clear_has_wp_client_mediaid();
+  inline void set_has_wpuser();
+  inline void clear_has_wpuser();
+  inline void set_has_wppassword();
+  inline void clear_has_wppassword();
+  inline void set_has_wpserverurl();
+  inline void clear_has_wpserverurl();
+  inline void set_has_wpuserid();
+  inline void clear_has_wpuserid();
+  inline void set_has_wpclientid();
+  inline void clear_has_wpclientid();
+  inline void set_has_wpclientmediaid();
+  inline void clear_has_wpclientmediaid();
   inline void set_has_pfobjectid();
   inline void clear_has_pfobjectid();
   inline void set_has_username();
   inline void clear_has_username();
   inline void set_has_email();
   inline void clear_has_email();
-  inline void set_has_first_name();
-  inline void clear_has_first_name();
-  inline void set_has_last_name();
-  inline void clear_has_last_name();
+  inline void set_has_firstname();
+  inline void clear_has_firstname();
+  inline void set_has_lastname();
+  inline void clear_has_lastname();
   inline void set_has_location();
   inline void clear_has_location();
   inline void set_has_uiidinstallation();
   inline void clear_has_uiidinstallation();
-  inline void set_has_service_type();
-  inline void clear_has_service_type();
+  inline void set_has_servicetype();
+  inline void clear_has_servicetype();
+  inline void set_has_wpslug();
+  inline void clear_has_wpslug();
+  inline void set_has_wplink();
+  inline void clear_has_wplink();
+  inline void set_has_wpapilink();
+  inline void clear_has_wpapilink();
+  inline void set_has_wpfeaturedimage();
+  inline void clear_has_wpfeaturedimage();
+  inline void set_has_wptype();
+  inline void clear_has_wptype();
+  inline void set_has_wpparent();
+  inline void clear_has_wpparent();
+  inline void set_has_wpmodified();
+  inline void clear_has_wpmodified();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::std::string* wp_user_;
-  ::std::string* wp_password_;
+  ::std::string* wpuser_;
+  ::std::string* wppassword_;
   ::google::protobuf::int32 clientnumber_;
-  ::google::protobuf::int32 wp_userid_;
-  ::std::string* wp_server_url_;
-  ::google::protobuf::int32 wp_client_id_;
-  ::google::protobuf::int32 wp_client_mediaid_;
+  ::google::protobuf::int32 wpuserid_;
+  ::std::string* wpserverurl_;
+  ::google::protobuf::int32 wpclientid_;
+  ::google::protobuf::int32 wpclientmediaid_;
   ::std::string* pfobjectid_;
   ::std::string* username_;
   ::std::string* email_;
-  ::std::string* first_name_;
-  ::std::string* last_name_;
+  ::std::string* firstname_;
+  ::std::string* lastname_;
   ::std::string* location_;
   ::std::string* uiidinstallation_;
-  ::google::protobuf::int32 service_type_;
+  ::std::string* wpslug_;
+  ::std::string* wplink_;
+  ::std::string* wpapilink_;
+  ::google::protobuf::int32 servicetype_;
+  ::google::protobuf::int32 wpparent_;
+  ::std::string* wpfeaturedimage_;
+  ::std::string* wptype_;
+  ::std::string* wpmodified_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -2404,6 +2844,7 @@ class Message : public ::google::protobuf::Message {
 
   // nested types ----------------------------------------------------
 
+  typedef Message_MotionDevice MotionDevice;
   typedef Message_MotionUser MotionUser;
   typedef Message_MotionCamera MotionCamera;
   typedef Message_MotionTrack MotionTrack;
@@ -2601,84 +3042,22 @@ class Message : public ::google::protobuf::Message {
   inline ::motion::Message_ActionType type() const;
   inline void set_type(::motion::Message_ActionType value);
 
-  // optional string time = 3;
-  inline bool has_time() const;
-  inline void clear_time();
-  static const int kTimeFieldNumber = 3;
-  inline const ::std::string& time() const;
-  inline void set_time(const ::std::string& value);
-  inline void set_time(const char* value);
-  inline void set_time(const char* value, size_t size);
-  inline ::std::string* mutable_time();
-  inline ::std::string* release_time();
-  inline void set_allocated_time(::std::string* time);
+  // repeated .motion.Message.MotionUser motionuser = 3;
+  inline int motionuser_size() const;
+  inline void clear_motionuser();
+  static const int kMotionuserFieldNumber = 3;
+  inline const ::motion::Message_MotionUser& motionuser(int index) const;
+  inline ::motion::Message_MotionUser* mutable_motionuser(int index);
+  inline ::motion::Message_MotionUser* add_motionuser();
+  inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionUser >&
+      motionuser() const;
+  inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionUser >*
+      mutable_motionuser();
 
-  // optional bytes data = 4;
-  inline bool has_data() const;
-  inline void clear_data();
-  static const int kDataFieldNumber = 4;
-  inline const ::std::string& data() const;
-  inline void set_data(const ::std::string& value);
-  inline void set_data(const char* value);
-  inline void set_data(const void* value, size_t size);
-  inline ::std::string* mutable_data();
-  inline ::std::string* release_data();
-  inline void set_allocated_data(::std::string* data);
-
-  // optional int32 data_amount = 5;
-  inline bool has_data_amount() const;
-  inline void clear_data_amount();
-  static const int kDataAmountFieldNumber = 5;
-  inline ::google::protobuf::int32 data_amount() const;
-  inline void set_data_amount(::google::protobuf::int32 value);
-
-  // optional int32 data_total = 6;
-  inline bool has_data_total() const;
-  inline void clear_data_total();
-  static const int kDataTotalFieldNumber = 6;
-  inline ::google::protobuf::int32 data_total() const;
-  inline void set_data_total(::google::protobuf::int32 value);
-
-  // optional string serverip = 7;
-  inline bool has_serverip() const;
-  inline void clear_serverip();
-  static const int kServeripFieldNumber = 7;
-  inline const ::std::string& serverip() const;
-  inline void set_serverip(const ::std::string& value);
-  inline void set_serverip(const char* value);
-  inline void set_serverip(const char* value, size_t size);
-  inline ::std::string* mutable_serverip();
-  inline ::std::string* release_serverip();
-  inline void set_allocated_serverip(::std::string* serverip);
-
-  // optional string clientip = 8;
-  inline bool has_clientip() const;
-  inline void clear_clientip();
-  static const int kClientipFieldNumber = 8;
-  inline const ::std::string& clientip() const;
-  inline void set_clientip(const ::std::string& value);
-  inline void set_clientip(const char* value);
-  inline void set_clientip(const char* value, size_t size);
-  inline ::std::string* mutable_clientip();
-  inline ::std::string* release_clientip();
-  inline void set_allocated_clientip(::std::string* clientip);
-
-  // optional string devicestarttime = 9;
-  inline bool has_devicestarttime() const;
-  inline void clear_devicestarttime();
-  static const int kDevicestarttimeFieldNumber = 9;
-  inline const ::std::string& devicestarttime() const;
-  inline void set_devicestarttime(const ::std::string& value);
-  inline void set_devicestarttime(const char* value);
-  inline void set_devicestarttime(const char* value, size_t size);
-  inline ::std::string* mutable_devicestarttime();
-  inline ::std::string* release_devicestarttime();
-  inline void set_allocated_devicestarttime(::std::string* devicestarttime);
-
-  // repeated .motion.Message.MotionCamera motioncamera = 10;
+  // repeated .motion.Message.MotionCamera motioncamera = 4;
   inline int motioncamera_size() const;
   inline void clear_motioncamera();
-  static const int kMotioncameraFieldNumber = 10;
+  static const int kMotioncameraFieldNumber = 4;
   inline const ::motion::Message_MotionCamera& motioncamera(int index) const;
   inline ::motion::Message_MotionCamera* mutable_motioncamera(int index);
   inline ::motion::Message_MotionCamera* add_motioncamera();
@@ -2687,10 +3066,96 @@ class Message : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera >*
       mutable_motioncamera();
 
-  // optional string currmonth = 11;
+  // repeated .motion.Message.MotionDevice motiondevice = 5;
+  inline int motiondevice_size() const;
+  inline void clear_motiondevice();
+  static const int kMotiondeviceFieldNumber = 5;
+  inline const ::motion::Message_MotionDevice& motiondevice(int index) const;
+  inline ::motion::Message_MotionDevice* mutable_motiondevice(int index);
+  inline ::motion::Message_MotionDevice* add_motiondevice();
+  inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionDevice >&
+      motiondevice() const;
+  inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionDevice >*
+      mutable_motiondevice();
+
+  // optional string time = 6;
+  inline bool has_time() const;
+  inline void clear_time();
+  static const int kTimeFieldNumber = 6;
+  inline const ::std::string& time() const;
+  inline void set_time(const ::std::string& value);
+  inline void set_time(const char* value);
+  inline void set_time(const char* value, size_t size);
+  inline ::std::string* mutable_time();
+  inline ::std::string* release_time();
+  inline void set_allocated_time(::std::string* time);
+
+  // optional bytes datafile = 7;
+  inline bool has_datafile() const;
+  inline void clear_datafile();
+  static const int kDatafileFieldNumber = 7;
+  inline const ::std::string& datafile() const;
+  inline void set_datafile(const ::std::string& value);
+  inline void set_datafile(const char* value);
+  inline void set_datafile(const void* value, size_t size);
+  inline ::std::string* mutable_datafile();
+  inline ::std::string* release_datafile();
+  inline void set_allocated_datafile(::std::string* datafile);
+
+  // optional int32 dataamount = 8;
+  inline bool has_dataamount() const;
+  inline void clear_dataamount();
+  static const int kDataamountFieldNumber = 8;
+  inline ::google::protobuf::int32 dataamount() const;
+  inline void set_dataamount(::google::protobuf::int32 value);
+
+  // optional int32 datatotal = 9;
+  inline bool has_datatotal() const;
+  inline void clear_datatotal();
+  static const int kDatatotalFieldNumber = 9;
+  inline ::google::protobuf::int32 datatotal() const;
+  inline void set_datatotal(::google::protobuf::int32 value);
+
+  // optional string serverip = 10;
+  inline bool has_serverip() const;
+  inline void clear_serverip();
+  static const int kServeripFieldNumber = 10;
+  inline const ::std::string& serverip() const;
+  inline void set_serverip(const ::std::string& value);
+  inline void set_serverip(const char* value);
+  inline void set_serverip(const char* value, size_t size);
+  inline ::std::string* mutable_serverip();
+  inline ::std::string* release_serverip();
+  inline void set_allocated_serverip(::std::string* serverip);
+
+  // optional string clientip = 11;
+  inline bool has_clientip() const;
+  inline void clear_clientip();
+  static const int kClientipFieldNumber = 11;
+  inline const ::std::string& clientip() const;
+  inline void set_clientip(const ::std::string& value);
+  inline void set_clientip(const char* value);
+  inline void set_clientip(const char* value, size_t size);
+  inline ::std::string* mutable_clientip();
+  inline ::std::string* release_clientip();
+  inline void set_allocated_clientip(::std::string* clientip);
+
+  // optional string devicestarttime = 12;
+  inline bool has_devicestarttime() const;
+  inline void clear_devicestarttime();
+  static const int kDevicestarttimeFieldNumber = 12;
+  inline const ::std::string& devicestarttime() const;
+  inline void set_devicestarttime(const ::std::string& value);
+  inline void set_devicestarttime(const char* value);
+  inline void set_devicestarttime(const char* value, size_t size);
+  inline ::std::string* mutable_devicestarttime();
+  inline ::std::string* release_devicestarttime();
+  inline void set_allocated_devicestarttime(::std::string* devicestarttime);
+
+  // optional string currmonth = 13;
   inline bool has_currmonth() const;
   inline void clear_currmonth();
-  static const int kCurrmonthFieldNumber = 11;
+  static const int kCurrmonthFieldNumber = 13;
   inline const ::std::string& currmonth() const;
   inline void set_currmonth(const ::std::string& value);
   inline void set_currmonth(const char* value);
@@ -2699,10 +3164,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_currmonth();
   inline void set_allocated_currmonth(::std::string* currmonth);
 
-  // optional string currday = 12;
+  // optional string currday = 14;
   inline bool has_currday() const;
   inline void clear_currday();
-  static const int kCurrdayFieldNumber = 12;
+  static const int kCurrdayFieldNumber = 14;
   inline const ::std::string& currday() const;
   inline void set_currday(const ::std::string& value);
   inline void set_currday(const char* value);
@@ -2711,10 +3176,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_currday();
   inline void set_allocated_currday(::std::string* currday);
 
-  // optional string currdaytitle = 13;
+  // optional string currdaytitle = 15;
   inline bool has_currdaytitle() const;
   inline void clear_currdaytitle();
-  static const int kCurrdaytitleFieldNumber = 13;
+  static const int kCurrdaytitleFieldNumber = 15;
   inline const ::std::string& currdaytitle() const;
   inline void set_currdaytitle(const ::std::string& value);
   inline void set_currdaytitle(const char* value);
@@ -2723,24 +3188,24 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_currdaytitle();
   inline void set_allocated_currdaytitle(::std::string* currdaytitle);
 
-  // optional int32 currcam = 14;
+  // optional int32 currcam = 16;
   inline bool has_currcam() const;
   inline void clear_currcam();
-  static const int kCurrcamFieldNumber = 14;
+  static const int kCurrcamFieldNumber = 16;
   inline ::google::protobuf::int32 currcam() const;
   inline void set_currcam(::google::protobuf::int32 value);
 
-  // optional int32 packagesize = 15;
+  // optional int32 packagesize = 17;
   inline bool has_packagesize() const;
   inline void clear_packagesize();
-  static const int kPackagesizeFieldNumber = 15;
+  static const int kPackagesizeFieldNumber = 17;
   inline ::google::protobuf::int32 packagesize() const;
   inline void set_packagesize(::google::protobuf::int32 value);
 
-  // optional string imagefilepath = 16;
+  // optional string imagefilepath = 18;
   inline bool has_imagefilepath() const;
   inline void clear_imagefilepath();
-  static const int kImagefilepathFieldNumber = 16;
+  static const int kImagefilepathFieldNumber = 18;
   inline const ::std::string& imagefilepath() const;
   inline void set_imagefilepath(const ::std::string& value);
   inline void set_imagefilepath(const char* value);
@@ -2749,10 +3214,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_imagefilepath();
   inline void set_allocated_imagefilepath(::std::string* imagefilepath);
 
-  // optional string videofilepath = 17;
+  // optional string videofilepath = 19;
   inline bool has_videofilepath() const;
   inline void clear_videofilepath();
-  static const int kVideofilepathFieldNumber = 17;
+  static const int kVideofilepathFieldNumber = 19;
   inline const ::std::string& videofilepath() const;
   inline void set_videofilepath(const ::std::string& value);
   inline void set_videofilepath(const char* value);
@@ -2761,10 +3226,10 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_videofilepath();
   inline void set_allocated_videofilepath(::std::string* videofilepath);
 
-  // optional string recname = 18;
+  // optional string recname = 20;
   inline bool has_recname() const;
   inline void clear_recname();
-  static const int kRecnameFieldNumber = 18;
+  static const int kRecnameFieldNumber = 20;
   inline const ::std::string& recname() const;
   inline void set_recname(const ::std::string& value);
   inline void set_recname(const char* value);
@@ -2773,24 +3238,19 @@ class Message : public ::google::protobuf::Message {
   inline ::std::string* release_recname();
   inline void set_allocated_recname(::std::string* recname);
 
-  // optional int32 activecamnum = 19;
+  // optional int32 activecamnum = 21;
   inline bool has_activecamnum() const;
   inline void clear_activecamnum();
-  static const int kActivecamnumFieldNumber = 19;
+  static const int kActivecamnumFieldNumber = 21;
   inline ::google::protobuf::int32 activecamnum() const;
   inline void set_activecamnum(::google::protobuf::int32 value);
 
-  // repeated .motion.Message.MotionUser motionuser = 20;
-  inline int motionuser_size() const;
-  inline void clear_motionuser();
-  static const int kMotionuserFieldNumber = 20;
-  inline const ::motion::Message_MotionUser& motionuser(int index) const;
-  inline ::motion::Message_MotionUser* mutable_motionuser(int index);
-  inline ::motion::Message_MotionUser* add_motionuser();
-  inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionUser >&
-      motionuser() const;
-  inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionUser >*
-      mutable_motionuser();
+  // optional bool includethubmnails = 22;
+  inline bool has_includethubmnails() const;
+  inline void clear_includethubmnails();
+  static const int kIncludethubmnailsFieldNumber = 22;
+  inline bool includethubmnails() const;
+  inline void set_includethubmnails(bool value);
 
   // @@protoc_insertion_point(class_scope:motion.Message)
  private:
@@ -2800,12 +3260,12 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_type();
   inline void set_has_time();
   inline void clear_has_time();
-  inline void set_has_data();
-  inline void clear_has_data();
-  inline void set_has_data_amount();
-  inline void clear_has_data_amount();
-  inline void set_has_data_total();
-  inline void clear_has_data_total();
+  inline void set_has_datafile();
+  inline void clear_has_datafile();
+  inline void set_has_dataamount();
+  inline void clear_has_dataamount();
+  inline void set_has_datatotal();
+  inline void clear_has_datatotal();
   inline void set_has_serverip();
   inline void clear_has_serverip();
   inline void set_has_clientip();
@@ -2830,6 +3290,8 @@ class Message : public ::google::protobuf::Message {
   inline void clear_has_recname();
   inline void set_has_activecamnum();
   inline void clear_has_activecamnum();
+  inline void set_has_includethubmnails();
+  inline void clear_has_includethubmnails();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2837,14 +3299,16 @@ class Message : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::google::protobuf::int32 activecam_;
   int type_;
+  ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionUser > motionuser_;
+  ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera > motioncamera_;
+  ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionDevice > motiondevice_;
   ::std::string* time_;
-  ::std::string* data_;
-  ::google::protobuf::int32 data_amount_;
-  ::google::protobuf::int32 data_total_;
+  ::std::string* datafile_;
+  ::google::protobuf::int32 dataamount_;
+  ::google::protobuf::int32 datatotal_;
   ::std::string* serverip_;
   ::std::string* clientip_;
   ::std::string* devicestarttime_;
-  ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera > motioncamera_;
   ::std::string* currmonth_;
   ::std::string* currday_;
   ::std::string* currdaytitle_;
@@ -2853,8 +3317,8 @@ class Message : public ::google::protobuf::Message {
   ::std::string* imagefilepath_;
   ::std::string* videofilepath_;
   ::std::string* recname_;
-  ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionUser > motionuser_;
   ::google::protobuf::int32 activecamnum_;
+  bool includethubmnails_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -2866,6 +3330,1218 @@ class Message : public ::google::protobuf::Message {
 
 
 // ===================================================================
+
+// Message_MotionDevice
+
+// optional string ipnumber = 1;
+inline bool Message_MotionDevice::has_ipnumber() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Message_MotionDevice::set_has_ipnumber() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Message_MotionDevice::clear_has_ipnumber() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Message_MotionDevice::clear_ipnumber() {
+  if (ipnumber_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    ipnumber_->clear();
+  }
+  clear_has_ipnumber();
+}
+inline const ::std::string& Message_MotionDevice::ipnumber() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.ipnumber)
+  return *ipnumber_;
+}
+inline void Message_MotionDevice::set_ipnumber(const ::std::string& value) {
+  set_has_ipnumber();
+  if (ipnumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    ipnumber_ = new ::std::string;
+  }
+  ipnumber_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.ipnumber)
+}
+inline void Message_MotionDevice::set_ipnumber(const char* value) {
+  set_has_ipnumber();
+  if (ipnumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    ipnumber_ = new ::std::string;
+  }
+  ipnumber_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.ipnumber)
+}
+inline void Message_MotionDevice::set_ipnumber(const char* value, size_t size) {
+  set_has_ipnumber();
+  if (ipnumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    ipnumber_ = new ::std::string;
+  }
+  ipnumber_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.ipnumber)
+}
+inline ::std::string* Message_MotionDevice::mutable_ipnumber() {
+  set_has_ipnumber();
+  if (ipnumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    ipnumber_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.ipnumber)
+  return ipnumber_;
+}
+inline ::std::string* Message_MotionDevice::release_ipnumber() {
+  clear_has_ipnumber();
+  if (ipnumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = ipnumber_;
+    ipnumber_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_ipnumber(::std::string* ipnumber) {
+  if (ipnumber_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete ipnumber_;
+  }
+  if (ipnumber) {
+    set_has_ipnumber();
+    ipnumber_ = ipnumber;
+  } else {
+    clear_has_ipnumber();
+    ipnumber_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.ipnumber)
+}
+
+// optional string ippublic = 2;
+inline bool Message_MotionDevice::has_ippublic() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Message_MotionDevice::set_has_ippublic() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Message_MotionDevice::clear_has_ippublic() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void Message_MotionDevice::clear_ippublic() {
+  if (ippublic_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    ippublic_->clear();
+  }
+  clear_has_ippublic();
+}
+inline const ::std::string& Message_MotionDevice::ippublic() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.ippublic)
+  return *ippublic_;
+}
+inline void Message_MotionDevice::set_ippublic(const ::std::string& value) {
+  set_has_ippublic();
+  if (ippublic_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    ippublic_ = new ::std::string;
+  }
+  ippublic_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.ippublic)
+}
+inline void Message_MotionDevice::set_ippublic(const char* value) {
+  set_has_ippublic();
+  if (ippublic_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    ippublic_ = new ::std::string;
+  }
+  ippublic_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.ippublic)
+}
+inline void Message_MotionDevice::set_ippublic(const char* value, size_t size) {
+  set_has_ippublic();
+  if (ippublic_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    ippublic_ = new ::std::string;
+  }
+  ippublic_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.ippublic)
+}
+inline ::std::string* Message_MotionDevice::mutable_ippublic() {
+  set_has_ippublic();
+  if (ippublic_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    ippublic_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.ippublic)
+  return ippublic_;
+}
+inline ::std::string* Message_MotionDevice::release_ippublic() {
+  clear_has_ippublic();
+  if (ippublic_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = ippublic_;
+    ippublic_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_ippublic(::std::string* ippublic) {
+  if (ippublic_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete ippublic_;
+  }
+  if (ippublic) {
+    set_has_ippublic();
+    ippublic_ = ippublic;
+  } else {
+    clear_has_ippublic();
+    ippublic_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.ippublic)
+}
+
+// optional string macaddress = 3;
+inline bool Message_MotionDevice::has_macaddress() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Message_MotionDevice::set_has_macaddress() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Message_MotionDevice::clear_has_macaddress() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void Message_MotionDevice::clear_macaddress() {
+  if (macaddress_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    macaddress_->clear();
+  }
+  clear_has_macaddress();
+}
+inline const ::std::string& Message_MotionDevice::macaddress() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.macaddress)
+  return *macaddress_;
+}
+inline void Message_MotionDevice::set_macaddress(const ::std::string& value) {
+  set_has_macaddress();
+  if (macaddress_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    macaddress_ = new ::std::string;
+  }
+  macaddress_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.macaddress)
+}
+inline void Message_MotionDevice::set_macaddress(const char* value) {
+  set_has_macaddress();
+  if (macaddress_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    macaddress_ = new ::std::string;
+  }
+  macaddress_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.macaddress)
+}
+inline void Message_MotionDevice::set_macaddress(const char* value, size_t size) {
+  set_has_macaddress();
+  if (macaddress_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    macaddress_ = new ::std::string;
+  }
+  macaddress_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.macaddress)
+}
+inline ::std::string* Message_MotionDevice::mutable_macaddress() {
+  set_has_macaddress();
+  if (macaddress_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    macaddress_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.macaddress)
+  return macaddress_;
+}
+inline ::std::string* Message_MotionDevice::release_macaddress() {
+  clear_has_macaddress();
+  if (macaddress_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = macaddress_;
+    macaddress_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_macaddress(::std::string* macaddress) {
+  if (macaddress_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete macaddress_;
+  }
+  if (macaddress) {
+    set_has_macaddress();
+    macaddress_ = macaddress;
+  } else {
+    clear_has_macaddress();
+    macaddress_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.macaddress)
+}
+
+// optional string hostname = 4;
+inline bool Message_MotionDevice::has_hostname() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void Message_MotionDevice::set_has_hostname() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void Message_MotionDevice::clear_has_hostname() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void Message_MotionDevice::clear_hostname() {
+  if (hostname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    hostname_->clear();
+  }
+  clear_has_hostname();
+}
+inline const ::std::string& Message_MotionDevice::hostname() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.hostname)
+  return *hostname_;
+}
+inline void Message_MotionDevice::set_hostname(const ::std::string& value) {
+  set_has_hostname();
+  if (hostname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    hostname_ = new ::std::string;
+  }
+  hostname_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.hostname)
+}
+inline void Message_MotionDevice::set_hostname(const char* value) {
+  set_has_hostname();
+  if (hostname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    hostname_ = new ::std::string;
+  }
+  hostname_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.hostname)
+}
+inline void Message_MotionDevice::set_hostname(const char* value, size_t size) {
+  set_has_hostname();
+  if (hostname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    hostname_ = new ::std::string;
+  }
+  hostname_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.hostname)
+}
+inline ::std::string* Message_MotionDevice::mutable_hostname() {
+  set_has_hostname();
+  if (hostname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    hostname_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.hostname)
+  return hostname_;
+}
+inline ::std::string* Message_MotionDevice::release_hostname() {
+  clear_has_hostname();
+  if (hostname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = hostname_;
+    hostname_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_hostname(::std::string* hostname) {
+  if (hostname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete hostname_;
+  }
+  if (hostname) {
+    set_has_hostname();
+    hostname_ = hostname;
+  } else {
+    clear_has_hostname();
+    hostname_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.hostname)
+}
+
+// optional string city = 5;
+inline bool Message_MotionDevice::has_city() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void Message_MotionDevice::set_has_city() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void Message_MotionDevice::clear_has_city() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void Message_MotionDevice::clear_city() {
+  if (city_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    city_->clear();
+  }
+  clear_has_city();
+}
+inline const ::std::string& Message_MotionDevice::city() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.city)
+  return *city_;
+}
+inline void Message_MotionDevice::set_city(const ::std::string& value) {
+  set_has_city();
+  if (city_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    city_ = new ::std::string;
+  }
+  city_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.city)
+}
+inline void Message_MotionDevice::set_city(const char* value) {
+  set_has_city();
+  if (city_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    city_ = new ::std::string;
+  }
+  city_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.city)
+}
+inline void Message_MotionDevice::set_city(const char* value, size_t size) {
+  set_has_city();
+  if (city_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    city_ = new ::std::string;
+  }
+  city_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.city)
+}
+inline ::std::string* Message_MotionDevice::mutable_city() {
+  set_has_city();
+  if (city_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    city_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.city)
+  return city_;
+}
+inline ::std::string* Message_MotionDevice::release_city() {
+  clear_has_city();
+  if (city_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = city_;
+    city_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_city(::std::string* city) {
+  if (city_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete city_;
+  }
+  if (city) {
+    set_has_city();
+    city_ = city;
+  } else {
+    clear_has_city();
+    city_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.city)
+}
+
+// optional string country = 6;
+inline bool Message_MotionDevice::has_country() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void Message_MotionDevice::set_has_country() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void Message_MotionDevice::clear_has_country() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void Message_MotionDevice::clear_country() {
+  if (country_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    country_->clear();
+  }
+  clear_has_country();
+}
+inline const ::std::string& Message_MotionDevice::country() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.country)
+  return *country_;
+}
+inline void Message_MotionDevice::set_country(const ::std::string& value) {
+  set_has_country();
+  if (country_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    country_ = new ::std::string;
+  }
+  country_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.country)
+}
+inline void Message_MotionDevice::set_country(const char* value) {
+  set_has_country();
+  if (country_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    country_ = new ::std::string;
+  }
+  country_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.country)
+}
+inline void Message_MotionDevice::set_country(const char* value, size_t size) {
+  set_has_country();
+  if (country_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    country_ = new ::std::string;
+  }
+  country_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.country)
+}
+inline ::std::string* Message_MotionDevice::mutable_country() {
+  set_has_country();
+  if (country_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    country_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.country)
+  return country_;
+}
+inline ::std::string* Message_MotionDevice::release_country() {
+  clear_has_country();
+  if (country_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = country_;
+    country_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_country(::std::string* country) {
+  if (country_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete country_;
+  }
+  if (country) {
+    set_has_country();
+    country_ = country;
+  } else {
+    clear_has_country();
+    country_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.country)
+}
+
+// optional string location = 7;
+inline bool Message_MotionDevice::has_location() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void Message_MotionDevice::set_has_location() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void Message_MotionDevice::clear_has_location() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void Message_MotionDevice::clear_location() {
+  if (location_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    location_->clear();
+  }
+  clear_has_location();
+}
+inline const ::std::string& Message_MotionDevice::location() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.location)
+  return *location_;
+}
+inline void Message_MotionDevice::set_location(const ::std::string& value) {
+  set_has_location();
+  if (location_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    location_ = new ::std::string;
+  }
+  location_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.location)
+}
+inline void Message_MotionDevice::set_location(const char* value) {
+  set_has_location();
+  if (location_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    location_ = new ::std::string;
+  }
+  location_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.location)
+}
+inline void Message_MotionDevice::set_location(const char* value, size_t size) {
+  set_has_location();
+  if (location_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    location_ = new ::std::string;
+  }
+  location_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.location)
+}
+inline ::std::string* Message_MotionDevice::mutable_location() {
+  set_has_location();
+  if (location_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    location_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.location)
+  return location_;
+}
+inline ::std::string* Message_MotionDevice::release_location() {
+  clear_has_location();
+  if (location_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = location_;
+    location_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_location(::std::string* location) {
+  if (location_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete location_;
+  }
+  if (location) {
+    set_has_location();
+    location_ = location;
+  } else {
+    clear_has_location();
+    location_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.location)
+}
+
+// optional string network_provider = 8;
+inline bool Message_MotionDevice::has_network_provider() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void Message_MotionDevice::set_has_network_provider() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void Message_MotionDevice::clear_has_network_provider() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void Message_MotionDevice::clear_network_provider() {
+  if (network_provider_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    network_provider_->clear();
+  }
+  clear_has_network_provider();
+}
+inline const ::std::string& Message_MotionDevice::network_provider() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.network_provider)
+  return *network_provider_;
+}
+inline void Message_MotionDevice::set_network_provider(const ::std::string& value) {
+  set_has_network_provider();
+  if (network_provider_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    network_provider_ = new ::std::string;
+  }
+  network_provider_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.network_provider)
+}
+inline void Message_MotionDevice::set_network_provider(const char* value) {
+  set_has_network_provider();
+  if (network_provider_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    network_provider_ = new ::std::string;
+  }
+  network_provider_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.network_provider)
+}
+inline void Message_MotionDevice::set_network_provider(const char* value, size_t size) {
+  set_has_network_provider();
+  if (network_provider_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    network_provider_ = new ::std::string;
+  }
+  network_provider_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.network_provider)
+}
+inline ::std::string* Message_MotionDevice::mutable_network_provider() {
+  set_has_network_provider();
+  if (network_provider_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    network_provider_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.network_provider)
+  return network_provider_;
+}
+inline ::std::string* Message_MotionDevice::release_network_provider() {
+  clear_has_network_provider();
+  if (network_provider_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = network_provider_;
+    network_provider_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_network_provider(::std::string* network_provider) {
+  if (network_provider_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete network_provider_;
+  }
+  if (network_provider) {
+    set_has_network_provider();
+    network_provider_ = network_provider;
+  } else {
+    clear_has_network_provider();
+    network_provider_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.network_provider)
+}
+
+// optional string uptime = 9;
+inline bool Message_MotionDevice::has_uptime() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void Message_MotionDevice::set_has_uptime() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void Message_MotionDevice::clear_has_uptime() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void Message_MotionDevice::clear_uptime() {
+  if (uptime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    uptime_->clear();
+  }
+  clear_has_uptime();
+}
+inline const ::std::string& Message_MotionDevice::uptime() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.uptime)
+  return *uptime_;
+}
+inline void Message_MotionDevice::set_uptime(const ::std::string& value) {
+  set_has_uptime();
+  if (uptime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    uptime_ = new ::std::string;
+  }
+  uptime_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.uptime)
+}
+inline void Message_MotionDevice::set_uptime(const char* value) {
+  set_has_uptime();
+  if (uptime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    uptime_ = new ::std::string;
+  }
+  uptime_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.uptime)
+}
+inline void Message_MotionDevice::set_uptime(const char* value, size_t size) {
+  set_has_uptime();
+  if (uptime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    uptime_ = new ::std::string;
+  }
+  uptime_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.uptime)
+}
+inline ::std::string* Message_MotionDevice::mutable_uptime() {
+  set_has_uptime();
+  if (uptime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    uptime_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.uptime)
+  return uptime_;
+}
+inline ::std::string* Message_MotionDevice::release_uptime() {
+  clear_has_uptime();
+  if (uptime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = uptime_;
+    uptime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_uptime(::std::string* uptime) {
+  if (uptime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete uptime_;
+  }
+  if (uptime) {
+    set_has_uptime();
+    uptime_ = uptime;
+  } else {
+    clear_has_uptime();
+    uptime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.uptime)
+}
+
+// optional string starttime = 10;
+inline bool Message_MotionDevice::has_starttime() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void Message_MotionDevice::set_has_starttime() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void Message_MotionDevice::clear_has_starttime() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void Message_MotionDevice::clear_starttime() {
+  if (starttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    starttime_->clear();
+  }
+  clear_has_starttime();
+}
+inline const ::std::string& Message_MotionDevice::starttime() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.starttime)
+  return *starttime_;
+}
+inline void Message_MotionDevice::set_starttime(const ::std::string& value) {
+  set_has_starttime();
+  if (starttime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    starttime_ = new ::std::string;
+  }
+  starttime_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.starttime)
+}
+inline void Message_MotionDevice::set_starttime(const char* value) {
+  set_has_starttime();
+  if (starttime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    starttime_ = new ::std::string;
+  }
+  starttime_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.starttime)
+}
+inline void Message_MotionDevice::set_starttime(const char* value, size_t size) {
+  set_has_starttime();
+  if (starttime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    starttime_ = new ::std::string;
+  }
+  starttime_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.starttime)
+}
+inline ::std::string* Message_MotionDevice::mutable_starttime() {
+  set_has_starttime();
+  if (starttime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    starttime_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.starttime)
+  return starttime_;
+}
+inline ::std::string* Message_MotionDevice::release_starttime() {
+  clear_has_starttime();
+  if (starttime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = starttime_;
+    starttime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_starttime(::std::string* starttime) {
+  if (starttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete starttime_;
+  }
+  if (starttime) {
+    set_has_starttime();
+    starttime_ = starttime;
+  } else {
+    clear_has_starttime();
+    starttime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.starttime)
+}
+
+// optional int32 db_local = 11;
+inline bool Message_MotionDevice::has_db_local() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void Message_MotionDevice::set_has_db_local() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void Message_MotionDevice::clear_has_db_local() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void Message_MotionDevice::clear_db_local() {
+  db_local_ = 0;
+  clear_has_db_local();
+}
+inline ::google::protobuf::int32 Message_MotionDevice::db_local() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.db_local)
+  return db_local_;
+}
+inline void Message_MotionDevice::set_db_local(::google::protobuf::int32 value) {
+  set_has_db_local();
+  db_local_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.db_local)
+}
+
+// optional string model = 12;
+inline bool Message_MotionDevice::has_model() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void Message_MotionDevice::set_has_model() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void Message_MotionDevice::clear_has_model() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void Message_MotionDevice::clear_model() {
+  if (model_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    model_->clear();
+  }
+  clear_has_model();
+}
+inline const ::std::string& Message_MotionDevice::model() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.model)
+  return *model_;
+}
+inline void Message_MotionDevice::set_model(const ::std::string& value) {
+  set_has_model();
+  if (model_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    model_ = new ::std::string;
+  }
+  model_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.model)
+}
+inline void Message_MotionDevice::set_model(const char* value) {
+  set_has_model();
+  if (model_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    model_ = new ::std::string;
+  }
+  model_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.model)
+}
+inline void Message_MotionDevice::set_model(const char* value, size_t size) {
+  set_has_model();
+  if (model_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    model_ = new ::std::string;
+  }
+  model_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.model)
+}
+inline ::std::string* Message_MotionDevice::mutable_model() {
+  set_has_model();
+  if (model_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    model_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.model)
+  return model_;
+}
+inline ::std::string* Message_MotionDevice::release_model() {
+  clear_has_model();
+  if (model_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = model_;
+    model_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_model(::std::string* model) {
+  if (model_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete model_;
+  }
+  if (model) {
+    set_has_model();
+    model_ = model;
+  } else {
+    clear_has_model();
+    model_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.model)
+}
+
+// optional string hardware = 13;
+inline bool Message_MotionDevice::has_hardware() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void Message_MotionDevice::set_has_hardware() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void Message_MotionDevice::clear_has_hardware() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void Message_MotionDevice::clear_hardware() {
+  if (hardware_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    hardware_->clear();
+  }
+  clear_has_hardware();
+}
+inline const ::std::string& Message_MotionDevice::hardware() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.hardware)
+  return *hardware_;
+}
+inline void Message_MotionDevice::set_hardware(const ::std::string& value) {
+  set_has_hardware();
+  if (hardware_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    hardware_ = new ::std::string;
+  }
+  hardware_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.hardware)
+}
+inline void Message_MotionDevice::set_hardware(const char* value) {
+  set_has_hardware();
+  if (hardware_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    hardware_ = new ::std::string;
+  }
+  hardware_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.hardware)
+}
+inline void Message_MotionDevice::set_hardware(const char* value, size_t size) {
+  set_has_hardware();
+  if (hardware_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    hardware_ = new ::std::string;
+  }
+  hardware_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.hardware)
+}
+inline ::std::string* Message_MotionDevice::mutable_hardware() {
+  set_has_hardware();
+  if (hardware_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    hardware_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.hardware)
+  return hardware_;
+}
+inline ::std::string* Message_MotionDevice::release_hardware() {
+  clear_has_hardware();
+  if (hardware_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = hardware_;
+    hardware_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_hardware(::std::string* hardware) {
+  if (hardware_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete hardware_;
+  }
+  if (hardware) {
+    set_has_hardware();
+    hardware_ = hardware;
+  } else {
+    clear_has_hardware();
+    hardware_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.hardware)
+}
+
+// optional string serial = 14;
+inline bool Message_MotionDevice::has_serial() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void Message_MotionDevice::set_has_serial() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void Message_MotionDevice::clear_has_serial() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void Message_MotionDevice::clear_serial() {
+  if (serial_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    serial_->clear();
+  }
+  clear_has_serial();
+}
+inline const ::std::string& Message_MotionDevice::serial() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.serial)
+  return *serial_;
+}
+inline void Message_MotionDevice::set_serial(const ::std::string& value) {
+  set_has_serial();
+  if (serial_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    serial_ = new ::std::string;
+  }
+  serial_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.serial)
+}
+inline void Message_MotionDevice::set_serial(const char* value) {
+  set_has_serial();
+  if (serial_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    serial_ = new ::std::string;
+  }
+  serial_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.serial)
+}
+inline void Message_MotionDevice::set_serial(const char* value, size_t size) {
+  set_has_serial();
+  if (serial_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    serial_ = new ::std::string;
+  }
+  serial_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.serial)
+}
+inline ::std::string* Message_MotionDevice::mutable_serial() {
+  set_has_serial();
+  if (serial_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    serial_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.serial)
+  return serial_;
+}
+inline ::std::string* Message_MotionDevice::release_serial() {
+  clear_has_serial();
+  if (serial_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = serial_;
+    serial_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_serial(::std::string* serial) {
+  if (serial_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete serial_;
+  }
+  if (serial) {
+    set_has_serial();
+    serial_ = serial;
+  } else {
+    clear_has_serial();
+    serial_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.serial)
+}
+
+// optional string revision = 15;
+inline bool Message_MotionDevice::has_revision() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void Message_MotionDevice::set_has_revision() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void Message_MotionDevice::clear_has_revision() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void Message_MotionDevice::clear_revision() {
+  if (revision_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    revision_->clear();
+  }
+  clear_has_revision();
+}
+inline const ::std::string& Message_MotionDevice::revision() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.revision)
+  return *revision_;
+}
+inline void Message_MotionDevice::set_revision(const ::std::string& value) {
+  set_has_revision();
+  if (revision_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    revision_ = new ::std::string;
+  }
+  revision_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.revision)
+}
+inline void Message_MotionDevice::set_revision(const char* value) {
+  set_has_revision();
+  if (revision_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    revision_ = new ::std::string;
+  }
+  revision_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionDevice.revision)
+}
+inline void Message_MotionDevice::set_revision(const char* value, size_t size) {
+  set_has_revision();
+  if (revision_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    revision_ = new ::std::string;
+  }
+  revision_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionDevice.revision)
+}
+inline ::std::string* Message_MotionDevice::mutable_revision() {
+  set_has_revision();
+  if (revision_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    revision_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionDevice.revision)
+  return revision_;
+}
+inline ::std::string* Message_MotionDevice::release_revision() {
+  clear_has_revision();
+  if (revision_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = revision_;
+    revision_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionDevice::set_allocated_revision(::std::string* revision) {
+  if (revision_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete revision_;
+  }
+  if (revision) {
+    set_has_revision();
+    revision_ = revision;
+  } else {
+    clear_has_revision();
+    revision_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionDevice.revision)
+}
+
+// optional int32 disktotal = 16;
+inline bool Message_MotionDevice::has_disktotal() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void Message_MotionDevice::set_has_disktotal() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void Message_MotionDevice::clear_has_disktotal() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void Message_MotionDevice::clear_disktotal() {
+  disktotal_ = 0;
+  clear_has_disktotal();
+}
+inline ::google::protobuf::int32 Message_MotionDevice::disktotal() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.disktotal)
+  return disktotal_;
+}
+inline void Message_MotionDevice::set_disktotal(::google::protobuf::int32 value) {
+  set_has_disktotal();
+  disktotal_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.disktotal)
+}
+
+// optional int32 diskused = 17;
+inline bool Message_MotionDevice::has_diskused() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void Message_MotionDevice::set_has_diskused() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void Message_MotionDevice::clear_has_diskused() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void Message_MotionDevice::clear_diskused() {
+  diskused_ = 0;
+  clear_has_diskused();
+}
+inline ::google::protobuf::int32 Message_MotionDevice::diskused() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.diskused)
+  return diskused_;
+}
+inline void Message_MotionDevice::set_diskused(::google::protobuf::int32 value) {
+  set_has_diskused();
+  diskused_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.diskused)
+}
+
+// optional int32 diskavailable = 18;
+inline bool Message_MotionDevice::has_diskavailable() const {
+  return (_has_bits_[0] & 0x00020000u) != 0;
+}
+inline void Message_MotionDevice::set_has_diskavailable() {
+  _has_bits_[0] |= 0x00020000u;
+}
+inline void Message_MotionDevice::clear_has_diskavailable() {
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline void Message_MotionDevice::clear_diskavailable() {
+  diskavailable_ = 0;
+  clear_has_diskavailable();
+}
+inline ::google::protobuf::int32 Message_MotionDevice::diskavailable() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.diskavailable)
+  return diskavailable_;
+}
+inline void Message_MotionDevice::set_diskavailable(::google::protobuf::int32 value) {
+  set_has_diskavailable();
+  diskavailable_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.diskavailable)
+}
+
+// optional int32 disk_percentage_used = 19;
+inline bool Message_MotionDevice::has_disk_percentage_used() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void Message_MotionDevice::set_has_disk_percentage_used() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void Message_MotionDevice::clear_has_disk_percentage_used() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void Message_MotionDevice::clear_disk_percentage_used() {
+  disk_percentage_used_ = 0;
+  clear_has_disk_percentage_used();
+}
+inline ::google::protobuf::int32 Message_MotionDevice::disk_percentage_used() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.disk_percentage_used)
+  return disk_percentage_used_;
+}
+inline void Message_MotionDevice::set_disk_percentage_used(::google::protobuf::int32 value) {
+  set_has_disk_percentage_used();
+  disk_percentage_used_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.disk_percentage_used)
+}
+
+// optional int32 temperature = 20;
+inline bool Message_MotionDevice::has_temperature() const {
+  return (_has_bits_[0] & 0x00080000u) != 0;
+}
+inline void Message_MotionDevice::set_has_temperature() {
+  _has_bits_[0] |= 0x00080000u;
+}
+inline void Message_MotionDevice::clear_has_temperature() {
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline void Message_MotionDevice::clear_temperature() {
+  temperature_ = 0;
+  clear_has_temperature();
+}
+inline ::google::protobuf::int32 Message_MotionDevice::temperature() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.temperature)
+  return temperature_;
+}
+inline void Message_MotionDevice::set_temperature(::google::protobuf::int32 value) {
+  set_has_temperature();
+  temperature_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.temperature)
+}
+
+// -------------------------------------------------------------------
 
 // Message_MotionUser
 
@@ -2893,304 +4569,304 @@ inline void Message_MotionUser::set_clientnumber(::google::protobuf::int32 value
   // @@protoc_insertion_point(field_set:motion.Message.MotionUser.clientnumber)
 }
 
-// optional string wp_user = 2;
-inline bool Message_MotionUser::has_wp_user() const {
+// optional string wpuser = 2;
+inline bool Message_MotionUser::has_wpuser() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Message_MotionUser::set_has_wp_user() {
+inline void Message_MotionUser::set_has_wpuser() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Message_MotionUser::clear_has_wp_user() {
+inline void Message_MotionUser::clear_has_wpuser() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void Message_MotionUser::clear_wp_user() {
-  if (wp_user_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_user_->clear();
+inline void Message_MotionUser::clear_wpuser() {
+  if (wpuser_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpuser_->clear();
   }
-  clear_has_wp_user();
+  clear_has_wpuser();
 }
-inline const ::std::string& Message_MotionUser::wp_user() const {
-  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wp_user)
-  return *wp_user_;
+inline const ::std::string& Message_MotionUser::wpuser() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wpuser)
+  return *wpuser_;
 }
-inline void Message_MotionUser::set_wp_user(const ::std::string& value) {
-  set_has_wp_user();
-  if (wp_user_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_user_ = new ::std::string;
+inline void Message_MotionUser::set_wpuser(const ::std::string& value) {
+  set_has_wpuser();
+  if (wpuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpuser_ = new ::std::string;
   }
-  wp_user_->assign(value);
-  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wp_user)
+  wpuser_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wpuser)
 }
-inline void Message_MotionUser::set_wp_user(const char* value) {
-  set_has_wp_user();
-  if (wp_user_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_user_ = new ::std::string;
+inline void Message_MotionUser::set_wpuser(const char* value) {
+  set_has_wpuser();
+  if (wpuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpuser_ = new ::std::string;
   }
-  wp_user_->assign(value);
-  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wp_user)
+  wpuser_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wpuser)
 }
-inline void Message_MotionUser::set_wp_user(const char* value, size_t size) {
-  set_has_wp_user();
-  if (wp_user_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_user_ = new ::std::string;
+inline void Message_MotionUser::set_wpuser(const char* value, size_t size) {
+  set_has_wpuser();
+  if (wpuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpuser_ = new ::std::string;
   }
-  wp_user_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wp_user)
+  wpuser_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wpuser)
 }
-inline ::std::string* Message_MotionUser::mutable_wp_user() {
-  set_has_wp_user();
-  if (wp_user_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_user_ = new ::std::string;
+inline ::std::string* Message_MotionUser::mutable_wpuser() {
+  set_has_wpuser();
+  if (wpuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpuser_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wp_user)
-  return wp_user_;
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wpuser)
+  return wpuser_;
 }
-inline ::std::string* Message_MotionUser::release_wp_user() {
-  clear_has_wp_user();
-  if (wp_user_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+inline ::std::string* Message_MotionUser::release_wpuser() {
+  clear_has_wpuser();
+  if (wpuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
   } else {
-    ::std::string* temp = wp_user_;
-    wp_user_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    ::std::string* temp = wpuser_;
+    wpuser_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     return temp;
   }
 }
-inline void Message_MotionUser::set_allocated_wp_user(::std::string* wp_user) {
-  if (wp_user_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete wp_user_;
+inline void Message_MotionUser::set_allocated_wpuser(::std::string* wpuser) {
+  if (wpuser_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete wpuser_;
   }
-  if (wp_user) {
-    set_has_wp_user();
-    wp_user_ = wp_user;
+  if (wpuser) {
+    set_has_wpuser();
+    wpuser_ = wpuser;
   } else {
-    clear_has_wp_user();
-    wp_user_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    clear_has_wpuser();
+    wpuser_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wp_user)
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wpuser)
 }
 
-// optional string wp_password = 3;
-inline bool Message_MotionUser::has_wp_password() const {
+// optional string wppassword = 3;
+inline bool Message_MotionUser::has_wppassword() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void Message_MotionUser::set_has_wp_password() {
+inline void Message_MotionUser::set_has_wppassword() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void Message_MotionUser::clear_has_wp_password() {
+inline void Message_MotionUser::clear_has_wppassword() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void Message_MotionUser::clear_wp_password() {
-  if (wp_password_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_password_->clear();
+inline void Message_MotionUser::clear_wppassword() {
+  if (wppassword_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wppassword_->clear();
   }
-  clear_has_wp_password();
+  clear_has_wppassword();
 }
-inline const ::std::string& Message_MotionUser::wp_password() const {
-  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wp_password)
-  return *wp_password_;
+inline const ::std::string& Message_MotionUser::wppassword() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wppassword)
+  return *wppassword_;
 }
-inline void Message_MotionUser::set_wp_password(const ::std::string& value) {
-  set_has_wp_password();
-  if (wp_password_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_password_ = new ::std::string;
+inline void Message_MotionUser::set_wppassword(const ::std::string& value) {
+  set_has_wppassword();
+  if (wppassword_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wppassword_ = new ::std::string;
   }
-  wp_password_->assign(value);
-  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wp_password)
+  wppassword_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wppassword)
 }
-inline void Message_MotionUser::set_wp_password(const char* value) {
-  set_has_wp_password();
-  if (wp_password_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_password_ = new ::std::string;
+inline void Message_MotionUser::set_wppassword(const char* value) {
+  set_has_wppassword();
+  if (wppassword_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wppassword_ = new ::std::string;
   }
-  wp_password_->assign(value);
-  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wp_password)
+  wppassword_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wppassword)
 }
-inline void Message_MotionUser::set_wp_password(const char* value, size_t size) {
-  set_has_wp_password();
-  if (wp_password_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_password_ = new ::std::string;
+inline void Message_MotionUser::set_wppassword(const char* value, size_t size) {
+  set_has_wppassword();
+  if (wppassword_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wppassword_ = new ::std::string;
   }
-  wp_password_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wp_password)
+  wppassword_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wppassword)
 }
-inline ::std::string* Message_MotionUser::mutable_wp_password() {
-  set_has_wp_password();
-  if (wp_password_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_password_ = new ::std::string;
+inline ::std::string* Message_MotionUser::mutable_wppassword() {
+  set_has_wppassword();
+  if (wppassword_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wppassword_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wp_password)
-  return wp_password_;
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wppassword)
+  return wppassword_;
 }
-inline ::std::string* Message_MotionUser::release_wp_password() {
-  clear_has_wp_password();
-  if (wp_password_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+inline ::std::string* Message_MotionUser::release_wppassword() {
+  clear_has_wppassword();
+  if (wppassword_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
   } else {
-    ::std::string* temp = wp_password_;
-    wp_password_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    ::std::string* temp = wppassword_;
+    wppassword_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     return temp;
   }
 }
-inline void Message_MotionUser::set_allocated_wp_password(::std::string* wp_password) {
-  if (wp_password_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete wp_password_;
+inline void Message_MotionUser::set_allocated_wppassword(::std::string* wppassword) {
+  if (wppassword_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete wppassword_;
   }
-  if (wp_password) {
-    set_has_wp_password();
-    wp_password_ = wp_password;
+  if (wppassword) {
+    set_has_wppassword();
+    wppassword_ = wppassword;
   } else {
-    clear_has_wp_password();
-    wp_password_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    clear_has_wppassword();
+    wppassword_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wp_password)
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wppassword)
 }
 
-// optional string wp_server_url = 4;
-inline bool Message_MotionUser::has_wp_server_url() const {
+// optional string wpserverurl = 4;
+inline bool Message_MotionUser::has_wpserverurl() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void Message_MotionUser::set_has_wp_server_url() {
+inline void Message_MotionUser::set_has_wpserverurl() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void Message_MotionUser::clear_has_wp_server_url() {
+inline void Message_MotionUser::clear_has_wpserverurl() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void Message_MotionUser::clear_wp_server_url() {
-  if (wp_server_url_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_server_url_->clear();
+inline void Message_MotionUser::clear_wpserverurl() {
+  if (wpserverurl_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpserverurl_->clear();
   }
-  clear_has_wp_server_url();
+  clear_has_wpserverurl();
 }
-inline const ::std::string& Message_MotionUser::wp_server_url() const {
-  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wp_server_url)
-  return *wp_server_url_;
+inline const ::std::string& Message_MotionUser::wpserverurl() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wpserverurl)
+  return *wpserverurl_;
 }
-inline void Message_MotionUser::set_wp_server_url(const ::std::string& value) {
-  set_has_wp_server_url();
-  if (wp_server_url_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_server_url_ = new ::std::string;
+inline void Message_MotionUser::set_wpserverurl(const ::std::string& value) {
+  set_has_wpserverurl();
+  if (wpserverurl_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpserverurl_ = new ::std::string;
   }
-  wp_server_url_->assign(value);
-  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wp_server_url)
+  wpserverurl_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wpserverurl)
 }
-inline void Message_MotionUser::set_wp_server_url(const char* value) {
-  set_has_wp_server_url();
-  if (wp_server_url_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_server_url_ = new ::std::string;
+inline void Message_MotionUser::set_wpserverurl(const char* value) {
+  set_has_wpserverurl();
+  if (wpserverurl_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpserverurl_ = new ::std::string;
   }
-  wp_server_url_->assign(value);
-  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wp_server_url)
+  wpserverurl_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wpserverurl)
 }
-inline void Message_MotionUser::set_wp_server_url(const char* value, size_t size) {
-  set_has_wp_server_url();
-  if (wp_server_url_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_server_url_ = new ::std::string;
+inline void Message_MotionUser::set_wpserverurl(const char* value, size_t size) {
+  set_has_wpserverurl();
+  if (wpserverurl_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpserverurl_ = new ::std::string;
   }
-  wp_server_url_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wp_server_url)
+  wpserverurl_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wpserverurl)
 }
-inline ::std::string* Message_MotionUser::mutable_wp_server_url() {
-  set_has_wp_server_url();
-  if (wp_server_url_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    wp_server_url_ = new ::std::string;
+inline ::std::string* Message_MotionUser::mutable_wpserverurl() {
+  set_has_wpserverurl();
+  if (wpserverurl_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpserverurl_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wp_server_url)
-  return wp_server_url_;
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wpserverurl)
+  return wpserverurl_;
 }
-inline ::std::string* Message_MotionUser::release_wp_server_url() {
-  clear_has_wp_server_url();
-  if (wp_server_url_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+inline ::std::string* Message_MotionUser::release_wpserverurl() {
+  clear_has_wpserverurl();
+  if (wpserverurl_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
   } else {
-    ::std::string* temp = wp_server_url_;
-    wp_server_url_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    ::std::string* temp = wpserverurl_;
+    wpserverurl_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     return temp;
   }
 }
-inline void Message_MotionUser::set_allocated_wp_server_url(::std::string* wp_server_url) {
-  if (wp_server_url_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete wp_server_url_;
+inline void Message_MotionUser::set_allocated_wpserverurl(::std::string* wpserverurl) {
+  if (wpserverurl_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete wpserverurl_;
   }
-  if (wp_server_url) {
-    set_has_wp_server_url();
-    wp_server_url_ = wp_server_url;
+  if (wpserverurl) {
+    set_has_wpserverurl();
+    wpserverurl_ = wpserverurl;
   } else {
-    clear_has_wp_server_url();
-    wp_server_url_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    clear_has_wpserverurl();
+    wpserverurl_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wp_server_url)
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wpserverurl)
 }
 
-// optional int32 wp_userid = 5;
-inline bool Message_MotionUser::has_wp_userid() const {
+// optional int32 wpuserid = 5;
+inline bool Message_MotionUser::has_wpuserid() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void Message_MotionUser::set_has_wp_userid() {
+inline void Message_MotionUser::set_has_wpuserid() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void Message_MotionUser::clear_has_wp_userid() {
+inline void Message_MotionUser::clear_has_wpuserid() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void Message_MotionUser::clear_wp_userid() {
-  wp_userid_ = 0;
-  clear_has_wp_userid();
+inline void Message_MotionUser::clear_wpuserid() {
+  wpuserid_ = 0;
+  clear_has_wpuserid();
 }
-inline ::google::protobuf::int32 Message_MotionUser::wp_userid() const {
-  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wp_userid)
-  return wp_userid_;
+inline ::google::protobuf::int32 Message_MotionUser::wpuserid() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wpuserid)
+  return wpuserid_;
 }
-inline void Message_MotionUser::set_wp_userid(::google::protobuf::int32 value) {
-  set_has_wp_userid();
-  wp_userid_ = value;
-  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wp_userid)
+inline void Message_MotionUser::set_wpuserid(::google::protobuf::int32 value) {
+  set_has_wpuserid();
+  wpuserid_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wpuserid)
 }
 
-// optional int32 wp_client_id = 6;
-inline bool Message_MotionUser::has_wp_client_id() const {
+// optional int32 wpclientid = 6;
+inline bool Message_MotionUser::has_wpclientid() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void Message_MotionUser::set_has_wp_client_id() {
+inline void Message_MotionUser::set_has_wpclientid() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void Message_MotionUser::clear_has_wp_client_id() {
+inline void Message_MotionUser::clear_has_wpclientid() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void Message_MotionUser::clear_wp_client_id() {
-  wp_client_id_ = 0;
-  clear_has_wp_client_id();
+inline void Message_MotionUser::clear_wpclientid() {
+  wpclientid_ = 0;
+  clear_has_wpclientid();
 }
-inline ::google::protobuf::int32 Message_MotionUser::wp_client_id() const {
-  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wp_client_id)
-  return wp_client_id_;
+inline ::google::protobuf::int32 Message_MotionUser::wpclientid() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wpclientid)
+  return wpclientid_;
 }
-inline void Message_MotionUser::set_wp_client_id(::google::protobuf::int32 value) {
-  set_has_wp_client_id();
-  wp_client_id_ = value;
-  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wp_client_id)
+inline void Message_MotionUser::set_wpclientid(::google::protobuf::int32 value) {
+  set_has_wpclientid();
+  wpclientid_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wpclientid)
 }
 
-// optional int32 wp_client_mediaid = 7;
-inline bool Message_MotionUser::has_wp_client_mediaid() const {
+// optional int32 wpclientmediaid = 7;
+inline bool Message_MotionUser::has_wpclientmediaid() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void Message_MotionUser::set_has_wp_client_mediaid() {
+inline void Message_MotionUser::set_has_wpclientmediaid() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void Message_MotionUser::clear_has_wp_client_mediaid() {
+inline void Message_MotionUser::clear_has_wpclientmediaid() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void Message_MotionUser::clear_wp_client_mediaid() {
-  wp_client_mediaid_ = 0;
-  clear_has_wp_client_mediaid();
+inline void Message_MotionUser::clear_wpclientmediaid() {
+  wpclientmediaid_ = 0;
+  clear_has_wpclientmediaid();
 }
-inline ::google::protobuf::int32 Message_MotionUser::wp_client_mediaid() const {
-  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wp_client_mediaid)
-  return wp_client_mediaid_;
+inline ::google::protobuf::int32 Message_MotionUser::wpclientmediaid() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wpclientmediaid)
+  return wpclientmediaid_;
 }
-inline void Message_MotionUser::set_wp_client_mediaid(::google::protobuf::int32 value) {
-  set_has_wp_client_mediaid();
-  wp_client_mediaid_ = value;
-  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wp_client_mediaid)
+inline void Message_MotionUser::set_wpclientmediaid(::google::protobuf::int32 value) {
+  set_has_wpclientmediaid();
+  wpclientmediaid_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wpclientmediaid)
 }
 
 // optional string pfobjectid = 8;
@@ -3421,156 +5097,156 @@ inline void Message_MotionUser::set_allocated_email(::std::string* email) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.email)
 }
 
-// optional string first_name = 11;
-inline bool Message_MotionUser::has_first_name() const {
+// optional string firstname = 11;
+inline bool Message_MotionUser::has_firstname() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
-inline void Message_MotionUser::set_has_first_name() {
+inline void Message_MotionUser::set_has_firstname() {
   _has_bits_[0] |= 0x00000400u;
 }
-inline void Message_MotionUser::clear_has_first_name() {
+inline void Message_MotionUser::clear_has_firstname() {
   _has_bits_[0] &= ~0x00000400u;
 }
-inline void Message_MotionUser::clear_first_name() {
-  if (first_name_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    first_name_->clear();
+inline void Message_MotionUser::clear_firstname() {
+  if (firstname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    firstname_->clear();
   }
-  clear_has_first_name();
+  clear_has_firstname();
 }
-inline const ::std::string& Message_MotionUser::first_name() const {
-  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.first_name)
-  return *first_name_;
+inline const ::std::string& Message_MotionUser::firstname() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.firstname)
+  return *firstname_;
 }
-inline void Message_MotionUser::set_first_name(const ::std::string& value) {
-  set_has_first_name();
-  if (first_name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    first_name_ = new ::std::string;
+inline void Message_MotionUser::set_firstname(const ::std::string& value) {
+  set_has_firstname();
+  if (firstname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    firstname_ = new ::std::string;
   }
-  first_name_->assign(value);
-  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.first_name)
+  firstname_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.firstname)
 }
-inline void Message_MotionUser::set_first_name(const char* value) {
-  set_has_first_name();
-  if (first_name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    first_name_ = new ::std::string;
+inline void Message_MotionUser::set_firstname(const char* value) {
+  set_has_firstname();
+  if (firstname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    firstname_ = new ::std::string;
   }
-  first_name_->assign(value);
-  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.first_name)
+  firstname_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.firstname)
 }
-inline void Message_MotionUser::set_first_name(const char* value, size_t size) {
-  set_has_first_name();
-  if (first_name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    first_name_ = new ::std::string;
+inline void Message_MotionUser::set_firstname(const char* value, size_t size) {
+  set_has_firstname();
+  if (firstname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    firstname_ = new ::std::string;
   }
-  first_name_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.first_name)
+  firstname_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.firstname)
 }
-inline ::std::string* Message_MotionUser::mutable_first_name() {
-  set_has_first_name();
-  if (first_name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    first_name_ = new ::std::string;
+inline ::std::string* Message_MotionUser::mutable_firstname() {
+  set_has_firstname();
+  if (firstname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    firstname_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.first_name)
-  return first_name_;
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.firstname)
+  return firstname_;
 }
-inline ::std::string* Message_MotionUser::release_first_name() {
-  clear_has_first_name();
-  if (first_name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+inline ::std::string* Message_MotionUser::release_firstname() {
+  clear_has_firstname();
+  if (firstname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
   } else {
-    ::std::string* temp = first_name_;
-    first_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    ::std::string* temp = firstname_;
+    firstname_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     return temp;
   }
 }
-inline void Message_MotionUser::set_allocated_first_name(::std::string* first_name) {
-  if (first_name_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete first_name_;
+inline void Message_MotionUser::set_allocated_firstname(::std::string* firstname) {
+  if (firstname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete firstname_;
   }
-  if (first_name) {
-    set_has_first_name();
-    first_name_ = first_name;
+  if (firstname) {
+    set_has_firstname();
+    firstname_ = firstname;
   } else {
-    clear_has_first_name();
-    first_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    clear_has_firstname();
+    firstname_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.first_name)
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.firstname)
 }
 
-// optional string last_name = 12;
-inline bool Message_MotionUser::has_last_name() const {
+// optional string lastname = 12;
+inline bool Message_MotionUser::has_lastname() const {
   return (_has_bits_[0] & 0x00000800u) != 0;
 }
-inline void Message_MotionUser::set_has_last_name() {
+inline void Message_MotionUser::set_has_lastname() {
   _has_bits_[0] |= 0x00000800u;
 }
-inline void Message_MotionUser::clear_has_last_name() {
+inline void Message_MotionUser::clear_has_lastname() {
   _has_bits_[0] &= ~0x00000800u;
 }
-inline void Message_MotionUser::clear_last_name() {
-  if (last_name_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    last_name_->clear();
+inline void Message_MotionUser::clear_lastname() {
+  if (lastname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    lastname_->clear();
   }
-  clear_has_last_name();
+  clear_has_lastname();
 }
-inline const ::std::string& Message_MotionUser::last_name() const {
-  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.last_name)
-  return *last_name_;
+inline const ::std::string& Message_MotionUser::lastname() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.lastname)
+  return *lastname_;
 }
-inline void Message_MotionUser::set_last_name(const ::std::string& value) {
-  set_has_last_name();
-  if (last_name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    last_name_ = new ::std::string;
+inline void Message_MotionUser::set_lastname(const ::std::string& value) {
+  set_has_lastname();
+  if (lastname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    lastname_ = new ::std::string;
   }
-  last_name_->assign(value);
-  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.last_name)
+  lastname_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.lastname)
 }
-inline void Message_MotionUser::set_last_name(const char* value) {
-  set_has_last_name();
-  if (last_name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    last_name_ = new ::std::string;
+inline void Message_MotionUser::set_lastname(const char* value) {
+  set_has_lastname();
+  if (lastname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    lastname_ = new ::std::string;
   }
-  last_name_->assign(value);
-  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.last_name)
+  lastname_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.lastname)
 }
-inline void Message_MotionUser::set_last_name(const char* value, size_t size) {
-  set_has_last_name();
-  if (last_name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    last_name_ = new ::std::string;
+inline void Message_MotionUser::set_lastname(const char* value, size_t size) {
+  set_has_lastname();
+  if (lastname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    lastname_ = new ::std::string;
   }
-  last_name_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.last_name)
+  lastname_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.lastname)
 }
-inline ::std::string* Message_MotionUser::mutable_last_name() {
-  set_has_last_name();
-  if (last_name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    last_name_ = new ::std::string;
+inline ::std::string* Message_MotionUser::mutable_lastname() {
+  set_has_lastname();
+  if (lastname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    lastname_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.last_name)
-  return last_name_;
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.lastname)
+  return lastname_;
 }
-inline ::std::string* Message_MotionUser::release_last_name() {
-  clear_has_last_name();
-  if (last_name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+inline ::std::string* Message_MotionUser::release_lastname() {
+  clear_has_lastname();
+  if (lastname_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
   } else {
-    ::std::string* temp = last_name_;
-    last_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    ::std::string* temp = lastname_;
+    lastname_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     return temp;
   }
 }
-inline void Message_MotionUser::set_allocated_last_name(::std::string* last_name) {
-  if (last_name_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete last_name_;
+inline void Message_MotionUser::set_allocated_lastname(::std::string* lastname) {
+  if (lastname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete lastname_;
   }
-  if (last_name) {
-    set_has_last_name();
-    last_name_ = last_name;
+  if (lastname) {
+    set_has_lastname();
+    lastname_ = lastname;
   } else {
-    clear_has_last_name();
-    last_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    clear_has_lastname();
+    lastname_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.last_name)
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.lastname)
 }
 
 // optional string location = 13;
@@ -3725,28 +5401,508 @@ inline void Message_MotionUser::set_allocated_uiidinstallation(::std::string* ui
   // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.uiidinstallation)
 }
 
-// optional int32 service_type = 15;
-inline bool Message_MotionUser::has_service_type() const {
+// optional int32 servicetype = 15;
+inline bool Message_MotionUser::has_servicetype() const {
   return (_has_bits_[0] & 0x00004000u) != 0;
 }
-inline void Message_MotionUser::set_has_service_type() {
+inline void Message_MotionUser::set_has_servicetype() {
   _has_bits_[0] |= 0x00004000u;
 }
-inline void Message_MotionUser::clear_has_service_type() {
+inline void Message_MotionUser::clear_has_servicetype() {
   _has_bits_[0] &= ~0x00004000u;
 }
-inline void Message_MotionUser::clear_service_type() {
-  service_type_ = 0;
-  clear_has_service_type();
+inline void Message_MotionUser::clear_servicetype() {
+  servicetype_ = 0;
+  clear_has_servicetype();
 }
-inline ::google::protobuf::int32 Message_MotionUser::service_type() const {
-  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.service_type)
-  return service_type_;
+inline ::google::protobuf::int32 Message_MotionUser::servicetype() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.servicetype)
+  return servicetype_;
 }
-inline void Message_MotionUser::set_service_type(::google::protobuf::int32 value) {
-  set_has_service_type();
-  service_type_ = value;
-  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.service_type)
+inline void Message_MotionUser::set_servicetype(::google::protobuf::int32 value) {
+  set_has_servicetype();
+  servicetype_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.servicetype)
+}
+
+// optional string wpslug = 16;
+inline bool Message_MotionUser::has_wpslug() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void Message_MotionUser::set_has_wpslug() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void Message_MotionUser::clear_has_wpslug() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void Message_MotionUser::clear_wpslug() {
+  if (wpslug_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpslug_->clear();
+  }
+  clear_has_wpslug();
+}
+inline const ::std::string& Message_MotionUser::wpslug() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wpslug)
+  return *wpslug_;
+}
+inline void Message_MotionUser::set_wpslug(const ::std::string& value) {
+  set_has_wpslug();
+  if (wpslug_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpslug_ = new ::std::string;
+  }
+  wpslug_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wpslug)
+}
+inline void Message_MotionUser::set_wpslug(const char* value) {
+  set_has_wpslug();
+  if (wpslug_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpslug_ = new ::std::string;
+  }
+  wpslug_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wpslug)
+}
+inline void Message_MotionUser::set_wpslug(const char* value, size_t size) {
+  set_has_wpslug();
+  if (wpslug_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpslug_ = new ::std::string;
+  }
+  wpslug_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wpslug)
+}
+inline ::std::string* Message_MotionUser::mutable_wpslug() {
+  set_has_wpslug();
+  if (wpslug_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpslug_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wpslug)
+  return wpslug_;
+}
+inline ::std::string* Message_MotionUser::release_wpslug() {
+  clear_has_wpslug();
+  if (wpslug_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = wpslug_;
+    wpslug_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionUser::set_allocated_wpslug(::std::string* wpslug) {
+  if (wpslug_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete wpslug_;
+  }
+  if (wpslug) {
+    set_has_wpslug();
+    wpslug_ = wpslug;
+  } else {
+    clear_has_wpslug();
+    wpslug_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wpslug)
+}
+
+// optional string wplink = 17;
+inline bool Message_MotionUser::has_wplink() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void Message_MotionUser::set_has_wplink() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void Message_MotionUser::clear_has_wplink() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void Message_MotionUser::clear_wplink() {
+  if (wplink_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wplink_->clear();
+  }
+  clear_has_wplink();
+}
+inline const ::std::string& Message_MotionUser::wplink() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wplink)
+  return *wplink_;
+}
+inline void Message_MotionUser::set_wplink(const ::std::string& value) {
+  set_has_wplink();
+  if (wplink_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wplink_ = new ::std::string;
+  }
+  wplink_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wplink)
+}
+inline void Message_MotionUser::set_wplink(const char* value) {
+  set_has_wplink();
+  if (wplink_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wplink_ = new ::std::string;
+  }
+  wplink_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wplink)
+}
+inline void Message_MotionUser::set_wplink(const char* value, size_t size) {
+  set_has_wplink();
+  if (wplink_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wplink_ = new ::std::string;
+  }
+  wplink_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wplink)
+}
+inline ::std::string* Message_MotionUser::mutable_wplink() {
+  set_has_wplink();
+  if (wplink_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wplink_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wplink)
+  return wplink_;
+}
+inline ::std::string* Message_MotionUser::release_wplink() {
+  clear_has_wplink();
+  if (wplink_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = wplink_;
+    wplink_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionUser::set_allocated_wplink(::std::string* wplink) {
+  if (wplink_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete wplink_;
+  }
+  if (wplink) {
+    set_has_wplink();
+    wplink_ = wplink;
+  } else {
+    clear_has_wplink();
+    wplink_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wplink)
+}
+
+// optional string wpapilink = 18;
+inline bool Message_MotionUser::has_wpapilink() const {
+  return (_has_bits_[0] & 0x00020000u) != 0;
+}
+inline void Message_MotionUser::set_has_wpapilink() {
+  _has_bits_[0] |= 0x00020000u;
+}
+inline void Message_MotionUser::clear_has_wpapilink() {
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline void Message_MotionUser::clear_wpapilink() {
+  if (wpapilink_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpapilink_->clear();
+  }
+  clear_has_wpapilink();
+}
+inline const ::std::string& Message_MotionUser::wpapilink() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wpapilink)
+  return *wpapilink_;
+}
+inline void Message_MotionUser::set_wpapilink(const ::std::string& value) {
+  set_has_wpapilink();
+  if (wpapilink_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpapilink_ = new ::std::string;
+  }
+  wpapilink_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wpapilink)
+}
+inline void Message_MotionUser::set_wpapilink(const char* value) {
+  set_has_wpapilink();
+  if (wpapilink_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpapilink_ = new ::std::string;
+  }
+  wpapilink_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wpapilink)
+}
+inline void Message_MotionUser::set_wpapilink(const char* value, size_t size) {
+  set_has_wpapilink();
+  if (wpapilink_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpapilink_ = new ::std::string;
+  }
+  wpapilink_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wpapilink)
+}
+inline ::std::string* Message_MotionUser::mutable_wpapilink() {
+  set_has_wpapilink();
+  if (wpapilink_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpapilink_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wpapilink)
+  return wpapilink_;
+}
+inline ::std::string* Message_MotionUser::release_wpapilink() {
+  clear_has_wpapilink();
+  if (wpapilink_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = wpapilink_;
+    wpapilink_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionUser::set_allocated_wpapilink(::std::string* wpapilink) {
+  if (wpapilink_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete wpapilink_;
+  }
+  if (wpapilink) {
+    set_has_wpapilink();
+    wpapilink_ = wpapilink;
+  } else {
+    clear_has_wpapilink();
+    wpapilink_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wpapilink)
+}
+
+// optional string wpfeaturedimage = 19;
+inline bool Message_MotionUser::has_wpfeaturedimage() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void Message_MotionUser::set_has_wpfeaturedimage() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void Message_MotionUser::clear_has_wpfeaturedimage() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void Message_MotionUser::clear_wpfeaturedimage() {
+  if (wpfeaturedimage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpfeaturedimage_->clear();
+  }
+  clear_has_wpfeaturedimage();
+}
+inline const ::std::string& Message_MotionUser::wpfeaturedimage() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wpfeaturedimage)
+  return *wpfeaturedimage_;
+}
+inline void Message_MotionUser::set_wpfeaturedimage(const ::std::string& value) {
+  set_has_wpfeaturedimage();
+  if (wpfeaturedimage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpfeaturedimage_ = new ::std::string;
+  }
+  wpfeaturedimage_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wpfeaturedimage)
+}
+inline void Message_MotionUser::set_wpfeaturedimage(const char* value) {
+  set_has_wpfeaturedimage();
+  if (wpfeaturedimage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpfeaturedimage_ = new ::std::string;
+  }
+  wpfeaturedimage_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wpfeaturedimage)
+}
+inline void Message_MotionUser::set_wpfeaturedimage(const char* value, size_t size) {
+  set_has_wpfeaturedimage();
+  if (wpfeaturedimage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpfeaturedimage_ = new ::std::string;
+  }
+  wpfeaturedimage_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wpfeaturedimage)
+}
+inline ::std::string* Message_MotionUser::mutable_wpfeaturedimage() {
+  set_has_wpfeaturedimage();
+  if (wpfeaturedimage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpfeaturedimage_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wpfeaturedimage)
+  return wpfeaturedimage_;
+}
+inline ::std::string* Message_MotionUser::release_wpfeaturedimage() {
+  clear_has_wpfeaturedimage();
+  if (wpfeaturedimage_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = wpfeaturedimage_;
+    wpfeaturedimage_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionUser::set_allocated_wpfeaturedimage(::std::string* wpfeaturedimage) {
+  if (wpfeaturedimage_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete wpfeaturedimage_;
+  }
+  if (wpfeaturedimage) {
+    set_has_wpfeaturedimage();
+    wpfeaturedimage_ = wpfeaturedimage;
+  } else {
+    clear_has_wpfeaturedimage();
+    wpfeaturedimage_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wpfeaturedimage)
+}
+
+// optional string wptype = 20;
+inline bool Message_MotionUser::has_wptype() const {
+  return (_has_bits_[0] & 0x00080000u) != 0;
+}
+inline void Message_MotionUser::set_has_wptype() {
+  _has_bits_[0] |= 0x00080000u;
+}
+inline void Message_MotionUser::clear_has_wptype() {
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline void Message_MotionUser::clear_wptype() {
+  if (wptype_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wptype_->clear();
+  }
+  clear_has_wptype();
+}
+inline const ::std::string& Message_MotionUser::wptype() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wptype)
+  return *wptype_;
+}
+inline void Message_MotionUser::set_wptype(const ::std::string& value) {
+  set_has_wptype();
+  if (wptype_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wptype_ = new ::std::string;
+  }
+  wptype_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wptype)
+}
+inline void Message_MotionUser::set_wptype(const char* value) {
+  set_has_wptype();
+  if (wptype_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wptype_ = new ::std::string;
+  }
+  wptype_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wptype)
+}
+inline void Message_MotionUser::set_wptype(const char* value, size_t size) {
+  set_has_wptype();
+  if (wptype_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wptype_ = new ::std::string;
+  }
+  wptype_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wptype)
+}
+inline ::std::string* Message_MotionUser::mutable_wptype() {
+  set_has_wptype();
+  if (wptype_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wptype_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wptype)
+  return wptype_;
+}
+inline ::std::string* Message_MotionUser::release_wptype() {
+  clear_has_wptype();
+  if (wptype_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = wptype_;
+    wptype_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionUser::set_allocated_wptype(::std::string* wptype) {
+  if (wptype_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete wptype_;
+  }
+  if (wptype) {
+    set_has_wptype();
+    wptype_ = wptype;
+  } else {
+    clear_has_wptype();
+    wptype_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wptype)
+}
+
+// optional int32 wpparent = 21;
+inline bool Message_MotionUser::has_wpparent() const {
+  return (_has_bits_[0] & 0x00100000u) != 0;
+}
+inline void Message_MotionUser::set_has_wpparent() {
+  _has_bits_[0] |= 0x00100000u;
+}
+inline void Message_MotionUser::clear_has_wpparent() {
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline void Message_MotionUser::clear_wpparent() {
+  wpparent_ = 0;
+  clear_has_wpparent();
+}
+inline ::google::protobuf::int32 Message_MotionUser::wpparent() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wpparent)
+  return wpparent_;
+}
+inline void Message_MotionUser::set_wpparent(::google::protobuf::int32 value) {
+  set_has_wpparent();
+  wpparent_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wpparent)
+}
+
+// optional string wpmodified = 22;
+inline bool Message_MotionUser::has_wpmodified() const {
+  return (_has_bits_[0] & 0x00200000u) != 0;
+}
+inline void Message_MotionUser::set_has_wpmodified() {
+  _has_bits_[0] |= 0x00200000u;
+}
+inline void Message_MotionUser::clear_has_wpmodified() {
+  _has_bits_[0] &= ~0x00200000u;
+}
+inline void Message_MotionUser::clear_wpmodified() {
+  if (wpmodified_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpmodified_->clear();
+  }
+  clear_has_wpmodified();
+}
+inline const ::std::string& Message_MotionUser::wpmodified() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.wpmodified)
+  return *wpmodified_;
+}
+inline void Message_MotionUser::set_wpmodified(const ::std::string& value) {
+  set_has_wpmodified();
+  if (wpmodified_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpmodified_ = new ::std::string;
+  }
+  wpmodified_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.wpmodified)
+}
+inline void Message_MotionUser::set_wpmodified(const char* value) {
+  set_has_wpmodified();
+  if (wpmodified_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpmodified_ = new ::std::string;
+  }
+  wpmodified_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.wpmodified)
+}
+inline void Message_MotionUser::set_wpmodified(const char* value, size_t size) {
+  set_has_wpmodified();
+  if (wpmodified_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpmodified_ = new ::std::string;
+  }
+  wpmodified_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.wpmodified)
+}
+inline ::std::string* Message_MotionUser::mutable_wpmodified() {
+  set_has_wpmodified();
+  if (wpmodified_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    wpmodified_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.wpmodified)
+  return wpmodified_;
+}
+inline ::std::string* Message_MotionUser::release_wpmodified() {
+  clear_has_wpmodified();
+  if (wpmodified_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = wpmodified_;
+    wpmodified_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionUser::set_allocated_wpmodified(::std::string* wpmodified) {
+  if (wpmodified_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete wpmodified_;
+  }
+  if (wpmodified) {
+    set_has_wpmodified();
+    wpmodified_ = wpmodified;
+  } else {
+    clear_has_wpmodified();
+    wpmodified_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wpmodified)
 }
 
 // -------------------------------------------------------------------
@@ -8367,15 +10523,105 @@ inline void Message::set_type(::motion::Message_ActionType value) {
   // @@protoc_insertion_point(field_set:motion.Message.type)
 }
 
-// optional string time = 3;
+// repeated .motion.Message.MotionUser motionuser = 3;
+inline int Message::motionuser_size() const {
+  return motionuser_.size();
+}
+inline void Message::clear_motionuser() {
+  motionuser_.Clear();
+}
+inline const ::motion::Message_MotionUser& Message::motionuser(int index) const {
+  // @@protoc_insertion_point(field_get:motion.Message.motionuser)
+  return motionuser_.Get(index);
+}
+inline ::motion::Message_MotionUser* Message::mutable_motionuser(int index) {
+  // @@protoc_insertion_point(field_mutable:motion.Message.motionuser)
+  return motionuser_.Mutable(index);
+}
+inline ::motion::Message_MotionUser* Message::add_motionuser() {
+  // @@protoc_insertion_point(field_add:motion.Message.motionuser)
+  return motionuser_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionUser >&
+Message::motionuser() const {
+  // @@protoc_insertion_point(field_list:motion.Message.motionuser)
+  return motionuser_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionUser >*
+Message::mutable_motionuser() {
+  // @@protoc_insertion_point(field_mutable_list:motion.Message.motionuser)
+  return &motionuser_;
+}
+
+// repeated .motion.Message.MotionCamera motioncamera = 4;
+inline int Message::motioncamera_size() const {
+  return motioncamera_.size();
+}
+inline void Message::clear_motioncamera() {
+  motioncamera_.Clear();
+}
+inline const ::motion::Message_MotionCamera& Message::motioncamera(int index) const {
+  // @@protoc_insertion_point(field_get:motion.Message.motioncamera)
+  return motioncamera_.Get(index);
+}
+inline ::motion::Message_MotionCamera* Message::mutable_motioncamera(int index) {
+  // @@protoc_insertion_point(field_mutable:motion.Message.motioncamera)
+  return motioncamera_.Mutable(index);
+}
+inline ::motion::Message_MotionCamera* Message::add_motioncamera() {
+  // @@protoc_insertion_point(field_add:motion.Message.motioncamera)
+  return motioncamera_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera >&
+Message::motioncamera() const {
+  // @@protoc_insertion_point(field_list:motion.Message.motioncamera)
+  return motioncamera_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera >*
+Message::mutable_motioncamera() {
+  // @@protoc_insertion_point(field_mutable_list:motion.Message.motioncamera)
+  return &motioncamera_;
+}
+
+// repeated .motion.Message.MotionDevice motiondevice = 5;
+inline int Message::motiondevice_size() const {
+  return motiondevice_.size();
+}
+inline void Message::clear_motiondevice() {
+  motiondevice_.Clear();
+}
+inline const ::motion::Message_MotionDevice& Message::motiondevice(int index) const {
+  // @@protoc_insertion_point(field_get:motion.Message.motiondevice)
+  return motiondevice_.Get(index);
+}
+inline ::motion::Message_MotionDevice* Message::mutable_motiondevice(int index) {
+  // @@protoc_insertion_point(field_mutable:motion.Message.motiondevice)
+  return motiondevice_.Mutable(index);
+}
+inline ::motion::Message_MotionDevice* Message::add_motiondevice() {
+  // @@protoc_insertion_point(field_add:motion.Message.motiondevice)
+  return motiondevice_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionDevice >&
+Message::motiondevice() const {
+  // @@protoc_insertion_point(field_list:motion.Message.motiondevice)
+  return motiondevice_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionDevice >*
+Message::mutable_motiondevice() {
+  // @@protoc_insertion_point(field_mutable_list:motion.Message.motiondevice)
+  return &motiondevice_;
+}
+
+// optional string time = 6;
 inline bool Message::has_time() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void Message::set_has_time() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void Message::clear_has_time() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void Message::clear_time() {
   if (time_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -8443,139 +10689,139 @@ inline void Message::set_allocated_time(::std::string* time) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.time)
 }
 
-// optional bytes data = 4;
-inline bool Message::has_data() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+// optional bytes datafile = 7;
+inline bool Message::has_datafile() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void Message::set_has_data() {
-  _has_bits_[0] |= 0x00000008u;
+inline void Message::set_has_datafile() {
+  _has_bits_[0] |= 0x00000040u;
 }
-inline void Message::clear_has_data() {
-  _has_bits_[0] &= ~0x00000008u;
+inline void Message::clear_has_datafile() {
+  _has_bits_[0] &= ~0x00000040u;
 }
-inline void Message::clear_data() {
-  if (data_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    data_->clear();
+inline void Message::clear_datafile() {
+  if (datafile_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    datafile_->clear();
   }
-  clear_has_data();
+  clear_has_datafile();
 }
-inline const ::std::string& Message::data() const {
-  // @@protoc_insertion_point(field_get:motion.Message.data)
-  return *data_;
+inline const ::std::string& Message::datafile() const {
+  // @@protoc_insertion_point(field_get:motion.Message.datafile)
+  return *datafile_;
 }
-inline void Message::set_data(const ::std::string& value) {
-  set_has_data();
-  if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    data_ = new ::std::string;
+inline void Message::set_datafile(const ::std::string& value) {
+  set_has_datafile();
+  if (datafile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    datafile_ = new ::std::string;
   }
-  data_->assign(value);
-  // @@protoc_insertion_point(field_set:motion.Message.data)
+  datafile_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.datafile)
 }
-inline void Message::set_data(const char* value) {
-  set_has_data();
-  if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    data_ = new ::std::string;
+inline void Message::set_datafile(const char* value) {
+  set_has_datafile();
+  if (datafile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    datafile_ = new ::std::string;
   }
-  data_->assign(value);
-  // @@protoc_insertion_point(field_set_char:motion.Message.data)
+  datafile_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.datafile)
 }
-inline void Message::set_data(const void* value, size_t size) {
-  set_has_data();
-  if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    data_ = new ::std::string;
+inline void Message::set_datafile(const void* value, size_t size) {
+  set_has_datafile();
+  if (datafile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    datafile_ = new ::std::string;
   }
-  data_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:motion.Message.data)
+  datafile_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.datafile)
 }
-inline ::std::string* Message::mutable_data() {
-  set_has_data();
-  if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    data_ = new ::std::string;
+inline ::std::string* Message::mutable_datafile() {
+  set_has_datafile();
+  if (datafile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    datafile_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:motion.Message.data)
-  return data_;
+  // @@protoc_insertion_point(field_mutable:motion.Message.datafile)
+  return datafile_;
 }
-inline ::std::string* Message::release_data() {
-  clear_has_data();
-  if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+inline ::std::string* Message::release_datafile() {
+  clear_has_datafile();
+  if (datafile_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
   } else {
-    ::std::string* temp = data_;
-    data_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    ::std::string* temp = datafile_;
+    datafile_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     return temp;
   }
 }
-inline void Message::set_allocated_data(::std::string* data) {
-  if (data_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete data_;
+inline void Message::set_allocated_datafile(::std::string* datafile) {
+  if (datafile_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete datafile_;
   }
-  if (data) {
-    set_has_data();
-    data_ = data;
+  if (datafile) {
+    set_has_datafile();
+    datafile_ = datafile;
   } else {
-    clear_has_data();
-    data_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    clear_has_datafile();
+    datafile_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:motion.Message.data)
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.datafile)
 }
 
-// optional int32 data_amount = 5;
-inline bool Message::has_data_amount() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+// optional int32 dataamount = 8;
+inline bool Message::has_dataamount() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void Message::set_has_data_amount() {
-  _has_bits_[0] |= 0x00000010u;
+inline void Message::set_has_dataamount() {
+  _has_bits_[0] |= 0x00000080u;
 }
-inline void Message::clear_has_data_amount() {
-  _has_bits_[0] &= ~0x00000010u;
+inline void Message::clear_has_dataamount() {
+  _has_bits_[0] &= ~0x00000080u;
 }
-inline void Message::clear_data_amount() {
-  data_amount_ = 0;
-  clear_has_data_amount();
+inline void Message::clear_dataamount() {
+  dataamount_ = 0;
+  clear_has_dataamount();
 }
-inline ::google::protobuf::int32 Message::data_amount() const {
-  // @@protoc_insertion_point(field_get:motion.Message.data_amount)
-  return data_amount_;
+inline ::google::protobuf::int32 Message::dataamount() const {
+  // @@protoc_insertion_point(field_get:motion.Message.dataamount)
+  return dataamount_;
 }
-inline void Message::set_data_amount(::google::protobuf::int32 value) {
-  set_has_data_amount();
-  data_amount_ = value;
-  // @@protoc_insertion_point(field_set:motion.Message.data_amount)
-}
-
-// optional int32 data_total = 6;
-inline bool Message::has_data_total() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void Message::set_has_data_total() {
-  _has_bits_[0] |= 0x00000020u;
-}
-inline void Message::clear_has_data_total() {
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline void Message::clear_data_total() {
-  data_total_ = 0;
-  clear_has_data_total();
-}
-inline ::google::protobuf::int32 Message::data_total() const {
-  // @@protoc_insertion_point(field_get:motion.Message.data_total)
-  return data_total_;
-}
-inline void Message::set_data_total(::google::protobuf::int32 value) {
-  set_has_data_total();
-  data_total_ = value;
-  // @@protoc_insertion_point(field_set:motion.Message.data_total)
+inline void Message::set_dataamount(::google::protobuf::int32 value) {
+  set_has_dataamount();
+  dataamount_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.dataamount)
 }
 
-// optional string serverip = 7;
+// optional int32 datatotal = 9;
+inline bool Message::has_datatotal() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void Message::set_has_datatotal() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void Message::clear_has_datatotal() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void Message::clear_datatotal() {
+  datatotal_ = 0;
+  clear_has_datatotal();
+}
+inline ::google::protobuf::int32 Message::datatotal() const {
+  // @@protoc_insertion_point(field_get:motion.Message.datatotal)
+  return datatotal_;
+}
+inline void Message::set_datatotal(::google::protobuf::int32 value) {
+  set_has_datatotal();
+  datatotal_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.datatotal)
+}
+
+// optional string serverip = 10;
 inline bool Message::has_serverip() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
 inline void Message::set_has_serverip() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000200u;
 }
 inline void Message::clear_has_serverip() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void Message::clear_serverip() {
   if (serverip_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -8643,15 +10889,15 @@ inline void Message::set_allocated_serverip(::std::string* serverip) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.serverip)
 }
 
-// optional string clientip = 8;
+// optional string clientip = 11;
 inline bool Message::has_clientip() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void Message::set_has_clientip() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void Message::clear_has_clientip() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void Message::clear_clientip() {
   if (clientip_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -8719,15 +10965,15 @@ inline void Message::set_allocated_clientip(::std::string* clientip) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.clientip)
 }
 
-// optional string devicestarttime = 9;
+// optional string devicestarttime = 12;
 inline bool Message::has_devicestarttime() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000800u) != 0;
 }
 inline void Message::set_has_devicestarttime() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000800u;
 }
 inline void Message::clear_has_devicestarttime() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void Message::clear_devicestarttime() {
   if (devicestarttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -8795,45 +11041,15 @@ inline void Message::set_allocated_devicestarttime(::std::string* devicestarttim
   // @@protoc_insertion_point(field_set_allocated:motion.Message.devicestarttime)
 }
 
-// repeated .motion.Message.MotionCamera motioncamera = 10;
-inline int Message::motioncamera_size() const {
-  return motioncamera_.size();
-}
-inline void Message::clear_motioncamera() {
-  motioncamera_.Clear();
-}
-inline const ::motion::Message_MotionCamera& Message::motioncamera(int index) const {
-  // @@protoc_insertion_point(field_get:motion.Message.motioncamera)
-  return motioncamera_.Get(index);
-}
-inline ::motion::Message_MotionCamera* Message::mutable_motioncamera(int index) {
-  // @@protoc_insertion_point(field_mutable:motion.Message.motioncamera)
-  return motioncamera_.Mutable(index);
-}
-inline ::motion::Message_MotionCamera* Message::add_motioncamera() {
-  // @@protoc_insertion_point(field_add:motion.Message.motioncamera)
-  return motioncamera_.Add();
-}
-inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera >&
-Message::motioncamera() const {
-  // @@protoc_insertion_point(field_list:motion.Message.motioncamera)
-  return motioncamera_;
-}
-inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionCamera >*
-Message::mutable_motioncamera() {
-  // @@protoc_insertion_point(field_mutable_list:motion.Message.motioncamera)
-  return &motioncamera_;
-}
-
-// optional string currmonth = 11;
+// optional string currmonth = 13;
 inline bool Message::has_currmonth() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00001000u) != 0;
 }
 inline void Message::set_has_currmonth() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00001000u;
 }
 inline void Message::clear_has_currmonth() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline void Message::clear_currmonth() {
   if (currmonth_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -8901,15 +11117,15 @@ inline void Message::set_allocated_currmonth(::std::string* currmonth) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.currmonth)
 }
 
-// optional string currday = 12;
+// optional string currday = 14;
 inline bool Message::has_currday() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
+  return (_has_bits_[0] & 0x00002000u) != 0;
 }
 inline void Message::set_has_currday() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00002000u;
 }
 inline void Message::clear_has_currday() {
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline void Message::clear_currday() {
   if (currday_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -8977,15 +11193,15 @@ inline void Message::set_allocated_currday(::std::string* currday) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.currday)
 }
 
-// optional string currdaytitle = 13;
+// optional string currdaytitle = 15;
 inline bool Message::has_currdaytitle() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
+  return (_has_bits_[0] & 0x00004000u) != 0;
 }
 inline void Message::set_has_currdaytitle() {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00004000u;
 }
 inline void Message::clear_has_currdaytitle() {
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline void Message::clear_currdaytitle() {
   if (currdaytitle_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -9053,15 +11269,15 @@ inline void Message::set_allocated_currdaytitle(::std::string* currdaytitle) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.currdaytitle)
 }
 
-// optional int32 currcam = 14;
+// optional int32 currcam = 16;
 inline bool Message::has_currcam() const {
-  return (_has_bits_[0] & 0x00002000u) != 0;
+  return (_has_bits_[0] & 0x00008000u) != 0;
 }
 inline void Message::set_has_currcam() {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00008000u;
 }
 inline void Message::clear_has_currcam() {
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline void Message::clear_currcam() {
   currcam_ = 0;
@@ -9077,15 +11293,15 @@ inline void Message::set_currcam(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.currcam)
 }
 
-// optional int32 packagesize = 15;
+// optional int32 packagesize = 17;
 inline bool Message::has_packagesize() const {
-  return (_has_bits_[0] & 0x00004000u) != 0;
+  return (_has_bits_[0] & 0x00010000u) != 0;
 }
 inline void Message::set_has_packagesize() {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00010000u;
 }
 inline void Message::clear_has_packagesize() {
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline void Message::clear_packagesize() {
   packagesize_ = 0;
@@ -9101,15 +11317,15 @@ inline void Message::set_packagesize(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.packagesize)
 }
 
-// optional string imagefilepath = 16;
+// optional string imagefilepath = 18;
 inline bool Message::has_imagefilepath() const {
-  return (_has_bits_[0] & 0x00008000u) != 0;
+  return (_has_bits_[0] & 0x00020000u) != 0;
 }
 inline void Message::set_has_imagefilepath() {
-  _has_bits_[0] |= 0x00008000u;
+  _has_bits_[0] |= 0x00020000u;
 }
 inline void Message::clear_has_imagefilepath() {
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline void Message::clear_imagefilepath() {
   if (imagefilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -9177,15 +11393,15 @@ inline void Message::set_allocated_imagefilepath(::std::string* imagefilepath) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.imagefilepath)
 }
 
-// optional string videofilepath = 17;
+// optional string videofilepath = 19;
 inline bool Message::has_videofilepath() const {
-  return (_has_bits_[0] & 0x00010000u) != 0;
+  return (_has_bits_[0] & 0x00040000u) != 0;
 }
 inline void Message::set_has_videofilepath() {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00040000u;
 }
 inline void Message::clear_has_videofilepath() {
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline void Message::clear_videofilepath() {
   if (videofilepath_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -9253,15 +11469,15 @@ inline void Message::set_allocated_videofilepath(::std::string* videofilepath) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.videofilepath)
 }
 
-// optional string recname = 18;
+// optional string recname = 20;
 inline bool Message::has_recname() const {
-  return (_has_bits_[0] & 0x00020000u) != 0;
+  return (_has_bits_[0] & 0x00080000u) != 0;
 }
 inline void Message::set_has_recname() {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00080000u;
 }
 inline void Message::clear_has_recname() {
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline void Message::clear_recname() {
   if (recname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -9329,15 +11545,15 @@ inline void Message::set_allocated_recname(::std::string* recname) {
   // @@protoc_insertion_point(field_set_allocated:motion.Message.recname)
 }
 
-// optional int32 activecamnum = 19;
+// optional int32 activecamnum = 21;
 inline bool Message::has_activecamnum() const {
-  return (_has_bits_[0] & 0x00040000u) != 0;
+  return (_has_bits_[0] & 0x00100000u) != 0;
 }
 inline void Message::set_has_activecamnum() {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00100000u;
 }
 inline void Message::clear_has_activecamnum() {
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline void Message::clear_activecamnum() {
   activecamnum_ = 0;
@@ -9353,34 +11569,28 @@ inline void Message::set_activecamnum(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.activecamnum)
 }
 
-// repeated .motion.Message.MotionUser motionuser = 20;
-inline int Message::motionuser_size() const {
-  return motionuser_.size();
+// optional bool includethubmnails = 22;
+inline bool Message::has_includethubmnails() const {
+  return (_has_bits_[0] & 0x00200000u) != 0;
 }
-inline void Message::clear_motionuser() {
-  motionuser_.Clear();
+inline void Message::set_has_includethubmnails() {
+  _has_bits_[0] |= 0x00200000u;
 }
-inline const ::motion::Message_MotionUser& Message::motionuser(int index) const {
-  // @@protoc_insertion_point(field_get:motion.Message.motionuser)
-  return motionuser_.Get(index);
+inline void Message::clear_has_includethubmnails() {
+  _has_bits_[0] &= ~0x00200000u;
 }
-inline ::motion::Message_MotionUser* Message::mutable_motionuser(int index) {
-  // @@protoc_insertion_point(field_mutable:motion.Message.motionuser)
-  return motionuser_.Mutable(index);
+inline void Message::clear_includethubmnails() {
+  includethubmnails_ = false;
+  clear_has_includethubmnails();
 }
-inline ::motion::Message_MotionUser* Message::add_motionuser() {
-  // @@protoc_insertion_point(field_add:motion.Message.motionuser)
-  return motionuser_.Add();
+inline bool Message::includethubmnails() const {
+  // @@protoc_insertion_point(field_get:motion.Message.includethubmnails)
+  return includethubmnails_;
 }
-inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionUser >&
-Message::motionuser() const {
-  // @@protoc_insertion_point(field_list:motion.Message.motionuser)
-  return motionuser_;
-}
-inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionUser >*
-Message::mutable_motionuser() {
-  // @@protoc_insertion_point(field_mutable_list:motion.Message.motionuser)
-  return &motionuser_;
+inline void Message::set_includethubmnails(bool value) {
+  set_has_includethubmnails();
+  includethubmnails_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.includethubmnails)
 }
 
 

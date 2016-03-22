@@ -15,6 +15,10 @@ extern std::string CLIENT_ID;
 extern std::string SERVER_BASE_URL;
 extern std::string public_ip;
 
+// WP USER AND PASSWORD
+extern std::string WP_USER;
+extern std::string WP_PASS;
+
 double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d);
 
 std::string get_command_from_wp(std::string command);
