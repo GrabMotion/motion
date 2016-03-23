@@ -1390,7 +1390,7 @@ int insertIntoRecognitionSetup(
             "speed, "           <<
             "xmlfilepath, "     <<
             "runatstartup, "    <<
-            "created) "    <<
+            "created) "         <<
     "SELECT "            << "'"      << 
     prec->recname()      << "', "    <<
     prec->activerec()    << ", "     <<        
@@ -1541,13 +1541,41 @@ void insertIntoLocation(vector<std::string> location)
     ptmr = localtime (&tr.tv_sec);
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
       
-        //rel_camera_month.
+    //rel_camera_month.
     stringstream sql_location;
     sql_location <<
-    "INSERT INTO location (_id, as, city, country, countryCode, isp, lat, lon, public_ip, region, regionName, timezone, zip, time) " <<
-    "SELECT '" << as << "', '"  << city << "', '"  << country << "', '"  << countryCode << "', '"  << isp << "', '"  << lat << "', '"  << lon << "', '"  << public_ip << "', '"  << region << "', '"  << regionName << "', '"  << timezone << "', '"  << zip << "', '"  << time << "' "  <<
+    "INSERT INTO location ("        <<
+            "asnumber, "            <<
+            "city, "                <<
+            "country, "             <<
+            "countryCode, "         <<
+            "isp, "                 <<
+            "lat, "                 <<
+            "lon, "                 <<
+            "publicip, "            <<
+            "region, "              <<
+            "regionName, "          <<
+            "timezone, "            <<
+            "zip, "                 <<
+            "time) "                <<
+    "SELECT '"                      << 
+            as          << "', '"   << 
+            city        << "', '"   << 
+            country     << "', '"   << 
+            countryCode << "', '"   << 
+            isp         << "', '"   << 
+            lat         << "', '"   << 
+            lon         << "', '"   << 
+            public_ip   << "', '"   << 
+            region      << "', '"   << 
+            regionName  << "', '"   << 
+            time_zone   << "', '"   << 
+            zip         << "', '"   << 
+            time_rasp   << "' "     <<
     " WHERE NOT EXISTS (SELECT * FROM location WHERE publicip = '" << public_ip << "');";
+    
     cout << "sql_location: " << sql_location.str() << endl;
+    
     pthread_mutex_lock(&databaseMutex); 
     db_execute(sql_location.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
@@ -1776,7 +1804,7 @@ vector<std::string> getIpInfo()
     vector<std::string> info;
     
     std::stringstream ipinfo;
-    ipinfo << "SELECT publicip, time FROM location;";
+    ipinfo << "SELECT public_ip, time FROM location;";
     pthread_mutex_lock(&databaseMutex);
     vector<vector<string> > ipinfo_array = db_select(ipinfo.str().c_str(), 2);
     pthread_mutex_unlock(&databaseMutex);
@@ -1795,17 +1823,27 @@ vector<std::string> getLocationInfo()
     vector<std::string> info_location;
     
     std::stringstream locinfo;
-    locinfo << "SELECT _id, city, country, location FROM location;";
+    locinfo << "SELECT _id, asnumber, city, country, countryCode, isp, lat, lon, publicip, region, regionName, timezone, zip, time FROM location;";
     pthread_mutex_lock(&databaseMutex);
     vector<vector<string> > locinfo_array = db_select(locinfo.str().c_str(), 4);
     pthread_mutex_unlock(&databaseMutex);
     
     if (locinfo_array.size()>0)
     {
-        info_location.push_back(locinfo_array.at(0).at(0));
-        info_location.push_back(locinfo_array.at(0).at(1));
-        info_location.push_back(locinfo_array.at(0).at(2));
-        info_location.push_back(locinfo_array.at(0).at(3));
+        info_location.push_back(locinfo_array.at(0).at(0));     // _id
+        info_location.push_back(locinfo_array.at(0).at(1));     // as
+        info_location.push_back(locinfo_array.at(0).at(2));     // city
+        info_location.push_back(locinfo_array.at(0).at(3));     // country
+        info_location.push_back(locinfo_array.at(0).at(4));     // countryCode
+        info_location.push_back(locinfo_array.at(0).at(5));     // isp
+        info_location.push_back(locinfo_array.at(0).at(6));     // lat
+        info_location.push_back(locinfo_array.at(0).at(7));     // lon
+        info_location.push_back(locinfo_array.at(0).at(8));     // public_ip
+        info_location.push_back(locinfo_array.at(0).at(9));     // region
+        info_location.push_back(locinfo_array.at(0).at(10));    // regionName
+        info_location.push_back(locinfo_array.at(0).at(11));    // time_zone
+        info_location.push_back(locinfo_array.at(0).at(12));    // zip
+        info_location.push_back(locinfo_array.at(0).at(13));    // time 	
     } 
     
     return info_location;    

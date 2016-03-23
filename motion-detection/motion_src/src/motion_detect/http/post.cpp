@@ -406,19 +406,35 @@ void locationPost(bool update,  vector<std::string> locationinfo )
 {
     
     int db_local;
-    std::string country;
+    
+    std::string as; 
     std::string city;
-    std::string longitude;
-    std::string latitude;
+    std::string country;
+    std::string countryCode;
+    std::string isp;
+    std::string lat;
+    std::string lon;
+    std::string queryIp;
+    std::string region;
+    std::string regionName;
+    std::string time_zone;
+    std::string zip;
     
-    db_local         = atoi(locationinfo.at(0).c_str());
-    city        = locationinfo.at(1);
-    country     = locationinfo.at(2);
-    vector<string> locations;
-    split(locationinfo.at(3), ',', locations);
-    longitude = locations.at(0);
-    latitude = locations.at(1);
+    db_local    = atoi(locationinfo.at(0).c_str());      
     
+    as          = locationinfo.at(1);
+    city        = locationinfo.at(2);        
+    country     = locationinfo.at(3);        
+    countryCode = locationinfo.at(4);            
+    isp         = locationinfo.at(5);    
+    lat         = locationinfo.at(6);    
+    lon         = locationinfo.at(7);    
+    queryIp     = locationinfo.at(8);        
+    region      = locationinfo.at(9);        
+    regionName  = locationinfo.at(10);            
+    time_zone   = locationinfo.at(11);            
+    zip         = locationinfo.at(12);
+
     std::stringstream clientapi;
     clientapi << SERVER_BASE_URL << "client/" <<  CLIENT_ID;
     std::string client_api = escape(clientapi.str());
@@ -440,6 +456,40 @@ void locationPost(bool update,  vector<std::string> locationinfo )
         post_location = true;
     }
    
+    if (post_location)
+    {
+        std::stringstream location_post;
+        location_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X " << posttype << " -d "   << 
+        "'{\"title\":\""            << city                     <<  "\","       <<
+        "\"content_raw\":\"Content\",\"content\":\" \","        <<
+        "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
+        "\"post_parent\":\""                << CLIENT_ID        <<  "\","   <<                
+        "\"locaton_as\":\""                 << as               <<  "\","   <<                
+        "\"locaton_city\":\""               << city             <<  "\","   <<        
+        "\"locaton_country\":\""            << country          <<  "\","   <<                
+        "\"locaton_country_code\":\""       << countryCode      <<  "\","   <<                
+        "\"locaton_isp\":\""                << isp              <<  "\","   <<                                       
+        "\"locaton_longitude\":\""          << lon              <<  "\","   <<        
+        "\"locaton_latitude\":\""           << lat              <<  "\","   <<        
+        "\"locaton_region\":\""             << region           <<  "\","   <<                
+        "\"locaton_region_name\":\""        << regionName       <<  "\","   <<                        
+        "\"locaton_region_time_zone\":\""   << time_zone        <<  "\","   <<                            
+         "\"locaton_zip\":\""               << zip              <<  "\"}'"  <<                     
+        " -H \"Content-Type:application/json\" -H \"Expect: \"" <<
+        " " << url_location;
+        
+        std::string path =  basepath + "/curl_location.txt";
+        std::ofstream outxml;
+        outxml.open (path.c_str());
+        outxml << location_post.str() << "\n";
+        outxml.close();
+        
+        cout << "location_post: " << location_post.str() << endl;
+
+        post_command_to_wp(false, location_post.str(), db_local);
+        
+    }
+    
     /*std::stringstream url_client;
     url_client << " curl " << SERVER_BASE_URL << "client/" << CLIENT_ID;
     std::string locations_relationship_response = get_command_from_wp(url_client.str());
@@ -484,32 +534,7 @@ void locationPost(bool update,  vector<std::string> locationinfo )
         
     }*/
    
-    if (post_location)
-    {
-        std::stringstream location_post;
-        location_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X " << posttype << " -d "   << 
-        "'{\"title\":\""            << city                     <<  "\","       <<
-        "\"content_raw\":\"Content\",\"content\":\" \","        <<
-        "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
-        "\"post_parent\":\""   << CLIENT_ID        <<  "\","   <<                
-        "\"locaton_country\":\""        << country          <<  "\","   <<                
-        "\"locaton_city\":\""           << city             <<  "\","   <<
-        "\"locaton_longitude\":\""      << longitude        <<  "\","   <<        
-        "\"locaton_latitude\":\""       << latitude         <<  "\"}'"  <<     
-        " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
-        " " << url_location;
-        
-        std::string path =  basepath + "/curl_location.txt";
-        std::ofstream outxml;
-        outxml.open (path.c_str());
-        outxml << location_post.str() << "\n";
-        outxml.close();
-        
-        cout << "location_post: " << location_post.str() << endl;
-
-        post_command_to_wp(false, location_post.str(), db_local);
-        
-    }
+    
 }
 
 int dayPost(int db_recid, int db_dayid, std::string label, std::string xml)

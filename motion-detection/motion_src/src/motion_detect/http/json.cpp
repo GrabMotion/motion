@@ -143,7 +143,7 @@ vector<std::string> parse_and_store_ipinfo_io(const char *cstr)
         {
             city = json_object_get_string(val);
         }
-        else if ( strcmp( key, "county" ) == 0 )
+        else if ( strcmp( key, "country" ) == 0 )
         {
             country = json_object_get_string(val);
         }
@@ -185,6 +185,19 @@ vector<std::string> parse_and_store_ipinfo_io(const char *cstr)
         }
     }
     
+    cout << "as         : "  <<  as          << endl; 
+    cout << "city       : "  <<  city        << endl;
+    cout << "country    : "  <<  country     << endl;
+    cout << "countryCode: "  <<  countryCode << endl;
+    cout << "isp        : "  <<  isp         << endl;
+    cout << "lat        : "  <<  lat         << endl;
+    cout << "lon        : "  <<  lon         << endl;
+    cout << "queryIp    : "  <<  queryIp     << endl;
+    cout << "region     : "  <<  region      << endl;
+    cout << "regionName : "  <<  regionName  << endl;
+    cout << "time_zone  : "  <<  time_zone   << endl;
+    cout << "zip        : "  <<  zip         << endl;
+    
     location.push_back(as);             // 0
     location.push_back(city);           // 1
     location.push_back(country);        // 2
@@ -198,6 +211,6 @@ vector<std::string> parse_and_store_ipinfo_io(const char *cstr)
     location.push_back(time_zone);      // 10
     location.push_back(zip);            // 11
        
-    return location;pi
+    return location;
             
 }

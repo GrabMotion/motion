@@ -195,7 +195,7 @@ int netWorkInfo()
  
         FILE *inloc;
         char buffloc[512];
-        std::string location = "http://ip-api.com/json"; //"curl ipinfo.io"; // 190.177.218.76";
+        std::string location = "curl http://ip-api.com/json"; //"curl ipinfo.io"; // 190.177.218.76";
         cout << "location: " << location << endl;
         if(!(inloc = popen(location.c_str(), "r")))
         {
@@ -221,8 +221,8 @@ int netWorkInfo()
         time_zone      		= locationp.at(10);				        			
         zip   			= locationp.at(11);
       
-        cout << "ipnumber: " << NETWORK_IP << endl;
-        cout << "publicip: " << public_ip << endl;
+        cout << "ipnumber: " << NETWORK_IP  << endl;
+        cout << "publicip: " << public_ip   << endl;
                 
         insertIntoLocation(locationp);
         
