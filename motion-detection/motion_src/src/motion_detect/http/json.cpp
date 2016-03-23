@@ -116,13 +116,18 @@ vector<std::string> parse_and_store_ipinfo_io(const char *cstr)
             
     json_object * jobj = json_tokener_parse(cstr);
     
-    std::string publicip; 
-    std::string hostname;
+    std::string as; 
     std::string city;
-    std::string region;
     std::string country;
-    std::string loc;
-    std::string org;
+    std::string countryCode;
+    std::string isp;
+    std::string lat;
+    std::string lon;
+    std::string queryIp;
+    std::string region;
+    std::string regionName;
+    std::string time_zone;
+    std::string zip;
         
     enum json_type type;
     json_object_object_foreach(jobj, key, val)
@@ -130,45 +135,69 @@ vector<std::string> parse_and_store_ipinfo_io(const char *cstr)
         printf("type: ",type);
         type = json_object_get_type(val);
         
-        if ( strcmp( key, "ip" ) == 0 )
+        if ( strcmp( key, "as" ) == 0 )
         {
-            publicip = json_object_get_string(val);
-        }
-        else if ( strcmp( key, "hostname" ) == 0 )
-        {
-            hostname = json_object_get_string(val);
+            as = json_object_get_string(val);
         }
         else if ( strcmp( key, "city" ) == 0 )
         {
             city = json_object_get_string(val);
         }
+        else if ( strcmp( key, "county" ) == 0 )
+        {
+            country = json_object_get_string(val);
+        }
+        else if ( strcmp( key, "countryCode" ) == 0 )
+        {
+            countryCode = json_object_get_string(val);
+        }
+        else if ( strcmp( key, "isp" ) == 0 )
+        {
+            isp = json_object_get_string(val);
+        }
+        else if ( strcmp( key, "lat" ) == 0 )
+        {
+            lat = json_object_get_string(val);
+        }
+        else if ( strcmp( key, "lon" ) == 0 )
+        {
+            lon = json_object_get_string(val);
+        }
+        else if ( strcmp( key, "query" ) == 0 )
+        {
+            queryIp = json_object_get_string(val);
+        }       
         else if ( strcmp( key, "region" ) == 0 )
         {
             region = json_object_get_string(val);
         }
-        else if ( strcmp( key, "country" ) == 0 )
+        else if ( strcmp( key, "regionName" ) == 0 )
         {
-            country = json_object_get_string(val);
+            regionName = json_object_get_string(val);
+        }        
+        else if ( strcmp( key, "timezone" ) == 0 )
+        {
+            time_zone = json_object_get_string(val);
         }
-        else if ( strcmp( key, "loc" ) == 0 )
+        else if ( strcmp( key, "zip" ) == 0 )
         {
-            loc = json_object_get_string(val);
-        }
-        else if ( strcmp( key, "org" ) == 0 )
-        {
-            org = json_object_get_string(val);
+            zip = json_object_get_string(val);
         }
     }
     
-    location.push_back(publicip);
-    location.push_back(hostname);
-    location.push_back(city);
-    location.push_back(region);
-    location.push_back(country);
-    location.push_back(loc);
-    location.push_back(org);
-    
-    //insertIntoLocation(publicip, hostname, city, region, country, loc, org);
-    
-    return location;
+    location.push_back(as);             // 0
+    location.push_back(city);           // 1
+    location.push_back(country);        // 2
+    location.push_back(countryCode);    // 3
+    location.push_back(isp);            // 4
+    location.push_back(lat);            // 5
+    location.push_back(lon);            // 6
+    location.push_back(queryIp);        // 7
+    location.push_back(region);         // 8
+    location.push_back(regionName);     // 9
+    location.push_back(time_zone);      // 10
+    location.push_back(zip);            // 11
+       
+    return location;pi
+            
 }

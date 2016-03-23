@@ -10,13 +10,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/main.cpp</file>
-            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/communications.cpp</file>
-            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/http/post.cpp</file>
-            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/operations/startup.cpp</file>
-            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/protobuffer/motion.pb.h</file>
-            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/database/database.cpp</file>
-            <file>rfs://root@192.168.0.5:22/home/pi/motion/motion-detection/motion_src/src/motion_detect/http/post.h</file>
+            <file>rfs://root@RASPBERRYPI:22/home/pi/motion/motion%2D%64%65%74%65%63%74%69%6F%6E%2F%6D%6F%74%69%6F%6E%5F%73%72%63%2F%73%72%63%2F%6D%6F%74%69%6F%6E%5F%64%65%74%65%63%74%2F%64%61%74%61%62%61%73%65%2F%64%61%74%61%62%61%73%65%2E%63%70%70</file>
+            <file>rfs://root@RASPBERRYPI:22/home/pi/motion/motion%2D%64%65%74%65%63%74%69%6F%6E%2F%6D%6F%74%69%6F%6E%5F%73%72%63%2F%73%72%63%2F%6D%6F%74%69%6F%6E%5F%64%65%74%65%63%74%2F%68%74%74%70%2F%70%6F%73%74%2E%63%70%70</file>
+            <file>rfs://root@RASPBERRYPI:22/home/pi/motion/motion%2D%64%65%74%65%63%74%69%6F%6E%2F%6D%6F%74%69%6F%6E%5F%73%72%63%2F%73%72%63%2F%6D%6F%74%69%6F%6E%5F%64%65%74%65%63%74%2F%68%74%74%70%2F%6A%73%6F%6E%2E%63%70%70</file>
+            <file>rfs://root@RASPBERRYPI:22/home/pi/motion/motion%2D%64%65%74%65%63%74%69%6F%6E%2F%6D%6F%74%69%6F%6E%5F%73%72%63%2F%73%72%63%2F%6D%6F%74%69%6F%6E%5F%64%65%74%65%63%74%2F%6D%61%69%6E%2E%63%70%70</file>
+            <file>rfs://root@RASPBERRYPI:22/home/pi/motion/motion%2D%64%65%74%65%63%74%69%6F%6E%2F%6D%6F%74%69%6F%6E%5F%73%72%63%2F%73%72%63%2F%6D%6F%74%69%6F%6E%5F%64%65%74%65%63%74%2F%6F%70%65%72%61%74%69%6F%6E%73%2F%73%74%61%72%74%75%70%2E%68</file>
+            <file>rfs://root@RASPBERRYPI:22/home/pi/motion/motion%2D%64%65%74%65%63%74%69%6F%6E%2F%6D%6F%74%69%6F%6E%5F%73%72%63%2F%73%72%63%2F%6D%6F%74%69%6F%6E%5F%64%65%74%65%63%74%2F%6F%70%65%72%61%74%69%6F%6E%73%2F%73%74%61%72%74%75%70%2E%63%70%70</file>
+            <file>rfs://root@RASPBERRYPI:22/home/pi/motion/motion%2D%64%65%74%65%63%74%69%6F%6E%2F%6D%6F%74%69%6F%6E%5F%73%72%63%2F%73%72%63%2F%6D%6F%74%69%6F%6E%5F%64%65%74%65%63%74%2F%6F%70%65%72%61%74%69%6F%6E%73%2F%63%6F%6D%6D%75%6E%69%63%61%74%69%6F%6E%73%2E%63%70%70</file>
         </group>
     </open-files>
 </project-private>

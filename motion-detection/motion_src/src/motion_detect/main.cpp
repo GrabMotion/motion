@@ -61,13 +61,20 @@ std::string dumpinstancefolder;
 
 std::string CLIENT_ID;
 std::string SERVER_BASE_URL;
-std::string public_ip;
-std::string hostname;
-std::string city;
-std::string region;
-std::string country;
-std::string loc;
-std::string org;
+
+//LOCATION
+std::string as;             // 0
+std::string city;           // 1
+std::string country;        // 2
+std::string countryCode;    // 3
+std::string isp;            // 4
+std::string lat;            // 5
+std::string lon;            // 6
+std::string public_ip;      // 7
+std::string region;         // 8
+std::string regionName;     // 9
+std::string time_zone;      // 10
+std::string zip;            // 11
 
 //xml
 std::string XML_FILE = "<import>session";

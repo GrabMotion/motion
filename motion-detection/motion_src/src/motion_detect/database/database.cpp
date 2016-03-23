@@ -1174,6 +1174,9 @@ int insertUserIntoDatabase(motion::Message::MotionUser * muser) //int clientnumb
     if (muser->has_clientnumber())  
         cout << "clientnumber       : " <<      muser->clientnumber()        << endl;
     
+    if (muser->has_location())  
+        cout << "location           : " <<      muser->location()            << endl; 
+    
 
     cout << "********************************************" << endl;
 
@@ -1518,13 +1521,18 @@ vector<string> getIntervalsByCamberaAndRec(std::string camera, std::string recna
 void insertIntoLocation(vector<std::string> location)
 {
     
-    std::string publicip = location.at(0);
-    std::string hostname = location.at(1); 
-    std::string city = location.at(2); 
-    std::string region = location.at(3); 
-    std::string country = location.at(4); 
-    std::string loc = location.at(5); 
-    std::string org = location.at(6);
+    std::string  as             = location.at(0);				
+    std::string  city       	= location.at(1);			
+    std::string  country	= location.at(2);			
+    std::string  countryCode	= location.at(3);				
+    std::string  isp    	= location.at(4);				
+    std::string  lat         	= location.at(5);				
+    std::string  lon         	= location.at(6);				
+    std::string  public_ip	= location.at(7);			
+    std::string  region         = location.at(8);				
+    std::string  regionName    	= location.at(9);				
+    std::string  time_zone      = location.at(10);				
+    std::string  zip   		= location.at(11);			
     
     struct timeval tr;
     struct tm* ptmr;
@@ -1532,31 +1540,18 @@ void insertIntoLocation(vector<std::string> location)
     gettimeofday (&tr, NULL);
     ptmr = localtime (&tr.tv_sec);
     strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
-    
-    //rel_camera_month.
-    /*stringstream sql_location;
-    sql_location <<
-    "INSERT OR REPLACE INTO location (publicip, hostname, city, region, country, location, organization, time) " <<
-    "SELECT '" << publicip << "', '"  << hostname << "', '" << city << "', '" << region << "', '" << country << "', '" << loc << "', '" << org << "', '" << time_rasp << "');";
-    cout << "sql_location: " << sql_location.str() << endl;
-    pthread_mutex_lock(&databaseMutex); 
-    db_execute(sql_location.str().c_str());
-    pthread_mutex_unlock(&databaseMutex);*/
-    
-    
-    //rel_camera_month.
+      
+        //rel_camera_month.
     stringstream sql_location;
     sql_location <<
-    "INSERT INTO location (publicip, hostname, city, region, country, location, organization, time) " <<
-    "SELECT '" << publicip << "', '"  << hostname << "', '" << city << "', '" << region << "', '" << country << "', '" << loc << "', '" << org << "', '" << time_rasp << "'" << 
-    " WHERE NOT EXISTS (SELECT * FROM location WHERE publicip = '" << publicip << "');";
+    "INSERT INTO location (_id, as, city, country, countryCode, isp, lat, lon, public_ip, region, regionName, timezone, zip, time) " <<
+    "SELECT '" << as << "', '"  << city << "', '"  << country << "', '"  << countryCode << "', '"  << isp << "', '"  << lat << "', '"  << lon << "', '"  << public_ip << "', '"  << region << "', '"  << regionName << "', '"  << timezone << "', '"  << zip << "', '"  << time << "' "  <<
+    " WHERE NOT EXISTS (SELECT * FROM location WHERE publicip = '" << public_ip << "');";
     cout << "sql_location: " << sql_location.str() << endl;
     pthread_mutex_lock(&databaseMutex); 
     db_execute(sql_location.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
 
-    
-    
 }
 
 int insertIntoPosts(std::string id, 
@@ -1583,7 +1578,7 @@ int insertIntoPosts(std::string id,
     "INSERT INTO track_posts (id, date, modified, slug, type, link, api_link, featured_image, post_parent, count_update, db_local, time_rasp) " <<
     "SELECT " << id << ", '"  << date << "', '" << modified << "', '" << slug << "', '" << type << "', '" << link << "', '" << api_link << "', '" << featured_image << "', '" << post_parent << "', 0, " << db_local << ",'" << time_rasp << "'" << 
     " WHERE NOT EXISTS (SELECT * FROM track_posts WHERE id = " << id << ");";
-    cout << "sql_posts: " << sql_posts.str() << endl;
+    //cout << "sql_posts: " << sql_posts.str() << endl;
     pthread_mutex_lock(&databaseMutex); 
     db_execute(sql_posts.str().c_str());
     pthread_mutex_unlock(&databaseMutex);

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="95">
+<configurationDescriptor version="97">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="." name="0">
       <df name="src">
@@ -81,6 +81,10 @@
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath>src/motion_detect/motion_detect_raspberry</executablePath>
         </makeTool>
+        <preBuild>
+          <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
+          <preBuildCommand></preBuildCommand>
+        </preBuild>
       </makefileType>
       <item path="src/motion_detect/b64/base64.cpp" ex="false" tool="1" flavor2="0">
       </item>

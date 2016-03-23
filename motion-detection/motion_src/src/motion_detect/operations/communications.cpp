@@ -1113,19 +1113,11 @@ motion::Message runCommand(motion::Message m)
             cout << "SERVER_INFO serverip               :" << m.serverip()              << endl;
             cout << "SERVER_INFO packagesize            :" << m.packagesize()           << endl;
             cout << "SERVER_INFO includethubmnails      :" << m.includethubmnails()     << endl;
-            cout << "SERVER_INFO serverip               :" << m.serverip()              << endl; 
-            cout << "SERVER_INFO imagefilepath          :" << m.imagefilepath()         << endl;       
+            cout << "SERVER_INFO serverip               :" << m.serverip()              << endl;  
             cout << "****************************************" << endl;
             
             motion::Message::MotionUser * muser = m.mutable_motionuser(0);
             int db_server = insertUserIntoDatabase(muser);
-
-            /// WP USER AND PASSWORD ///
-            //if (muser->has_wpuser())    
-            //   WP_USER = muser->wpuser(); 
-    
-            //if (muser->has_wppassword())    
-            //    WP_PASS = muser->wppassword(); 
 
             /// WP BASE URL AND USER ID ///
             if (muser->has_wpserverurl())

@@ -175,7 +175,7 @@ int netWorkInfo()
         
     if (callip)
     {    
-        FILE *inip;
+        /*FILE *inip;
         char buffip[512];
         if(!(inip = popen("curl ifconfig.me", "r")))
         {
@@ -186,17 +186,16 @@ int netWorkInfo()
         {
             busip << buffip;
             public_ip = busip.str();
-        }
+        }*/
+        
+        //public_ip = "190.177.218.76";
         
         //REMOVE WHITE SPACES
-        public_ip.erase( std::remove_if( public_ip.begin(), public_ip.end(), ::isspace ), public_ip.end() );
-
-        cout << "ipnumber: " << NETWORK_IP << endl;
-        cout << "publicip: " << public_ip << endl;
-        
+        //public_ip.erase( std::remove_if( public_ip.begin(), public_ip.end(), ::isspace ), public_ip.end() );
+ 
         FILE *inloc;
         char buffloc[512];
-        std::string location = "curl ipinfo.io"; // 190.177.218.76";
+        std::string location = "http://ip-api.com/json"; //"curl ipinfo.io"; // 190.177.218.76";
         cout << "location: " << location << endl;
         if(!(inloc = popen(location.c_str(), "r")))
         {
@@ -209,12 +208,21 @@ int netWorkInfo()
         }
         vector<std::string> locationp = parse_and_store_ipinfo_io(busloc.str().c_str());
         
-        hostname = locationp.at(1);
-        city = locationp.at(2);
-        region = locationp.at(3);
-        country = locationp.at(4);
-        loc = locationp.at(5);        
-        org = locationp.at(6);
+        as             		= locationp.at(0);				
+        city       		= locationp.at(1);			
+        country			= locationp.at(2);			
+        countryCode		= locationp.at(3);					
+        isp    			= locationp.at(4);					
+        lat         	   	= locationp.at(5);				
+        lon         	   	= locationp.at(6);				
+        public_ip		= locationp.at(7);			
+        region         		= locationp.at(8);				
+        regionName    		= locationp.at(9);				
+        time_zone      		= locationp.at(10);				        			
+        zip   			= locationp.at(11);
+      
+        cout << "ipnumber: " << NETWORK_IP << endl;
+        cout << "publicip: " << public_ip << endl;
                 
         insertIntoLocation(locationp);
         
