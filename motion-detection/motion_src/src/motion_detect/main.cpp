@@ -245,7 +245,7 @@ void startThreads()
 int main (int argc, char * const av[])
 {
     
-	cout << "CV_MAJOR_VERSION: " << CV_MAJOR_VERSION << endl;
+    cout << "CV_MAJOR_VERSION: " << CV_MAJOR_VERSION << endl;
 	
     //createBlobTable();
 	
@@ -303,6 +303,9 @@ int main (int argc, char * const av[])
     //Main Loop
     for (;;)
     {
+        
+        sleep(10);
+        
         vector<std::string> user_info = getUserInfo();
 
         cout << "main loop counter: " << main_loop_counter << endl;
@@ -314,6 +317,9 @@ int main (int argc, char * const av[])
             WP_USER = user_info.at(1);
             WP_PASS = user_info.at(2);
 
+            CLIENT_ID       = user_info.at(5);
+            SERVER_BASE_URL = user_info.at(3);
+            
             //Post Location
             locationPost(t_post_location);
 
@@ -322,9 +328,6 @@ int main (int argc, char * const av[])
 
             time_t now;
             time(&now); 
-
-            CLIENT_ID       = user_info.at(5);
-            SERVER_BASE_URL = user_info.at(3);
 
             //Post Terminal
             terminalPost(t_post_terminal);

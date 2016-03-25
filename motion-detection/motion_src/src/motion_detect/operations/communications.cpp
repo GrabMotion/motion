@@ -323,7 +323,7 @@ motion::Message getRefreshProto(motion::Message m)
         }
 
         int engage = motion::Message::ENGAGE;
-        if (m.type() == engage && m.includethubmnails())
+        if (m.includethubmnails())
         { 
             cout << "ENTRA THUMBNAIL" << endl;
 
@@ -1135,7 +1135,8 @@ motion::Message runCommand(motion::Message m)
             std::stringstream timerasp;
             timerasp << time_rasp << endl;
 
-            int db_track = insertIntoPosts(clientid.str(), 
+            int db_track = insertIntoPosts(
+                clientid.str(), 
                 timerasp.str(),
                 muser->wpmodified(),
                 muser->wpslug(),
@@ -1146,13 +1147,16 @@ motion::Message runCommand(motion::Message m)
                 postparent.str(), 
                 db_server); 
 
+            cout << "db_track: " << db_track << endl;    
+            
             if (PROTO.has_serverip())
             {
                 m.set_serverip(PROTO.serverip());
             }
             m.set_type(motion::Message::SERVER_INFO_OK);
-
+            
             m = getRefreshProto(m);
+            
         }
         break;
     }
@@ -1395,10 +1399,9 @@ try
           
           //cout << msg << endl;
           //cout << "..........................................." << endl;
-          
-      }
-      
-      
+         
+        }
+     
         ms.Clear();
         //google::protobuf::ShutdownProtobufLibrary();
     

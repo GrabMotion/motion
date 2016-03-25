@@ -1606,7 +1606,9 @@ int insertIntoPosts(std::string id,
     "INSERT INTO track_posts (id, date, modified, slug, type, link, api_link, featured_image, post_parent, count_update, db_local, time_rasp) " <<
     "SELECT " << id << ", '"  << date << "', '" << modified << "', '" << slug << "', '" << type << "', '" << link << "', '" << api_link << "', '" << featured_image << "', '" << post_parent << "', 0, " << db_local << ",'" << time_rasp << "'" << 
     " WHERE NOT EXISTS (SELECT * FROM track_posts WHERE id = " << id << ");";
-    //cout << "sql_posts: " << sql_posts.str() << endl;
+    
+    cout << "sql_posts: " << sql_posts.str() << endl;
+    
     pthread_mutex_lock(&databaseMutex); 
     db_execute(sql_posts.str().c_str());
     pthread_mutex_unlock(&databaseMutex);
@@ -1825,7 +1827,7 @@ vector<std::string> getLocationInfo()
     std::stringstream locinfo;
     locinfo << "SELECT _id, asnumber, city, country, countryCode, isp, lat, lon, publicip, region, regionName, timezone, zip, time FROM location;";
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > locinfo_array = db_select(locinfo.str().c_str(), 4);
+    vector<vector<string> > locinfo_array = db_select(locinfo.str().c_str(), 14);
     pthread_mutex_unlock(&databaseMutex);
     
     if (locinfo_array.size()>0)

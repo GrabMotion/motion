@@ -478,12 +478,6 @@ void locationPost(bool update,  vector<std::string> locationinfo )
         " -H \"Content-Type:application/json\" -H \"Expect: \"" <<
         " " << url_location;
         
-        std::string path =  basepath + "/curl_location.txt";
-        std::ofstream outxml;
-        outxml.open (path.c_str());
-        outxml << location_post.str() << "\n";
-        outxml.close();
-        
         cout << "location_post: " << location_post.str() << endl;
 
         post_command_to_wp(false, location_post.str(), db_local);
