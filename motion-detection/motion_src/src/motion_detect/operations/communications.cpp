@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <netdb.h>
 
+#include <parse.h>
 
 using namespace std;
 using namespace cv;
@@ -763,7 +764,7 @@ motion::Message runCommand(motion::Message m)
             db_execute(sql_connection.str().c_str());
             pthread_mutex_unlock(&databaseMutex);
 
-            /*cout << "****************************************" << endl;
+            cout << "****************************************" << endl;
             if (m.has_type())
                 cout << "ENGAGE type            :" << m.type() << endl;
             if (m.has_time())
@@ -786,7 +787,7 @@ motion::Message runCommand(motion::Message m)
             cout << "ENGAGE dataamount          :" << m.dataamount() << endl;
             if (m.has_datatotal())
             cout << "ENGAGE datatotal           :" << m.datatotal() << endl;
-            cout << "****************************************" << endl;*/
+            cout << "****************************************" << endl;
         
             m.set_type(motion::Message::ENGAGE);
 
@@ -1011,7 +1012,7 @@ motion::Message runCommand(motion::Message m)
             motion::Message::MotionRec * mrec = mcamera->mutable_motionrec(0);
                 
             updateRecStatusByRecName(0, mrec->recname());
-            
+             
             mcamera->Clear();
             mrec->Clear();
             
@@ -1106,25 +1107,16 @@ motion::Message runCommand(motion::Message m)
             char time_rasp[40];
             gettimeofday (&tr, NULL);
             ptmr = localtime (&tr.tv_sec);
-            strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
-
-            cout << "****************************************" << endl;
-            cout << "SERVER_INFO type                   :" << m.type()                  << endl;
-            cout << "SERVER_INFO serverip               :" << m.serverip()              << endl;
-            cout << "SERVER_INFO packagesize            :" << m.packagesize()           << endl;
-            cout << "SERVER_INFO includethubmnails      :" << m.includethubmnails()     << endl;
-            cout << "SERVER_INFO serverip               :" << m.serverip()              << endl;  
-            cout << "****************************************" << endl;
+            strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);          
             
             motion::Message::MotionUser * muser = m.mutable_motionuser(0);
-            int db_server = insertUserIntoDatabase(muser);
-
+            
             /// WP BASE URL AND USER ID ///
             if (muser->has_wpserverurl())
                 SERVER_BASE_URL = muser->wpserverurl();  
                 
             if (muser->has_wpclientid()) 
-                CLIENT_ID = muser->wpclientid();  
+                WP_CLIENT_ID = muser->wpclientid();  
     
             std::stringstream clientid;
             clientid << muser->wpclientid() << endl;
@@ -1133,27 +1125,13 @@ motion::Message runCommand(motion::Message m)
             postparent << muser->wpparent() << endl;
 
             std::stringstream timerasp;
-            timerasp << time_rasp << endl;
+            timerasp << time_rasp << endl;   
 
-            int db_track = insertIntoPosts(
-                clientid.str(), 
-                timerasp.str(),
-                muser->wpmodified(),
-                muser->wpslug(),
-                muser->wptype(),
-                muser->wplink(),
-                muser->wpapilink(),
-                muser->wpfeaturedimage(),
-                postparent.str(), 
-                db_server); 
-
-            cout << "db_track: " << db_track << endl;    
-            
             if (PROTO.has_serverip())
             {
                 m.set_serverip(PROTO.serverip());
             }
-            m.set_type(motion::Message::SERVER_INFO_OK);
+            m.set_type(motion::Message::SERVER_INFO_OK);   
             
             m = getRefreshProto(m);
             
@@ -1215,6 +1193,25 @@ try
       //cout << "count vector size:" << count_vector_size << endl;
         
       value = ms.type();
+      
+      
+      //IF USER INFO STORE PROTO TO DISK
+      if (value == motion::Message::SERVER_INFO)
+      {
+          
+        motion::Message::MotionUser * muser = ms.mutable_motionuser(0);
+        int db_user_id = insertUserIntoDatabase(muser);               
+          
+        std::string trackdatafile = basepath + "data/client"; 
+        directoryExistsOrCreate(trackdatafile.c_str());                  
+
+        std::string path =  basepath + "data/client/client.dat";
+
+        std::ofstream outuser;
+        outuser.open (path.c_str());
+        outuser << strproto << "\n";
+        outuser.close();            
+      }
 
       cout << "Proto size   : " << ms.ByteSize() << endl;
 
@@ -1348,8 +1345,13 @@ try
              
       if ( final_size > chunck_size )
       {
+          
+          //cout << "all_encoded.length(): " << all_encoded.length() << endl;
+          //cout << "chunck_size: " << chunck_size << endl;
+          
           for (unsigned i = 0; i < all_encoded.length(); i += chunck_size)
           {
+              cout << "i: " << i << endl;
               msg_split_vector_comm.push_back(all_encoded.substr(i, chunck_size));
           }
           

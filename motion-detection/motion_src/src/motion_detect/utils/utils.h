@@ -38,7 +38,6 @@ std::string getCurrentMonthLabel();
 char *getShortTimeRasp();
 char * getTimeRasp();
 char * setTimeToRaspBerry(struct tm tmremote, int timezone_adjust);
-
  
 //Commands
 std::string exec_command(char* cmd);
@@ -52,3 +51,18 @@ cv::Mat getImageWithTextByPath(std::string imagefilepath);
 cv::Mat extractMat(string loadedmat);
 cv::Mat drawRectFromCoordinate(std::string coords, cv::Mat mat, cv::Scalar color);
 
+int createJobManually(
+    int cameranumber, 
+    std::string codename,
+    google::protobuf::uint32 delay,     
+    std::string recname);
+
+
+int createJobManually(
+    int cameranumber, 
+    std::string codename,
+    google::protobuf::uint32 delay,
+    std::string recname,    
+    std::string coords);
+
+void loadJobFromFile();

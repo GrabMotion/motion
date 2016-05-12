@@ -168,3 +168,9 @@ std::string getDayCreatedById(int dayid);
 std::string getIntervalByIdRecognitionSetupId(int db_idrec);
 
 int insertIntoNetwork(std::string public_ip, std::string local_ip, std::string resutl_mac );
+
+std::vector<string> getCameraByCameraNumber(int cameranumber);
+
+vector<string> getInstallationUIID();
+
+int getUserIdByWpUserName(std::string username);

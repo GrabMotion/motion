@@ -13,8 +13,8 @@
 
 //Cameras
 std::vector<int> getCameras();
-motion::Message::MotionCamera * takePictureToProto(int camera, motion::Message::MotionCamera * mcam);
-std::string takeThumbnailFromCamera(int camera);
+motion::Message::MotionCamera * takePictureToProto(int cameranumber, motion::Message::MotionCamera * mcam);
+std::vector<std::string> takeThumbnailFromCamera(int camera);
 
 //Global 
 extern cv::Mat picture;

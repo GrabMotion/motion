@@ -7,6 +7,8 @@
 
 #include "../utils/utils.h"
 #include "../database/database.h"
+#include "../operations/camera.h"
+#include "../http/post.h"
 
 #include <iostream>     // std::cout
 #include <fstream>      // std::ifstream
@@ -19,8 +21,6 @@
 #include <string>
 
 #include <errno.h>
-
-
 
 std::string getXMLFilePathAndName(std::string sourcepath, int cam, std::string recname, std::string currday, std::string name)
 {
@@ -364,8 +364,22 @@ cv::Mat getImageWithTextByPath(std::string imagefilepath)
 
 cv::Mat drawRectFromCoordinate(std::string coords, cv::Mat mat, cv::Scalar color)
 {
+    cout << "coords: " << coords << endl;
+    std::string coordstring;
+    
+    if(
+       (coords.find("[") != std::string::npos) &&
+       (coords.find("]") != std::string::npos) &&
+       (coords.find(";") != std::string::npos) )
+    {
+        coordstring = coords;
+    } else
+    {
+        coordstring = base64_decode(coords);
+    }  
+         
     vector<cv::Point> coordinates;
-    std::stringstream ss(coords);
+    std::stringstream ss(coordstring);
     string d;
     int c=0, x=0, y=0, t=0;
     while (ss >> d)
@@ -432,6 +446,187 @@ cv::Mat extractMat(string loadedmat)
 
     return extracted;
 }
+
+void loadJobFromFile()
+{
+    
+    //CREATE JOBS
+
+     vector<std::string> cameras = getCamerasFromDB();
+
+     for (int i=0; i<cameras.size(); i++)
+     {
+         if (i==1) //REMOVE THIS FOR MULTI CAMERA
+         {
+             int db_camera = atoi(cameras.at(3).c_str());               
+
+             vector<std::string> camerainfo = getTrackPostByTypeAndIdLocal("camera", db_camera);
+             if (camerainfo.size()>0)
+             {
+                 struct timeval tr;
+                 struct tm* ptmr;
+                 char time_rasp[40];
+                 gettimeofday (&tr, NULL);
+                 ptmr = localtime (&tr.tv_sec);
+                 strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);          
+
+                 std::string post_parent = camerainfo.at(9).c_str();           
+
+                 std::stringstream dumpfile;
+                 dumpfile << basepath << "data/client/client.dat";
+
+                 std::string strproto = get_file_contents(dumpfile.str());
+                 std::string strdecoded = base64_decode(strproto);
+
+                 //cout << "RECEIVE" << endl;
+
+                 GOOGLE_PROTOBUF_VERIFY_VERSION;
+                 motion::Message m;
+                 m.ParseFromArray(strdecoded.c_str(), strdecoded.size());
+
+                 motion::Message::MotionUser * muser = m.mutable_motionuser(0);
+                 
+                 google::protobuf::uint32 db_user_id = getUserIdByWpUserName(muser->username());
+
+                 std::stringstream clientid;
+                 clientid << muser->wpclientid() << endl;
+
+                 std::stringstream timerasp;
+                 timerasp << time_rasp << endl;                    
+
+                 cout << "****************************************" << endl;
+                 cout << "SERVER_INFO clientid                   :" << clientid.str()           << endl;
+                 cout << "SERVER_INFO timerasp                   :" << timerasp.str()           << endl;
+                 cout << "SERVER_INFO wpmodified                 :" << muser->wpmodified()      << endl;
+                 cout << "SERVER_INFO wpslug                     :" << muser->wpslug()          << endl;
+                 cout << "SERVER_INFO wptype                     :" << muser->wptype()          << endl;
+                 cout << "SERVER_INFO wplink                     :" << muser->wplink()          << endl;
+                 cout << "SERVER_INFO wpapilink                  :" << muser->wpapilink()       << endl;
+                 cout << "SERVER_INFO wpfeaturedimage            :" << muser->wpfeaturedimage() << endl;            
+                 cout << "SERVER_INFO postparent                 :" << post_parent              << endl;            
+                 cout << "****************************************" << endl;
+
+                int db_track = insertIntoPosts(clientid.str(), timerasp.str(), muser->wpmodified(), muser->wpslug(), muser->wptype(), muser->wplink(), muser->wpapilink(), muser->wpfeaturedimage(), post_parent, db_user_id);                           
+
+                 //CREATE JOB STATIC
+                 createJobManually(db_camera, "test", 2, "BASIC");
+             } 
+         }
+     }    
+    
+}
+
+
+
+
+int createJobManually(
+    int cameranumber, 
+    std::string codename,
+    google::protobuf::uint32 delay,        
+    std::string recname)
+{
+    std::string coords;
+    createJobManually(cameranumber, codename, delay, recname, coords);
+}
+
+
+int createJobManually(
+    int cameranumber, 
+    std::string codename,
+    google::protobuf::uint32 delay,
+    std::string recname,
+    std::string coords)
+{
+    
+    motion::Message m;
+    
+    m.set_activecam(cameranumber);
+    
+    std::vector<string> camera_vector = getCameraByCameraNumber(cameranumber);   
+    
+    int _id = atoi(camera_vector.at(0).c_str());
+    std::string name = camera_vector.at(1); 
+    int matrows     = atoi(camera_vector.at(2).c_str());
+    int matcols     = atoi(camera_vector.at(3).c_str());
+    int matheight   = atoi(camera_vector.at(4).c_str());
+    int matwidth    = atoi(camera_vector.at(5).c_str());
+    int _idmat      = atoi(camera_vector.at(6).c_str());
+
+    motion::Message::MotionCamera * mcamera = m.add_motioncamera();  
+    
+    mcamera->set_cameraname(name);
+    
+    mcamera->set_db_idcamera(_id);
+        
+    mcamera->set_cameraname(name);
+
+    mcamera->set_cameranumber(cameranumber);
+    mcamera->set_fromdatabase(false); 
+    
+    mcamera = takePictureToProto(cameranumber, mcamera);
+    
+    motion::Message::MotionRec * mrec = mcamera->add_motionrec();
+    
+    mrec->set_activerec(true);
+    
+    std::string _month = getCurrentMonthLabel();
+    m.set_currmonth(_month);
+
+    motion::Message::MotionMonth * pmonth = mcamera->add_motionmonth();
+    pmonth->set_monthlabel(_month);
+
+    std::string _day = getCurrentDayLabel();
+    m.set_currday(_day);  
+    
+    mrec->set_codename(codename);
+
+    mrec->set_delay(delay);
+
+    mrec->set_storevideo(true);
+
+    mrec->set_storeimage(true);   
+
+    mrec->set_recname(recname);
+    
+    if (!coords.empty())
+    {
+        mrec->set_hasregion(true);    
+
+        std::stringstream coords;
+        coords      << 
+        "[0, 0;"    <<
+        "480, 0;"   <<  
+        "640, 640;" <<
+        "0, 640;"   <<
+        "0, 0]";
+
+        mrec->set_coordinates(coords.str());
+    } else 
+    {
+        mrec->set_hasregion(false);
+    }
+    
+    mrec->set_db_idmat(_idmat);
+    mrec->set_matrows(matrows);   
+    mrec->set_matcols(matcols);   
+    mrec->set_matheight(matwidth);
+    mrec->set_matwidth(matheight);   
+    
+    mrec->set_runatstartup(true);
+    
+    mrec->set_hascron(true);    
+    mrec->set_timestart("00:00:00");
+    mrec->set_timeend("24:00:00");       
+    
+    m = saveRecognition(m);
+   
+    postRecognition(m);
+    
+    return _id;
+    
+}
+
+
 
 // String Generator
 /*char genRandom()

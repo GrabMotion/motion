@@ -820,6 +820,13 @@ class Message_MotionUser : public ::google::protobuf::Message {
   inline ::std::string* release_wpmodified();
   inline void set_allocated_wpmodified(::std::string* wpmodified);
 
+  // optional int32 db_user_id = 23;
+  inline bool has_db_user_id() const;
+  inline void clear_db_user_id();
+  static const int kDbUserIdFieldNumber = 23;
+  inline ::google::protobuf::int32 db_user_id() const;
+  inline void set_db_user_id(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:motion.Message.MotionUser)
  private:
   inline void set_has_clientnumber();
@@ -866,6 +873,8 @@ class Message_MotionUser : public ::google::protobuf::Message {
   inline void clear_has_wpparent();
   inline void set_has_wpmodified();
   inline void clear_has_wpmodified();
+  inline void set_has_db_user_id();
+  inline void clear_has_db_user_id();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -893,6 +902,7 @@ class Message_MotionUser : public ::google::protobuf::Message {
   ::std::string* wpfeaturedimage_;
   ::std::string* wptype_;
   ::std::string* wpmodified_;
+  ::google::protobuf::int32 db_user_id_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -5903,6 +5913,30 @@ inline void Message_MotionUser::set_allocated_wpmodified(::std::string* wpmodifi
     wpmodified_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.wpmodified)
+}
+
+// optional int32 db_user_id = 23;
+inline bool Message_MotionUser::has_db_user_id() const {
+  return (_has_bits_[0] & 0x00400000u) != 0;
+}
+inline void Message_MotionUser::set_has_db_user_id() {
+  _has_bits_[0] |= 0x00400000u;
+}
+inline void Message_MotionUser::clear_has_db_user_id() {
+  _has_bits_[0] &= ~0x00400000u;
+}
+inline void Message_MotionUser::clear_db_user_id() {
+  db_user_id_ = 0;
+  clear_has_db_user_id();
+}
+inline ::google::protobuf::int32 Message_MotionUser::db_user_id() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.db_user_id)
+  return db_user_id_;
+}
+inline void Message_MotionUser::set_db_user_id(::google::protobuf::int32 value) {
+  set_has_db_user_id();
+  db_user_id_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.db_user_id)
 }
 
 // -------------------------------------------------------------------

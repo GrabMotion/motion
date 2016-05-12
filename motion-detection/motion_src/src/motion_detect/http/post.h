@@ -11,8 +11,9 @@
 using namespace std;
 
 //Global
-extern std::string CLIENT_ID;
+extern std::string WP_CLIENT_ID;
 extern std::string SERVER_BASE_URL;
+extern std::string WP_USER_ID;
 extern std::string public_ip;
 
 // WP USER AND PASSWORD
@@ -26,6 +27,7 @@ vector<std::string> get_command_to_array_wp(std::string url);
 
 int post_command_to_wp(bool update, std::string command, int db_local);
 int post_command_to_wp(std::string command);
+int post_media_command_to_wp(bool update, std::string command, int db_local);
 
 vector<std::string> parsePost(std::string message, int numArgs, ...);
 

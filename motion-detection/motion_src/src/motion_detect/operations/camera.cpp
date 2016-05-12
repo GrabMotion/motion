@@ -20,19 +20,19 @@
 using namespace std;
 using namespace cv;
 
-motion::Message::MotionCamera * takePictureToProto(int camera, motion::Message::MotionCamera * mcam)
+motion::Message::MotionCamera * takePictureToProto(int cameranumber, motion::Message::MotionCamera * mcam)
 {
     
     cout << "CAPTURING !!!!!!!!!!!!!" << endl;
     
-    CvCapture* capture = cvCreateCameraCapture(camera);
+    CvCapture* capture = cvCreateCameraCapture(cameranumber);
     if (capture == NULL)
     {
         std::cout << "No cam found." << std::endl;
     }
     
-    int w = 640; //1280; //320;
-    int h = 480; //720;  //240;
+    int w = 320; //640; //1280; //320;
+    int h = 240; //480; //720;  //240;
     
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
@@ -133,8 +133,10 @@ motion::Message::MotionCamera * takePictureToProto(int camera, motion::Message::
 }
 
 
-std::string takeThumbnailFromCamera(int camera)
+std::vector<std::string> takeThumbnailFromCamera(int camera)
 {
+    
+    std::vector<string> response; 
     
     cout << "CAPTURING !!!!!!!!!!!!!" << endl;
     
@@ -149,28 +151,16 @@ std::string takeThumbnailFromCamera(int camera)
     
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
-    
-    //IplImage* img=0;
-    //img = cvQueryFrame( capture );  
-    //cvSaveImage("IplImage.JPG",img);
-    
+   
     Mat bigmat; //(h, w, CV_8U); //CV_8U); // CV_8UC3);
     bigmat = cvQueryFrame(capture);
-    //cvtColor(mat, mat, CV_RGB2GRAY);
-     
+    
     cout << "+++++++++++CREATING THUMBNAIL++++++++++++++" << endl;
     
     Size size(100,75);      //the dst image size,e.g.100x100
     Mat mat;                //dst image
     resize(bigmat,mat,size);   //resize image
-
-    //std:stringstream thumbmat;
-    //thumbmat << dst << endl;
-
-    //std::string thumbnail = thumbmat.str();
-
-    //std::string thumbencoded = base64_encode(reinterpret_cast<const unsigned char*>(thumbnail.c_str()), thumbnail.length());
-
+    
     // We will need to also serialize the width, height, type and size of the matrix
     int width_s     = mat.cols;
     int height_s    = mat.rows;
@@ -210,9 +200,26 @@ std::string takeThumbnailFromCamera(int camera)
     out << encodedmat << "\n";
     out.close();
 
+    stringstream insert_mats_query;
+    insert_mats_query <<
+    "INSERT INTO mat (matcols, matrows, matwidth, matheight, matfile, basefile, data) " <<
+    "SELECT " << width_s << ", " << height_s << ", " << w << ", " << h << ", " << activemat << ",'" << basefile << "','" << encodedmat.c_str() << "'"
+    " WHERE NOT EXISTS (SELECT * FROM mat WHERE matfile = " << activemat << ");";
+    db_execute(insert_mats_query.str().c_str());
+    std::string last_mats_query = "SELECT MAX(_id) FROM mat";
+    vector<vector<string> > mats_array = db_select(last_mats_query.c_str(), 1);
+    int db_mats_id = atoi(mats_array.at(0).at(0).c_str());
+    cout << "db_mats_id: " << db_mats_id << endl;   
+    
     cvReleaseCapture(&capture);
-        
-    return basefile;
+    
+    std::stringstream dnmatsid;
+    dnmatsid << db_mats_id;   
+       
+    response.push_back(basefile);
+    response.push_back(dnmatsid.str());
+    
+    return response;
 }
 
 

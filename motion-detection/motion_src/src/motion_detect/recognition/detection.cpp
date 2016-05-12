@@ -551,9 +551,9 @@ void * startRecognition(void * arg)
     std::string rcoords;
     if (mrec->hasregion())
     {
-        std::string rc = mrec->coordinates(); 
-        rcoords = base64_decode(rc);
-        cout << "rcoords." << rcoords << endl;
+        rcoords = base64_decode(mrec->coordinates());        
+        std::string rc = base64_decode(rcoords);
+        cout << "rc: " << rc << endl;
          
         if (mrec->has_matrows())
                matrows = mrec->matrows();
@@ -561,7 +561,7 @@ void * startRecognition(void * arg)
         if (mrec->has_matcols())
             matcols = mrec->matcols();
         
-        region = processRegionString(rcoords);
+        region = processRegionString(rc);
         
         if (region.size()>0)
             has_region = true;
@@ -1087,11 +1087,10 @@ void dumpInstance(int activecamnum,
 
     //Initialize objects to serialize.
     int size = pinstance->ByteSize();
-    char datasend[size];
-    string datastr;
+    char datasend[size];    
     pinstance->SerializePartialToArray(&datasend, size);
 
-    std:string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(datasend),sizeof(datasend));
+    std::string encoded_proto = base64_encode(reinterpret_cast<const unsigned char*>(datasend),sizeof(datasend));
 
     std::stringstream dumpfile;
     dumpfile << basepath << "data/instances/camera" << activecamnum << "/" << dumpfilename << "-" << instance << ".dat";

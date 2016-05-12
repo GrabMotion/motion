@@ -29,6 +29,7 @@ extern std::string basepath;
 extern std::string sourcepath;
 extern void startMainRecognition(int camnum);
 extern bool stop_capture;
+extern void startNotificationThread();
 
 // WP USER AND PASSWORD
 extern std::string WP_USER;

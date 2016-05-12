@@ -47,7 +47,7 @@ motion::Message postRecognition(motion::Message m)
 
     motion::Message::MotionCamera * pcamera = m.mutable_motioncamera(0);
     motion::Message::MotionRec * prec = pcamera->mutable_motionrec(0);
-    
+   
     std::string recname = prec->recname();
      //time
     struct timeval tr;
@@ -68,9 +68,12 @@ motion::Message postRecognition(motion::Message m)
 
         cv::Scalar red(255,0,0);
         
-        std::string rcoords = m.datafile();
-
-        mat = drawRectFromCoordinate(rcoords, mat, red);
+        std::string rcoords;
+        if (prec->has_coordinates())
+        {
+            rcoords = prec->coordinates();
+            mat = drawRectFromCoordinate(rcoords, mat, red);
+        }
 
         std::string trackdatafile = basepath + "data/tracking"; 
         directoryExistsOrCreate(trackdatafile.c_str());
@@ -111,12 +114,41 @@ motion::Message postRecognition(motion::Message m)
                
             } else 
             {
-                std::stringstream media;
-                media << "curl --user " << WP_USER << ":" << WP_PASS << " -X POST -H 'Content-Disposition: filename=" << fineandextension << 
-                "' --data-binary @'"<< maximagepath << "' -d title='" << recname << "' -H \"Expect: \" " << SERVER_BASE_URL << "media";
+                bool curl = true;
+                if (!curl)
+                {
+                    //TEST TO POST DIRECTLY TO PHP 
+                    bool imageexist = file_exists(maximagepath);
+                    if (imageexist)
+                    {
+                                  
+                        std::string imagedata = get_file_contents(maximagepath);                        
+                        std::string imageBase64 = base64_encode(reinterpret_cast<const unsigned char*>(imagedata.c_str()), imagedata.length());
 
-                idmedia = post_command_to_wp(false, media.str(), prec->db_idmat());
-            }
+                        std::stringstream media_php;
+                        media_php << "curl -H \"Content-Type: application/json\" -X POST -d " <<
+                        "'{\"check_login\":5,"          <<
+                        "\"media_userlogin\":\"" 	<< WP_USER 	<< "\"," 	<<
+                        "\"media_userpassword\":\""     << WP_PASS 	<< "\","	<<
+                        "\"image\":\""                  << imageBase64 	<< "\"," 	<<
+                        "\"postId\":"    		<< WP_CLIENT_ID << ","          <<
+                        "\"post_author\":"       	<< WP_USER_ID 	<< ","          <<
+                        "}' http://grabmotion.co/wp-json/wp/v2/media";
+
+                        idmedia = post_media_command_to_wp(false, media_php.str(), prec->db_idmat());                        
+                    }
+                    
+                } else 
+                {  
+                    std::stringstream media_curl;
+                    media_curl << "curl --user " << WP_USER << ":" << WP_PASS << " -X POST -H 'Content-Disposition:attachement;filename=" << fineandextension << 
+                    "' --data-binary @'" << maximagepath << "' -d title='" << recname << "' -H \"Expect: \" " << SERVER_BASE_URL << "media";
+
+                    std::cout << "media.str(): " << media_curl.str() << std::endl;
+                
+                    idmedia = post_command_to_wp(false, media_curl.str(), prec->db_idmat());
+                }
+            }            
             
             std::string media_url;
             vector<std::string> media_attahced = getTrackPostByTypeAndIdRemote("attachment", idmedia);
@@ -138,14 +170,22 @@ motion::Message postRecognition(motion::Message m)
             }
 
             std::string codename            = prec->codename();
-            std::string region              = rcoords;
+            
             int delay                       = prec->delay();
             bool runatstartup               = prec->runatstartup();
             bool hascron                    = prec->hascron();
             std::string screen              = mat_array.at(0);
             
-            std::string coordsnb = region;    
-            coordsnb.erase(std::remove(coordsnb.begin(), coordsnb.end(), '\n'), coordsnb.end());
+            std::string region;
+            if (prec->has_coordinates())
+            {
+                region = rcoords;
+                std::string coordsnb = region;    
+                coordsnb.erase(std::remove(coordsnb.begin(), coordsnb.end(), '\n'), coordsnb.end());
+            } else
+            {
+                region = "N/A";
+            }
 
             bool running = getRecRunningByName(recname);
             
@@ -196,17 +236,29 @@ int instancePost(motion::Message::Instance pinstance, int db_instance_id, int po
     if (max_image.size()==0)
         return 0;
     
+    bool has_region;
     int db_local        = atoi(max_image.at(0). c_str());
     std::string maxpath = max_image.at(1);
     std::string maxname = max_image.at(2);
     std::string maxday  = max_image.at(3);
     std::string maxrec  = max_image.at(4);
     std::string maxtime = max_image.at(5);
-    std::string coords  = max_image.at(6);
+    std::string coords;
+    
+    if (max_image.size()>6)
+    {
+        has_region = true;
+        coords = max_image.at(6);       
+    } else 
+    {
+        has_region = false;
+    }
 
     cv::Mat mat = getImageWithTextByPath(maxpath);
     cv::Scalar yellow(0,255,255);
-    mat = drawRectFromCoordinate(coords, mat, yellow);
+    
+    if (has_region)
+        mat = drawRectFromCoordinate(coords, mat, yellow);
     
     std::string trackdatafile = basepath + "data/tracking"; 
     directoryExistsOrCreate(trackdatafile.c_str());
@@ -227,7 +279,7 @@ int instancePost(motion::Message::Instance pinstance, int db_instance_id, int po
     cout << "posting: " << fineandextension << endl;
     
     std::stringstream media;
-    media << "curl --user " << WP_USER << ":" << WP_PASS << " -X POST -H 'Content-Disposition: filename=" << 
+    media << "curl --user " << WP_USER << ":" << WP_PASS << " -X POST -H 'Content-Disposition:attachment;filename=" << 
     fineandextension << "' --data-binary @'"    << 
     maximagepath << "' -d title='"              << 
     maxtime << "' -H \"Expect: \" "             << 
@@ -352,10 +404,51 @@ int post_command_to_wp(bool update, std::string command, int db_local)
     return id;
 }
 
+int post_media_command_to_wp(bool update, std::string command, int db_local)
+{
+    int id = 0;
+    
+    cout << "post_command: " << command << endl;
+    
+    FILE* pipe = popen(command.c_str(), "r");
+    int size = sizeof(pipe);
+    char buffer[128];
+    std::string result = "";
+    std::string error;
+    
+    std::stringstream post_response;
+    while(!feof(pipe)) 
+    {
+    	if(fgets(buffer, sizeof(buffer), pipe) != NULL)
+        {
+            post_response << buffer; 
+        }       
+    }
+    pclose(pipe);
+    
+    // HERE PARSE FOR RESPONSE OF PHP AND INSERT PORT INFO ACCORDINGLY
+    
+    /*char *s;
+    s = strstr(buffer, "<?xml");      
+    if (s != NULL)                     
+    {
+        TiXmlDocument doc;
+        doc.Parse(post_response.str().c_str());
+        TiXmlNode * titlenode = doc.RootElement()->FirstChild( "head" )->FirstChild( "title" ); //Tree root
+        error = titlenode->Value();
+
+    } else 
+    {
+        id = insertUpdatePostInfo(update, post_response.str(), db_local);
+    }*/
+     
+    return id;
+}
+
 std::string get_command_to_wp(std::string command)
 {
     FILE* pipe = popen(command.c_str(), "r");
-    int size = sizeof(pipe);
+    int size = sizeof(pipe);F
     char buffer[128];
     std::string result = "";
     std::string error;
@@ -436,7 +529,7 @@ void locationPost(bool update,  vector<std::string> locationinfo )
     zip         = locationinfo.at(12);
 
     std::stringstream clientapi;
-    clientapi << SERVER_BASE_URL << "client/" <<  CLIENT_ID;
+    clientapi << SERVER_BASE_URL << "client/" <<  WP_CLIENT_ID;
     std::string client_api = escape(clientapi.str());
     
     bool post_location      = false;
@@ -463,7 +556,7 @@ void locationPost(bool update,  vector<std::string> locationinfo )
         "'{\"title\":\""            << city                     <<  "\","       <<
         "\"content_raw\":\"Content\",\"content\":\" \","        <<
         "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
-        "\"post_parent\":\""                << CLIENT_ID        <<  "\","   <<                
+        "\"post_parent\":\""                << WP_CLIENT_ID     <<  "\","   <<                
         "\"locaton_as\":\""                 << as               <<  "\","   <<                
         "\"locaton_city\":\""               << city             <<  "\","   <<        
         "\"locaton_country\":\""            << country          <<  "\","   <<                
@@ -485,7 +578,7 @@ void locationPost(bool update,  vector<std::string> locationinfo )
     }
     
     /*std::stringstream url_client;
-    url_client << " curl " << SERVER_BASE_URL << "client/" << CLIENT_ID;
+    url_client << " curl " << SERVER_BASE_URL << "client/" << WP_CLIENT_ID;
     std::string locations_relationship_response = get_command_from_wp(url_client.str());
     vector<string> locations_relationship = parsePost(locations_relationship_response, 1, "client_locations");
     std::string response_locations;
@@ -992,6 +1085,12 @@ void cameraPost(double timecount)
     }
     
     if (post_camera)
-        postCameraStatus();          
+    {
+        postCameraStatus(); 
+        
+        //Load Basic Jobs
+        loadJobFromFile();            
+        
+    }    
     
 }

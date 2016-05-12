@@ -59,9 +59,6 @@ bool observer_running;
 
 std::string dumpinstancefolder;
 
-std::string CLIENT_ID;
-std::string SERVER_BASE_URL;
-
 //LOCATION
 std::string as;             // 0
 std::string city;           // 1
@@ -88,16 +85,21 @@ int       	server_camera;
 //WP User and Password
 std::string WP_USER;
 std::string WP_PASS;
+std::string WP_USER_ID;
+std::string WP_CLIENT_ID;
+std::string SERVER_BASE_URL;
 
 //Threads
-int runt, runb, runs, runr, runl, runm, runw, runss, runo, ruse;
+int runt, runb, runs, runr, runl, runm, runw, runss, runo, ruse, runn;
 int numRecognitionThreads = 4;
 std::vector<pthread_t> threads_recognition(4);
 std::vector<int> threads_recognizing_pids(4);
 
+
 // Threading
-pthread_t thread_broadcast, thread_echo, thread_socket;
+pthread_t thread_broadcast, thread_echo, thread_socket, thread_notification;
 bool observer_thread_running = false;
+int thread_notification_pid = 0;
 
 //Threads
 pthread_cond_t echo_response;
@@ -105,6 +107,9 @@ pthread_mutex_t protoMutex, fileMutex, databaseMutex;
 bool echo_received;
 motion::Message::ActionType resutl_echo;
 std::string from_ip;
+
+//Notification 
+void startNotificationThread();
 
 // END GLOBAL VARIABLES //
 
@@ -119,12 +124,12 @@ void startMainRecognition(int camnum);
 void * startRecognition(void * arg);
 
 //Run Forever
-double t_post_terminal      = 60 * 20; //60 * 24; 
-double t_post_location   = 60 * 60 * 12; 
-double t_post_camera     = 60 * 60 * 6; 
+double t_post_terminal                          = 60 * 20; //60 * 24; 
+double t_post_location                          = 60 * 60 * 12; 
+double t_post_camera                            = 60 * 60 * 6; 
+double t_post_notification_thread_running       = 60 * 5; 
 
 double t_load_instance   = 10; //60 * 24;      
-
 
 int main_loop_counter;
 
@@ -156,6 +161,81 @@ void startMainRecognition(int camnum)
         }
     }
 }
+
+void pushCallback(ParseClient client, int error, const char *buffer) {
+    if (error == 0 && buffer != NULL) {
+        printf("push: '%s'\n", buffer);
+    }
+}
+
+void * NotificationThread(void *clntSock)
+{    
+    int self = pthread_self();
+    thread_notification_pid = self;
+    
+    vector<string> uiid = getInstallationUIID();
+    const char * data = uiid.at(0).c_str();
+    
+    parseSetInstallationId(client, data);    
+    parseSetPushCallback(client, pushCallback);
+    parseStartPushService(client);
+    parseRunPushLoop(client);
+    
+    int socket = parseGetPushSocket(client);
+    while(1) {
+        struct timeval tv;
+        fd_set receive, send, error;
+
+        // tv_sec defines the interval at which the method is executed.
+        // The lower the value the more responsive it will be to notifications.
+
+        tv.tv_sec = 10;
+        tv.tv_usec= 0;
+        FD_ZERO(&receive);
+        FD_ZERO(&send);
+        FD_ZERO(&error);
+        FD_SET(socket, &error);
+        FD_SET(socket, &receive);
+        select(socket + 1, &receive, &send, &error, &tv);
+
+        // ...
+
+        parseProcessNextPushNotification(client);
+    }
+}
+
+void startNotificationThread()
+{   
+    int running;
+    
+    if (thread_notification_pid>0)
+    { 
+        int response = pthread_kill(thread_notification_pid, 0);
+        if (response != 0) 
+        {
+             running = 0;
+        } else 
+        {
+             running = 1;
+        }
+    } else
+    {
+        running = 0;
+    }
+    
+    
+    if (running==0)
+    {    
+        runn =  pthread_create(&thread_notification, NULL, NotificationThread, NULL);
+        if (runn  != 0)
+        {
+            cerr << "Unable to create ThreadMain thread" << endl;
+            exit(1);
+        }
+    }
+}
+
+
 
 void * ThreadMain(void *clntSock)
 {
@@ -231,7 +311,8 @@ void startThreads()
     
     // UDP
    runb = pthread_create(&thread_broadcast, NULL, broadcastsender, NULL);
-   if ( runb  != 0) {
+   if ( runb  != 0) 
+   {
        cerr << "Unable to create thread" << endl;
    }
    
@@ -299,7 +380,7 @@ int main (int argc, char * const av[])
     //Parse
     client = parseInitialize("fsLv65faQqwqhliCGF7oGqcT8MxPDFjmcxIuonGw", "T3PK1u0NQ36eZm91jM0TslCREDj8LBeKzGCsrudE");
     //parseSendRequest(client, "POST", "/1/classes/TestObject", "{\"foo\":\"bar\"}"  
-        
+         
     //Main Loop
     for (;;)
     {
@@ -314,25 +395,28 @@ int main (int argc, char * const av[])
         {
 
             //WP USER PASS
-            WP_USER = user_info.at(1);
-            WP_PASS = user_info.at(2);
-
-            CLIENT_ID       = user_info.at(5);
-            SERVER_BASE_URL = user_info.at(3);
+            WP_USER             = user_info.at(1);
+            WP_PASS             = user_info.at(2);            
+            SERVER_BASE_URL     = user_info.at(3);    
+            WP_USER_ID          = user_info.at(4);
+            WP_CLIENT_ID        = user_info.at(5);
+  
+            time_t now;
+            time(&now);
             
             //Post Location
             locationPost(t_post_location);
-
-            //Post Camera
-            cameraPost(t_post_camera); 
-
-            time_t now;
-            time(&now); 
-
+            
             //Post Terminal
             terminalPost(t_post_terminal);
-
-            sleep(5);
+            
+            //Notification Thread             
+            startNotificationThread();  
+            
+            //Post Camera
+            cameraPost(t_post_camera); 
+  
+            sleep(5);       
 
             //Scan local instances and store
             loadInstancesFromFile();
