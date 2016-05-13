@@ -827,6 +827,42 @@ class Message_MotionUser : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 db_user_id() const;
   inline void set_db_user_id(::google::protobuf::int32 value);
 
+  // optional string pfuser = 24;
+  inline bool has_pfuser() const;
+  inline void clear_pfuser();
+  static const int kPfuserFieldNumber = 24;
+  inline const ::std::string& pfuser() const;
+  inline void set_pfuser(const ::std::string& value);
+  inline void set_pfuser(const char* value);
+  inline void set_pfuser(const char* value, size_t size);
+  inline ::std::string* mutable_pfuser();
+  inline ::std::string* release_pfuser();
+  inline void set_allocated_pfuser(::std::string* pfuser);
+
+  // optional string pfappid = 25;
+  inline bool has_pfappid() const;
+  inline void clear_pfappid();
+  static const int kPfappidFieldNumber = 25;
+  inline const ::std::string& pfappid() const;
+  inline void set_pfappid(const ::std::string& value);
+  inline void set_pfappid(const char* value);
+  inline void set_pfappid(const char* value, size_t size);
+  inline ::std::string* mutable_pfappid();
+  inline ::std::string* release_pfappid();
+  inline void set_allocated_pfappid(::std::string* pfappid);
+
+  // optional string pfrestapikey = 26;
+  inline bool has_pfrestapikey() const;
+  inline void clear_pfrestapikey();
+  static const int kPfrestapikeyFieldNumber = 26;
+  inline const ::std::string& pfrestapikey() const;
+  inline void set_pfrestapikey(const ::std::string& value);
+  inline void set_pfrestapikey(const char* value);
+  inline void set_pfrestapikey(const char* value, size_t size);
+  inline ::std::string* mutable_pfrestapikey();
+  inline ::std::string* release_pfrestapikey();
+  inline void set_allocated_pfrestapikey(::std::string* pfrestapikey);
+
   // @@protoc_insertion_point(class_scope:motion.Message.MotionUser)
  private:
   inline void set_has_clientnumber();
@@ -875,6 +911,12 @@ class Message_MotionUser : public ::google::protobuf::Message {
   inline void clear_has_wpmodified();
   inline void set_has_db_user_id();
   inline void clear_has_db_user_id();
+  inline void set_has_pfuser();
+  inline void clear_has_pfuser();
+  inline void set_has_pfappid();
+  inline void clear_has_pfappid();
+  inline void set_has_pfrestapikey();
+  inline void clear_has_pfrestapikey();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -902,6 +944,9 @@ class Message_MotionUser : public ::google::protobuf::Message {
   ::std::string* wpfeaturedimage_;
   ::std::string* wptype_;
   ::std::string* wpmodified_;
+  ::std::string* pfuser_;
+  ::std::string* pfappid_;
+  ::std::string* pfrestapikey_;
   ::google::protobuf::int32 db_user_id_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
@@ -5937,6 +5982,234 @@ inline void Message_MotionUser::set_db_user_id(::google::protobuf::int32 value) 
   set_has_db_user_id();
   db_user_id_ = value;
   // @@protoc_insertion_point(field_set:motion.Message.MotionUser.db_user_id)
+}
+
+// optional string pfuser = 24;
+inline bool Message_MotionUser::has_pfuser() const {
+  return (_has_bits_[0] & 0x00800000u) != 0;
+}
+inline void Message_MotionUser::set_has_pfuser() {
+  _has_bits_[0] |= 0x00800000u;
+}
+inline void Message_MotionUser::clear_has_pfuser() {
+  _has_bits_[0] &= ~0x00800000u;
+}
+inline void Message_MotionUser::clear_pfuser() {
+  if (pfuser_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfuser_->clear();
+  }
+  clear_has_pfuser();
+}
+inline const ::std::string& Message_MotionUser::pfuser() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.pfuser)
+  return *pfuser_;
+}
+inline void Message_MotionUser::set_pfuser(const ::std::string& value) {
+  set_has_pfuser();
+  if (pfuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfuser_ = new ::std::string;
+  }
+  pfuser_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.pfuser)
+}
+inline void Message_MotionUser::set_pfuser(const char* value) {
+  set_has_pfuser();
+  if (pfuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfuser_ = new ::std::string;
+  }
+  pfuser_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.pfuser)
+}
+inline void Message_MotionUser::set_pfuser(const char* value, size_t size) {
+  set_has_pfuser();
+  if (pfuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfuser_ = new ::std::string;
+  }
+  pfuser_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.pfuser)
+}
+inline ::std::string* Message_MotionUser::mutable_pfuser() {
+  set_has_pfuser();
+  if (pfuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfuser_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.pfuser)
+  return pfuser_;
+}
+inline ::std::string* Message_MotionUser::release_pfuser() {
+  clear_has_pfuser();
+  if (pfuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = pfuser_;
+    pfuser_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionUser::set_allocated_pfuser(::std::string* pfuser) {
+  if (pfuser_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete pfuser_;
+  }
+  if (pfuser) {
+    set_has_pfuser();
+    pfuser_ = pfuser;
+  } else {
+    clear_has_pfuser();
+    pfuser_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.pfuser)
+}
+
+// optional string pfappid = 25;
+inline bool Message_MotionUser::has_pfappid() const {
+  return (_has_bits_[0] & 0x01000000u) != 0;
+}
+inline void Message_MotionUser::set_has_pfappid() {
+  _has_bits_[0] |= 0x01000000u;
+}
+inline void Message_MotionUser::clear_has_pfappid() {
+  _has_bits_[0] &= ~0x01000000u;
+}
+inline void Message_MotionUser::clear_pfappid() {
+  if (pfappid_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfappid_->clear();
+  }
+  clear_has_pfappid();
+}
+inline const ::std::string& Message_MotionUser::pfappid() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.pfappid)
+  return *pfappid_;
+}
+inline void Message_MotionUser::set_pfappid(const ::std::string& value) {
+  set_has_pfappid();
+  if (pfappid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfappid_ = new ::std::string;
+  }
+  pfappid_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.pfappid)
+}
+inline void Message_MotionUser::set_pfappid(const char* value) {
+  set_has_pfappid();
+  if (pfappid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfappid_ = new ::std::string;
+  }
+  pfappid_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.pfappid)
+}
+inline void Message_MotionUser::set_pfappid(const char* value, size_t size) {
+  set_has_pfappid();
+  if (pfappid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfappid_ = new ::std::string;
+  }
+  pfappid_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.pfappid)
+}
+inline ::std::string* Message_MotionUser::mutable_pfappid() {
+  set_has_pfappid();
+  if (pfappid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfappid_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.pfappid)
+  return pfappid_;
+}
+inline ::std::string* Message_MotionUser::release_pfappid() {
+  clear_has_pfappid();
+  if (pfappid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = pfappid_;
+    pfappid_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionUser::set_allocated_pfappid(::std::string* pfappid) {
+  if (pfappid_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete pfappid_;
+  }
+  if (pfappid) {
+    set_has_pfappid();
+    pfappid_ = pfappid;
+  } else {
+    clear_has_pfappid();
+    pfappid_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.pfappid)
+}
+
+// optional string pfrestapikey = 26;
+inline bool Message_MotionUser::has_pfrestapikey() const {
+  return (_has_bits_[0] & 0x02000000u) != 0;
+}
+inline void Message_MotionUser::set_has_pfrestapikey() {
+  _has_bits_[0] |= 0x02000000u;
+}
+inline void Message_MotionUser::clear_has_pfrestapikey() {
+  _has_bits_[0] &= ~0x02000000u;
+}
+inline void Message_MotionUser::clear_pfrestapikey() {
+  if (pfrestapikey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfrestapikey_->clear();
+  }
+  clear_has_pfrestapikey();
+}
+inline const ::std::string& Message_MotionUser::pfrestapikey() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.pfrestapikey)
+  return *pfrestapikey_;
+}
+inline void Message_MotionUser::set_pfrestapikey(const ::std::string& value) {
+  set_has_pfrestapikey();
+  if (pfrestapikey_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfrestapikey_ = new ::std::string;
+  }
+  pfrestapikey_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionUser.pfrestapikey)
+}
+inline void Message_MotionUser::set_pfrestapikey(const char* value) {
+  set_has_pfrestapikey();
+  if (pfrestapikey_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfrestapikey_ = new ::std::string;
+  }
+  pfrestapikey_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionUser.pfrestapikey)
+}
+inline void Message_MotionUser::set_pfrestapikey(const char* value, size_t size) {
+  set_has_pfrestapikey();
+  if (pfrestapikey_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfrestapikey_ = new ::std::string;
+  }
+  pfrestapikey_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionUser.pfrestapikey)
+}
+inline ::std::string* Message_MotionUser::mutable_pfrestapikey() {
+  set_has_pfrestapikey();
+  if (pfrestapikey_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    pfrestapikey_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.pfrestapikey)
+  return pfrestapikey_;
+}
+inline ::std::string* Message_MotionUser::release_pfrestapikey() {
+  clear_has_pfrestapikey();
+  if (pfrestapikey_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = pfrestapikey_;
+    pfrestapikey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionUser::set_allocated_pfrestapikey(::std::string* pfrestapikey) {
+  if (pfrestapikey_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete pfrestapikey_;
+  }
+  if (pfrestapikey) {
+    set_has_pfrestapikey();
+    pfrestapikey_ = pfrestapikey;
+  } else {
+    clear_has_pfrestapikey();
+    pfrestapikey_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.pfrestapikey)
 }
 
 // -------------------------------------------------------------------
