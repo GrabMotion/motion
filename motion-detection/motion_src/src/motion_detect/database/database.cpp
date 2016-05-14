@@ -1473,6 +1473,24 @@ vector<string> getInstallationUIID()
     
     return uiid;
 }
+
+vector<string> getParseInfoForPush()
+{
+    vector<string> parse_usr_info;
+    stringstream sql_parse;
+    sql_parse << "SELECT pfuser, pfappid, pfrestapikey FROM user;";
+    
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > push_info_array = db_select(sql_parse.str().c_str(), 3);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (push_info_array.size() > 0)
+    {
+       parse_usr_info =  push_info_array.at(0);
+    }
+    
+    return parse_usr_info;
+}
  
 int insertRegionIntoDatabase(std::string rcoords)
 {

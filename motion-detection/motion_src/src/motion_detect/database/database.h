@@ -172,5 +172,6 @@ int insertIntoNetwork(std::string public_ip, std::string local_ip, std::string r
 std::vector<string> getCameraByCameraNumber(int cameranumber);
 
 vector<string> getInstallationUIID();
+vector<string> getParseInfoForPush();
 
 int getUserIdByWpUserName(std::string username);
