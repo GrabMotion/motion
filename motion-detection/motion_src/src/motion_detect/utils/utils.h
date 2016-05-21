@@ -52,14 +52,14 @@ cv::Mat extractMat(string loadedmat);
 cv::Mat drawRectFromCoordinate(std::string coords, cv::Mat mat, cv::Scalar color);
 
 int createJobManually(
-    int cameranumber, 
+    int db_camera, 
     std::string codename,
     google::protobuf::uint32 delay,     
     std::string recname);
 
 
 int createJobManually(
-    int cameranumber, 
+    int db_camera, 
     std::string codename,
     google::protobuf::uint32 delay,
     std::string recname,    

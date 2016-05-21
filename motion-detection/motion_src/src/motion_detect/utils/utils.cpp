@@ -452,13 +452,18 @@ void loadJobFromFile()
     
     //CREATE JOBS
 
-     vector<std::string> cameras = getCamerasFromDB();
+     vector<vector<string> > cameras = getCamerasFromDB();
 
-     for (int i=0; i<cameras.size(); i++)
+     int size = cameras.size();
+     
+     for (int i=0; i<size; i++)
      {
-         if (i==1) //REMOVE THIS FOR MULTI CAMERA
-         {
-             int db_camera = atoi(cameras.at(3).c_str());               
+         int cameranumber = atoi(cameras.at(i).at(0).c_str());
+         
+         int db_camera = atoi(cameras.at(i).at(3).c_str());     
+         
+         if (db_camera==1) //REMOVE THIS FOR MULTI CAMERA
+         {                         
 
              vector<std::string> camerainfo = getTrackPostByTypeAndIdLocal("camera", db_camera);
              if (camerainfo.size()>0)
@@ -520,29 +525,27 @@ void loadJobFromFile()
 
 
 int createJobManually(
-    int cameranumber, 
+    int db_camera, 
     std::string codename,
     google::protobuf::uint32 delay,        
     std::string recname)
 {
     std::string coords;
-    createJobManually(cameranumber, codename, delay, recname, coords);
+    createJobManually(db_camera, codename, delay, recname, coords);
 }
 
 
 int createJobManually(
-    int cameranumber, 
+    int db_camera, 
     std::string codename,
     google::protobuf::uint32 delay,
     std::string recname,
     std::string coords)
 {
     
-    motion::Message m;
+    motion::Message m;    
     
-    m.set_activecam(cameranumber);
-    
-    std::vector<string> camera_vector = getCameraByCameraNumber(cameranumber);   
+    std::vector<string> camera_vector = getCameraByCameraDbId(db_camera);   
     
     int _id = atoi(camera_vector.at(0).c_str());
     std::string name = camera_vector.at(1); 
@@ -551,6 +554,9 @@ int createJobManually(
     int matheight   = atoi(camera_vector.at(4).c_str());
     int matwidth    = atoi(camera_vector.at(5).c_str());
     int _idmat      = atoi(camera_vector.at(6).c_str());
+    int cameranumber = atoi(camera_vector.at(7).c_str());
+    
+    m.set_activecam(cameranumber);
 
     motion::Message::MotionCamera * mcamera = m.add_motioncamera();  
     

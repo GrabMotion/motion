@@ -144,7 +144,7 @@ void loadInstancesFromFile()
 
                         motion::Message::Video dvideo = pinstance.video();
                         int db_video_id = insertIntoVideo(dvideo);
-                        int db_instance_id = insertIntoInstance(pinstance.instance(), &pinstance, endtimechar, db_video_id, images);
+                        int db_instance_id = insertIntoInstance(pinstance.instance(), &pinstance, endtimechar, db_video_id, images);                
 
                         int post = instancePost(pinstance, db_instance_id, post_parent);
 

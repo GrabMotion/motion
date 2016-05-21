@@ -290,7 +290,7 @@ void * broadcastsender ( void * args )
     for (;;) 
     {
         sock.sendTo(sendString, strlen(sendString), destAddress, destPort);
-        cout << "UPD Send: " << countud << " " << endl;
+        //cout << "UPD Send: " << countud << " " << endl;
         countud++;
         sleep(5);
     }
@@ -389,7 +389,7 @@ int main (int argc, char * const av[])
         
         vector<std::string> user_info = getUserInfo();
 
-        cout << "main loop counter: " << main_loop_counter << endl;
+        cout << "main loop #: " << main_loop_counter << endl;
 
         if (user_info.size()>0)
         {
@@ -433,11 +433,11 @@ int main (int argc, char * const av[])
             timecompare << curr_time;
 
             //Run Job if in Interval
-            runJobsInterval(timecompare.str(), threads_recognition);
-
-            main_loop_counter ++;
+            runJobsInterval(timecompare.str(), threads_recognition);          
             
         }
+        
+        main_loop_counter ++;
         
         sleep(10);
     }

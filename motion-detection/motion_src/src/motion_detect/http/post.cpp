@@ -294,6 +294,12 @@ int instancePost(motion::Message::Instance pinstance, int db_instance_id, int po
         media_url  = media_attahced.at(6);
     }
     
+    //Parse Data for Push    
+    vector<string> parse_push_info = getParseInfoForPush();
+    std::string pfuser = parse_push_info.at(0);
+    std::string pfappid = parse_push_info.at(1);
+    std::string pfrestapikey = parse_push_info.at(2);
+    
     if (idmedia)
     {
         
@@ -312,16 +318,16 @@ int instancePost(motion::Message::Instance pinstance, int db_instance_id, int po
         "\"instance_begintime\":\""     << pinstance.instancestart()    <<  "\","   <<
         "\"instance_endtime\":\""       << pinstance.instanceend()      <<  "\","   <<
         "\"instance_code\":\""          << pinstance.instancecode()     <<  "\","   <<
+        "\"instance_pfuser\":\""        << pfuser                       <<  "\","   <<
+        "\"instance_pfappid\":\""       << pfappid                      <<  "\","   <<
+        "\"instance_pfrestapikey\":\""  << pfrestapikey                 <<  "\","   <<
         "\"instance_media_url\":\""     << media_url                    <<  "\"}'"  <<    
-        " -H \"Content-Type:application/json\" -H \"Expect: \"" <<
+        " -H \"Content-Type:application/json\" -H \"Expect: \""         <<
         " " << url;
         
         cout << "instance_post: " << instance_post.str() << endl;
 
-        post = post_command_to_wp(false, instance_post.str(), db_instance_id);
-       
-        //PUSH NOTIFICATION.
-        
+        post = post_command_to_wp(false, instance_post.str(), db_instance_id);      
     
     } else 
     {
@@ -448,7 +454,7 @@ int post_media_command_to_wp(bool update, std::string command, int db_local)
 std::string get_command_to_wp(std::string command)
 {
     FILE* pipe = popen(command.c_str(), "r");
-    int size = sizeof(pipe);F
+    int size = sizeof(pipe);
     char buffer[128];
     std::string result = "";
     std::string error;

@@ -632,7 +632,7 @@ std::vector<int> db_cams(std::vector<int> cams)
     return camsarray;
 }
 
-std::vector<string> getCameraByCameraNumber(int cameranumber)
+std::vector<string> getCameraByCameraDbId(int db_camera)
 {
     std::vector<string> camera_vector;
     
@@ -645,14 +645,15 @@ std::vector<string> getCameraByCameraNumber(int cameranumber)
         "M.matcols, "           // 3
         "M.matheight, "         // 4
         "M.matwidth, "          // 5
-        "M._id "                // 6
+        "M._id, "               // 6
+        "C.number "             // 7
         "FROM mat AS M "
         "JOIN rel_camera_mat AS RCM ON M._id = RCM._id "
         "JOIN cameras AS C ON RCM._id_camera = C._id "
-        "WHERE C.number = " << cameranumber << ";";
+        "WHERE C._id = " << db_camera << ";";
     cout << "select_cameras: " << select_cameras.str()  << endl;  
     pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > select_cameras_array = db_select(select_cameras.str().c_str(), 7);
+    vector<vector<string> > select_cameras_array = db_select(select_cameras.str().c_str(), 8);
     pthread_mutex_unlock(&databaseMutex);  
     
     if (select_cameras_array.size() > 0)
@@ -1235,21 +1236,9 @@ vector<string> checkJobRunningQuery(std::string camera, char * time)
     "AND C.number = "               << camera <<   " "  <<
     "AND (SELECT COUNT(*) FROM interval AS I "
     "WHERE strftime('%H-%M-%S', '"  << time << "') "    <<
-    "BETWEEN I.timestart AND I.timeend AND I._id = RC._id_interval) = 1;";
-
-    /*"SELECT "   << 
-    "RC._id, "  <<
-    "RC.name "  <<         
-    "FROM recognition_setup RC "    <<
-    "JOIN cameras AS C ON RC._id_camera = C._id "   <<
-    "WHERE IFNULL(RC.runatstartup,0) = 1 "          <<
-    "AND IFNULL(RC.recognizing,0) = 0 "             <<
-    "AND C.number = "    << camera << " "           <<
-    "AND (SELECT COUNT(*) FROM interval AS I "      <<
-    "WHERE strftime('%H-%M-%S', '" << time << "') " <<
-    "BETWEEN I.timestart AND I.timeend) = 1;"; */
+    "BETWEEN I.timestart AND I.timeend AND I._id = RC._id_interval) = 1;";  
     
-    cout << "check_running_strart: " << check_run_strart.str() << endl;
+    //cout << "check_running_strart: " << check_run_strart.str() << endl;
     
     vector<vector<string> > run_array = db_select(check_run_strart.str().c_str(), 2);
     if (run_array.size()>0)
@@ -1389,6 +1378,14 @@ int insertUserIntoDatabase(motion::Message::MotionUser * muser) //int clientnumb
     if (muser->has_location())  
         cout << "location           : " <<      muser->location()            << endl; 
     
+     if (muser->has_pfuser())  
+        cout << "pfuser             : " <<      muser->pfuser()             << endl; 
+    
+    if (muser->has_pfappid())  
+        cout << "pfappid            : " <<      muser->pfappid()            << endl;
+    
+    if (muser->has_pfrestapikey())  
+        cout << "pfrestapikey       : " <<      muser->pfrestapikey()       << endl;
 
     cout << "********************************************" << endl;
 
@@ -1406,7 +1403,10 @@ int insertUserIntoDatabase(motion::Message::MotionUser * muser) //int clientnumb
         "first_name,  "             <<  //10
         "last_name,  "              <<  //11
         "location,  "               <<  //12
-        "uiidinstallation  "        <<  //13
+        "uiidinstallation, "        <<  //13
+        "pfuser,  "                 <<  //14
+        "pfappid,  "                <<  //15
+        "pfrestapikey "             <<  //16
         ") values ("                <<
         muser->clientnumber()       << ", '"    << //0 
         muser->wpuser()             << "', '"   << //1 
@@ -1421,7 +1421,10 @@ int insertUserIntoDatabase(motion::Message::MotionUser * muser) //int clientnumb
         muser->firstname()          << "', '"   << //10 
         muser->lastname()           << "', '"   << //11 
         muser->location()           << "', '"   << //12 
-        muser->uiidinstallation()   << "');";      //13 
+        muser->uiidinstallation()   << "', '"   << //13 
+        muser->pfuser()             << "', '"   << //14
+        muser->pfappid()            << "', '"   << //15 
+        muser->pfrestapikey()       << "');";      //16 
     
     cout << "sql_insert_user: " << sql_insert_user.str() << endl;
     
@@ -1654,21 +1657,21 @@ int insertIntoRecognitionSetup(
     sql_recognition_setup <<
     "INSERT INTO recognition_setup " <<
     "(name, "                   <<
-            "activerec, "       <<
-            "_id_day, "         <<
-            "_id_camera, "      <<
-            "_id_mat, "         <<
-            "storeimage, "      <<
-            "storevideo, "      <<
-            "codename, "        <<
-            "has_region, "      <<
-            "has_cron, "        <<
-            "_id_coordinates, " <<
-            "delay, "           <<
-            "speed, "           <<
-            "xmlfilepath, "     <<
-            "runatstartup, "    <<
-            "created) "         <<
+    "activerec, "       <<
+    "_id_day, "         <<
+    "_id_camera, "      <<
+    "_id_mat, "         <<
+    "storeimage, "      <<
+    "storevideo, "      <<
+    "codename, "        <<
+    "has_region, "      <<
+    "has_cron, "        <<
+    "_id_coordinates, " <<
+    "delay, "           <<
+    "speed, "           <<
+    "xmlfilepath, "     <<
+    "runatstartup, "    <<
+    "created) "         <<
     "SELECT "            << "'"      << 
     prec->recname()      << "', "    <<
     prec->activerec()    << ", "     <<        
@@ -2844,9 +2847,9 @@ void updateRecognition(motion::Message m)
     
 }
 
-vector<std::string> getCamerasFromDB()
+vector<vector<string> > getCamerasFromDB()
 {
-    vector<std::string> cameraarray;
+    vector<vector<string> > cameraarray;
     
     std::stringstream sql_camera;
     sql_camera << "SELECT number, name, created, _id FROM cameras;";
@@ -2856,7 +2859,7 @@ vector<std::string> getCamerasFromDB()
     
     if (camera_array.size()>0)
     {
-        return camera_array.at(0);
+        return camera_array;
     }
     return cameraarray;
 }

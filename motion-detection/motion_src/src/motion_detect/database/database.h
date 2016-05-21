@@ -161,7 +161,7 @@ motion::Message::MotionCamera * getMonthByCameraIdMonthAndDate(
 
 void updateRecognition(motion::Message m);
 
-vector<std::string> getCamerasFromDB();
+vector<vector<string> > getCamerasFromDB();
 
 std::string getDayCreatedById(int dayid);
 
@@ -169,7 +169,7 @@ std::string getIntervalByIdRecognitionSetupId(int db_idrec);
 
 int insertIntoNetwork(std::string public_ip, std::string local_ip, std::string resutl_mac );
 
-std::vector<string> getCameraByCameraNumber(int cameranumber);
+std::vector<string> getCameraByCameraDbId(int db_camera);
 
 vector<string> getInstallationUIID();
 vector<string> getParseInfoForPush();
