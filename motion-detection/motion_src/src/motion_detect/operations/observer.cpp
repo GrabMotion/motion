@@ -135,8 +135,9 @@ void loadInstancesFromFile()
                             const motion::Message::Crop & crop = pinstance.crop(j);                
                             insertIntoCrop(crop, db_image_id);
                             images.push_back(db_image_id);
-                        } 
-
+                        }                        
+                        
+                        cout << "pinstanceendtime: " << pinstance.endtime() << endl;
                         struct tm t_mend;
                         std::stringstream endt;
                         endt << pinstance.endtime();

@@ -66,3 +66,7 @@ int createJobManually(
     std::string coords);
 
 void loadJobFromFile();
+
+bool to_boolean(std::string str);
+
+std::string replace_space_with_underscore(std::string s);

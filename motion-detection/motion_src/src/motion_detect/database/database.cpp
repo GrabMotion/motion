@@ -963,7 +963,9 @@ bool loadStartQuery(std::string camera, std::string recname)
         std::string _day = getCurrentDayLabel();
         std::string _daytitle = getCurrentDayTitle();
         std::string _month = getCurrentMonthLabel();
+        cout << "D_id: " << D_id << endl;
         google::protobuf::int32 dbidday = atoi(rows.at(D_id).c_str());
+        cout << "dbidday: " << dbidday << endl;
         google::protobuf::int32 dbidmonth = atoi(rows.at(MO_id).c_str());
         google::protobuf::int32 speed = atoi(rows.at(RCspeed).c_str());
         google::protobuf::int32 recid = atoi(rows.at(RC_id).c_str());
@@ -2463,6 +2465,23 @@ vector<std::string> getTerminalInfo()
     
 }
 
+vector<string> getTerminalSerial()
+{
+    vector<string> serial;
+    std::string sql_terminal = "SELECT _id, serial FROM terminal;";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > terminal_array = db_select(sql_terminal.c_str(), 2);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (terminal_array.size()>0) 
+    {
+        serial.push_back(terminal_array.at(0).at(0)); //db_local
+        serial.push_back(terminal_array.at(0).at(1)); //serial
+    }
+    return serial;
+}
+
+
 vector<std::string> getMatInfoFromId(int db_idmat)
 {
     vector<std::string> matidarray;
@@ -2481,6 +2500,7 @@ vector<std::string> getMatInfoFromId(int db_idmat)
         screen << "[" << matwidth << "," << matheight << "]";                           //screen size
         matidarray.push_back(screen.str());                                             //screen             0
         matidarray.push_back(mat_array.at(0).at(6));                                    //matfile            1
+        matidarray.push_back(mat_array.at(0).at(0));                                    //_id                2
     }
     return matidarray;
 }

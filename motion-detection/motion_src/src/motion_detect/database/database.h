@@ -175,3 +175,5 @@ vector<string> getInstallationUIID();
 vector<string> getParseInfoForPush();
 
 int getUserIdByWpUserName(std::string username);
+
+vector<string> getTerminalSerial();

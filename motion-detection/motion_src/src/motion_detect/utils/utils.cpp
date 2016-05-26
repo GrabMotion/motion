@@ -517,8 +517,7 @@ void loadJobFromFile()
                  createJobManually(db_camera, "test", 2, "BASIC");
              } 
          }
-     }    
-    
+     }   
 }
 
 
@@ -632,6 +631,26 @@ int createJobManually(
     
 }
 
+
+bool to_boolean(std::string str) 
+{
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    std::istringstream is(str);
+    bool b;
+    is >> std::boolalpha >> b;
+    return b;
+}
+
+std::string replace_space_with_underscore(std::string text)
+{
+    for(int i = 0; i < text.length(); i++)
+    {
+           if( isspace(text[i]) )
+                text[i] = '_';
+    }
+    return text;
+ }
+    
 
 
 // String Generator

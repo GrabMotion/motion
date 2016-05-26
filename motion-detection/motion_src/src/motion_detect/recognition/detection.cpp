@@ -666,6 +666,8 @@ void * startRecognition(void * arg)
      
     int db_dayid = pday->db_dayid();
     
+    cout << "db_dayid: " << db_dayid << endl;
+    
     std::string XML_FILE;
     if (mrec->has_xmlfilepath())
     { 
