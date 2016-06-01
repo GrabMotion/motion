@@ -65,7 +65,7 @@ int createJobManually(
     std::string recname,    
     std::string coords);
 
-void loadJobFromFile();
+void loadJobFromFile(int db_camera_local);
 
 bool to_boolean(std::string str);
 

@@ -31,8 +31,8 @@ motion::Message::MotionCamera * takePictureToProto(int cameranumber, motion::Mes
         std::cout << "No cam found." << std::endl;
     }
     
-    int w = 320; //640; //1280; //320;
-    int h = 240; //480; //720;  //240;
+    int w = 640; //640; //1280; //320;
+    int h = 480; //480; //720;  //240;
     
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
@@ -146,8 +146,8 @@ std::vector<std::string> takeThumbnailFromCamera(int camera)
         std::cout << "No cam found." << std::endl;
     }
     
-    int w = 60; //640; //1280; //320;
-    int h = 45; //480; //720;  //240;
+    int w = 640; //640; //1280; //320;
+    int h = 480; //480; //720;  //240;
     
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720

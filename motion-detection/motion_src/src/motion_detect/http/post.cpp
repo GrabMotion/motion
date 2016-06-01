@@ -24,7 +24,7 @@
     {
 
         bool post_location = false;
-        time_t post_time = getLastPostTime("location");
+        time_t post_time = getLastPostTimeByType("location");
         if (post_time!=NULL)
         {
             time_t now;
@@ -109,11 +109,13 @@
                 {
                     std::cout << "stored" << endl;
                 }
+                
+                update = true;
 
             } else
             {
                 haslocation = false;
-                update = true;
+                update = false;
             }      
            
             std::stringstream clientapi;
@@ -175,7 +177,7 @@
     void terminalPost(double timecount)
     {
         bool post_terminal = false;
-        time_t post_time = getLastPostTime("terminal");
+        time_t post_time = getLastPostTimeByType("terminal");
         if (post_time!=NULL)
         {
             time_t now;
@@ -338,32 +340,56 @@
     ///////////////////////////
     
     void cameraPost(double timecount)
-    {   
-        bool post_camera = false;
-        time_t post_time = getLastPostTime("camera");
-        if (post_time!=NULL)
+    { 
+         
+        vector<vector<string> > array_cams = getCamerasFromDB();
+        
+        int size = array_cams.size();
+        
+        if (size>0)
         {
-            time_t now;
-            time(&now); 
+            for (int j=0; j<size; j++)
+            {
 
-            double posted = difftime(now, post_time);
+                int db_local_cam = atoi(array_cams.at(j).at(3).c_str());
 
-            if ( posted > timecount ) {
-                post_camera = true;
-            }         
-        } else {
-            post_camera = true;
+                bool post_camera = false;
+                time_t post_time = getLastPostTimeByTypeAndLocal("camera", db_local_cam);
+                if (post_time!=NULL)
+                {
+                    time_t now;
+                    time(&now); 
+
+                    double posted = difftime(now, post_time);
+
+                    if ( posted > timecount ) {
+
+                        post_camera = true;
+                    }
+
+                } else {
+                    post_camera = true;
+                }
+
+                if (post_camera)
+                {
+                    postCameraStatus(db_local_cam);
+
+                    ////////////////////////////
+                    //// CREATE GENERIC JOB //// 
+                    ////////////////////////////
+
+                    if (db_local_cam==1)
+                    {
+                        //Load Basic Jobs
+                        loadJobFromFile(db_local_cam);            
+                    }
+                }
+            }
         }
-
-        if (post_camera)
-        {
-            postCameraStatus(); 
-            //Load Basic Jobs
-            loadJobFromFile();            
-        }    
     }   
     
-    void postCameraStatus()
+    void postCameraStatus(int db_local_cam)
     {
 
         vector<std::string> terminalinfo = getTrackPostByType("terminal");
@@ -373,7 +399,7 @@
 
             stringstream sql_cams;
             sql_cams   <<
-            "SELECT _id, number, name, created FROM cameras;";
+            "SELECT _id, number, name, created FROM cameras WHERE _id= " << db_local_cam << ";";
             cout << "sql_active_cam: " << sql_cams.str() << endl;
             pthread_mutex_lock(&databaseMutex);
             vector<vector<string> > array_cams = db_select(sql_cams.str().c_str(),4);
@@ -386,87 +412,83 @@
             ptmr = localtime (&tr.tv_sec);
             strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
 
-            for (int i=0; i<array_cams.size(); i++)
+            int db_local_cam = atoi(array_cams.at(0).at(0).c_str());
+            std::string cameranumber    = array_cams.at(0).at(1);
+            std::string cameraname      = array_cams.at(0).at(2);
+            std::string cameracreated   = array_cams.at(0).at(3);
+
+            std::stringstream urlcam; 
+            urlcam << "curl --user " << WP_USER << ":" << WP_PASS  <<
+            " -H 'Accept: application/json' " << 
+            " http://grabmotion.co/wp-json/gm/v1/cameras/"      << 
+            post_parent << "/" << replace_space_with_underscore(cameraname);
+            std::string enpoind_has_camera = get_endpoint_from_wp(urlcam.str());
+
+            bool hascamera = false;
+            int camera_post_id = 0;
+
+            std::size_t found = enpoind_has_camera.find("true");
+            if (found!=std::string::npos)
+            {        
+                std::string half    = splitString(enpoind_has_camera, "[[").at(1);
+                std::string way     = splitString(enpoind_has_camera, "]]").at(0);
+                vector<string> through = splitString(enpoind_has_camera, ",");
+
+                hascamera        = to_bool(through.at(0));
+                camera_post_id   = atoi(through.at(1).c_str());       
+
+                std::stringstream urlfound; 
+                urlfound << "curl --user " << WP_USER << ":" << WP_PASS            <<
+                "-H 'Accept: application/json' " << 
+                " http://grabmotion.co/wp-json/wp/v2/camera/" << camera_post_id; 
+
+                std::string enpoind_camera_post = get_endpoint_from_wp(urlfound.str());  
+                int id = insertUpdatePostInfo(false, enpoind_camera_post, db_local_cam);
+
+                if (id>0)
+                {
+                    std::cout << "stored" << endl;
+                }    
+
+            } else
             {
+                hascamera = false;
+            } 
 
-                int db_local_cam = atoi(array_cams.at(i).at(0).c_str());
-                std::string cameranumber    = array_cams.at(i).at(1);
-                std::string cameraname      = array_cams.at(i).at(2);
-                std::string cameracreated   = array_cams.at(i).at(3);
+            vector<std::string> locationbyid = getTrackPostByTypeAndIdLocal("camera", db_local_cam);
 
-                std::stringstream urlcam; 
-                urlcam << "curl --user " << WP_USER << ":" << WP_PASS  <<
-                " -H 'Accept: application/json' " << 
-                " http://grabmotion.co/wp-json/gm/v1/cameras/"      << 
-                post_parent << "/" << replace_space_with_underscore(cameraname);
-                std::string enpoind_has_camera = get_endpoint_from_wp(urlcam.str());
+            std::string url;
+            std::string posttype;
+            bool update_camera = false;
 
-                bool hascamera = false;
-                int camera_post_id = 0;
-
-                std::size_t found = enpoind_has_camera.find("true");
-                if (found!=std::string::npos)
-                {        
-                    std::string half    = splitString(enpoind_has_camera, "[[").at(1);
-                    std::string way     = splitString(enpoind_has_camera, "]]").at(0);
-                    vector<string> through = splitString(enpoind_has_camera, ",");
-
-                    hascamera        = to_bool(through.at(0));
-                    camera_post_id   = atoi(through.at(1).c_str());       
-
-                    std::stringstream urlfound; 
-                    urlfound << "curl --user " << WP_USER << ":" << WP_PASS            <<
-                    "-H 'Accept: application/json' " << 
-                    " http://grabmotion.co/wp-json/wp/v2/camera/" << camera_post_id; 
-
-                    std::string enpoind_camera_post = get_endpoint_from_wp(urlfound.str());  
-                    int id = insertUpdatePostInfo(false, enpoind_camera_post, db_local_cam);
-
-                    if (id>0)
-                    {
-                        std::cout << "stored" << endl;
-                    }    
-
-                } else
-                {
-                    hascamera = false;
-                } 
-
-                vector<std::string> locationbyid = getTrackPostByTypeAndIdLocal("camera", db_local_cam);
-
-                std::string url;
-                std::string posttype;
-                bool update_camera = false;
-
-                if (locationbyid.size()>0)
-                {
-                    url = locationbyid.at(7);
-                    posttype = "PUT";
-                    update_camera = true;
-                } else
-                {
-                    posttype = "POST";
-                    url = SERVER_BASE_URL + "camera";
-                }
-
-                std::stringstream camera_post;
-                camera_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X "         << posttype << " -d " << 
-                "'{\"title\":\""            << cameraname     <<  "\","   <<
-                "\"content_raw\":\"Content\",\"content\":\"\","     <<
-                "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","           <<
-                "\"camera_name\":\""            << cameraname       <<  "\","   <<
-                "\"camera_number\":\""          << cameranumber     <<  "\","   <<        
-                "\"post_parent\":\""            << post_parent      <<  "\","   <<                             
-                "\"camera_created\":\""         << cameracreated    <<  "\","   <<                             
-                "\"camera_keepalive_time\":\""  << time_rasp    <<  "\"}'"      <<   
-                " -H \"Content-Type:application/json\" -H \"Expect: \""         <<
-                " " << url << ";" ;
-
-                cout << "camera_post: " << camera_post.str() << endl;
-
-                post_command_to_wp(update_camera, camera_post.str(), db_local_cam);
-
+            if (locationbyid.size()>0)
+            {
+                url = locationbyid.at(7);
+                posttype = "PUT";
+                update_camera = true;
+            } else
+            {
+                posttype = "POST";
+                url = SERVER_BASE_URL + "camera";
             }
+
+            std::stringstream camera_post;
+            camera_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X "         << posttype << " -d " << 
+            "'{\"title\":\""            << cameraname     <<  "\","   <<
+            "\"content_raw\":\"Content\",\"content\":\"\","     <<
+            "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","           <<
+            "\"camera_name\":\""            << cameraname       <<  "\","   <<
+            "\"camera_number\":\""          << cameranumber     <<  "\","   <<        
+            "\"post_parent\":\""            << post_parent      <<  "\","   <<                             
+            "\"camera_created\":\""         << cameracreated    <<  "\","   <<                             
+            "\"camera_keepalive_time\":\""  << time_rasp    <<  "\"}'"      <<   
+            " -H \"Content-Type:application/json\" -H \"Expect: \""         <<
+            " " << url << ";" ;
+
+            cout << "camera_post: " << camera_post.str() << endl;
+
+            post_command_to_wp(update_camera, camera_post.str(), db_local_cam);
+            
         }
     }
     
@@ -641,7 +663,7 @@
                 vector<std::string> media_attahced = getTrackPostByTypeAndIdRemote("attachment", idmedia);
                 if (media_attahced.size()>0)
                 {
-                    media_url  = media_attahced.at(6);
+                    media_url  = media_attahced.at(1);
                 }
 
                 std::string posttype;
@@ -723,101 +745,136 @@
     
     int dayPost(int db_recid, int db_dayid, std::string label, std::string xml)
     {
-        int idday;
-
-        vector<std::string> recinfo = getTrackPostByTypeAndIdLocal("recognition", db_recid);
-        std::string post_parent;
-        if (recinfo.size()>0)
+        double timecount = t_post_day;
+        
+        bool post_day = false;
+        time_t post_time = getLastPostTimeByType("day");
+        if (post_time!=NULL)
         {
-            post_parent = recinfo.at(1);
-        }
+            time_t now;
+            time(&now); 
 
-        std::stringstream urlday; 
-        urlday << "curl --user " << WP_USER << ":" << WP_PASS            <<
-        "-H 'Accept: application/json' " << 
-        " http://grabmotion.co/wp-json/gm/v1/days/"      << 
-        post_parent << "/" << label;
-        std::string enpoind_has_day = get_endpoint_from_wp(urlday.str());
+            double posted = difftime(now, post_time);
 
-        bool hasday = false;
-        int day_post_id = 0;
-
-        std::size_t found = enpoind_has_day.find("true");
-        if (found!=std::string::npos)
-        {        
-            std::string half    = splitString(enpoind_has_day, "[[").at(1);
-            std::string way     = splitString(enpoind_has_day, "]]").at(0);
-            vector<string> through = splitString(enpoind_has_day, ",");
-
-            hasday         = to_bool(through.at(0));
-            day_post_id    = atoi(through.at(1).c_str());
-
-            std::stringstream urfound; 
-            urfound << "curl --user " << WP_USER << ":" << WP_PASS            <<
-            "-H 'Accept: application/json' " << 
-            " http://grabmotion.co/wp-json/wp/v2/day/" << day_post_id;
-
-            std::string enpoind_day_post = get_endpoint_from_wp(urfound.str());              
-            int id = insertUpdatePostInfo(false, enpoind_day_post, db_dayid);
-
-            if (id>0)
+            if ( posted > timecount ) 
             {
-                std::cout << "stored" << endl;
+                post_day = true;
+            }         
+        } else {
+            post_day = true;
+        }  
+        
+        if (post_day)
+        {
+        
+            int idday;
+
+            vector<std::string> recinfo = getTrackPostByTypeAndIdLocal("recognition", db_recid);
+            std::string post_parent;
+            if (recinfo.size()>0)
+            {
+                post_parent = recinfo.at(1);
             }
 
+            std::stringstream urlday; 
+            urlday << "curl --user " << WP_USER << ":" << WP_PASS            <<
+            "-H 'Accept: application/json' " << 
+            " http://grabmotion.co/wp-json/gm/v1/days/"      << 
+            post_parent << "/" << label;
+            std::string enpoind_has_day = get_endpoint_from_wp(urlday.str());
+
+            bool hasday = false;
+            int day_post_id = 0;
+
+            std::size_t found = enpoind_has_day.find("true");
+            if (found!=std::string::npos)
+            {        
+                std::string half    = splitString(enpoind_has_day, "[[").at(1);
+                std::string way     = splitString(enpoind_has_day, "]]").at(0);
+                vector<string> through = splitString(enpoind_has_day, ",");
+
+                hasday         = to_bool(through.at(0));
+                day_post_id    = atoi(through.at(1).c_str());
+
+                std::stringstream urfound; 
+                urfound << "curl --user " << WP_USER << ":" << WP_PASS            <<
+                "-H 'Accept: application/json' " << 
+                " http://grabmotion.co/wp-json/wp/v2/day/" << day_post_id;
+
+                std::string enpoind_day_post = get_endpoint_from_wp(urfound.str());              
+                int id = insertUpdatePostInfo(false, enpoind_day_post, db_dayid);
+
+                if (id>0)
+                {
+                    std::cout << "stored" << endl;
+                }
+
+            } else
+            {
+                hasday = false;
+            }
+
+            bool update_day = false;
+            std::string day_api_url; 
+            vector<std::string> dayinfo = getTrackPostByTypeAndIdParent("day", atoi(post_parent.c_str()));
+            if (dayinfo.size()>0)
+            {
+                update_day= true;
+            }
+
+            struct timeval tr;
+            struct tm* ptmr;
+            char time_rasp[40];
+            gettimeofday (&tr, NULL);
+            ptmr = localtime (&tr.tv_sec);
+            strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+
+            std::string posttype;
+            std::string url;
+
+            if (update_day)
+            {
+                posttype = "PUT";
+                url = dayinfo.at(7);
+            } else 
+            {
+                posttype = "POST";
+                url = SERVER_BASE_URL + "day";
+            }
+
+            std::string day_created = getDayCreatedById(db_dayid);
+
+            std::stringstream day_post;
+            day_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X " << posttype << " -d "   << 
+            "'{\"title\":\""            << label                    <<  "\","       <<
+            "\"content_raw\":\"Content\",\"content\":\" \","        <<
+            "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
+            "\"post_parent\":\""            << post_parent          <<  "\","   <<                
+            "\"day_label\":\""              << label                <<  "\","   <<                
+            "\"day_xml\":\""                << xml                  <<  "\","   <<
+            "\"day_created\":\""            << day_created          <<  "\","   <<        
+            "\"day_keepalive_time\":\""     << time_rasp            <<  "\"}'"  <<     
+            " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
+            " " << url;
+
+            cout << "day_post: " << day_post.str() << endl;
+
+            idday = post_command_to_wp(false, day_post.str(), db_dayid);
+
+            return idday;
+        
         } else
         {
-            hasday = false;
+            vector<std::string> dayinfo = getTrackPostByType("day");
+            if (dayinfo.size()>0)
+            {
+                return atoi(dayinfo.at(1).c_str());        
+            } else
+            {
+                return 0;
+            }
         }
-
-        bool update_day = false;
-        std::string day_api_url; 
-        vector<std::string> dayinfo = getTrackPostByTypeAndIdParent("day", atoi(post_parent.c_str()));
-        if (dayinfo.size()>0)
-        {
-            update_day= true;
-        }
-
-        struct timeval tr;
-        struct tm* ptmr;
-        char time_rasp[40];
-        gettimeofday (&tr, NULL);
-        ptmr = localtime (&tr.tv_sec);
-        strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
-
-        std::string posttype;
-        std::string url;
-
-        if (update_day)
-        {
-            posttype = "PUT";
-            url = dayinfo.at(7);
-        } else 
-        {
-            posttype = "POST";
-            url = SERVER_BASE_URL + "day";
-        }
-
-        std::string day_created = getDayCreatedById(db_dayid);
-
-        std::stringstream day_post;
-        day_post << "curl --user " << WP_USER << ":" << WP_PASS << " -X " << posttype << " -d "   << 
-        "'{\"title\":\""            << label                    <<  "\","       <<
-        "\"content_raw\":\"Content\",\"content\":\" \","        <<
-        "\"excerpt_raw\":\"Excerpt\",\"status\":\"publish\","   <<
-        "\"post_parent\":\""            << post_parent          <<  "\","   <<                
-        "\"day_label\":\""              << label                <<  "\","   <<                
-        "\"day_xml\":\""                << xml                  <<  "\","   <<
-        "\"day_created\":\""            << day_created          <<  "\","   <<        
-        "\"day_keepalive_time\":\""     << time_rasp            <<  "\"}'"  <<     
-        " -H \"Content-Type:application/json\" -H \"Expect: \""     <<
-        " " << url;
-
-        cout << "day_post: " << day_post.str() << endl;
-
-        idday = post_command_to_wp(false, day_post.str(), db_dayid);
-
-        return idday;
+        
     }  
     
     //////////////////////////
@@ -886,7 +943,7 @@
         vector<std::string> media_attahced = getTrackPostByTypeAndIdRemote("attachment", idmedia);
         if (media_attahced.size()>0)
         {
-            media_url  = media_attahced.at(6);
+            media_url  = media_attahced.at(1);
         }
 
         //Parse Data for Push    
@@ -916,7 +973,7 @@
             "\"instance_pfuser\":\""        << pfuser                       <<  "\","   <<
             "\"instance_pfappid\":\""       << pfappid                      <<  "\","   <<
             "\"instance_pfrestapikey\":\""  << pfrestapikey                 <<  "\","   <<
-            "\"instance_media_url\":\""     << media_url                    <<  "\"}'"  <<    
+            "\"instance_media_id\":\""      << media_url                    <<  "\"}'"  <<    
             " -H \"Content-Type:application/json\" -H \"Expect: \""         <<
             " " << url;
 
@@ -1026,23 +1083,7 @@
             }       
         }
         pclose(pipe);
-
-        // HERE PARSE FOR RESPONSE OF PHP AND INSERT PORT INFO ACCORDINGLY
-
-        /*char *s;
-        s = strstr(buffer, "<?xml");      
-        if (s != NULL)                     
-        {
-            TiXmlDocument doc;
-            doc.Parse(post_response.str().c_str());
-            TiXmlNode * titlenode = doc.RootElement()->FirstChild( "head" )->FirstChild( "title" ); //Tree root
-            error = titlenode->Value();
-
-        } else 
-        {
-            id = insertUpdatePostInfo(update, post_response.str(), db_local);
-        }*/
-
+        
         return id;
     }
 
@@ -1131,7 +1172,7 @@
 
     vector<std::string> parsePost(std::string message, int numArgs, ...)
     {
-
+        
         cout << "message: " << endl;
         va_list args;             // define argument list variable
         va_start (args,numArgs);  // init list; point to last
@@ -1174,93 +1215,108 @@
         strcpy(cstr, message.c_str());
         // do stuff
         json_object * jobj = json_tokener_parse(cstr);
-
-        enum json_type type;
-        json_object_object_foreach(jobj, key, val)
+        
+        try 
         {
-            type = json_object_get_type(val);
 
-            std::stringstream ss;
-            ss << key;
-            std::string strkey = ss.str();
-
-            switch (type)
+            enum json_type type;
+            json_object_object_foreach(jobj, key, val)
             {
-                case json_type_int:
-                case json_type_boolean:
-                case json_type_double:
-                case json_type_string:
+                type = json_object_get_type(val);
 
-                   if ( strcmp( key, "id" ) == 0 )
-                    {
-                        id = json_object_get_int(val);
-                    }
-                    else if ( strcmp( key, "date" ) == 0 )
-                    {
-                        date = json_object_get_string(val);
-                    }
-                    else if ( strcmp( key, "modified" ) == 0 )
-                    {
-                        modified = json_object_get_string(val);
-                    }
-                    else if ( strcmp( key, "slug" ) == 0 )
-                    {
-                        slug = json_object_get_string(val);
-                    }
-                    else if ( strcmp( key, "type" ) == 0 )
-                    {
-                        post_type = json_object_get_string(val);
-                    }
-                    else if ( strcmp( key, "featured_image" ) == 0 )
-                    {
-                        featured_image = json_object_get_string(val);
-                    }
-                    else if ( strcmp( key, "link" ) == 0 )
-                    {
-                        link = json_object_get_string(val);
-                    }
-                    break;
+                std::stringstream ss;
+                ss << key;
+                std::string strkey = ss.str();
 
-                case json_type_array:
-                    if ( strcmp( key, "post_parent" ) == 0 )
-                    {
-                        post_parent = parse_json_array(jobj, key); 
-                    } else if ( strcmp( key, "location_latitude" ) == 0 )
-                    {
-                        location_latitude = parse_json_array(jobj, key); 
-                    } else if ( strcmp( key, "location_longitude" ) == 0 )
-                    {
-                        location_longitude = parse_json_array(jobj, key); 
-                    }          
-                    break;
+                switch (type)
+                {
+                    case json_type_int:
+                    case json_type_boolean:
+                    case json_type_double:
+                    case json_type_string:
+
+                       if ( strcmp( key, "id" ) == 0 )
+                        {
+                            id = json_object_get_int(val);
+                        }
+                        else if ( strcmp( key, "date" ) == 0 )
+                        {
+                            date = json_object_get_string(val);
+                        }
+                        else if ( strcmp( key, "modified" ) == 0 )
+                        {
+                            modified = json_object_get_string(val);
+                        }
+                        else if ( strcmp( key, "slug" ) == 0 )
+                        {
+                            slug = json_object_get_string(val);
+                        }
+                        else if ( strcmp( key, "type" ) == 0 )
+                        {
+                            post_type = json_object_get_string(val);
+                        }
+                        else if ( strcmp( key, "featured_image" ) == 0 )
+                        {
+                            featured_image = json_object_get_string(val);
+                        }
+                        else if ( strcmp( key, "link" ) == 0 )
+                        {
+                            link = json_object_get_string(val);
+                        }
+                        break;
+
+                    case json_type_array:
+                        if ( strcmp( key, "post_parent" ) == 0 )
+                        {
+                            post_parent = parse_json_array(jobj, key); 
+                        } else if ( strcmp( key, "location_latitude" ) == 0 )
+                        {
+                            location_latitude = parse_json_array(jobj, key); 
+                        } else if ( strcmp( key, "location_longitude" ) == 0 )
+                        {
+                            location_longitude = parse_json_array(jobj, key); 
+                        }          
+                        break;
+                }
             }
-        }
 
-        delete [] cstr;
-
-        std::stringstream apilink;
-        apilink << SERVER_BASE_URL << "" << post_type << "/" << id ;
-
-         api_link = apilink.str();
-
-        _id << id;                                  
-        result_post.push_back(_id.str());           // 0 
-        result_post.push_back(date);                // 1
-        result_post.push_back(modified);            // 2
-        result_post.push_back(slug);                // 3
-        result_post.push_back(post_type);           // 4
-        result_post.push_back(link);                // 5
-        result_post.push_back(api_link);            // 6
-        result_post.push_back(featured_image);      // 7
-        result_post.push_back(post_parent);         // 8
-
-        if (relation_array.size()>0)    
+            delete [] cstr;
+        
+        } catch(const std::exception& e) 
         {
-            result_post.push_back(customs.str());   // 9
-        }
+          cout << "exception: " << e.what() << endl;  
+        }   
+        
+        try 
+        {
+            std::stringstream apilink;
+            apilink << SERVER_BASE_URL << "" << post_type << "/" << id ;
 
-        result_post.push_back(location_latitude);         // 10
-        result_post.push_back(location_longitude);        // 11
+             api_link = apilink.str();
 
+            _id << id;                                  
+            result_post.push_back(_id.str());           // 0 
+            result_post.push_back(date);                // 1
+            result_post.push_back(modified);            // 2
+            result_post.push_back(slug);                // 3
+            result_post.push_back(post_type);           // 4
+            result_post.push_back(link);                // 5
+            result_post.push_back(api_link);            // 6
+            result_post.push_back(featured_image);      // 7
+            result_post.push_back(post_parent);         // 8
+
+            if (relation_array.size()>0)    
+            {
+                result_post.push_back(customs.str());   // 9
+            }
+
+            result_post.push_back(location_latitude);         // 10
+            result_post.push_back(location_longitude);        // 11
+        
+        } catch(const std::exception& e) 
+        {
+          cout << "exception: " << e.what() << endl;  
+        } 
+        
         return result_post;
     }

@@ -787,7 +787,7 @@ void * startRecognition(void * arg)
      
     // If more than 'there_is_motion' pixels are changed, we say there is motion
     // and store an image on disk
-    there_is_motion = 3;
+    there_is_motion = 50;
      
     // Maximum deviation of the image, the higher the value, the more motion is allowed
     int max_deviation = 20;
@@ -904,10 +904,12 @@ void * startRecognition(void * arg)
                 cout << "cam" << activecamnum << " resutl detected: " << resutl_watch_detected << endl;
                 //cout << "number_of_sequence:: " << number_of_sequence << endl;
 
-                if(number_of_sequence>0 & number_of_changes.size()>1)
+                int numchansize = number_of_changes.size();
+                
+                if(number_of_sequence>0 & numchansize>1)
                 {
 
-                    //cout << "!motion_detected:: " << motion_detected << endl;
+                    cout << "!motion_detected:: " << motion_detected << endl;
 
                     init_motion = true;
 

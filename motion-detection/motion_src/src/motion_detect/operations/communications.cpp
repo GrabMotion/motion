@@ -323,7 +323,7 @@ motion::Message getRefreshProto(motion::Message m)
             mcam->clear_tempdata();
         }
 
-        int engage = motion::Message::ENGAGE;
+        int sengage = motion::Message::ENGAGE;
         if (m.includethubmnails())
         { 
             cout << "ENTRA THUMBNAIL" << endl;
@@ -354,7 +354,8 @@ motion::Message getRefreshProto(motion::Message m)
             {
                 cout << "CIERRA THUMBNAIL: " << thubnails.str().size() << endl;
                 m.set_datafile(thubnails.str()); 
-            }   
+            }
+            
         }
          
         bool active = to_bool(rowc.at(3));

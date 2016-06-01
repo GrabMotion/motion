@@ -15,6 +15,7 @@ using namespace std;
 int hardwareInfo();
 int netWorkInfo();
 int createDirectories();
+int createCamsDirectory();
 int startUpParams(int argc, const char **argv);
 
 //Network

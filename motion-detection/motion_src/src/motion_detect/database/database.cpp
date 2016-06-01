@@ -16,8 +16,6 @@ sqlite3 *db;
 char *zErrMsg = 0;
 int  cd, rc;
 
-
-
 static int callback(void *NotUsed, int argc, char **argv, char **azColName)
 {
     int i;
@@ -2061,7 +2059,7 @@ vector<vector<string> > getTrackPostChilds(int id)
     return child;
 }
 
-time_t getLastPostTime(std::string type)
+time_t getLastPostTimeByType(std::string type)
 {
     std::stringstream timeinfo;
     timeinfo << "SELECT time_rasp FROM track_posts WHERE type ='" << type << "';";
@@ -2083,6 +2081,27 @@ time_t getLastPostTime(std::string type)
     }
 }
 
+time_t getLastPostTimeByTypeAndLocal(std::string type, int db_local)
+{
+    std::stringstream timeinfo;
+    timeinfo << "SELECT time_rasp FROM track_posts WHERE type ='" << type << "' AND db_local=" << db_local << ";";
+    pthread_mutex_lock(&databaseMutex);
+    vector<vector<string> > timeinfo_array = db_select(timeinfo.str().c_str(), 1);
+    pthread_mutex_unlock(&databaseMutex);
+    
+    if (timeinfo_array.size()>0)
+    {
+        const char *time_details = timeinfo_array.at(0).at(0).c_str();
+        struct tm tm;
+        strptime(time_details, "%Y-%m-%d %H:%M:%S %z", &tm);
+        time_t lasttime = mktime(&tm); 
+        return lasttime;
+        
+    } else 
+    {
+        return NULL;
+    }
+}
 
 vector<std::string> getIpInfo()
 {
@@ -2516,7 +2535,7 @@ int getPostByIdAndType(int db_idpost)
     
     if (post_array.size()>0)
     {
-        id = atoi(post_array.at(0).at(0).c_str());
+        id = atoi(post_array.at(0).at(1).c_str());
     }
     return id;
 }

@@ -15,6 +15,7 @@ extern std::string WP_CLIENT_ID;
 extern std::string SERVER_BASE_URL;
 extern std::string WP_USER_ID;
 extern std::string public_ip;
+extern double t_post_day;
 
 // WP USER AND PASSWORD
 extern std::string WP_USER;
@@ -30,7 +31,7 @@ std::string get_endpoint_from_wp(std::string endpoint);
 
 vector<std::string> parsePost(std::string message, int numArgs, ...);
 
-void postCameraStatus();
+void postCameraStatus(int db_local_cam);
 void postTerminalStatus();
 
 motion::Message postRecognition(motion::Message m);

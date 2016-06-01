@@ -244,6 +244,8 @@ int netWorkInfo()
 int createDirectories()
 {
     
+    std::string datafile = basepath + "data";
+    directoryExistsOrCreate(datafile.c_str());
     std::string secdatafile = basepath + "data/data";
     directoryExistsOrCreate(secdatafile.c_str());
     std::string matdatafile = basepath + "data/mat";
@@ -253,15 +255,18 @@ int createDirectories()
     dumpinstancefolder = basepath + "data/instances";
     directoryExistsOrCreate(dumpinstancefolder.c_str());
     std::string thumbnailpath = basepath + "data/thumbnails"; 
-    directoryExistsOrCreate(thumbnailpath.c_str());
-    
+    directoryExistsOrCreate(thumbnailpath.c_str());   
+    return 0;
+}
+
+int createCamsDirectory()
+{
     for (int k=0; k< cams.size(); k++)
     {
         std::stringstream dumpcamera;
         dumpcamera << dumpinstancefolder << "/camera" << cams.at(k);
         directoryExistsOrCreate(dumpcamera.str().c_str());
     }
-    return 0;
 }
 
 void runJobsInterval(std::string timecompare, std::vector<pthread_t> threads_recognition)

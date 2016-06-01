@@ -447,77 +447,68 @@ cv::Mat extractMat(string loadedmat)
     return extracted;
 }
 
-void loadJobFromFile()
-{
-    
-    //CREATE JOBS
+void loadJobFromFile(int db_camera_local)
+{   
+    vector<std::string> camerainfo = getTrackPostByTypeAndIdLocal("camera", db_camera_local);
+    if (camerainfo.size()>0)
+    {
+        struct timeval tr;
+        struct tm* ptmr;
+        char time_rasp[40];
+        gettimeofday (&tr, NULL);
+        ptmr = localtime (&tr.tv_sec);
+        strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);          
 
-     vector<vector<string> > cameras = getCamerasFromDB();
+        std::string post_parent = camerainfo.at(9).c_str();           
 
-     int size = cameras.size();
-     
-     for (int i=0; i<size; i++)
-     {
-         int cameranumber = atoi(cameras.at(i).at(0).c_str());
+        std::stringstream dumpfile;
+        dumpfile << basepath << "data/client/client.dat";
+
+        bool datexist = file_exists(dumpfile.str());
+        if (datexist)
+        {
+        
+            std::string strproto = get_file_contents(dumpfile.str());
+            std::string strdecoded = base64_decode(strproto);        
+
+            GOOGLE_PROTOBUF_VERIFY_VERSION;
+            motion::Message m;
+            m.ParseFromArray(strdecoded.c_str(), strdecoded.size());
+
+            motion::Message::MotionUser * muser = m.mutable_motionuser(0);
+
+            google::protobuf::uint32 db_user_id = getUserIdByWpUserName(muser->username());
+
+            std::stringstream clientid;
+            clientid << muser->wpclientid() << endl;
+
+            std::stringstream timerasp;
+            timerasp << time_rasp << endl;                    
+
+            cout << "****************************************" << endl;
+            cout << "SERVER_INFO clientid                   :" << clientid.str()           << endl;
+            cout << "SERVER_INFO timerasp                   :" << timerasp.str()           << endl;
+            cout << "SERVER_INFO wpmodified                 :" << muser->wpmodified()      << endl;
+            cout << "SERVER_INFO wpslug                     :" << muser->wpslug()          << endl;
+            cout << "SERVER_INFO wptype                     :" << muser->wptype()          << endl;
+            cout << "SERVER_INFO wplink                     :" << muser->wplink()          << endl;
+            cout << "SERVER_INFO wpapilink                  :" << muser->wpapilink()       << endl;
+            cout << "SERVER_INFO wpfeaturedimage            :" << muser->wpfeaturedimage() << endl;            
+            cout << "SERVER_INFO postparent                 :" << post_parent              << endl;            
+            cout << "****************************************" << endl;
+
+           int db_track = insertIntoPosts(clientid.str(), timerasp.str(), muser->wpmodified(), muser->wpslug(), muser->wptype(), muser->wplink(), muser->wpapilink(), muser->wpfeaturedimage(), post_parent, db_user_id);                           
+
+            //CREATE JOB STATIC
+           int _id = createJobManually(db_camera_local, "test", 2, "BASIC");
+
+           if (_id>0)        
+                std::remove(dumpfile.str().c_str());
+           
+        }
          
-         int db_camera = atoi(cameras.at(i).at(3).c_str());     
-         
-         if (db_camera==1) //REMOVE THIS FOR MULTI CAMERA
-         {                         
-
-             vector<std::string> camerainfo = getTrackPostByTypeAndIdLocal("camera", db_camera);
-             if (camerainfo.size()>0)
-             {
-                 struct timeval tr;
-                 struct tm* ptmr;
-                 char time_rasp[40];
-                 gettimeofday (&tr, NULL);
-                 ptmr = localtime (&tr.tv_sec);
-                 strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);          
-
-                 std::string post_parent = camerainfo.at(9).c_str();           
-
-                 std::stringstream dumpfile;
-                 dumpfile << basepath << "data/client/client.dat";
-
-                 std::string strproto = get_file_contents(dumpfile.str());
-                 std::string strdecoded = base64_decode(strproto);
-
-                 //cout << "RECEIVE" << endl;
-
-                 GOOGLE_PROTOBUF_VERIFY_VERSION;
-                 motion::Message m;
-                 m.ParseFromArray(strdecoded.c_str(), strdecoded.size());
-
-                 motion::Message::MotionUser * muser = m.mutable_motionuser(0);
-                 
-                 google::protobuf::uint32 db_user_id = getUserIdByWpUserName(muser->username());
-
-                 std::stringstream clientid;
-                 clientid << muser->wpclientid() << endl;
-
-                 std::stringstream timerasp;
-                 timerasp << time_rasp << endl;                    
-
-                 cout << "****************************************" << endl;
-                 cout << "SERVER_INFO clientid                   :" << clientid.str()           << endl;
-                 cout << "SERVER_INFO timerasp                   :" << timerasp.str()           << endl;
-                 cout << "SERVER_INFO wpmodified                 :" << muser->wpmodified()      << endl;
-                 cout << "SERVER_INFO wpslug                     :" << muser->wpslug()          << endl;
-                 cout << "SERVER_INFO wptype                     :" << muser->wptype()          << endl;
-                 cout << "SERVER_INFO wplink                     :" << muser->wplink()          << endl;
-                 cout << "SERVER_INFO wpapilink                  :" << muser->wpapilink()       << endl;
-                 cout << "SERVER_INFO wpfeaturedimage            :" << muser->wpfeaturedimage() << endl;            
-                 cout << "SERVER_INFO postparent                 :" << post_parent              << endl;            
-                 cout << "****************************************" << endl;
-
-                int db_track = insertIntoPosts(clientid.str(), timerasp.str(), muser->wpmodified(), muser->wpslug(), muser->wptype(), muser->wplink(), muser->wpapilink(), muser->wpfeaturedimage(), post_parent, db_user_id);                           
-
-                 //CREATE JOB STATIC
-                 createJobManually(db_camera, "test", 2, "BASIC");
-             } 
-         }
-     }   
+    }
+        
 }
 
 
@@ -546,7 +537,8 @@ int createJobManually(
     
     std::vector<string> camera_vector = getCameraByCameraDbId(db_camera);   
     
-    int _id = atoi(camera_vector.at(0).c_str());
+    int _id = 0;
+    _id = atoi(camera_vector.at(0).c_str());
     std::string name = camera_vector.at(1); 
     int matrows     = atoi(camera_vector.at(2).c_str());
     int matcols     = atoi(camera_vector.at(3).c_str());
@@ -620,8 +612,8 @@ int createJobManually(
     mrec->set_runatstartup(true);
     
     mrec->set_hascron(true);    
-    mrec->set_timestart("00:00:00");
-    mrec->set_timeend("24:00:00");       
+    mrec->set_timestart("00:01:01");
+    mrec->set_timeend("23:59:59");       
     
     m = saveRecognition(m);
    

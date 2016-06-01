@@ -142,7 +142,8 @@ int getPostByIdAndType(int db_idpost);
 vector<vector<string> > getTrackPosts(std::string type);
 vector<vector<string> > getTrackPostChilds(int id);
 
-time_t getLastPostTime(std::string type);
+time_t getLastPostTimeByType(std::string type);
+time_t getLastPostTimeByTypeAndLocal(std::string type, int db_local);
 
 vector<std::string> getUserInfo();
 

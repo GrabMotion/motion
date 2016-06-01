@@ -124,10 +124,11 @@ void startMainRecognition(int camnum);
 void * startRecognition(void * arg);
 
 //Run Forever
-double t_post_terminal                          = 60 * 20; //60 * 24; 
+double t_post_terminal                          = 60 * 20; 
 double t_post_location                          = 60 * 60 * 12; 
 double t_post_camera                            = 60 * 60 * 6; 
 double t_post_notification_thread_running       = 60 * 5; 
+double t_post_day                               = 60 * 60 * 2;
 
 double t_load_instance   = 10; //60 * 24;      
 
@@ -366,12 +367,14 @@ int main (int argc, char * const av[])
     cout << "sourcepath: "  << sourcepath   << endl;
     cout << "+++++++++++++++++++++++++++++++++++++++++++" << endl;
     
+    //Directories
+    createDirectories();    
     //Hardware Info 
     hardwareInfo();
     //Network Info
-    netWorkInfo();
-    //Directories
-    createDirectories();
+    netWorkInfo();    
+    //Cams Directory
+    createCamsDirectory();
     //StartUp Params
     startUpParams(argc, argv);
     //Start Threads
@@ -385,11 +388,11 @@ int main (int argc, char * const av[])
     for (;;)
     {
         
-        sleep(10);
+        sleep(5);
         
         vector<std::string> user_info = getUserInfo();
 
-        cout << "main loop #: " << main_loop_counter << endl;
+        cout << "main loop #: " << main_loop_counter << " user_info size: " << user_info.size() << endl;
 
         if (user_info.size()>0)
         {
