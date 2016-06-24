@@ -4,6 +4,10 @@
     <df root="." name="0">
       <df name="src">
         <df name="motion_detect">
+          <df name="analysis">
+            <in>Analize.cpp</in>
+            <in>Analize.h</in>
+          </df>
           <df name="b64">
             <in>base64.cpp</in>
             <in>cdecode.c</in>
@@ -52,6 +56,15 @@
         </df>
       </df>
     </df>
+    <df root="." name="1">
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>CMakeLists.txt</itemPath>
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false"
@@ -62,6 +75,7 @@
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
+    <Elem>.</Elem>
     <Elem>.</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
@@ -86,6 +100,16 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
+      <item path="src/motion_detect/analysis/Analize.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/motion_detect/analysis/Analize.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="src/motion_detect/b64/base64.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/motion_detect/b64/cdecode.c" ex="false" tool="0" flavor2="0">

@@ -110,14 +110,14 @@ vector<string> getIntervalsByCamberaAndRec(std::string camera, std::string recna
 vector<string> getMaxImageByPath(google::protobuf::int32 imageid);
 vector<string> getImageByPath(std::string path);
 //int insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idmedia, int db_srv_idpost);
-vector<vector<string> > getNotTrackedInstance();
+vector<int> getNotProccessedInstance();
 
 void insertIntoLocation(vector<std::string> location);
 //database
 int insertIntoIMage(const motion::Message::Image & img);
 void insertIntoCrop(const motion::Message::Crop & crop, int db_image_id);
 int insertIntoVideo(motion::Message::Video dvideo);
-int insertIntoInstance(std::string number, motion::Message::Instance * pinstance, const char * time_info, int db_video_id, vector<int> images);
+int insertIntoInstance(std::string number, motion::Message::Instance * pinstance, const char* init_time, const char* end_time, int db_video_id, vector<int> images);
 //Dump xml
 void build_xml(const char * xmlPath);
 void writeXMLInstance (std::string XMLFILE, std::string time_start, std::string time_end, std::string instance, std::string instancecode);
@@ -178,3 +178,5 @@ vector<string> getParseInfoForPush();
 int getUserIdByWpUserName(std::string username);
 
 vector<string> getTerminalSerial();
+
+void insertIntoProcess(motion::Message::MotionUser * muser, int db_recogniton_setup);

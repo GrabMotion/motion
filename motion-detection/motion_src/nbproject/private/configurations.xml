@@ -39,11 +39,17 @@
             </df>
           </df>
         </df>
+        <df name="Progress">
+        </df>
       </df>
       <df name="src">
         <df name="motion_cron">
         </df>
         <df name="motion_detect">
+          <df name="analysis">
+            <in>Analize.cpp</in>
+            <in>Analize.h</in>
+          </df>
           <df name="b64">
             <in>._base64.cpp</in>
             <in>._base64.h</in>
@@ -63,6 +69,8 @@
             <in>encode.h</in>
           </df>
           <df name="data">
+            <df name="client">
+            </df>
             <df name="data">
             </df>
             <df name="instances">
@@ -76,6 +84,12 @@
             <df name="thumbnails">
             </df>
             <df name="tracking">
+              <df name="22Jun2016">
+                <df name="BASIC">
+                </df>
+              </df>
+              <df name="recognitions">
+              </df>
             </df>
           </df>
           <df name="database">
@@ -182,6 +196,176 @@
           <df name="log">
           </df>
           <df name="pics">
+            <df name="camera0">
+              <df name="BASIC">
+                <df name="22Jun2016">
+                  <df name="1">
+                  </df>
+                  <df name="2">
+                  </df>
+                  <df name="3">
+                  </df>
+                  <df name="4">
+                  </df>
+                  <df name="5">
+                  </df>
+                  <df name="6">
+                  </df>
+                  <df name="7">
+                  </df>
+                  <df name="8">
+                  </df>
+                  <df name="9">
+                  </df>
+                  <df name="xml">
+                  </df>
+                </df>
+              </df>
+            </df>
+            <df name="region">
+            </df>
+            <df name="screenshots">
+            </df>
+          </df>
+          <df name="region">
+          </df>
+          <df name="samba">
+          </df>
+        </df>
+      </df>
+    </df>
+    <df root="." name="1">
+      <df name="CMakeFiles">
+        <df name="CMakeTmp">
+        </df>
+        <df name="CompilerIdC">
+        </df>
+        <df name="CompilerIdCXX">
+        </df>
+        <df name="motion_detect_raspberry.dir">
+          <df name="src">
+            <df name="motion_detect">
+              <df name="b64">
+              </df>
+              <df name="database">
+              </df>
+              <df name="http">
+              </df>
+              <df name="ntp">
+              </df>
+              <df name="operations">
+              </df>
+              <df name="practical">
+              </df>
+              <df name="protobuffer">
+              </df>
+              <df name="recognition">
+              </df>
+              <df name="socket">
+              </df>
+              <df name="tinyxml">
+              </df>
+              <df name="utils">
+              </df>
+            </df>
+          </df>
+        </df>
+        <df name="Progress">
+        </df>
+      </df>
+      <df name="src">
+        <df name="motion_cron">
+        </df>
+        <df name="motion_detect">
+          <df name="analysis">
+          </df>
+          <df name="b64">
+          </df>
+          <df name="data">
+            <df name="client">
+            </df>
+            <df name="data">
+            </df>
+            <df name="instances">
+              <df name="camera0">
+              </df>
+              <df name="camera1">
+              </df>
+            </df>
+            <df name="mat">
+            </df>
+            <df name="thumbnails">
+            </df>
+            <df name="tracking">
+              <df name="22Jun2016">
+                <df name="BASIC">
+                </df>
+              </df>
+              <df name="recognitions">
+              </df>
+            </df>
+          </df>
+          <df name="database">
+          </df>
+          <df name="http">
+          </df>
+          <df name="ntp">
+          </df>
+          <df name="operations">
+          </df>
+          <df name="practical">
+          </df>
+          <df name="protobuffer">
+          </df>
+          <df name="recognition">
+          </df>
+          <df name="socket">
+          </df>
+          <df name="streaming">
+          </df>
+          <df name="tinyxml">
+          </df>
+          <df name="utils">
+          </df>
+        </df>
+        <df name="motion_web">
+          <df name="apache.conf">
+            <df name="conf.d">
+            </df>
+          </df>
+          <df name="fancybox">
+            <df name="images">
+            </df>
+          </df>
+          <df name="log">
+          </df>
+          <df name="pics">
+            <df name="camera0">
+              <df name="BASIC">
+                <df name="22Jun2016">
+                  <df name="1">
+                  </df>
+                  <df name="2">
+                  </df>
+                  <df name="3">
+                  </df>
+                  <df name="4">
+                  </df>
+                  <df name="5">
+                  </df>
+                  <df name="6">
+                  </df>
+                  <df name="7">
+                  </df>
+                  <df name="8">
+                  </df>
+                  <df name="9">
+                  </df>
+                  <df name="xml">
+                  </df>
+                </df>
+              </df>
+            </df>
             <df name="region">
             </df>
             <df name="screenshots">
@@ -220,8 +404,6 @@
         <gdb_interceptlist>
           <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
         </gdb_interceptlist>
-        <gdb_signals>
-        </gdb_signals>
         <gdb_options>
           <DebugOptions>
           </DebugOptions>

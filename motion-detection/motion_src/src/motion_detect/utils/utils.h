@@ -70,3 +70,6 @@ void loadJobFromFile(int db_camera_local);
 bool to_boolean(std::string str);
 
 std::string replace_space_with_underscore(std::string s);
+
+time_t timestamp_to_ctime(const char* time_stamp );
+const char* ctime_to_timestamp(time_t time_t_input);

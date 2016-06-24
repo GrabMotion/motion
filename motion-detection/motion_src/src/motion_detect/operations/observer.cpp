@@ -3,6 +3,11 @@
  * Author: jose
  *
  * Created on Dec 12, 2015, 7:48 PM
+ * 
+ * This class loads the stored instances on disk saved with recognition.cpp. 
+ *  
+ * store them into the database 
+ * and  
  */
 
 #include "../operations/observer.h"
@@ -31,6 +36,7 @@ void loadInstancesFromFile()
     int count_device;
     struct stat stdev;
     
+    //Loop 
     for(int k=0; k<cams.size(); k++)
     {
        
@@ -57,9 +63,7 @@ void loadInstancesFromFile()
 
             std::string devicedir = dumpcamera.str() + "/" + entry_device->d_name;
 
-            devicedir = splitString(devicedir, "..").at(0);
-
-            //std::string dumpfolder = devicedir + "/";
+            devicedir = splitString(devicedir, "..").at(0);           
 
             struct dirent **entry_list_instances;
             int count_inst;
@@ -137,15 +141,14 @@ void loadInstancesFromFile()
                             images.push_back(db_image_id);
                         }                        
                         
-                        cout << "pinstanceendtime: " << pinstance.endtime() << endl;
-                        struct tm t_mend;
-                        std::stringstream endt;
-                        endt << pinstance.endtime();
-                        const char * endtimechar = endt.str().c_str();
+                        cout << "pinstanceendtime: " << pinstance.endtime() << endl;                        
+                        
+                        const char* init_time = ctime_to_timestamp(tinit);
+                        const char* end_time = ctime_to_timestamp(tend);               
 
                         motion::Message::Video dvideo = pinstance.video();
                         int db_video_id = insertIntoVideo(dvideo);
-                        int db_instance_id = insertIntoInstance(pinstance.instance(), &pinstance, endtimechar, db_video_id, images);                
+                        int db_instance_id = insertIntoInstance(pinstance.instance(), &pinstance, init_time, end_time, db_video_id, images);                
 
                         int post = instancePost(pinstance, db_instance_id, post_parent);
 

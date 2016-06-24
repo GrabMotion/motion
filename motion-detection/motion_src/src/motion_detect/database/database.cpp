@@ -6,6 +6,8 @@
  * Created on Julio 22, 2015, 11:23 AM
  */
 
+#include <google/protobuf/message.h>
+
 #include "../utils/utils.h"
 #include "../database/database.h"
 #include "../operations/camera.h"
@@ -1141,50 +1143,19 @@ vector<string> getMaxImageByPath(google::protobuf::int32 instanceid)
     return maximage;  
 }
 
-/*int insertTracking(int db_instance_id, std::string maximagepath, int db_srv_idmedia, int db_srv_idpost)
+vector<int> getNotProccessedInstance()
 {
-    stringstream sql_insert_tracking;
-    sql_insert_tracking <<
-    "INSERT INTO track_instances (_id_db_instance, imagepath, _id_dbsrv_media, _id_dbsrv_post) "   <<
-    "SELECT " << db_instance_id << ",'"  << maximagepath << "', " << db_srv_idmedia << ", " << db_srv_idpost <<
-    " WHERE NOT EXISTS (SELECT * FROM tracking WHERE _id_db_instance = " << db_instance_id  << ");";
+    vector<int> nonproccesed;
+    std::string not_tracker_instance = "SELECT _id FROM instance WHERE proccessed = 0;";
     pthread_mutex_lock(&databaseMutex);
-    db_execute(sql_insert_tracking.str().c_str());
-    pthread_mutex_unlock(&databaseMutex); 
-    
-    stringstream sql_update_instance;
-    sql_update_instance <<
-    "UPDATE instance SET tracked = 1 " <<
-    "WHERE _id = " << db_instance_id << ";";
-    pthread_mutex_lock(&databaseMutex);
-    db_execute(sql_update_instance.str().c_str());
-    pthread_mutex_unlock(&databaseMutex); 
-    
-    std::stringstream last_tracking_query;
-    last_tracking_query << "SELECT _id FROM tracking WHERE _id_db_instance = " << db_instance_id << ";";
-    pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > tracking_array = db_select(last_tracking_query.str().c_str(), 1);
+    vector<vector<string> > not_proccessed_instance_array = db_select(not_tracker_instance.c_str(), 1);
     pthread_mutex_unlock(&databaseMutex);
-    int db_tracking_id;
-    if (tracking_array.size()>0)
-    {
-        db_tracking_id= atoi(tracking_array.at(0).at(0).c_str());
-        cout << "db_tracking_id: " << db_tracking_id << endl;
-    } else 
-    {
-        db_tracking_id = 0;
-    }
-    return db_tracking_id;
     
-}*/
-
-vector<vector<string> > getNotTrackedInstance()
-{
-    std::string not_tracker_instance = "SELECT _id FROM instance WHERE tracked =0;";
-    pthread_mutex_lock(&databaseMutex);
-    vector<vector<string> > not_tracker_instance_array = db_select(not_tracker_instance.c_str(), 1);
-    pthread_mutex_unlock(&databaseMutex);
-    return not_tracker_instance_array;
+    for (int i=0; i<not_proccessed_instance_array.size(); i++)
+    {
+        nonproccesed.push_back(atoi(not_proccessed_instance_array.at(i).at(0).c_str()));           
+    }      
+    return nonproccesed;
 }
 
 vector<string> getImageByPath(std::string path)
@@ -1904,6 +1875,57 @@ int insertIntoPosts(std::string id,
     return db_track_posts_id;
 }
 
+void insertIntoProcess(motion::Message::MotionUser * muser, int db_recogniton_setup)
+{
+    struct timeval tr;
+    struct tm* ptmr;
+    char time_rasp[40];
+    gettimeofday (&tr, NULL);
+    ptmr = localtime (&tr.tv_sec);
+    strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+      
+    int processize = muser->motionprocess_size();
+    for(int i=0; i<processize;i++)
+    {
+        motion::Message::MotionProcess * process = muser->mutable_motionprocess(i);
+        std::string name = process->name();
+        google::protobuf::int32 type = process->type();       
+         
+        std::stringstream sql_process;
+        sql_process <<
+        "INSERT INTO process (name, number) " <<
+        "SELECT '" << name << "', "  << type <<  
+        " WHERE NOT EXISTS (SELECT * FROM track_posts WHERE name = '" << name << "');";
+
+        cout << "sql_posts: " << sql_process.str() << endl;
+
+        pthread_mutex_lock(&databaseMutex); 
+        db_execute(sql_process.str().c_str());
+        pthread_mutex_unlock(&databaseMutex);
+
+        vector<vector<string> > track_posts_array;
+        std::string process_sql_last = "SELECT MAX(_id) FROM process";
+        pthread_mutex_lock(&databaseMutex);
+        vector<vector<string> > process_array = db_select(process_sql_last.c_str(), 1);
+        pthread_mutex_unlock(&databaseMutex);
+        
+        int db_process_id = atoi(process_array.at(0).at(0).c_str());
+        
+        std::stringstream sql_rel_recognition_process;
+        sql_rel_recognition_process <<
+        "INSERT INTO rel_recognition_setup_process (_id_recognition_setup, _id_process) " <<
+        "SELECT " << db_recogniton_setup << ", "  << db_process_id <<  
+        " WHERE NOT EXISTS (SELECT * FROM track_posts WHERE _id_process = " << db_process_id << ");";
+
+        cout << "sql_posts: " << sql_rel_recognition_process.str() << endl;
+
+        pthread_mutex_lock(&databaseMutex); 
+        db_execute(sql_rel_recognition_process.str().c_str());
+        pthread_mutex_unlock(&databaseMutex); 
+        
+    }
+}
+
 void updateIntoPost (std::string id, std::string date, std::string modified)
 {
     struct timeval tr;
@@ -2156,7 +2178,7 @@ vector<std::string> getLocationInfo()
 
 // INSTANCE 
 
-int insertIntoInstance(std::string number, motion::Message::Instance * pinstance, const char * time_info, int db_video_id, vector<int> images)
+int insertIntoInstance(std::string number, motion::Message::Instance * pinstance, const char* time_start, const char* time_end, int db_video_id, vector<int> images)
 {
                 
         std::string instancestart   = pinstance->instancestart();
@@ -2165,18 +2187,20 @@ int insertIntoInstance(std::string number, motion::Message::Instance * pinstance
         //Instance
         stringstream sql_instance;
         sql_instance <<        
-        "INSERT INTO instance (number, instancestart, instanceend, _id_video, time, tracked) " <<
+        "INSERT INTO instance (number, instancestart, instanceend, _id_video, time_start, time_end, tracked) " <<
         "SELECT "   << number                   << 
         ",' "       << instancestart            << "'" << 
         ", '"       << instanceend              << "'" <<
         ", "        << db_video_id              <<
-        ", '"       << time_info                << "'" << 
+        ", '"       << time_start               << "'" << 
+        ", '"       << time_end                 << "'" << 
         ", 0 "      <<
         " WHERE NOT EXISTS (SELECT * FROM instance WHERE number = " << number       <<
         " AND instancestart = '"  << pinstance->instancestart()     <<    "'"       <<
         " AND instanceend   = '"  << pinstance->instanceend()       <<    "'"       <<
         " AND _id_video     = "   << db_video_id                    << 
-        " AND time          = '"  << time_info                      <<    "'"       
+        " AND time_start    = '"  << time_start                     <<    "'"       
+        " AND time_end      = '"  << time_end                       <<    "'"                
         " AND tracked       = 0"        << ");";
         std::string sqlinst = sql_instance.str();
         //cout << "sqlinst: " << sqlinst << endl;
@@ -2207,6 +2231,13 @@ int insertIntoInstance(std::string number, motion::Message::Instance * pinstance
         int dayid = pinstance->db_dayid();
         int db_recognition_setup_id = pinstance->db_recognition_setup_id();
         
+        struct timeval tr;
+        struct tm* ptmr;
+        char time_rasp[40];
+        gettimeofday (&tr, NULL);
+        ptmr = localtime (&tr.tv_sec);
+        strftime (time_rasp, sizeof (time_rasp), "%Y-%m-%d %H:%M:%S %z", ptmr);
+
         //Instance.
         stringstream sql_rel_day_instance;
         sql_rel_day_instance <<
@@ -2214,7 +2245,7 @@ int insertIntoInstance(std::string number, motion::Message::Instance * pinstance
         "SELECT "  << dayid                     <<
         ", "       << db_instance_id            <<
         ", "       << db_recognition_setup_id   <<
-        ", '"       << time_info         << "'" <<
+        ", '"      << time_rasp                 << "'" <<
         " WHERE NOT EXISTS (SELECT * FROM rel_day_instance_recognition_setup WHERE _id_day = " << dayid << 
         " AND _id_instance = " << db_instance_id << " AND _id_recognition_setup = " << db_recognition_setup_id << ");";
         cout << "sql_rel_day_instance: " << sql_rel_day_instance << endl;
@@ -2280,14 +2311,12 @@ void insertIntoCrop(const motion::Message::Crop & crop, int db_image_id)
     vector<vector<string> > crop_array = db_select(last_crop_query.c_str(), 1);
     pthread_mutex_unlock(&databaseMutex);
     db_crop_id = atoi(crop_array.at(0).at(0).c_str());
-    //cout << "db_crop_id: " << db_crop_id << endl;
-    
+    //cout << "db_crop_id: " << db_crop_id << endl;    
 }
     
 
 int insertIntoIMage(const motion::Message::Image & img)
-{
-    
+{    
     stringstream sql_img;
     sql_img <<
     "INSERT INTO image (path, name, imagechanges, time) " <<
@@ -2309,8 +2338,6 @@ int insertIntoIMage(const motion::Message::Image & img)
     //cout << "db_image_id: " << db_image_id << endl;
     return db_image_id;
 }
-
-
 
 // Create initial XML file
 void build_xml(const char * xmlPath)
@@ -2341,8 +2368,7 @@ void build_xml(const char * xmlPath)
     doc.LinkEndChild( decl );
     doc.LinkEndChild( file );
     doc.SaveFile( xmlPath );
-}
-  
+}  
   
 // Write XML file
 // Check if the xml file exists, if not create it

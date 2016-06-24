@@ -35,14 +35,15 @@
             if ( posted > timecount ) 
             {
                 post_location = true;
-            }         
-        } else {
+            } 
+            
+        } else 
+        {
             post_location = true;
         }
 
         if (post_location)
-        {    
-           
+        {       
             vector<std::string> locationinfo = getLocationInfo();
         
             int db_local;

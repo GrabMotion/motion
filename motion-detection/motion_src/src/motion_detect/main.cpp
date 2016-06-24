@@ -29,9 +29,11 @@
 #include "operations/communications.h"
 #include "operations/observer.h"
 #include "operations/startup.h"
+#include "analysis/Analize.h"
 
 
 #include <parse.h>
+#include <netdb.h>
 
 using namespace std;
 
@@ -133,7 +135,6 @@ double t_post_day                               = 60 * 60 * 2;
 double t_load_instance   = 10; //60 * 24;      
 
 int main_loop_counter;
-
 
 #define RCVBUFSIZE 1024
 //const unsigned int RCVBUFSIZE = 100000; //4096; //32;     // Size of receive buffer
@@ -310,7 +311,7 @@ void startThreads()
     pthread_mutex_init(&fileMutex, 0);
     pthread_mutex_init(&databaseMutex, 0);
     
-    // UDP
+   // UDP
    runb = pthread_create(&thread_broadcast, NULL, broadcastsender, NULL);
    if ( runb  != 0) 
    {
@@ -423,6 +424,17 @@ int main (int argc, char * const av[])
 
             //Scan local instances and store
             loadInstancesFromFile();
+            
+            //Proccess recognition for instances
+            vector<int> nonproccesed = getNotProccessedInstance();
+            if (nonproccesed.size()>0)
+            {
+                //Analize
+                Analize analyze();               
+                
+                
+                
+            }
 
             sleep(5);
 

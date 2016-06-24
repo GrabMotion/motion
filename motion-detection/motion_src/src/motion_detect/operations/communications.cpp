@@ -740,6 +740,14 @@ motion::Message runCommand(motion::Message m)
     
     cout << "runCommand:: " << m.type() << endl;
     
+    if (!m.has_packagesize())
+    {
+        cout << "NO PACKAGE SIZE!" << endl;
+        m.set_type(motion::Message::RESPONSE_NO_PACKAGE_SIZE);
+        return m;
+    }
+               
+    
     switch (m.type())
     {
         case motion::Message::ENGAGE:
@@ -766,28 +774,40 @@ motion::Message runCommand(motion::Message m)
             pthread_mutex_unlock(&databaseMutex);
 
             cout << "****************************************" << endl;
+            
             if (m.has_type())
                 cout << "ENGAGE type            :" << m.type() << endl;
+            
             if (m.has_time())
                 cout << "ENGAGE time            :" << m.time() << endl;
+            
             if (m.has_serverip())
                 cout << "ENGAGE serverip        :" << m.serverip() << endl;
+            
             if (m.has_dataamount())
-            cout << "ENGAGE serverip            :" << m.dataamount() << endl;
+                cout << "ENGAGE serverip            :" << m.dataamount() << endl;
+            
             if (m.has_packagesize())
-            cout << "ENGAGE packagesize         :" << m.packagesize() << endl;
+                cout << "ENGAGE packagesize         :" << m.packagesize() << endl;
+            
             if (m.has_includethubmnails())
-            cout << "ENGAGE includethubmnails   :" << m.includethubmnails() << endl;
+                cout << "ENGAGE includethubmnails   :" << m.includethubmnails() << endl;
+            
             if (m.has_imagefilepath())
-            cout << "ENGAGE imagefilepath       :" << m.imagefilepath() << endl;
+                cout << "ENGAGE imagefilepath       :" << m.imagefilepath() << endl;
+            
             if (m.has_datafile())
-            cout << "ENGAGE datafile            :" << m.datafile() << endl;
+                cout << "ENGAGE datafile            :" << m.datafile() << endl;
+            
             if (m.has_devicestarttime())
-            cout << "ENGAGE devicestarttime     :" << m.devicestarttime() << endl;
+                cout << "ENGAGE devicestarttime     :" << m.devicestarttime() << endl;
+            
             if (m.has_dataamount())
-            cout << "ENGAGE dataamount          :" << m.dataamount() << endl;
+                cout << "ENGAGE dataamount          :" << m.dataamount() << endl;
+            
             if (m.has_datatotal())
-            cout << "ENGAGE datatotal           :" << m.datatotal() << endl;
+                cout << "ENGAGE datatotal           :" << m.datatotal() << endl;
+            
             cout << "****************************************" << endl;
         
             m.set_type(motion::Message::ENGAGE);
@@ -1193,16 +1213,14 @@ try
       cout << "count_sent__split:" << count_sent__split << endl;
       //cout << "count vector size:" << count_vector_size << endl;
         
-      value = ms.type();
-      
+      value = ms.type();      
       
       //IF USER INFO STORE PROTO TO DISK
       if (value == motion::Message::SERVER_INFO)
-      {
-          
+      {          
         motion::Message::MotionUser * muser = ms.mutable_motionuser(0);
         int db_user_id = insertUserIntoDatabase(muser);               
-          
+
         std::string trackdatafile = basepath + "data/client"; 
         directoryExistsOrCreate(trackdatafile.c_str());                  
 

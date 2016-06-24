@@ -497,18 +497,18 @@ void loadJobFromFile(int db_camera_local)
             cout << "SERVER_INFO postparent                 :" << post_parent              << endl;            
             cout << "****************************************" << endl;
 
-           int db_track = insertIntoPosts(clientid.str(), timerasp.str(), muser->wpmodified(), muser->wpslug(), muser->wptype(), muser->wplink(), muser->wpapilink(), muser->wpfeaturedimage(), post_parent, db_user_id);                           
-
+           int db_track = insertIntoPosts(clientid.str(), timerasp.str(), muser->wpmodified(), muser->wpslug(), muser->wptype(), muser->wplink(), muser->wpapilink(), muser->wpfeaturedimage(), post_parent, db_user_id);                                     
+           
             //CREATE JOB STATIC
-           int _id = createJobManually(db_camera_local, "test", 2, "BASIC");
+           int db_recogniton_setup = createJobManually(db_camera_local, "test", 2, "BASIC");
 
-           if (_id>0)        
+           insertIntoProcess(muser, db_recogniton_setup);       
+           
+           if (db_recogniton_setup>0)        
                 std::remove(dumpfile.str().c_str());
            
-        }
-         
-    }
-        
+        }         
+    }        
 }
 
 
@@ -643,6 +643,26 @@ std::string replace_space_with_underscore(std::string text)
     return text;
  }
     
+
+/* convert string time stamp format to time_t and return */
+time_t timestamp_to_ctime(const char* time_stamp )
+{
+   time_t _return;
+   struct tm tm_struct ; 
+   strptime(time_stamp ,"%Y-%m-%d %H:%M:%S",&tm_struct);
+   _return  = mktime(&tm_struct);   return
+   _return;
+}
+
+/* convert time_t format into time-stamp format */ 
+const char* ctime_to_timestamp(time_t time_t_input) 
+{
+   char* _return = (char*) malloc(40);
+   struct tm* tm_struct ;   tm_struct = gmtime(&time_t_input);
+   strftime( _return, 40,"%Y-%m-%d %H:%M:%S %z",tm_struct);
+   // free (tm_struct);
+   return _return;  
+}
 
 
 // String Generator

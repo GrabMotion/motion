@@ -41,6 +41,7 @@ class Message_MotionCamera;
 class Message_MotionTrack;
 class Message_MotionRec;
 class Message_MotionCron;
+class Message_MotionProcess;
 class Message_MotionMonth;
 class Message_MotionDay;
 class Message_Instance;
@@ -54,11 +55,12 @@ enum Message_ResponseType {
   Message_ResponseType_ERROR_INVALID_USERNAME = 102,
   Message_ResponseType_ERROR_INVALID_PASSWORD = 103,
   Message_ResponseType_ERROR_LOGIN_FAILIURE = 104,
-  Message_ResponseType_ERROR_TIMEOUT = 105
+  Message_ResponseType_ERROR_TIMEOUT = 105,
+  Message_ResponseType_ERROR_NO_PACKAGE_SIZE = 106
 };
 bool Message_ResponseType_IsValid(int value);
 const Message_ResponseType Message_ResponseType_ResponseType_MIN = Message_ResponseType_LOGIN_SUCCESSFUL;
-const Message_ResponseType Message_ResponseType_ResponseType_MAX = Message_ResponseType_ERROR_TIMEOUT;
+const Message_ResponseType Message_ResponseType_ResponseType_MAX = Message_ResponseType_ERROR_NO_PACKAGE_SIZE;
 const int Message_ResponseType_ResponseType_ARRAYSIZE = Message_ResponseType_ResponseType_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Message_ResponseType_descriptor();
@@ -103,11 +105,12 @@ enum Message_ActionType {
   Message_ActionType_PROTO_HAS_FILE = 3030,
   Message_ActionType_PROTO_NO_FILE = 3031,
   Message_ActionType_SERVER_INFO = 3032,
-  Message_ActionType_SERVER_INFO_OK = 3033
+  Message_ActionType_SERVER_INFO_OK = 3033,
+  Message_ActionType_RESPONSE_NO_PACKAGE_SIZE = 3034
 };
 bool Message_ActionType_IsValid(int value);
 const Message_ActionType Message_ActionType_ActionType_MIN = Message_ActionType_ENGAGE;
-const Message_ActionType Message_ActionType_ActionType_MAX = Message_ActionType_SERVER_INFO_OK;
+const Message_ActionType Message_ActionType_ActionType_MAX = Message_ActionType_RESPONSE_NO_PACKAGE_SIZE;
 const int Message_ActionType_ActionType_ARRAYSIZE = Message_ActionType_ActionType_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* Message_ActionType_descriptor();
@@ -154,12 +157,14 @@ inline bool Message_SocketType_Parse(
     Message_SocketType_descriptor(), name, value);
 }
 enum Message_ProcessType {
-  Message_ProcessType_PROCESS_PEOPLE_COUNT = 4001,
-  Message_ProcessType_PROCESS_FACE_DETECT = 4002,
-  Message_ProcessType_PROCESS_WALK_DIRECTION = 4003
+  Message_ProcessType_PROCESS_FACE_DETECT = 4001,
+  Message_ProcessType_PROCESS_PEOPLE_COUNT = 4002,
+  Message_ProcessType_PROCESS_PEOPLE_GENDER = 4003,
+  Message_ProcessType_PROCESS_PEOPLE_ADULT = 4004,
+  Message_ProcessType_PROCESS_WALK_DIRECTION = 4005
 };
 bool Message_ProcessType_IsValid(int value);
-const Message_ProcessType Message_ProcessType_ProcessType_MIN = Message_ProcessType_PROCESS_PEOPLE_COUNT;
+const Message_ProcessType Message_ProcessType_ProcessType_MIN = Message_ProcessType_PROCESS_FACE_DETECT;
 const Message_ProcessType Message_ProcessType_ProcessType_MAX = Message_ProcessType_PROCESS_WALK_DIRECTION;
 const int Message_ProcessType_ProcessType_ARRAYSIZE = Message_ProcessType_ProcessType_MAX + 1;
 
@@ -863,6 +868,18 @@ class Message_MotionUser : public ::google::protobuf::Message {
   inline ::std::string* release_pfrestapikey();
   inline void set_allocated_pfrestapikey(::std::string* pfrestapikey);
 
+  // repeated .motion.Message.MotionProcess motionprocess = 27;
+  inline int motionprocess_size() const;
+  inline void clear_motionprocess();
+  static const int kMotionprocessFieldNumber = 27;
+  inline const ::motion::Message_MotionProcess& motionprocess(int index) const;
+  inline ::motion::Message_MotionProcess* mutable_motionprocess(int index);
+  inline ::motion::Message_MotionProcess* add_motionprocess();
+  inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionProcess >&
+      motionprocess() const;
+  inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionProcess >*
+      mutable_motionprocess();
+
   // @@protoc_insertion_point(class_scope:motion.Message.MotionUser)
  private:
   inline void set_has_clientnumber();
@@ -947,6 +964,7 @@ class Message_MotionUser : public ::google::protobuf::Message {
   ::std::string* pfuser_;
   ::std::string* pfappid_;
   ::std::string* pfrestapikey_;
+  ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionProcess > motionprocess_;
   ::google::protobuf::int32 db_user_id_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
@@ -1902,6 +1920,100 @@ class Message_MotionCron : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Message_MotionCron* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Message_MotionProcess : public ::google::protobuf::Message {
+ public:
+  Message_MotionProcess();
+  virtual ~Message_MotionProcess();
+
+  Message_MotionProcess(const Message_MotionProcess& from);
+
+  inline Message_MotionProcess& operator=(const Message_MotionProcess& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Message_MotionProcess& default_instance();
+
+  void Swap(Message_MotionProcess* other);
+
+  // implements Message ----------------------------------------------
+
+  Message_MotionProcess* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Message_MotionProcess& from);
+  void MergeFrom(const Message_MotionProcess& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string name = 1;
+  inline bool has_name() const;
+  inline void clear_name();
+  static const int kNameFieldNumber = 1;
+  inline const ::std::string& name() const;
+  inline void set_name(const ::std::string& value);
+  inline void set_name(const char* value);
+  inline void set_name(const char* value, size_t size);
+  inline ::std::string* mutable_name();
+  inline ::std::string* release_name();
+  inline void set_allocated_name(::std::string* name);
+
+  // required .motion.Message.ProcessType type = 2;
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 2;
+  inline ::motion::Message_ProcessType type() const;
+  inline void set_type(::motion::Message_ProcessType value);
+
+  // @@protoc_insertion_point(class_scope:motion.Message.MotionProcess)
+ private:
+  inline void set_has_name();
+  inline void clear_has_name();
+  inline void set_has_type();
+  inline void clear_has_type();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::std::string* name_;
+  int type_;
+  friend void  protobuf_AddDesc_motion_2eproto();
+  friend void protobuf_AssignDesc_motion_2eproto();
+  friend void protobuf_ShutdownFile_motion_2eproto();
+
+  void InitAsDefaultInstance();
+  static Message_MotionProcess* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -2905,6 +3017,7 @@ class Message : public ::google::protobuf::Message {
   typedef Message_MotionTrack MotionTrack;
   typedef Message_MotionRec MotionRec;
   typedef Message_MotionCron MotionCron;
+  typedef Message_MotionProcess MotionProcess;
   typedef Message_MotionMonth MotionMonth;
   typedef Message_MotionDay MotionDay;
   typedef Message_Instance Instance;
@@ -2919,6 +3032,7 @@ class Message : public ::google::protobuf::Message {
   static const ResponseType ERROR_INVALID_PASSWORD = Message_ResponseType_ERROR_INVALID_PASSWORD;
   static const ResponseType ERROR_LOGIN_FAILIURE = Message_ResponseType_ERROR_LOGIN_FAILIURE;
   static const ResponseType ERROR_TIMEOUT = Message_ResponseType_ERROR_TIMEOUT;
+  static const ResponseType ERROR_NO_PACKAGE_SIZE = Message_ResponseType_ERROR_NO_PACKAGE_SIZE;
   static inline bool ResponseType_IsValid(int value) {
     return Message_ResponseType_IsValid(value);
   }
@@ -2973,6 +3087,7 @@ class Message : public ::google::protobuf::Message {
   static const ActionType PROTO_NO_FILE = Message_ActionType_PROTO_NO_FILE;
   static const ActionType SERVER_INFO = Message_ActionType_SERVER_INFO;
   static const ActionType SERVER_INFO_OK = Message_ActionType_SERVER_INFO_OK;
+  static const ActionType RESPONSE_NO_PACKAGE_SIZE = Message_ActionType_RESPONSE_NO_PACKAGE_SIZE;
   static inline bool ActionType_IsValid(int value) {
     return Message_ActionType_IsValid(value);
   }
@@ -3033,8 +3148,10 @@ class Message : public ::google::protobuf::Message {
   }
 
   typedef Message_ProcessType ProcessType;
-  static const ProcessType PROCESS_PEOPLE_COUNT = Message_ProcessType_PROCESS_PEOPLE_COUNT;
   static const ProcessType PROCESS_FACE_DETECT = Message_ProcessType_PROCESS_FACE_DETECT;
+  static const ProcessType PROCESS_PEOPLE_COUNT = Message_ProcessType_PROCESS_PEOPLE_COUNT;
+  static const ProcessType PROCESS_PEOPLE_GENDER = Message_ProcessType_PROCESS_PEOPLE_GENDER;
+  static const ProcessType PROCESS_PEOPLE_ADULT = Message_ProcessType_PROCESS_PEOPLE_ADULT;
   static const ProcessType PROCESS_WALK_DIRECTION = Message_ProcessType_PROCESS_WALK_DIRECTION;
   static inline bool ProcessType_IsValid(int value) {
     return Message_ProcessType_IsValid(value);
@@ -3250,7 +3367,7 @@ class Message : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 currcam() const;
   inline void set_currcam(::google::protobuf::int32 value);
 
-  // optional int32 packagesize = 17;
+  // required int32 packagesize = 17;
   inline bool has_packagesize() const;
   inline void clear_packagesize();
   static const int kPackagesizeFieldNumber = 17;
@@ -6212,6 +6329,36 @@ inline void Message_MotionUser::set_allocated_pfrestapikey(::std::string* pfrest
   // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionUser.pfrestapikey)
 }
 
+// repeated .motion.Message.MotionProcess motionprocess = 27;
+inline int Message_MotionUser::motionprocess_size() const {
+  return motionprocess_.size();
+}
+inline void Message_MotionUser::clear_motionprocess() {
+  motionprocess_.Clear();
+}
+inline const ::motion::Message_MotionProcess& Message_MotionUser::motionprocess(int index) const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionUser.motionprocess)
+  return motionprocess_.Get(index);
+}
+inline ::motion::Message_MotionProcess* Message_MotionUser::mutable_motionprocess(int index) {
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionUser.motionprocess)
+  return motionprocess_.Mutable(index);
+}
+inline ::motion::Message_MotionProcess* Message_MotionUser::add_motionprocess() {
+  // @@protoc_insertion_point(field_add:motion.Message.MotionUser.motionprocess)
+  return motionprocess_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionProcess >&
+Message_MotionUser::motionprocess() const {
+  // @@protoc_insertion_point(field_list:motion.Message.MotionUser.motionprocess)
+  return motionprocess_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::motion::Message_MotionProcess >*
+Message_MotionUser::mutable_motionprocess() {
+  // @@protoc_insertion_point(field_mutable_list:motion.Message.MotionUser.motionprocess)
+  return &motionprocess_;
+}
+
 // -------------------------------------------------------------------
 
 // Message_MotionCamera
@@ -8554,6 +8701,111 @@ inline void Message_MotionCron::set_allocated_program(::std::string* program) {
     program_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionCron.program)
+}
+
+// -------------------------------------------------------------------
+
+// Message_MotionProcess
+
+// optional string name = 1;
+inline bool Message_MotionProcess::has_name() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Message_MotionProcess::set_has_name() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Message_MotionProcess::clear_has_name() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Message_MotionProcess::clear_name() {
+  if (name_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    name_->clear();
+  }
+  clear_has_name();
+}
+inline const ::std::string& Message_MotionProcess::name() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionProcess.name)
+  return *name_;
+}
+inline void Message_MotionProcess::set_name(const ::std::string& value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+  // @@protoc_insertion_point(field_set:motion.Message.MotionProcess.name)
+}
+inline void Message_MotionProcess::set_name(const char* value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+  // @@protoc_insertion_point(field_set_char:motion.Message.MotionProcess.name)
+}
+inline void Message_MotionProcess::set_name(const char* value, size_t size) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    name_ = new ::std::string;
+  }
+  name_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:motion.Message.MotionProcess.name)
+}
+inline ::std::string* Message_MotionProcess::mutable_name() {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    name_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:motion.Message.MotionProcess.name)
+  return name_;
+}
+inline ::std::string* Message_MotionProcess::release_name() {
+  clear_has_name();
+  if (name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = name_;
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void Message_MotionProcess::set_allocated_name(::std::string* name) {
+  if (name_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete name_;
+  }
+  if (name) {
+    set_has_name();
+    name_ = name;
+  } else {
+    clear_has_name();
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:motion.Message.MotionProcess.name)
+}
+
+// required .motion.Message.ProcessType type = 2;
+inline bool Message_MotionProcess::has_type() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Message_MotionProcess::set_has_type() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Message_MotionProcess::clear_has_type() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void Message_MotionProcess::clear_type() {
+  type_ = 4001;
+  clear_has_type();
+}
+inline ::motion::Message_ProcessType Message_MotionProcess::type() const {
+  // @@protoc_insertion_point(field_get:motion.Message.MotionProcess.type)
+  return static_cast< ::motion::Message_ProcessType >(type_);
+}
+inline void Message_MotionProcess::set_type(::motion::Message_ProcessType value) {
+  assert(::motion::Message_ProcessType_IsValid(value));
+  set_has_type();
+  type_ = value;
+  // @@protoc_insertion_point(field_set:motion.Message.MotionProcess.type)
 }
 
 // -------------------------------------------------------------------
@@ -11600,7 +11852,7 @@ inline void Message::set_currcam(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:motion.Message.currcam)
 }
 
-// optional int32 packagesize = 17;
+// required int32 packagesize = 17;
 inline bool Message::has_packagesize() const {
   return (_has_bits_[0] & 0x00010000u) != 0;
 }
