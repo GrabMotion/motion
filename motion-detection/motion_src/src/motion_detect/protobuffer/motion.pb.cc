@@ -552,7 +552,7 @@ void protobuf_AddDesc_motion_2eproto() {
     "e\030\r \001(\t\022\016\n\006serial\030\016 \001(\t\022\020\n\010revision\030\017 \001("
     "\t\022\021\n\tdisktotal\030\020 \001(\005\022\020\n\010diskused\030\021 \001(\005\022\025"
     "\n\rdiskavailable\030\022 \001(\005\022\034\n\024disk_percentage"
-    "_used\030\023 \001(\005\022\023\n\013temperature\030\024 \001(\005\032\270\004\n\nMot"
+    "_used\030\023 \001(\005\022\023\n\013temperature\030\024 \001(\002\032\270\004\n\nMot"
     "ionUser\022\024\n\014clientnumber\030\001 \001(\005\022\016\n\006wpuser\030"
     "\002 \001(\t\022\022\n\nwppassword\030\003 \001(\t\022\023\n\013wpserverurl"
     "\030\004 \001(\t\022\020\n\010wpuserid\030\005 \001(\005\022\022\n\nwpclientid\030\006"
@@ -1464,16 +1464,16 @@ bool Message_MotionDevice::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(160)) goto parse_temperature;
+        if (input->ExpectTag(165)) goto parse_temperature;
         break;
       }
 
-      // optional int32 temperature = 20;
+      // optional float temperature = 20;
       case 20: {
-        if (tag == 160) {
+        if (tag == 165) {
          parse_temperature:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
                  input, &temperature_)));
           set_has_temperature();
         } else {
@@ -1673,9 +1673,9 @@ void Message_MotionDevice::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(19, this->disk_percentage_used(), output);
   }
 
-  // optional int32 temperature = 20;
+  // optional float temperature = 20;
   if (has_temperature()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(20, this->temperature(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(20, this->temperature(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -1867,9 +1867,9 @@ void Message_MotionDevice::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(19, this->disk_percentage_used(), target);
   }
 
-  // optional int32 temperature = 20;
+  // optional float temperature = 20;
   if (has_temperature()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(20, this->temperature(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(20, this->temperature(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -2021,11 +2021,9 @@ int Message_MotionDevice::ByteSize() const {
           this->disk_percentage_used());
     }
 
-    // optional int32 temperature = 20;
+    // optional float temperature = 20;
     if (has_temperature()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->temperature());
+      total_size += 2 + 4;
     }
 
   }

@@ -1,1 +1,0 @@
-/home/pi/motion/motion-detection/motion_src/CMakeFiles/motion_detect_raspberry.dir

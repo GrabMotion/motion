@@ -1,5 +1,6 @@
 #include "../socket/netcvc.h"
 
+
 VideoCapture    capture;
 Mat             img0, img1, img2;
 int             is_data_ready = 1;

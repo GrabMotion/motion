@@ -8,8 +8,13 @@
 #include <vector> 
 #include "../protobuffer/motion.pb.h"
 
-#include "opencv2/opencv.hpp"
-#include "opencv2/highgui/highgui.hpp"
+//#include "opencv2/opencv.hpp"
+//#include "opencv2/highgui/highgui.hpp"
+
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/videoio/videoio.hpp>
 
 //Cameras
 std::vector<int> getCameras();

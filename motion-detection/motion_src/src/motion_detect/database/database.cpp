@@ -430,7 +430,7 @@ int db_cpuinfo()
         
         FILE *temp;
         char bufftemp[512];
-        if(!(temp = popen("vcgencmd measure_temp", "r")))
+        if(!(temp = popen("sudo vcgencmd measure_temp", "r")))
         {
             return 1;
         }
@@ -2452,11 +2452,20 @@ vector<std::string> getTerminalInfo()
     if (network_array.size()>0)
     {
         std::string ipnumber = network_array.at(0).at(1);
-        terminal.push_back(ipnumber);                       //ipnumber              0
+        if (!ipnumber.empty())
+        {    
+            terminal.push_back(ipnumber);                       //ipnumber              0
+        }   
         std::string ippublic = network_array.at(0).at(2);
-        terminal.push_back(ippublic);                       //ippublic              1
+        if (!ippublic.empty())
+        {
+            terminal.push_back(ippublic);                       //ippublic              1
+        }   
         std::string macaddress = network_array.at(0).at(3);
-        terminal.push_back(macaddress);                     //macaddress            2
+        if (!macaddress.empty())
+        {
+            terminal.push_back(macaddress);                     //macaddress            2
+        }
     }
     
     std::stringstream sql_location;
@@ -2468,11 +2477,38 @@ vector<std::string> getTerminalInfo()
     
     if (location_array.size()>0)
     {
-        terminal.push_back(location_array.at(0).at(2)); //hostname              3
-        terminal.push_back(location_array.at(0).at(3)); //city                  4
-        terminal.push_back(location_array.at(0).at(5)); //country               5
-        terminal.push_back(location_array.at(0).at(6)); //location              6
-        terminal.push_back(location_array.at(0).at(7)); //network_provider      7
+        std::string hostname = location_array.at(0).at(1);
+        if (!hostname.empty())
+        {
+            terminal.push_back(hostname); //hostname              3
+        }
+        
+        std::string city = location_array.at(0).at(2);
+        if (!city.empty())
+        {
+            terminal.push_back(city); //city                  4
+        }
+        
+        std::string country = location_array.at(0).at(3);
+        if (!country.empty())
+        {
+            terminal.push_back(country); //country               5
+        }
+        
+        std::string lat = location_array.at(0).at(6); 
+        std::string lon = location_array.at(0).at(7); 
+        if (!lat.empty() && !lon.empty())
+        {
+            std::stringstream loc;
+            loc << lat << ", " << lon;            
+            terminal.push_back(loc.str()); //location              6
+        }
+        
+        std::string network_provider =  location_array.at(0).at(5);
+        if (!network_provider.empty())
+        {
+            terminal.push_back(network_provider); //network_provider      7
+        }        
     }
     
     std::string sql_status = "SELECT * FROM status;";
@@ -2482,8 +2518,16 @@ vector<std::string> getTerminalInfo()
     
     if (status_array.size()>0)
     {
-        terminal.push_back(status_array.at(0).at(1)); //uptime              8
-        terminal.push_back(status_array.at(0).at(2)); //starttime           9
+        std::string uptime = status_array.at(0).at(1);
+        if (!uptime.empty())
+        {
+            terminal.push_back(uptime); //uptime              8
+        }
+        std::string starttime = status_array.at(0).at(2); 
+        if (!starttime.empty())
+        {
+            terminal.push_back(starttime); //starttime           9
+        }        
     }
     
     std::string sql_terminal = "SELECT * FROM terminal;";
@@ -2491,21 +2535,74 @@ vector<std::string> getTerminalInfo()
     vector<vector<string> > terminal_array = db_select(sql_terminal.c_str(), 11);
     pthread_mutex_unlock(&databaseMutex);
     
-    if (terminal_array.size()>0) 
+    int size = terminal_array.at(0).size();
+    
+    if (size>0) 
     {
-        terminal.push_back(terminal_array.at(0).at(0)); //db_local              10
-        terminal.push_back(terminal_array.at(0).at(1)); //model                 11
-        terminal.push_back(terminal_array.at(0).at(2)); //hardware              12
-        terminal.push_back(terminal_array.at(0).at(3)); //serial                13
-        terminal.push_back(terminal_array.at(0).at(4)); //revision              14
-        terminal.push_back(terminal_array.at(0).at(5)); //disktotal             15
-        terminal.push_back(terminal_array.at(0).at(6)); //diskused              16
-        terminal.push_back(terminal_array.at(0).at(7)); //diskavailable         17
-        terminal.push_back(terminal_array.at(0).at(8)); //disk_percentage_used  18
-        terminal.push_back(terminal_array.at(0).at(9)); //temperature           19
-        terminal.push_back(terminal_array.at(0).at(10)); //created              20
-    }
-   
+        
+        std::string db_local = terminal_array.at(0).at(0);
+        if (!db_local.empty())
+        {
+            terminal.push_back(db_local); //db_local              10
+        }
+        string model = terminal_array.at(0).at(1);
+        if (!model.empty())
+        {
+           terminal.push_back(model); //model                 11 
+        }
+        
+        std::string hardware = terminal_array.at(0).at(2);
+        if (!hardware.empty())
+        {
+            terminal.push_back(hardware); //hardware   12
+        }                   
+        std::string serial = terminal_array.at(0).at(3);
+        if (!serial.empty())
+        {
+           terminal.push_back(serial); //serial 13  
+        }                    
+        std::string revision = terminal_array.at(0).at(4);
+        if (!revision.empty())
+        {
+            terminal.push_back(revision); //revision              14
+        }        
+        std::string disktotal = terminal_array.at(0).at(5);
+        if (!disktotal.empty())
+        {
+            terminal.push_back(disktotal); //disktotal             15
+        }        
+        std::string diskused = terminal_array.at(0).at(6);
+        if (!diskused.empty())
+        {
+            terminal.push_back(diskused); //diskused              16
+        }        
+        std::string diskavailable = terminal_array.at(0).at(7);
+        if (!diskavailable.empty())
+        {
+            terminal.push_back(diskavailable); //diskavailable         17
+        }
+        
+        std::string disk_percentage_used = terminal_array.at(0).at(8);
+        if (!disk_percentage_used.empty())
+        {
+            terminal.push_back(disk_percentage_used); //disk_percentage_used  18
+        } 
+        std::string temperature = terminal_array.at(0).at(8);
+        if (!temperature.empty())
+        {
+            terminal.push_back(temperature); //temperature  19
+        }         
+        std::string created = terminal_array.at(0).at(8);
+        if (!created.empty())
+        {
+            terminal.push_back(created); //temperature  20
+        }                 
+       
+    }   
+    
+    
+    std::string dectemp = terminal.at(19);
+    
     return terminal;
     
 }

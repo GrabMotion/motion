@@ -455,12 +455,12 @@ class Message_MotionDevice : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 disk_percentage_used() const;
   inline void set_disk_percentage_used(::google::protobuf::int32 value);
 
-  // optional int32 temperature = 20;
+  // optional float temperature = 20;
   inline bool has_temperature() const;
   inline void clear_temperature();
   static const int kTemperatureFieldNumber = 20;
-  inline ::google::protobuf::int32 temperature() const;
-  inline void set_temperature(::google::protobuf::int32 value);
+  inline float temperature() const;
+  inline void set_temperature(float value);
 
   // @@protoc_insertion_point(class_scope:motion.Message.MotionDevice)
  private:
@@ -528,7 +528,7 @@ class Message_MotionDevice : public ::google::protobuf::Message {
   ::google::protobuf::int32 diskused_;
   ::google::protobuf::int32 diskavailable_;
   ::google::protobuf::int32 disk_percentage_used_;
-  ::google::protobuf::int32 temperature_;
+  float temperature_;
   friend void  protobuf_AddDesc_motion_2eproto();
   friend void protobuf_AssignDesc_motion_2eproto();
   friend void protobuf_ShutdownFile_motion_2eproto();
@@ -4689,7 +4689,7 @@ inline void Message_MotionDevice::set_disk_percentage_used(::google::protobuf::i
   // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.disk_percentage_used)
 }
 
-// optional int32 temperature = 20;
+// optional float temperature = 20;
 inline bool Message_MotionDevice::has_temperature() const {
   return (_has_bits_[0] & 0x00080000u) != 0;
 }
@@ -4703,11 +4703,11 @@ inline void Message_MotionDevice::clear_temperature() {
   temperature_ = 0;
   clear_has_temperature();
 }
-inline ::google::protobuf::int32 Message_MotionDevice::temperature() const {
+inline float Message_MotionDevice::temperature() const {
   // @@protoc_insertion_point(field_get:motion.Message.MotionDevice.temperature)
   return temperature_;
 }
-inline void Message_MotionDevice::set_temperature(::google::protobuf::int32 value) {
+inline void Message_MotionDevice::set_temperature(float value) {
   set_has_temperature();
   temperature_ = value;
   // @@protoc_insertion_point(field_set:motion.Message.MotionDevice.temperature)

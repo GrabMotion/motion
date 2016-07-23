@@ -320,13 +320,14 @@ inline vector<int> detectMotion(const Mat & motion,
         {
             int number_of_changes = 0;
             int min_x = motion.cols, max_x = 0;
-            int min_y = motion.rows, max_y = 0;
+            int min_y = motion.rows, max_y = 0;            
+            
             // loop over image and detect changes
             for(int j = y_start; j < y_stop; j+=2){ // height
-                for(int i = x_start; i < x_stop; i+=2){ // width
+                for(int i = x_start; i < x_stop; i+=2){ // width                           
                     // check if at pixel (j,i) intensity is equal to 255
                     // this means that the pixel is different in the sequence
-                    // of images (prev_frame, current_frame, next_frame)
+                    // of images (prev_frame, current_frame, next_frame)                   
                     if(static_cast<int>(motion.at<uchar>(j,i)) == 255)
                     {
                         number_of_changes++;
@@ -334,6 +335,7 @@ inline vector<int> detectMotion(const Mat & motion,
                         if(max_x<i) max_x = i;
                         if(min_y>j) min_y = j;
                         if(max_y<j) max_y = j;
+                        //cout << "number_of_changes: " << number_of_changes << endl;
                     }
                 }
             }
@@ -748,297 +750,327 @@ void * startRecognition(void * arg)
     std::string image_file_recognized;
      
     // Set up camera
-    CvCapture * camera = cvCaptureFromCAM(activecamnum); //CV_CAP_ANY);
-    //double fps = getFramesPerSecond(camera);
+    //CvCapture * camera = cvCaptureFromCAM(activecamnum); //CV_CAP_ANY);
+    VideoCapture camera(activecamnum);
     
-    int matwidth = 640; //1280
-    int matheight= 480; //720
-    
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, matwidth); 
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, matheight);  
-    double fps = 20; //120;
-    cvSetCaptureProperty(camera, CV_CAP_PROP_FPS, fps);
-    
-    // Take images and convert them to gray
-    Mat result; /*, result_cropped;*/
-    Mat prev_frame = result = cvQueryFrame(camera);
-    Mat current_frame = cvQueryFrame(camera);
-    Mat next_frame = cvQueryFrame(camera);
-     
-    cvtColor(current_frame, current_frame, CV_RGB2GRAY);
-    cvtColor(prev_frame, prev_frame, CV_RGB2GRAY);
-    cvtColor(next_frame, next_frame, CV_RGB2GRAY);
-            
-    int width     = current_frame.cols;
-    int height    = current_frame.rows;
-     
-    // d1 and d2 for calculating the differences
-    // result, the result of and operation, calculated on d1 and d2
-    // number_of_changes, the amount of changes in the result matrix.
-    // color, the color for drawing the rectangle when something has changed.
-    Mat d1, d2, motionmat;
-    vector<int> number_of_changes; 
-    int number_of_sequence = 0, count_sequence_cero = 0, count_save_image = 0;
-    Scalar mean_, color(0,255,255); // yellow
-     
-    // Detect motion in window
-    int x_start = 10, x_stop = current_frame.cols-11;
-    int y_start = 350, y_stop = 530;
-     
-    // If more than 'there_is_motion' pixels are changed, we say there is motion
-    // and store an image on disk
-    there_is_motion = 50;
-     
-    // Maximum deviation of the image, the higher the value, the more motion is allowed
-    int max_deviation = 20;
-     
-    // Erode kernel
-    Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2));
-     
-    //count instance time
-    string start_instance_time, total_elapsed_time;
-    bool motion_detected = false, init_motion = false, has_instance_directory = false;
-    double init_time, begin_time, end_time;
-    //Directory Tree
-    stringstream directoryTree;
-    
-    // Instance counter
-    int instance_counter = 0;
-    string instance;
-    if (mrec->has_lastinstance())
+    if (camera.isOpened())
     {
-        std::string instcounter = mrec->lastinstance();
-        instance_counter = atoi(instcounter.c_str());
-        instance = instcounter;
-    }
-     
-    init_time = clock();
     
-    pthread_mutex_lock(&protoMutex);
-    mrec->set_startrectime(time_rasp);
-    pthread_mutex_unlock(&protoMutex);
-    
-    startrecognitiontime = time_rasp;
-     
-    cout << "CAM " << activecamnum << " TIME STARTED: " << time_rasp << endl;
-    
-    writeVideo = true;
-      
-    // All settings have been set, now go in endless loop and
-    // take as many pictures you want..
-    while (true)
-    {
-        try
+        //double fps = getFramesPerSecond(camera);
+
+        int matwidth = 1280; //640; //1280
+        int matheight= 720; //480; //720
+
+        //cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH, matwidth); 
+        //cvSetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT, matheight);  
+        //cvSetCaptureProperty(camera, CV_CAP_PROP_FPS, fps);
+        
+        camera.set(CV_CAP_PROP_FRAME_WIDTH, matwidth);
+        camera.set(CV_CAP_PROP_FRAME_HEIGHT, matheight);
+        
+        double fps = 20; //120;
+        camera.set(CV_CAP_PROP_FPS, fps);         
+
+        // Take images and convert them to gray
+        Mat result, prev_frame, current_frame, next_frame; /*, result_cropped;*/
+        
+        camera >> prev_frame;
+        result = prev_frame; 
+        
+        camera >> current_frame;
+        camera >> next_frame;
+        
+        //Mat prev_frame = result = cvQueryFrame(camera);
+        //Mat current_frame = cvQueryFrame(camera);
+        //Mat next_frame = cvQueryFrame(camera);
+
+        cvtColor(current_frame, current_frame, CV_RGB2GRAY);
+        cvtColor(prev_frame, prev_frame, CV_RGB2GRAY);
+        cvtColor(next_frame, next_frame, CV_RGB2GRAY);
+
+        int width     = current_frame.cols;
+        int height    = current_frame.rows;
+
+        // d1 and d2 for calculating the differences
+        // result, the result of and operation, calculated on d1 and d2
+        // number_of_changes, the amount of changes in the result matrix.
+        // color, the color for drawing the rectangle when something has changed.
+        Mat d1, d2, motionmat;
+        vector<int> number_of_changes; 
+        int number_of_sequence = 0, count_sequence_cero = 0, count_save_image = 0;
+        Scalar mean_, color(0,255,255); // yellow
+
+        // Detect motion in window
+        int x_start = 10, x_stop = current_frame.cols-11;
+        int y_start = 350, y_stop = 530;
+
+        // If more than 'there_is_motion' pixels are changed, we say there is motion
+        // and store an image on disk
+        there_is_motion = 5;
+
+        // Maximum deviation of the image, the higher the value, the more motion is allowed
+        int max_deviation = 20;
+
+        // Erode kernel
+        Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2));
+
+        //count instance time
+        string start_instance_time, total_elapsed_time;
+        bool motion_detected = false, init_motion = false, has_instance_directory = false;
+        double init_time, begin_time, end_time;
+        //Directory Tree
+        stringstream directoryTree;
+
+        // Instance counter
+        int instance_counter = 0;
+        string instance;
+        if (mrec->has_lastinstance())
         {
-            
-            if (!pcamera->recognizing())
+            std::string instcounter = mrec->lastinstance();
+            instance_counter = atoi(instcounter.c_str());
+            instance = instcounter;
+        }
+
+        init_time = clock();
+
+        pthread_mutex_lock(&protoMutex);
+        mrec->set_startrectime(time_rasp);
+        pthread_mutex_unlock(&protoMutex);
+
+        startrecognitiontime = time_rasp;
+
+        cout << "CAM " << activecamnum << " TIME STARTED: " << time_rasp << endl;
+
+        writeVideo = true;
+
+        // All settings have been set, now go in endless loop and
+        // take as many pictures you want..
+        while (true)
+        {
+            try
             {
-                
-                while (running_image_threads > 0)
+
+                if (!pcamera->recognizing())
                 {
-                   cout << "running_image_threads: " << running_image_threads << endl; 
-                   sleep(1);
+
+                    while (running_image_threads > 0)
+                    {
+                       cout << "running_image_threads: " << running_image_threads << endl; 
+                       sleep(1);
+                    }
+                    running_image_threads = 0;
+
+                   if (camera.isOpened())
+                       camera.release();
+                        //cvReleaseCapture(&camera);
+
+                    std::cout << ":::::::::::: CAM" << activecamnum << "DUMP INSTANCE FINISH "<< instance << "  :::::::::::" << std::endl;
+
+                    has_instance_directory = false;
+                    init_motion = false;
+
+                    end_time = clock();
+
+                    dumpInstance(activecamnum, pinstance, DIR, XML_FILE, EXT_DATA, init_time, begin_time, end_time, instance, instancecode, dumpfilename.str(), mrec->name(), pcamera->cameraname());
+
+                    pinstance->Clear();
+
+                    threads_recognizing_pids[activecamnum] = 0;
+
+                    pthread_exit(NULL);
+
                 }
-                running_image_threads = 0;
-                
-                if (camera)
-                    cvReleaseCapture(&camera);
-                
-                std::cout << ":::::::::::: CAM" << activecamnum << "DUMP INSTANCE FINISH "<< instance << "  :::::::::::" << std::endl;
-                    
-                has_instance_directory = false;
-                init_motion = false;
 
-                end_time = clock();
+                // Take a new image
+                prev_frame = current_frame;
+                current_frame = next_frame;
+                //next_frame = cvQueryFrame(camera);
+                camera >> next_frame;
+                result = next_frame;
+                cvtColor(next_frame, next_frame, CV_RGB2GRAY);
+                
+                
 
-                dumpInstance(activecamnum, pinstance, DIR, XML_FILE, EXT_DATA, init_time, begin_time, end_time, instance, instancecode, dumpfilename.str(), mrec->name(), pcamera->cameraname());
+                // Calc differences between the images and do AND-operation
+                // threshold image, low differences are ignored (ex. contrast change due to sunlight)
+                absdiff(prev_frame, next_frame, d1);
+                absdiff(next_frame, current_frame, d2);
+                bitwise_and(d1, d2, motionmat);
+                threshold(motionmat, motionmat, 35, 255, CV_THRESH_BINARY);
+                erode(motionmat, motionmat, kernel_ero);
+
+                number_of_changes.clear();
+
+                //int lp = static_cast<int>(motionmat.at<uchar>(500,626));                
+                //int rp = static_cast<int>(motionmat.at<uchar>(504,626));                
+                //int ip = static_cast<int>(motionmat.at<uchar>(504,10));
                 
-                pinstance->Clear();
-                
-                threads_recognizing_pids[activecamnum] = 0;
-                
-                pthread_exit(NULL);
-           
+                if (!has_region)
+                {
+                   number_of_changes = detectMotion(motionmat, result, x_start, x_stop, y_start, y_stop, max_deviation, color, number_of_changes);
+                }
+                else
+                {
+                    number_of_changes = detectMotionRegion(motionmat, result, region, max_deviation, color, number_of_changes);
+                }
+                if (number_of_changes.size()>0)
+                    resutl_watch_detected = number_of_changes.at(0);
+
             }
-
-            // Take a new image
-            prev_frame = current_frame;
-            current_frame = next_frame;
-            next_frame = cvQueryFrame(camera);
-            result = next_frame;
-            cvtColor(next_frame, next_frame, CV_RGB2GRAY);
-
-            // Calc differences between the images and do AND-operation
-            // threshold image, low differences are ignored (ex. contrast change due to sunlight)
-            absdiff(prev_frame, next_frame, d1);
-            absdiff(next_frame, current_frame, d2);
-            bitwise_and(d1, d2, motionmat);
-            threshold(motionmat, motionmat, 35, 255, CV_THRESH_BINARY);
-            erode(motionmat, motionmat, kernel_ero);
-
-            number_of_changes.clear();
-
-            if (!has_region)
+            catch (std::bad_alloc& ba)
             {
-               number_of_changes = detectMotion(motionmat, result, x_start, x_stop, y_start, y_stop, max_deviation, color, number_of_changes);
+                std::cerr << "bad_alloc caught: " << ba.what() << '\n';
+            } 
+
+            // If a lot of changes happened, we assume something changed.
+            if( resutl_watch_detected >= there_is_motion)
+            {
+
+                try
+                {
+                    cout << "cam" << activecamnum << " resutl detected: " << resutl_watch_detected << endl;
+                    //cout << "number_of_sequence:: " << number_of_sequence << endl;
+
+                    int numchansize = number_of_changes.size();
+
+                    if(number_of_sequence>0 & numchansize>1)
+                    {
+
+                        cout << "!motion_detected:: " << motion_detected << endl;
+
+                        init_motion = true;
+
+                        if (!motion_detected)
+                        {
+
+                            count_sequence_cero = 0;
+                            motion_detected     = true;
+                            begin_time = clock();
+
+                            //cout << "!has_instance_directory:: " << has_instance_directory << endl;
+
+                            if (!has_instance_directory)
+                            {
+
+                                //New Instance
+                                instance_counter++;
+                                stringstream id;
+                                id << instance_counter;
+                                instance = id.str();
+
+                                //Add proto instance.
+                                cout << ":::::::::::  CAM" << activecamnum << " ADD  INSTANCE " << instance << "  ::::::::::::"  << endl;
+                                pthread_mutex_lock(&protoMutex);
+                                pinstance = pday->add_instance();
+                                pinstance->set_idinstance(std::atoi(instance.c_str()));
+                                pinstance->set_db_dayid(db_dayid);
+                                pinstance->set_db_recognition_setup_id(db_recognition_setup_id);
+                                pthread_mutex_unlock(&protoMutex);
+
+                                FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "%H%M%S";
+                                //CROPPED_FILE_FORMAT = DIR_FORMAT + "/" + instance + "/cropped/" + "%d%h%Y_%H%M%S";
+
+                                vector<string> dirs = createDirectoryTree (DIR,EXT,DIR_FORMAT.c_str(),instance );
+
+                                if (writeVideo)
+                                {    
+                                    std::string ext = ".mpg"; 
+                                    std::string  videoname = dirs.at(0) + "_" + instance + ext;
+                                    std::string videopath = dirs.at(1) + "/" + videoname;
+
+                                    pthread_mutex_lock(&protoMutex);
+                                    motion::Message::Video * pvideo = pinstance->mutable_video();
+                                    pvideo->set_path(videopath.c_str());
+                                    pvideo->set_name(videoname.c_str());
+                                    pvideo->set_instancefolder(dirs.at(1));
+                                    pthread_mutex_unlock(&protoMutex);
+                                }
+
+                                has_instance_directory = true;
+                            }
+                        }
+
+                        if (writeImages)
+                        {
+                            motion::Message::Image * pimage = pinstance->add_image();
+                            motion::Message::Crop * pcrop = pinstance->add_crop();
+                            image_file_recognized = saveImg (result, DIR, EXT, DIR_FORMAT.c_str(), FILE_FORMAT.c_str(), number_of_changes, pimage, pcrop);
+                        }
+
+                    }
+                    delaymark = time(0);
+                    number_of_sequence++;
+                }
+                catch (std::bad_alloc& ba)
+                {
+                  std::cerr << "bad_alloc caught: " << ba.what() << '\n';
+                } 
             }
             else
             {
-                number_of_changes = detectMotionRegion(motionmat, result, region, max_deviation, color, number_of_changes);
-            }
-            if (number_of_changes.size()>0)
-                resutl_watch_detected = number_of_changes.at(0);
-          
-        }
-        catch (std::bad_alloc& ba)
-        {
-            std::cerr << "bad_alloc caught: " << ba.what() << '\n';
-        } 
-        
-        // If a lot of changes happened, we assume something changed.
-        if( resutl_watch_detected >= there_is_motion)
-        {
-            
-            try
-            {
-                cout << "cam" << activecamnum << " resutl detected: " << resutl_watch_detected << endl;
-                //cout << "number_of_sequence:: " << number_of_sequence << endl;
 
-                int numchansize = number_of_changes.size();
-                
-                if(number_of_sequence>0 & numchansize>1)
+                try
                 {
+                    number_of_sequence = 0;
 
-                    cout << "!motion_detected:: " << motion_detected << endl;
+                    double seconds_since_start = difftime( time(0), delaymark);
 
-                    init_motion = true;
+                    //cout << "seconds_since_start: " << seconds_since_start << " delay: " << delay << " init_motion: " << init_motion << endl;
 
-                    if (!motion_detected)
+                    if ( seconds_since_start > delay & init_motion )
                     {
 
-                        count_sequence_cero = 0;
-                        motion_detected     = true;
-                        begin_time = clock();
+                        std::cout << ":::::::::::: CAM" << activecamnum << " DUMP INSTANCE "<< instance << "  :::::::::::" << std::endl;
 
-                        //cout << "!has_instance_directory:: " << has_instance_directory << endl;
+                        has_instance_directory = false;
+                        init_motion = false;
 
-                        if (!has_instance_directory)
-                        {
+                        end_time = clock();
 
-                            //New Instance
-                            instance_counter++;
-                            stringstream id;
-                            id << instance_counter;
-                            instance = id.str();
+                        dumpInstance(activecamnum, 
+                                pinstance, 
+                                DIR, XML_FILE, 
+                                EXT_DATA, 
+                                init_time, 
+                                begin_time, 
+                                end_time, 
+                                instance, 
+                                instancecode, 
+                                dumpfilename.str(), 
+                                pday->title(), 
+                                pcamera->cameraname());
 
-                            //Add proto instance.
-                            cout << ":::::::::::  CAM" << activecamnum << " ADD  INSTANCE " << instance << "  ::::::::::::"  << endl;
-                            pthread_mutex_lock(&protoMutex);
-                            pinstance = pday->add_instance();
-                            pinstance->set_idinstance(std::atoi(instance.c_str()));
-                            pinstance->set_db_dayid(db_dayid);
-                            pinstance->set_db_recognition_setup_id(db_recognition_setup_id);
-                            pthread_mutex_unlock(&protoMutex);
+                        pinstance->Clear();
 
-                            FILE_FORMAT = DIR_FORMAT + "/" + instance + "/" + "%H%M%S";
-                            //CROPPED_FILE_FORMAT = DIR_FORMAT + "/" + instance + "/cropped/" + "%d%h%Y_%H%M%S";
-
-                            vector<string> dirs = createDirectoryTree (DIR,EXT,DIR_FORMAT.c_str(),instance );
-
-                            if (writeVideo)
-                            {    
-                                std::string ext = ".mpg"; 
-                                std::string  videoname = dirs.at(0) + "_" + instance + ext;
-                                std::string videopath = dirs.at(1) + "/" + videoname;
-
-                                pthread_mutex_lock(&protoMutex);
-                                motion::Message::Video * pvideo = pinstance->mutable_video();
-                                pvideo->set_path(videopath.c_str());
-                                pvideo->set_name(videoname.c_str());
-                                pvideo->set_instancefolder(dirs.at(1));
-                                pthread_mutex_unlock(&protoMutex);
-                            }
-                            
-                            has_instance_directory = true;
-                        }
                     }
 
-                    if (writeImages)
+                    // XML Instance
+                    motion_detected = false;
+                    count_sequence_cero++;
+
+                    if (count_sequence_cero==1)
                     {
-                        motion::Message::Image * pimage = pinstance->add_image();
-                        motion::Message::Crop * pcrop = pinstance->add_crop();
-                        image_file_recognized = saveImg (result, DIR, EXT, DIR_FORMAT.c_str(), FILE_FORMAT.c_str(), number_of_changes, pimage, pcrop);
+                        end_time = clock();
                     }
-                    
+
                 }
-                delaymark = time(0);
-                number_of_sequence++;
-            }
-            catch (std::bad_alloc& ba)
-            {
-              std::cerr << "bad_alloc caught: " << ba.what() << '\n';
-            } 
-        }
-        else
-        {
-             
-            try
-            {
-                number_of_sequence = 0;
-
-                double seconds_since_start = difftime( time(0), delaymark);
-
-                //cout << "seconds_since_start: " << seconds_since_start << " delay: " << delay << " init_motion: " << init_motion << endl;
-
-                if ( seconds_since_start > delay & init_motion )
+                catch (std::bad_alloc& ba)
                 {
-
-                    std::cout << ":::::::::::: CAM" << activecamnum << " DUMP INSTANCE "<< instance << "  :::::::::::" << std::endl;
-                    
-                    has_instance_directory = false;
-                    init_motion = false;
-                    
-                    end_time = clock();
-                    
-                    dumpInstance(activecamnum, 
-                            pinstance, 
-                            DIR, XML_FILE, 
-                            EXT_DATA, 
-                            init_time, 
-                            begin_time, 
-                            end_time, 
-                            instance, 
-                            instancecode, 
-                            dumpfilename.str(), 
-                            pday->title(), 
-                            pcamera->cameraname());
-                    
-                    pinstance->Clear();
-                 
+                  std::cerr << "bad_alloc caught: " << ba.what() << '\n';
                 }
-
-                // XML Instance
-                motion_detected = false;
-                count_sequence_cero++;
-
-                if (count_sequence_cero==1)
-                {
-                    end_time = clock();
-                }
-             
             }
-            catch (std::bad_alloc& ba)
-            {
-              std::cerr << "bad_alloc caught: " << ba.what() << '\n';
-            }
+
+            //cv::imshow(pcamera->cameraname().c_str(), current_frame);
+
+            // Delay, wait a 1/2 second.
+            cvWaitKey (DELAY);
         }
+    //cannot capture    
+    } else    
+    {
         
-        //cv::imshow(pcamera->cameraname().c_str(), current_frame);
+    } 
         
-        // Delay, wait a 1/2 second.
-        cvWaitKey (DELAY);
-    }
-     
     return 0;
 }
 

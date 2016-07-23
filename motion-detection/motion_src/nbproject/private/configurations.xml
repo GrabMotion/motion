@@ -3,13 +3,15 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="." name="0">
       <df name="CMakeFiles">
+        <df name="3.0.2">
+          <df name="CompilerIdC">
+            <in>CMakeCCompilerId.c</in>
+          </df>
+          <df name="CompilerIdCXX">
+            <in>CMakeCXXCompilerId.cpp</in>
+          </df>
+        </df>
         <df name="CMakeTmp">
-        </df>
-        <df name="CompilerIdC">
-          <in>CMakeCCompilerId.c</in>
-        </df>
-        <df name="CompilerIdCXX">
-          <in>CMakeCXXCompilerId.cpp</in>
         </df>
         <df name="motion_detect_raspberry.dir">
           <df name="src">
@@ -39,7 +41,17 @@
             </df>
           </df>
         </df>
-        <df name="Progress">
+      </df>
+      <df name="data">
+        <df name="data">
+        </df>
+        <df name="instances">
+        </df>
+        <df name="mat">
+        </df>
+        <df name="thumbnails">
+        </df>
+        <df name="tracking">
         </df>
       </df>
       <df name="src">
@@ -76,18 +88,12 @@
             <df name="instances">
               <df name="camera0">
               </df>
-              <df name="camera1">
-              </df>
             </df>
             <df name="mat">
             </df>
             <df name="thumbnails">
             </df>
             <df name="tracking">
-              <df name="22Jun2016">
-                <df name="BASIC">
-                </df>
-              </df>
               <df name="recognitions">
               </df>
             </df>
@@ -154,6 +160,7 @@
             <in>streamlistener.h</in>
             <in>udp-recv.c</in>
             <in>udp-send.c</in>
+            <in>udp-send.h</in>
           </df>
           <df name="streaming">
             <in>._screenshot.cpp</in>
@@ -198,24 +205,8 @@
           <df name="pics">
             <df name="camera0">
               <df name="BASIC">
-                <df name="22Jun2016">
+                <df name="08Jul2016">
                   <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="3">
-                  </df>
-                  <df name="4">
-                  </df>
-                  <df name="5">
-                  </df>
-                  <df name="6">
-                  </df>
-                  <df name="7">
-                  </df>
-                  <df name="8">
-                  </df>
-                  <df name="9">
                   </df>
                   <df name="xml">
                   </df>
@@ -236,11 +227,13 @@
     </df>
     <df root="." name="1">
       <df name="CMakeFiles">
+        <df name="3.0.2">
+          <df name="CompilerIdC">
+          </df>
+          <df name="CompilerIdCXX">
+          </df>
+        </df>
         <df name="CMakeTmp">
-        </df>
-        <df name="CompilerIdC">
-        </df>
-        <df name="CompilerIdCXX">
         </df>
         <df name="motion_detect_raspberry.dir">
           <df name="src">
@@ -270,7 +263,17 @@
             </df>
           </df>
         </df>
-        <df name="Progress">
+      </df>
+      <df name="data">
+        <df name="data">
+        </df>
+        <df name="instances">
+        </df>
+        <df name="mat">
+        </df>
+        <df name="thumbnails">
+        </df>
+        <df name="tracking">
         </df>
       </df>
       <df name="src">
@@ -289,18 +292,12 @@
             <df name="instances">
               <df name="camera0">
               </df>
-              <df name="camera1">
-              </df>
             </df>
             <df name="mat">
             </df>
             <df name="thumbnails">
             </df>
             <df name="tracking">
-              <df name="22Jun2016">
-                <df name="BASIC">
-                </df>
-              </df>
               <df name="recognitions">
               </df>
             </df>
@@ -342,24 +339,8 @@
           <df name="pics">
             <df name="camera0">
               <df name="BASIC">
-                <df name="22Jun2016">
+                <df name="08Jul2016">
                   <df name="1">
-                  </df>
-                  <df name="2">
-                  </df>
-                  <df name="3">
-                  </df>
-                  <df name="4">
-                  </df>
-                  <df name="5">
-                  </df>
-                  <df name="6">
-                  </df>
-                  <df name="7">
-                  </df>
-                  <df name="8">
-                  </df>
-                  <df name="9">
                   </df>
                   <df name="xml">
                   </df>
@@ -404,6 +385,8 @@
         <gdb_interceptlist>
           <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
         </gdb_interceptlist>
+        <gdb_signals>
+        </gdb_signals>
         <gdb_options>
           <DebugOptions>
           </DebugOptions>

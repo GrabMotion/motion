@@ -33,7 +33,6 @@
 #include <signal.h>
 #include <cerrno> 
 
-
 int hardwareInfo() 
 {
  
@@ -47,6 +46,7 @@ int hardwareInfo()
     {
         cout << "NO CAMERA IDENTIFIED!" << endl;
         cout << "QUITTING PROGRAM....." << endl;
+        exit(0);
         return 0;
     }
     stringstream ss;

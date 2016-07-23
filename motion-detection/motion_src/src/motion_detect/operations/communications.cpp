@@ -32,6 +32,7 @@
 #include <netdb.h>
 
 #include <parse.h>
+#include <sstream>
 
 using namespace std;
 using namespace cv;
@@ -273,16 +274,18 @@ motion::Message getRefreshProto(motion::Message m)
         mdevice->set_network_provider(device_info.at(7));               //network_provider      
         mdevice->set_uptime(device_info.at(8));                         //uptime                
         mdevice->set_starttime(device_info.at(9));                      //starttime             
-        mdevice->set_db_local(atoi(device_info.at(10).c_str()));                 //db_local               
+        mdevice->set_db_local(atoi(device_info.at(10).c_str()));        //db_local               
         mdevice->set_model(device_info.at(11));                         //model                 
         mdevice->set_hardware(device_info.at(12));                      //hardware              
-        mdevice->set_serial(device_info.at(13));                         //serial                
-        mdevice->set_revision(device_info.at(14));                       //revision              
+        mdevice->set_serial(device_info.at(13));                        //serial                
+        mdevice->set_revision(device_info.at(14));                      //revision              
         mdevice->set_disktotal(atoi(device_info.at(15).c_str()));                //disktotal              
         mdevice->set_diskused(atoi(device_info.at(16).c_str()));                 //diskused               
-        mdevice->set_diskavailable(atoi(device_info.at(17).c_str()));            //diskavailable          
-        mdevice->set_disk_percentage_used(atoi(device_info.at(18).c_str()));     //disk_percentage_used   
-        mdevice->set_temperature(atoi(device_info.at(19).c_str()));              //temperature            
+        mdevice->set_diskavailable(atoi(device_info.at(17).c_str()));            //diskavailable                  
+        mdevice->set_disk_percentage_used(atoi(device_info.at(18).c_str()));     //disk_percentage_used                         
+        std::string dectemp = device_info.at(19);
+        float decfloat = ::atof(dectemp.c_str());
+        mdevice->set_temperature(decfloat);                             //temperature            
     }
 
     vector<int> cams;

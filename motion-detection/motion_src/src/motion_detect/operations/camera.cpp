@@ -25,8 +25,14 @@ motion::Message::MotionCamera * takePictureToProto(int cameranumber, motion::Mes
     
     cout << "CAPTURING !!!!!!!!!!!!!" << endl;
     
-    CvCapture* capture = cvCreateCameraCapture(cameranumber);
-    if (capture == NULL)
+    //CvCapture* capture = cvCreateCameraCapture(cameranumber);
+    VideoCapture camera(cameranumber);
+    //if (capture == NULL)
+    //{
+    //    std::cout << "No cam found." << std::endl;
+    //}
+    
+    if (!camera.isOpened())
     {
         std::cout << "No cam found." << std::endl;
     }
@@ -34,15 +40,19 @@ motion::Message::MotionCamera * takePictureToProto(int cameranumber, motion::Mes
     int w = 640; //640; //1280; //320;
     int h = 480; //480; //720;  //240;
     
-    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
-    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
+    //cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
+    //cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
+    
+    camera.set(CV_CAP_PROP_FRAME_WIDTH, w);
+    camera.set(CV_CAP_PROP_FRAME_HEIGHT, h);
     
     //IplImage* img=0;
     //img = cvQueryFrame( capture );
     //cvSaveImage("IplImage.JPG",img);
     
     Mat mat; //(h, w, CV_8U); //CV_8U); // CV_8UC3);
-    mat = cvQueryFrame(capture);
+    //mat = cvQueryFrame(capture);
+    camera >> mat;
     //cvtColor(mat, mat, CV_RGB2GRAY);
     
     //imwrite("MAT.jpg", mat);
@@ -127,21 +137,30 @@ motion::Message::MotionCamera * takePictureToProto(int cameranumber, motion::Mes
     << mcam->db_idcamera() << " AND _id_mat = " << db_mats_id << ");";
     db_execute(insert_rel_cameras_mats_query.str().c_str());
     
-    cvReleaseCapture(&capture);
+    //cvReleaseCapture(&capture);
+    
+    camera.release();
     
     return mcam;
 }
 
 
-std::vector<std::string> takeThumbnailFromCamera(int camera)
+std::vector<std::string> takeThumbnailFromCamera(int cameranumber)
 {
     
     std::vector<string> response; 
     
     cout << "CAPTURING !!!!!!!!!!!!!" << endl;
     
-    CvCapture* capture = cvCreateCameraCapture(camera);
-    if (capture == NULL)
+    //CvCapture* capture = cvCreateCameraCapture(camera);
+    //if (capture == NULL)
+    //{
+    //    std::cout << "No cam found." << std::endl;
+    //}
+    
+    VideoCapture camera(cameranumber);
+    
+    if (!camera.isOpened())
     {
         std::cout << "No cam found." << std::endl;
     }
@@ -149,17 +168,51 @@ std::vector<std::string> takeThumbnailFromCamera(int camera)
     int w = 640; //640; //1280; //320;
     int h = 480; //480; //720;  //240;
     
-    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
-    cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
+    //cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w); //max. logitech 1280
+    //cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h); //max. logitech 720
    
+    camera.set(CV_CAP_PROP_FRAME_WIDTH, w);
+    camera.set(CV_CAP_PROP_FRAME_HEIGHT, h);
+    
     Mat bigmat; //(h, w, CV_8U); //CV_8U); // CV_8UC3);
-    bigmat = cvQueryFrame(capture);
+    //bigmat = cvQueryFrame(capture);
+    //camera >> bigmat;    
     
     cout << "+++++++++++CREATING THUMBNAIL++++++++++++++" << endl;
     
     Size size(100,75);      //the dst image size,e.g.100x100
     Mat mat;                //dst image
-    resize(bigmat,mat,size);   //resize image
+    //resize(bigmat,mat,size);   //resize image
+    //resize(bigmat, mat, Size(100, 75), 0, 0, INTER_CUBIC);
+    
+    /*for(;;)
+    {       
+        try {
+            camera >> bigmat;
+        } catch (cv::Exception) 
+        {
+            cout << "An exception has accurred" << endl;
+        };
+        
+        if( bigmat.empty() ) break; // end of video stream
+        imshow("this is you, smile! :)", bigmat);
+        if( waitKey(1) == 27 ) break; // stop capturing by pressing ESC 
+    }*/
+    
+    try {
+        camera >> bigmat;
+    } catch (cv::Exception) 
+    {
+        cout << "An exception has accurred" << endl;
+    };
+    
+    if (bigmat.cols == 0) 
+    {
+        cout << "Error reading file " << endl;
+        return response;
+    }
+    
+    cv::resize(bigmat, mat, cv::Size(), 0.75, 0.75);
     
     // We will need to also serialize the width, height, type and size of the matrix
     int width_s     = mat.cols;
@@ -211,7 +264,8 @@ std::vector<std::string> takeThumbnailFromCamera(int camera)
     int db_mats_id = atoi(mats_array.at(0).at(0).c_str());
     cout << "db_mats_id: " << db_mats_id << endl;   
     
-    cvReleaseCapture(&capture);
+    //cvReleaseCapture(&capture);
+    camera.release();
     
     std::stringstream dnmatsid;
     dnmatsid << db_mats_id;   
@@ -225,16 +279,18 @@ std::vector<std::string> takeThumbnailFromCamera(int camera)
 
 std::vector<int> getCameras()
 {
-    std::vector<int> camsv;
-    CvCapture* temp_camera;
-    int maxTested = 2;
-    for (int i = 0; i < maxTested; i++){
-        temp_camera = cvCreateCameraCapture(i);
-        if (temp_camera!=NULL)
-        {
-            camsv.push_back(i);
-            cvReleaseCapture(&temp_camera);
+    std::vector<int> camsv;  
+    int number = 0;
+    while (number<4)
+    {
+        VideoCapture cap;
+        cap.open(number);
+        if (cap.isOpened())
+        {        
+            camsv.push_back(number);            
+            cap.release();
         }
+        number++;
     }
     return camsv;
 }

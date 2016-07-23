@@ -2,9 +2,14 @@ cmake_minimum_required(VERSION 2.4)
 
 PROJECT(MOTION_DETECTION)
 
+if(COMMAND cmake_policy)
+      cmake_policy(SET CMP0003 NEW)
+    endif(COMMAND cmake_policy)
+
 # paths 
 INCLUDE_DIRECTORIES(src)
 INCLUDE_DIRECTORIES(/usr/local/include)
+INCLUDE_DIRECTORIES(/cedric/include)
 
 INCLUDE_DIRECTORIES(
 	${TINYXML_DIRECTORY} 	/src/motion_detect/tinyxml 
@@ -23,8 +28,12 @@ INCLUDE_DIRECTORIES(
 
 FIND_PACKAGE(Protobuf REQUIRED)
 
+set ( OpenCV_DIR   "/home/pi/Downloads/opencv-3.0.0/build/")
+find_package( OpenCV 3.0 REQUIRED)
+
 LINK_DIRECTORIES(/usr/local/lib)
 LINK_DIRECTORIES(/usr/lib)
+LINK_DIRECTORIES(/cedric/lib)
 
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/src/motion_detect)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/src/motion_detect)
@@ -83,6 +92,8 @@ ADD_EXECUTABLE(motion_detect_raspberry
 )
 
 TARGET_LINK_LIBRARIES(motion_detect_raspberry ${OpenCV_LIBRARIES} -lcurl -lpthread -ljson -lm -ldl -lparse ${PROTOBUF_LIBRARIES} -lsqlite3 -lusb -lrt)
+
+SET(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -g -ftest-coverage -fprofile-arcs")
 
 SET(CMAKE_BUILD_TYPE Debug)
 

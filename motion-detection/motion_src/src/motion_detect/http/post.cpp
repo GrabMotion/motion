@@ -91,7 +91,7 @@
             std::size_t found = enpoind_has_location.find("true");
             if (found!=std::string::npos)
             {        
-                std::string half    = splitString(enpoind_has_location, "[[").at(1);
+                std::string half    = splitString(enpoind_has_location, "[[").at(0);
                 std::string way     = splitString(enpoind_has_location, "]]").at(0);
                 vector<string> through = splitString(enpoind_has_location, ",");
 
@@ -222,7 +222,7 @@
         std::size_t found = enpoind_has_terminal.find("true");
         if (found!=std::string::npos)
         {        
-            std::string half    = splitString(enpoind_has_terminal, "[[").at(1);
+            std::string half    = splitString(enpoind_has_terminal, "[[").at(0);
             std::string way     = splitString(enpoind_has_terminal, "]]").at(0);
             vector<string> through = splitString(enpoind_has_terminal, ",");
 
@@ -431,7 +431,7 @@
             std::size_t found = enpoind_has_camera.find("true");
             if (found!=std::string::npos)
             {        
-                std::string half    = splitString(enpoind_has_camera, "[[").at(1);
+                std::string half    = splitString(enpoind_has_camera, "[[").at(0);
                 std::string way     = splitString(enpoind_has_camera, "]]").at(0);
                 vector<string> through = splitString(enpoind_has_camera, ",");
 
@@ -567,7 +567,7 @@
                 std::size_t found = enpoind_has_recognition.find("true");
                 if (found!=std::string::npos)
                 {        
-                    std::string half    = splitString(enpoind_has_recognition, "[[").at(1);
+                    std::string half    = splitString(enpoind_has_recognition, "[[").at(0);
                     std::string way     = splitString(enpoind_has_recognition, "]]").at(0);
                     vector<string> through = splitString(enpoind_has_recognition, ",");
 
@@ -790,7 +790,7 @@
             std::size_t found = enpoind_has_day.find("true");
             if (found!=std::string::npos)
             {        
-                std::string half    = splitString(enpoind_has_day, "[[").at(1);
+                std::string half    = splitString(enpoind_has_day, "[[").at(0);
                 std::string way     = splitString(enpoind_has_day, "]]").at(0);
                 vector<string> through = splitString(enpoind_has_day, ",");
 

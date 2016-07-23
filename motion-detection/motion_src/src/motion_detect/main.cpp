@@ -5,7 +5,7 @@
  * Created on April 19, 2015, 11:23 PM
  */
 
-#include <iostream> h 
+#include <iostream>
 #include <string>  
 
 #include <stdio.h>
@@ -34,6 +34,8 @@
 
 #include <parse.h>
 #include <netdb.h>
+
+#include <unistd.h>
 
 using namespace std;
 
@@ -351,12 +353,15 @@ int main (int argc, char * const av[])
     }
     pclose(output);
    
+    std::string cedricpath = "/home/cedric/motion/motion-detection/motion_src/src/motion_detect/motion_detect_raspberry";
+    std::string pipath = "/home/pi/motion/motion-detection/motion_src/src/motion_detect/motion_detect_raspberry";
+    
     std::string runparam = argv[0];
     if (runparam=="./motion_detect_raspberry") {
         basepath = "";
         sourcepath = "../../src/"; 
     }
-    else if (runparam.find("/home/pi/motion/motion-detection/motion_src/src/motion_detect/motion_detect_raspberry") != std::string::npos ){
+    else if (runparam.find(cedricpath) != std::string::npos ){
         basepath    = "src/motion_detect/";
         sourcepath  = "src/";
     }
@@ -430,8 +435,7 @@ int main (int argc, char * const av[])
             if (nonproccesed.size()>0)
             {
                 //Analize
-                Analize analyze();               
-                
+                Analize analyze();           
                 
                 
             }
